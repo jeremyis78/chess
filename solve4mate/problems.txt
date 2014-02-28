@@ -1,0 +1,14 @@
+#
+# Contains problem definitions for solve4mate
+# Each line contains:
+# 1) the number of moves to mate
+# 2) the Forsythe-Edwards Notation (FEN) string
+# 
+# An # indicates a comment
+#
+1 3q1rk1/5pbp/5Qp1/8/8/2B5/5PPP/6K1 w - - 0 1  #"Chess" Lazlo Polgar #1
+2 4K1k1/6pp/2NN4/8/8/8/8/8 w - - 0 1 #"Mammoth Book of Chess" Graham Burgess #4
+2 8/8/8/8/5K2/PP6/Q7/5k2 w - - 0 1     #Polgar #307
+2 6k1/4rppp/8/8/8/8/5PPP/3R2K1 w - - 0 1  #Burgess #1
+2 r2qkbnr/ppp2ppp/n2p4/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w - - 0 1  #Burgess 2
+2 5r1k/6pp/7N/3Q4/8/8/8/6K1 w - - 0 1 #Burgess 3

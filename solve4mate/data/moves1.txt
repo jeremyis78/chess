@@ -1,0 +1,24 @@
+#
+# This tests generateNonCaptures() from the initial position
+#
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Pa2-a4
+Pb2-b4
+Pc2-c4
+Pd2-d4
+Pe2-e4
+Pf2-f4
+Pg2-g4
+Ph2-h4
+Pa2-a3
+Pb2-b3
+Pc2-c3
+Pd2-d3
+Pe2-e3
+Pf2-f3
+Pg2-g3
+Ph2-h3
+Nb1-a3
+Nb1-c3
+Ng1-f3
+Ng1-h3

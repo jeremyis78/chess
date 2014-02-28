@@ -1,0 +1,392 @@
+package com.jeremybrooks.chess;
+
+import static com.jeremybrooks.chess.Bitmap.*;
+import junit.framework.TestCase;
+
+public class PositionTest extends TestCase {
+
+	public static final String[] FEN;
+	public static final String FEN1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR";
+	public static final String FEN2 = "k1K1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p";
+	public static final String FEN3 = "8/8/8/8/8/8/8/k1K5"; // "1k1K1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1";
+	public static final String FEN4 = "q1n5/1P3P2/2P5/8/K7/8/k6P/8";
+
+	static
+	{
+		FEN = new String[]{
+			"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR",
+			"k1K1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p",
+			"8/8/8/8/8/8/8/k1K5",
+			"1k1K1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1",
+			"q1n5/1P3P2/2P5/8/K7/8/k6P/8"
+		                 };
+	}
+	
+//	Position p;
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+//		p = new Position();
+//		p.clear();
+	}
+	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+
+	public void testPositionEmpty() {
+		Position p = new Position();
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.PAWN));
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.KNIGHT));
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.BISHOP));
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.ROOK));
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.QUEEN));
+		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.KING));
+
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.PAWN));
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KNIGHT));
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.BISHOP));
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.ROOK));
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.QUEEN));
+		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KING));
+	}
+
+//	public void testPositionString() {
+//		fail("Not yet implemented");
+//	}	
+//
+//	public void testGetPieces() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testGet() {
+//		fail("Not yet implemented");
+//	}
+
+	public void testClear() {
+		Position p = new Position();
+		
+		//Test that there are some pieces set
+		assertTrue(0 != p.kingSq[Color.WHITE]);
+		assertTrue(0 != p.kingSq[Color.BLACK]);
+		assertTrue(PIECE[Bitmap.ROOK] == p.board[Bitmap.A1]);
+		assertEquals(0xFFFF00000000FFFFL, p.all[ALL]);
+		
+		//now clear them
+		p.clear();
+		assertEquals(-1, p.kingSq[Color.WHITE]);
+		assertEquals(-1, p.kingSq[Color.BLACK]);
+		//assertEquals(PIECE[Chess.ROOK] == p.board[Chess.A1]);
+		assertEquals(0x0L, p.all[ALL]);
+		
+	}
+
+	public void testSet()
+	{
+		Position p = new Position();
+		for(int i=0; i<FEN.length; i++)
+		{
+			p.set(FEN[i]);
+			assertEquals(FEN[i], p.getFen());
+			p.clear();
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public void testNewStartingPosition()
+	{
+		Position p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		assertStartingPosition(p);
+	}
+
+	public void testMovingPieces()
+	{
+		Position p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		assertStartingPosition(p);
+		
+		// 1. e4
+		p.placePiece(Color.WHITE, Pieces.PAWN, Bitmap.E4);
+		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPPPPPP/RNBQKBNR", p.getFen());
+		p.erasePiece(Color.WHITE, Pieces.PAWN, Bitmap.E2);
+		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		
+		// 1. ... d5
+		p.placePiece(Color.BLACK, Pieces.PAWN, Bitmap.D5);
+		assertEquals("rnbqkbnr/pppppppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		p.erasePiece(Color.BLACK, Pieces.PAWN, Bitmap.D7);
+		assertEquals("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		
+		// 2. e4xd5
+		p.erasePiece(Color.BLACK, Pieces.PAWN, Bitmap.D5);
+		assertEquals("rnbqkbnr/ppp1pppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		p.erasePiece(Color.WHITE, Pieces.PAWN, Bitmap.E4);
+		assertEquals("rnbqkbnr/ppp1pppp/8/8/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		p.placePiece(Color.WHITE, Pieces.PAWN, Bitmap.D5);
+		assertEquals("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
+	}
+
+	private void assertStartingPosition(Position p) {
+		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Color.WHITE, Pieces.PAWN));
+		assertEquals("a1 h1 ", toSquares(p, Color.WHITE, Pieces.ROOK));
+		assertEquals("b1 g1 ", toSquares(p, Color.WHITE, Pieces.KNIGHT));
+		assertEquals("c1 f1 ", toSquares(p, Color.WHITE, Pieces.BISHOP));
+		assertEquals("d1 ", toSquares(p, Color.WHITE, Pieces.QUEEN));
+		assertEquals("e1 ", toSquares(p, Color.WHITE, Pieces.KING));
+
+		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", toSquares(p, Color.BLACK, Pieces.PAWN));
+		assertEquals("a8 h8 ", toSquares(p, Color.BLACK, Pieces.ROOK));
+		assertEquals("b8 g8 ", toSquares(p, Color.BLACK, Pieces.KNIGHT));
+		assertEquals("c8 f8 ", toSquares(p, Color.BLACK, Pieces.BISHOP));
+		assertEquals("d8 ", toSquares(p, Color.BLACK, Pieces.QUEEN));
+		assertEquals("e8 ", toSquares(p, Color.BLACK, Pieces.KING));
+	}
+
+	private String toSquares(Position p, int colorIndex, int piecesIndex) {
+		return Util.displaySquaresStr(p.getPieces(colorIndex, piecesIndex));
+	}
+
+	public void testSetTooManyWhiteKings()
+	{
+		String tooManyWhiteKingsOnDifferentRanks = "2K5/8/8/8/8/8/8/7K";
+		assertInvalid(tooManyWhiteKingsOnDifferentRanks, "board has too many white kings");
+	}
+
+	public void testSetTooManyBlackKings()
+	{
+		String tooManyBlackKingsOnSameRank = "8/k6k/8/8/8/8/8/8";
+		assertInvalid(tooManyBlackKingsOnSameRank, "board has too many black kings");
+	}
+
+	public void testSetTooManyRanks()
+	{
+		String tooManyRanks = "8/8/8/8/8/8/8/8/8";
+		assertInvalid(tooManyRanks, "fen must contain eight ranks");
+	}
+
+	public void testSetTooManyFiles()
+	{
+		String tooManyFiles = "k8/8/8/8/8/8/8/8";
+		assertInvalid(tooManyFiles, "pieces and empty squares on rank do not fit on eight files");
+	}
+	
+	public void testSetUnknownPiece()
+	{
+		String invalidPiece = "k6K/8/8/8/8/8/8/7z";
+		assertInvalid(invalidPiece, "board contains invalid piece 'z'");
+	}
+
+	public void testSetAdjacentKings()
+	{
+		String adjacentKings = "8/8/8/8/8/8/6K1/7k";
+		assertInvalid(adjacentKings, "board cannot have adjacent kings");
+	}
+
+	public void testSetMissingKingOrKings()
+	{
+		String missingBlackKing = "8/8/8/8/8/8/6K1/8";
+		assertInvalid(missingBlackKing, "board is missing one or both kings");
+
+		String missingWhiteKing = "8/8/8/8/8/8/6k1/8";
+		assertInvalid(missingWhiteKing, "board is missing one or both kings");
+	}
+
+	private void assertInvalid(String position, String expectedError) {
+		try {
+			setupPosition(position);
+			fail(position+" did not throw '"+expectedError+"'");
+		} catch (IllegalArgumentException e) {
+			assertEquals(expectedError, e.getMessage());
+		}	
+	}
+
+	private void setupPosition(String FENString) {
+		Position p = new Position();
+		p.set(FENString);
+	}
+
+	public void testIsValidRankFen(){
+		String[] good = 
+			new String[]
+			           {
+						//"8",
+						"1p1p1p1p",
+						"p1p1p1p1",
+						"RNBQKBNR",
+						"2P5",
+			           };
+		for(int i=0; i<good.length; i++)
+		{
+			try
+			{
+				Position.validateFiles(good[i]);
+			} catch (IllegalArgumentException e){
+				fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
+			}
+		}
+
+	
+		String[] bad = 
+			new String[]
+			           {
+						"7",
+						"p1p1p1p1p1p",
+						"1p1p1p1",
+						"RNB3BNR",
+						"2P4",
+			           };
+		for(int i=0; i<good.length; i++)
+		{
+			try
+			{
+				Position.validateFiles(bad[i]);
+				fail("should throw, invalid rank fen " + bad[i]);
+			} catch (IllegalArgumentException e){
+			}
+		}
+
+	}
+
+	public void testPlaceAndEraseKings() {
+		Position p = new Position();
+
+		int sq = Bitmap.E1;
+
+		//Set the white king
+		int color = Color.WHITE;
+		int piece = Pieces.KING;
+		int boardPieceIndex = Bitmap.KING;
+		
+		p.placePiece(color, piece, sq);
+		assertEquals(PIECE[boardPieceIndex], p.board[sq]);
+		assertEquals(sq, p.kingSq[color]);
+		
+		//Get the appropriate bitboard masks
+        long sqMask = 1L << sq;
+        long sqMask90 = 1L << SQ2BIT90R[sq];
+        long sqMask45L = 1L << SQ2BIT45L[sq];
+        long sqMask45R = 1L << SQ2BIT45R[sq];
+
+		assertEquals(sqMask, p.all[ALL]);
+		assertEquals(sqMask90, p.all[ALL90]);
+		assertEquals(sqMask45L, p.all[ALL45L]);
+		assertEquals(sqMask45R, p.all[ALL45R]);
+
+		
+		//reset
+		p.erasePiece(color, piece, sq);
+		
+
+		//Set the black king
+		sq = Bitmap.G6;  //Change the placement
+		color = Color.BLACK;
+
+		p.placePiece(color, piece, sq);
+		assertEquals(-PIECE[boardPieceIndex], p.board[sq]);
+		assertEquals(sq, p.kingSq[color]);
+		
+		//Get the appropriate bitboard masks
+        sqMask = 1L << sq;
+        sqMask90 = 1L << SQ2BIT90R[sq];
+        sqMask45L = 1L << SQ2BIT45L[sq];
+        sqMask45R = 1L << SQ2BIT45R[sq];
+
+		assertEquals(sqMask, p.all[ALL]);
+		assertEquals(sqMask90, p.all[ALL90]);
+		assertEquals(sqMask45L, p.all[ALL45L]);
+		assertEquals(sqMask45R, p.all[ALL45R]);
+	}
+
+	public void testPlaceAndErasePieces()
+	{
+		Position p = new Position();
+		int sq = Bitmap.A3;
+		for(int color=Color.WHITE; color <= Color.BLACK; color++)
+		{
+			for(int piece=Pieces.PAWNS; piece<=Pieces.QUEENS; piece++)
+			{
+				sq++; //just for a good test so we are setting different bits each time
+				p.placePiece(color, piece, sq);
+				assertCorrectPlacement(p,sq,color,piece,piece);
+				p.erasePiece(color, piece, sq);
+			}
+		}
+	}
+	
+	private static void assertCorrectPlacement(Position p, int sq, int color, int piece, int boardPieceIndex)
+	{
+		int multiplier = (color == 0 ? 1 : -1);
+		assertEquals(multiplier * PIECE[boardPieceIndex], p.board[sq]);
+
+		
+		//Get the appropriate bitboard masks
+        long sqMask = 1L << sq;
+        long sqMask90 = 1L << SQ2BIT90R[sq];
+        long sqMask45L = 1L << SQ2BIT45L[sq];
+        long sqMask45R = 1L << SQ2BIT45R[sq];
+
+        assertEquals(sqMask, p.pieces[color][piece]);
+        assertEquals(sqMask, p.all[ALL]);
+		assertEquals(sqMask90, p.all[ALL90]);
+		assertEquals(sqMask45L, p.all[ALL45L]);
+		assertEquals(sqMask45R, p.all[ALL45R]);
+	}
+
+	
+//	public void testIsLegal() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testDisplay() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testDisplayFEN() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testDisplayBoard() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testDisplayBitboardBoard() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testShowBoard() {
+//		fail("Not yet implemented");
+//	}
+//
+//	public void testGetConsoleFEN() {
+//		fail("Not yet implemented");
+//	}
+
+
+	public void testMovePiece() {
+		fail("Not yet implemented");
+	}
+
+	public void testIsValid() {
+		fail("Not yet implemented");
+	}
+
+	public void testIsSameColor() {
+		fail("Not yet implemented");
+	}
+
+	public void testIsEmpty() {
+		fail("Not yet implemented");
+	}
+	
+
+}
