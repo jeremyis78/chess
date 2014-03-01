@@ -38,22 +38,15 @@ public class MoveGenerator {
 //	}
 
 	public long ClearPiece(long board, int bit){
-		board &= ~(1L << bit);
-		return board;
+		return Bitmap.clearBit(board, bit);
 	}
 
 	public int FirstPiece(long pieces){
-		long mask = 1;
-		for(int i=0; i < 64; i++, mask <<= 1) 
-			if(Util.bool(mask & pieces)) return i;		
-		return -1;
+		return Bitmap.lowestBitNumber(pieces);
 	}
 
 	private int LastPiece(long pieces){
-		long mask = 1L << 63;
-		for(int i=63; i >= 0; i--, mask >>= 1) 
-			if(Util.bool(mask & pieces)) return i;		
-		return -1;
+		return Bitmap.highestBitNumber(pieces);
 	}
 
 	//unsigned int PieceCount(bitbrd pieces){
