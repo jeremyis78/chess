@@ -1,49 +1,50 @@
 package com.jeremybrooks.chess;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class AttacksTest extends TestCase {
+public class AttacksTest {
 
 	private static final String BASE_DIR = "data/";
-	
 	Attacks attacks = Attacks.getInstance();
 	
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
-	
-
+	@Test
 	public void testGenMasksPlusMinus(){
 		assertFileEqualsString(BASE_DIR + "correct-plus-minus-attacks.txt",
 				attacks.plusMinusAttacksAsHumanReadableString().trim());
 	}
 
+	@Test
 	public void testGenBaseAttacks(){
 		assertFileEqualsString(BASE_DIR + "correct-base-attacks.txt",
 				attacks.baseAttacksAsHumanReadableString().trim());
 	}
 	
+	@Test 
 	public void testGenRankAttacks(){
 		assertFileEqualsString(BASE_DIR + "correct-rank-attacks.txt", attacks.rankAttacksAsHumanReadableString());
 	}
 
+	@Test
 	public void testGenFileAttacks() {
 		//fail("Not yet implemented");
 		//System.out.println(attacks.fileAttacksAsHumanReadableString());
 		assertFileEqualsString(BASE_DIR + "correct-file-attacks.txt", attacks.fileAttacksAsHumanReadableString());
 	}
 
+	@Test
 	public void testGenDiagonal45DegreesRightAttacks() {
 		//fail("It appears this output is incorrect....first few are okay but not farther on");
 		assertFileEqualsString(BASE_DIR + "correct-rotated-45-right-attacks.txt", attacks.diagonal45DegreesRightAttacksAsHumanReadableString());
 	}
 
+	@Test
 	public void testGetA1H8diag(){
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<15; i++)
@@ -55,10 +56,12 @@ public class AttacksTest extends TestCase {
 		assertFileEqualsString(BASE_DIR + "set-all-bits-in-a1-h8-diagonals.txt", sb.toString());
 	}
 
+	@Test
 	public void testGenDiagonal45DegreesLeftAttacks() {
 		assertFileEqualsString(BASE_DIR + "correct-rotated-45-left-attacks.txt", attacks.diagonal45DegreesLeftAttacksAsHumanReadableString());
 	}
 
+	@Test
 	public void testGetH1A8diag(){
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<15; i++)
