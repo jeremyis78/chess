@@ -89,9 +89,7 @@ public class AttacksTest extends TestCase {
 	{
 		File correctFile = new File(filename);
 		StringBuffer correct = new StringBuffer();
-		try {
-
-			BufferedReader br = new BufferedReader(new FileReader(correctFile));
+		try (BufferedReader br = new BufferedReader(new FileReader(correctFile))) {
 			while (br.ready()){
 				correct.append(br.readLine() + "\n");
 			}
