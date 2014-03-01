@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import com.jeremybrooks.chess.Util.UnsignedByte;
 
+
 public class UtilTest extends TestCase {
 
 	private static final int BIT_COUNT_ITERATIONS = 2000000;
@@ -18,61 +19,6 @@ public class UtilTest extends TestCase {
 		super.tearDown();
 	}
 	
-	/* helper methods */
-	private long getBitboard(int... indexes){
-		long board = 0L;
-		for(int i: indexes){
-			board |= 1L << i;
-		}
-		return board;
-	}
-	
-	private int getMove(int from, int to, int movingPiece, int capturedPiece, int promotionPiece)
-	{
-		int move = 0;
-		move = from;
-		move |= (to << 6);
-		move |= (movingPiece << 12);
-		move |= (capturedPiece << 15);
-		move |= (promotionPiece << 18);
-		return move;
-	}
-	
-	void printMove(int move){
-	    int from, to, mov, cap, pro;
-	    from = move & 0x3F;  //grab from square (6 bits)
-	    to = (move >> 6) & 0x3F; //grab to square (6 bits)
-	    mov = (move >> 12) & 0x7; //grab moving piece (3bits)
-	    cap = (move >> 15) & 0x7; //grab captured piece (3bits)
-	    pro = (move >> 18) & 0x7; //grab promotion piece (3bits)
-
-		System.out.println("pro cap mov   to    from ");
-		System.out.println("--- --- --- ------ ------");
-		System.out.print(getBinaryPadded(pro, 3) + " ");
-		System.out.print(getBinaryPadded(cap, 3) + " ");
-		System.out.print(getBinaryPadded(mov, 3) + " ");
-		System.out.print(getBinaryPadded(to, 6) + " ");
-		System.out.print(getBinaryPadded(from, 6) + "\n");
-	}
-
-	public static String getBinaryPadded(short move, int minPadding){
-		return getBinaryPadded((int)move, minPadding);
-	}
-
-	public static String getBinaryPadded(byte move, int minPadding){
-		return getBinaryPadded((int)move, minPadding);
-	}
-	
-	public static String getBinaryPadded(int move, int minPadding){
-		String b = Integer.toBinaryString(move);
-		int reqPadding = minPadding - b.length();
-		StringBuffer sb = new StringBuffer();
-		while (reqPadding-- > 0){
-			sb.append("0");
-		}
-		sb.append(b);
-		return sb.toString();
-	}
 	
 	
 	public void testOpp() {
@@ -227,7 +173,7 @@ public class UtilTest extends TestCase {
 //		fail("Not yet implemented");
 //	}
 
-	public void testDisplayMoveStr() {
+	public void testDisplayMoveStrIncludesCheckAndMateFlags() {
 		int from = Bitmap.A2;
 		int to = Bitmap.A4;
 		int mov = Bitmap.PIECE[Bitmap.PAWN];
@@ -236,54 +182,22 @@ public class UtilTest extends TestCase {
 		boolean check = false;
 		boolean mate = false;
 		
-		int aMove = getMove(from,to,mov,cap,pro);
-//		printMove(aMove);
-		assertEquals("Pa2-a4", Util.displayMoveStr(aMove, check, mate));
+		int aMove = 0;
+		int a2a4 = getPawnMove(Bitmap.A2, Bitmap.A4);
+		assertEquals("Pa2-a4", Util.displayMoveStr(a2a4, check, mate));
 
-		//pawn capture
-		to = Bitmap.B3;
-		cap = Bitmap.PIECE[Bitmap.PAWN];
-		check = false;
-		mate = false;
-		aMove = getMove(from,to,mov,cap,pro);
-//		printMove(aMove);
-		assertEquals("Pa2xb3", Util.displayMoveStr(aMove, check, mate));
+		int a2xb3 = getPawnCapture(Bitmap.A2, Bitmap.B3, Bitmap.PIECE[Bitmap.PAWN]); 
+		assertEquals("Pa2xb3", Util.displayMoveStr(a2xb3, check, mate));
 	
-		//King-side castling
-		from = Bitmap.E1;
-		to = Bitmap.G1;
-		mov = Bitmap.PIECE[Bitmap.KING];
-		cap = Bitmap.PIECE[Bitmap.NONE];
-		pro = Bitmap.PIECE[Bitmap.NONE];
-		check = false;
-		mate = false;
-		aMove = getMove(from,to,mov,cap,pro);
-//		printMove(aMove);
-		assertEquals("Ke1-g1 0-0", Util.displayMoveStr(aMove, check, mate));
-		
-		//Queen-side castling
-		from = Bitmap.E1;
-		to = Bitmap.C1;
-		mov = Bitmap.PIECE[Bitmap.KING];
-		cap = Bitmap.PIECE[Bitmap.NONE];
-		pro = Bitmap.PIECE[Bitmap.NONE];
-		check = false;
-		mate = false;
-		aMove = getMove(from,to,mov,cap,pro);
-//		printMove(aMove);
-		assertEquals("Ke1-c1 0-0-0", Util.displayMoveStr(aMove, check, mate));
+		int kingSideCastle = getCastleMove(Bitmap.E1, Bitmap.G1); 
+		assertEquals("Ke1-g1 0-0", Util.displayMoveStr(kingSideCastle, check, mate));
 
-		//Queen captures rook and checks
-		from = Bitmap.E1;
-		to = Bitmap.C1;
-		mov = Bitmap.PIECE[Bitmap.QUEEN];
-		cap = Bitmap.PIECE[Bitmap.ROOK];
-		pro = Bitmap.PIECE[Bitmap.NONE];
+		int queenSideCastle = getCastleMove(Bitmap.E1, Bitmap.C1); 
+		assertEquals("Ke1-c1 0-0-0", Util.displayMoveStr(queenSideCastle, check, mate));
+
+		int queenCapturesRook = getQueenCaptures(Bitmap.E1, Bitmap.C1, Bitmap.PIECE[Bitmap.QUEEN]);
 		check = true;
-		mate = false;
-		aMove = getMove(from,to,mov,cap,pro);
-//		printMove(aMove);
-		assertEquals("Qe1xc1+", Util.displayMoveStr(aMove, check, mate));
+		assertEquals("Qe1xc1+", Util.displayMoveStr(queenCapturesRook, check, mate));
 
 		//Pawn captures knight promotes to queen and mates
 		from = Bitmap.D7;
@@ -297,6 +211,37 @@ public class UtilTest extends TestCase {
 //		printMove(aMove);
 		assertEquals("Pd7xe8Q#", Util.displayMoveStr(aMove, check, mate));
 	}
+	
+	private int getPawnMove(int from, int to)
+	{
+		int mov = Bitmap.PIECE[Bitmap.PAWN];
+		int cap = 0;
+		int pro = 0;
+		return getMove(from,to,mov,cap,pro);
+	}
+
+	private int getPawnCapture(int from, int to, int cap)
+	{
+		int mov = Bitmap.PIECE[Bitmap.PAWN];
+		int pro = 0;
+		return getMove(from,to,mov,cap,pro);
+	}
+	
+	private int getCastleMove(int from, int to)
+	{
+		int mov = Bitmap.PIECE[Bitmap.KING];
+		return getMove(from, to, mov, 0, 0);
+	}
+
+	private int getQueenCaptures(int from, int to, int cap)
+	{
+		from = Bitmap.E1;
+		to = Bitmap.C1;
+		int mov = Bitmap.PIECE[Bitmap.QUEEN];
+		int pro = Bitmap.PIECE[Bitmap.NONE];
+		return getMove(from, to, mov, cap, pro);
+	}
+	
 	
 //	public void testDisplayMove() {
 //		fail("Not yet implemented");
@@ -697,7 +642,7 @@ public class UtilTest extends TestCase {
 	//The first diagonal is the zero-th.
 	static final int DLEN[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
  
-    long getA1H8diag(int diagonal, short b){  // 1/2/2010 - b used to be a byte
+    private static long getA1H8diag(int diagonal, short b){  // 1/2/2010 - b used to be a byte
 	
     //"diagonal" is the diagonal that we want to set to "b"
     //"diagonal" is in range 0..14 inclusive 
@@ -746,5 +691,62 @@ public class UtilTest extends TestCase {
 		piece <<= 1;
 		assertEquals((byte)0x80, piece); //gets interpreted as int when high bit is set, hence the cast
 	}
+	
+	/* helper methods */
+	private long getBitboard(int... indexes){
+		long board = 0L;
+		for(int i: indexes){
+			board |= 1L << i;
+		}
+		return board;
+	}
+	
+	private int getMove(int from, int to, int movingPiece, int capturedPiece, int promotionPiece)
+	{
+		int move = 0;
+		move = from;
+		move |= (to << 6);
+		move |= (movingPiece << 12);
+		move |= (capturedPiece << 15);
+		move |= (promotionPiece << 18);
+		return move;
+	}
+	
+	private static void printMove(int move){
+	    int from, to, mov, cap, pro;
+	    from = move & 0x3F;  //grab from square (6 bits)
+	    to = (move >> 6) & 0x3F; //grab to square (6 bits)
+	    mov = (move >> 12) & 0x7; //grab moving piece (3bits)
+	    cap = (move >> 15) & 0x7; //grab captured piece (3bits)
+	    pro = (move >> 18) & 0x7; //grab promotion piece (3bits)
+
+		System.out.println("pro cap mov   to    from ");
+		System.out.println("--- --- --- ------ ------");
+		System.out.print(getBinaryPadded(pro, 3) + " ");
+		System.out.print(getBinaryPadded(cap, 3) + " ");
+		System.out.print(getBinaryPadded(mov, 3) + " ");
+		System.out.print(getBinaryPadded(to, 6) + " ");
+		System.out.print(getBinaryPadded(from, 6) + "\n");
+	}
+
+	private static String getBinaryPadded(short move, int minPadding){
+		return getBinaryPadded((int)move, minPadding);
+	}
+
+	private static String getBinaryPadded(byte move, int minPadding){
+		return getBinaryPadded((int)move, minPadding);
+	}
+	
+	private static String getBinaryPadded(int move, int minPadding){
+		String b = Integer.toBinaryString(move);
+		int reqPadding = minPadding - b.length();
+		StringBuffer sb = new StringBuffer();
+		while (reqPadding-- > 0){
+			sb.append("0");
+		}
+		sb.append(b);
+		return sb.toString();
+	}
+
 	
 }

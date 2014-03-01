@@ -22,9 +22,6 @@ public class Util {
 	 * convenience methods for determining non-zero given a
 	 * numerical argument
 	 */
-    public static boolean bool(byte i){ return i != 0; }
-    public static boolean bool(char i){ return i != 0; }
-    public static boolean bool(short i){ return i != 0; }
     public static boolean bool(int i){ return i != 0; }
     public static boolean bool(long i){ return i != 0; }
 	
@@ -160,7 +157,7 @@ public class Util {
     {
     	return Long.bitCount(pieces);
     }
-
+// test: sqtoStr(), displayMove(int m), 
     public static char PieceToChar(int color, int piece){
 	    char ch = '^'; //should be set to an invalid character
 	    switch(piece){
@@ -248,77 +245,6 @@ public class Util {
 	}
 	*/
 
-
-    public static void displayMove(int m){
-		out.print(displayMoveStr(m));
-	}
-
-    public static String displayMoveStr(int m){
-		StringBuffer sb = new StringBuffer();
-		
-		int from, to, mov, cap, pro;
-	    from = m & 0x3F;  //grab from square (6 bits)
-	    to = (m >> 6) & 0x3F; //grab to square (6 bits)
-	    mov = (m >> 12) & 0x3; //grab moving piece (3bits)
-	    cap = (m >> 15) & 0x3; //grab captured piece (3bits)
-	    pro = (m >> 18) & 0x3; //grab promotion piece (3bits)
-	    
-	    //               *    1    2    3    *    5    6    7
-//	    char piece[] = {' ', 'P', 'N', 'K', ' ', 'B', 'R', 'Q'};
-	    
-	    int fromrank, fromfile = from, torank, tofile = to;
-	    for (fromrank=1; fromfile > 7; ++fromrank)
-			fromfile -= 8;
-	    for (torank=1; tofile > 7; ++torank)
-	        tofile -= 8;
-	    
-	    
-	    String fromStr; //char fromStr[3];
-	    String toStr; //char toStr[3];
-	    char movCh = '^'; //should be set to an invalid character
-	    char midCh = '-';
-	    StringBuffer proBuf = new StringBuffer(); //char proStr[3];
-	    
-	    fromStr = SqToStr(from); //SqToStr(from, fromStr);
-	    toStr = SqToStr(to); //SqToStr(to, toStr);
-	    
-	    switch(mov){
-	    case 1: movCh = 'P'; break;
-	    case 2: movCh = 'N'; break;
-	    case 3: movCh = 'K'; break;
-	    case 5: movCh = 'B'; break;
-	    case 6: movCh = 'R'; break;
-	    case 7: movCh = 'Q'; break;
-	    }
-	    if(bool(cap))
-	        midCh = 'x';
-	    if(bool(pro)){
-	        proBuf.append("=");
-	        switch(pro){
-	        case 2: proBuf.append("N"); break;
-	        case 5: proBuf.append("B"); break;
-	        case 6: proBuf.append("R"); break;
-	        case 7: proBuf.append("Q"); break;
-	        }
-	    }
-	    
-	    //Display the move in coordinate notation
-	    if(!bool(pro))
-	        //printf("%s-%s\t", fromStr, toStr);
-	    	sb.append(fromStr + "-" + toStr);
-	    else
-	    	//printf("%s-%s%c\t", fromStr, toStr, proStr[1]);
-	    	sb.append(fromStr + "-" + toStr + proBuf.toString().charAt(1));
-
-	    
-	    //Display the move in Standard Algebraic Notation (SAN)
-	    //(TODO: doesn't work with ambiguous moves);
-	    //printf("%c%c%s%s ", movCh, midCh, toStr, proStr);
-	    sb.append(movCh + midCh + toStr + proBuf.toString());
-	    return sb.toString();
-	}
-
-
     public static void displayMove(int m, boolean check, boolean mate){
 		out.print(displayMoveStr(m, check, mate));
 	}
@@ -331,37 +257,17 @@ public class Util {
 	    cap = (m >> 15) & 0x7; //grab captured piece (3bits)
 	    pro = (m >> 18) & 0x7; //grab promotion piece (3bits)
 
-	    //cout << "cap=" << cap << " pro=" << pro << ' ';
-	    
-	    //Indices:          *123*567
-	    //char pieceChar[] = " PNK BRQ";
 	    char pieceChar[] = {' ','P','N','K',' ','B','R','Q'};
-		
-	    
-//	    int i = 0;
-//	    int j = 0;
-	    //char coordStr[] = new char[9];
-	    //char SANStr[] = new char[9];
-	    StringBuffer coordStr = new StringBuffer(); 
-	    StringBuffer SANStr = new StringBuffer();
-	    
-	    //Add the moving piece
-	    if (from >= Bitmap.A1 && from <= Bitmap.H8){
-//	    	out.println("piece: " + pieceChar[mov]);
-	    	coordStr.append(pieceChar[mov]);
+	    StringBuilder coordStr = new StringBuilder(); 
+	    StringBuilder SANStr = new StringBuilder();
 
-//	    	char col = (char) ('a' + (from % 8));
-//	    	char row = (char) ('1' + (from / 8));  //integer division
-//	    	out.println("moving from: "  + col + " " + row);
-	    	coordStr.append((char) ('a' + (from % 8)));
-	        coordStr.append((char) ('1' + (from / 8)));  //integer division
-	        if (pieceChar[mov] == 'P' && bool(cap)){ //if pawn capture
-	            SANStr.append(coordStr.toString().charAt(1)); //the file of the pawn
-	        } else {
-	            SANStr.append(pieceChar[mov]);  //the type of piece
-	        }
+	    //Add the moving piece
+	    coordStr.append(pieceChar[mov]);
+	    coordStr.append(Util.SqToStr(from));
+	    if (pieceChar[mov] == 'P' && bool(cap)){ //if pawn capture
+	    	SANStr.append(coordStr.toString().charAt(1)); //the file of the pawn
 	    } else {
-	        err.print("Invalid 'from' square in move: " + Integer.toHexString(m));
+	    	SANStr.append(pieceChar[mov]);  //the type of piece
 	    }
 	    
 	    //Add 'x' or '-' for capture or noncapture	
@@ -372,21 +278,10 @@ public class Util {
 	    } else {
 	        coordStr.append('-');
 	    }
-	    
-	    
+
 	    //Add the 'to' square
-	    if (to >= Bitmap.A1 && to <= Bitmap.H8){
-	    	char col = (char) ('a' + (to % 8));
-	    	char row = (char) ('1' + (to / 8));  //integer division
-//	    	out.println("moving to: " + col + " " + row);
-	        coordStr.append(col);
-	        coordStr.append(row);
-	        SANStr.append(col);
-	        SANStr.append(row);
-	        
-	    }
-	    else
-	        err.println("Invalid 'to' square in move: " + Integer.toHexString(m));
+	    coordStr.append(Util.SqToStr(to));
+	    SANStr.append(Util.SqToStr(to));
 	    
 	    //Add the promotion piece
 	    if(bool(pro)){
@@ -399,11 +294,6 @@ public class Util {
 	        }
 	    }
 
-	    
-	    // TODO: Add check or mate symbol. Check and mate
-	    // need to be determined directly by making the move
-	    // and looking at the results to determine whether the side
-	    // to move is in check or not and if they have zero moves
 	    if (mate || (check && mate)){
 	    	coordStr.append("#");
         	SANStr.append("#");
