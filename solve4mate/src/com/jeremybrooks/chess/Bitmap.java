@@ -326,23 +326,39 @@ public class Bitmap {
 	static final int PRO  = 0x7 << 18;    //PROmotion piece
 
 	
-	long clearBit(long board, int bit){
+	static long clearBit(long board, int bit){
 		board &= ~(1L << bit);
 		return board;
 	}
 
-	int getLSBit(long pieces)
+	static int getLSBit(long pieces)
 	{
-		long mask = 1;
-		for(int i=0; i < 64; i++, mask <<= 1) 
-			if(Util.bool(mask & pieces)) return i;		
+		if (pieces != 0L)
+		{
+			long mask = 1;
+			for(int bit=0; bit < 64; bit++, mask <<= 1)
+			{
+				if(Util.bool(mask & pieces))
+				{
+					return bit;		
+				}
+			}
+		}
 		return -1;
 	}
 
-	int getMSBit(long pieces){
-		long mask = 1L << 63;
-		for(int i=63; i >= 0; i--, mask >>= 1) 
-			if(Util.bool(mask & pieces)) return i;		
+	static int getMSBit(long pieces){
+		if (pieces != 0L)
+		{
+			long mask = 1L << 63;
+			for(int bit=63; bit >= 0; bit--, mask >>= 1) 
+			{
+				if(Util.bool(mask & pieces))
+				{
+					return bit;		
+				}
+			}
+		}
 		return -1;
 	}
 

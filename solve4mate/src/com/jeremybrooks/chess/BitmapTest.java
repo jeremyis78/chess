@@ -113,6 +113,93 @@ public class BitmapTest extends TestCase {
 		}
 	}
 
+	public void testClearPiece()
+	{
+		long fourthBitSet = 1L << 4;
+		assertEquals(16L, fourthBitSet);
+		long fourthBitCleared = Bitmap.clearBit(fourthBitSet, 4);
+		assertEquals(0L, fourthBitCleared);
+	}
+
+	public void testClearPieceForEveryBit()
+	{
+		long allBitsSet = -1L;
+		long current = allBitsSet;
+		
+		for(int bitToClear = 0; bitToClear < 64; bitToClear++)
+		{
+			current = Bitmap.clearBit(current, bitToClear);
+			long notCurrent = ~current;
+			int mostSignificantBitSet = Bitmap.getMSBit(notCurrent);
+			assertEquals(bitToClear, mostSignificantBitSet);
+		}
+	}
+	
+	public void testGetLSBit()
+	{
+		long fourthBitSet = 1L << 4;
+		long fiftiethBitSet = 1L << 50;
+		assertEquals(16L, fourthBitSet);
+		assertEquals(1125899906842624L, fiftiethBitSet);
+		
+		long leastSignificantBitSet = Bitmap.getLSBit(fourthBitSet);
+		assertEquals(4, leastSignificantBitSet);
+		
+		leastSignificantBitSet = Bitmap.getLSBit(fiftiethBitSet);
+		assertEquals(50, leastSignificantBitSet);
+		
+		long fourthORFiftieth = fourthBitSet | fiftiethBitSet;
+		leastSignificantBitSet = Bitmap.getLSBit(fourthORFiftieth);
+		assertEquals(4, leastSignificantBitSet);
+	}
+	
+	public void testGetLSBitOnBoundaries()
+	{
+		long firstBitSet = 1L << 0;
+		long lastBitSet = 1L << 63;
+		long allBitsSet = -1L;
+		long noBitSet = 0L;
+		
+		long leastSignificantBitSet = Bitmap.getLSBit(noBitSet);
+		assertEquals(-1, leastSignificantBitSet);
+		
+		leastSignificantBitSet = Bitmap.getLSBit(firstBitSet);
+		assertEquals(0, leastSignificantBitSet);
+		
+		leastSignificantBitSet = Bitmap.getLSBit(lastBitSet);
+		assertEquals(63, leastSignificantBitSet);
+		
+		leastSignificantBitSet = Bitmap.getLSBit(allBitsSet);
+		assertEquals(0, leastSignificantBitSet);
+		
+		long firstAndLastBitSet = firstBitSet | lastBitSet;
+		leastSignificantBitSet = Bitmap.getLSBit(firstAndLastBitSet);
+		assertEquals(0, leastSignificantBitSet);
+	}
+
+	public void testGetMSBitOnBoundaries()
+	{
+		long firstBitSet = 1L << 0;
+		long lastBitSet = 1L << 63;
+		long allBitsSet = -1L;
+		long noBitSet = 0L;
+		
+		long mostSignificantBitSet = Bitmap.getMSBit(noBitSet);
+		assertEquals(-1, mostSignificantBitSet);
+		
+		mostSignificantBitSet = Bitmap.getMSBit(firstBitSet);
+		assertEquals(0, mostSignificantBitSet);
+
+		mostSignificantBitSet = Bitmap.getMSBit(lastBitSet);
+		assertEquals(63, mostSignificantBitSet);
+		
+		mostSignificantBitSet = Bitmap.getMSBit(allBitsSet);
+		assertEquals(63, mostSignificantBitSet);
+		
+		long firstAndLastBitSet = firstBitSet | lastBitSet;
+		mostSignificantBitSet = Bitmap.getMSBit(firstAndLastBitSet);
+		assertEquals(63, mostSignificantBitSet);
+	}
 
 	
 }
