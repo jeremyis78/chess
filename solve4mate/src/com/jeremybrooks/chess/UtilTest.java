@@ -2,9 +2,6 @@ package com.jeremybrooks.chess;
 
 import junit.framework.TestCase;
 
-import com.jeremybrooks.chess.Util.UnsignedByte;
-
-
 public class UtilTest extends TestCase {
 
 	private static final int BIT_COUNT_ITERATIONS = 2000000;
@@ -393,12 +390,6 @@ public class UtilTest extends TestCase {
 //		int imoves = 0x80;
 //		assertEquals("- - - - - - - X \n", Util.DisplayMovesStr(imoves));
 
-	}
-
-	public void testUnsignedByteClass(){
-		UnsignedByte ub = new UnsignedByte(1);
-		int i = ub.get() << 2;
-		assertEquals(4, i);
 	}
 	
 	public void testOperations(){

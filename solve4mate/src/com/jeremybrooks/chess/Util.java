@@ -538,44 +538,6 @@ public class Util {
     
     
     
-	public static class UnsignedByte {
-		public static final int MIN_VALUE = 256;
-		public static final int MAX_VALUE = 256;
-		
-		private static final int BYTE_MASK = 0xFF;
-		
-		private int unsignedByte;
-		
-		public UnsignedByte(){}
-
-		public UnsignedByte(int i){
-			set(i);
-		}
-		
-		public int get() {
-			return unsignedByte;
-		}
-
-		public void set(int unsignedByte) {
-			if (unsignedByte > 0x80 || unsignedByte < 0x00)
-				throw new IllegalArgumentException(unsignedByte + " can't be greater than " + MAX_VALUE);
-			this.unsignedByte = unsignedByte;
-		}
-		
-		public void shiftLeft(int shift){
-			//do the shift
-			this.unsignedByte = this.unsignedByte << shift;
-			
-			//ensure that higher-order bits are chopped off
-			this.unsignedByte &= BYTE_MASK; 
-		}
-
-		public void shiftRight(int shift){
-			//do the shift
-			this.unsignedByte = this.unsignedByte >> shift;
-			//we should have to worry....right shifting does rotate right?
-		}
-	}
 
 	
 	
