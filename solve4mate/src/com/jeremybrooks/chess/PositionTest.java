@@ -92,17 +92,7 @@ public class PositionTest extends TestCase {
 		}
 		
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	public void testNewStartingPosition()
 	{

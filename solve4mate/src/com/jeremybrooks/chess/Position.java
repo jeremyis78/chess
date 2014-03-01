@@ -50,7 +50,6 @@ public class Position
 
 	private static final int KING_NOT_PLACED = -1;
 
-	
 	//TODO: 1/9/2010 - Add a bitmap in the pieces array for the king
 	//and remove the kingSq[] array and w/bKingSq variables
 	//TODO: 1/9/2010 - Remove the board[] array and calculate what the board
@@ -59,11 +58,6 @@ public class Position
     long all[] = new long[MAXALL];
     int board[] = new int[64];
     int kingSq[] = new int[Color.MAXCOLOR];
-    int wKingSq;
-    int bKingSq;
-
-	
-	
 	
 	public Position(){
 	}
@@ -162,8 +156,6 @@ public class Position
 	}
 	
 	public void clear(){
-	    //wKingSq = -1;
-	    //bKingSq = -1;
 	    kingSq[Color.WHITE] = kingSq[Color.BLACK] = -1;
 	    
 	    for (int i = Color.WHITE; i <= Color.BLACK; i++){
