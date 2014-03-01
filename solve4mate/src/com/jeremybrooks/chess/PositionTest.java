@@ -9,10 +9,6 @@ import junit.framework.TestCase;
 public class PositionTest extends TestCase {
 
 	public static final String[] FEN;
-	public static final String FEN1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR";
-	public static final String FEN2 = "k1K1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p";
-	public static final String FEN3 = "8/8/8/8/8/8/8/k1K5"; // "1k1K1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1";
-	public static final String FEN4 = "q1n5/1P3P2/2P5/8/K7/8/k6P/8";
 
 	static
 	{
@@ -119,7 +115,7 @@ public class PositionTest extends TestCase {
 						"1 | R N B Q K B N R |\n" +
 						"   -----------------\n" +
 						"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBoard, Position.formatBoard(p));
+		Assert.assertEquals(expectedBoard, new Displayer().formatBoard(p));
 
 		String expectedBitboard =
                         "   -----------------\n" +
@@ -133,7 +129,7 @@ public class PositionTest extends TestCase {
 						"1 | R N B Q - B N R |\n" +
 						"   -----------------\n" +
 						"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBitboard, Position.formatBitboard(p));
+		Assert.assertEquals(expectedBitboard, new Displayer().formatAllBitboards(p));
 	}
 
 	private Position createStartingPosition() {
@@ -177,7 +173,7 @@ public class PositionTest extends TestCase {
 				"1 | R N B Q K B N R |\n" +
 				"   -----------------\n" +
 				"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBoard, Position.formatBoard(p));
+		Assert.assertEquals(expectedBoard, new Displayer().formatBoard(p));
 
 		String expectedBitboard =
                 "   -----------------\n" +
@@ -191,7 +187,7 @@ public class PositionTest extends TestCase {
 				"1 | R N B Q - B N R |\n" +
 				"   -----------------\n" +
 				"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBitboard, Position.formatBitboard(p));
+		Assert.assertEquals(expectedBitboard, new Displayer().formatAllBitboards(p));
 
 	}
 
@@ -431,6 +427,19 @@ public class PositionTest extends TestCase {
 //	}
 
 
+	/*
+ 	public static boolean isSameColor(int c, int p)
+	{
+		if ( (p > 0 && c == Color.WHITE) || (p < 0 && c == Color.BLACK) )
+	            return true;
+		return false;
+	}
+	
+	public static boolean isEmpty(int p)
+	{
+		return (p == BOARD_EMPTY_SQUARE);
+	}
+	 */
 	public void testMovePiece() {
 		fail("Not yet implemented");
 	}
@@ -440,12 +449,24 @@ public class PositionTest extends TestCase {
 	}
 
 	public void testIsSameColor() {
-		fail("Not yet implemented");
+		int whitePiece = 1;
+		int blackPiece = -1;
+		assertTrue("precondition: white pieces are positive", whitePiece > 0);
+		assertTrue("precondition: black pieces are negative", blackPiece < 0);
+		
+		assertTrue(Position.isSameColor(Color.WHITE, whitePiece));
+		assertTrue(Position.isSameColor(Color.BLACK, blackPiece));
+		assertFalse(Position.isSameColor(Color.WHITE, blackPiece));
+		assertFalse(Position.isSameColor(Color.BLACK, whitePiece));
+	
 	}
 
 	public void testIsEmpty() {
-		fail("Not yet implemented");
+		fail("not implemented");
 	}
 	
+	public void testPlaceAndEraseKings2() {
+		fail("not implemented");
+	}
 
 }
