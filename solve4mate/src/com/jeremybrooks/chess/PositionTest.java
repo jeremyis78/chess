@@ -1,6 +1,9 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+
+import org.junit.Assert;
+
 import junit.framework.TestCase;
 
 public class PositionTest extends TestCase {
@@ -64,7 +67,7 @@ public class PositionTest extends TestCase {
 //	}
 
 	public void testClear() {
-		Position p = new Position();
+		Position p = createStartingPosition();
 		
 		//Test that there are some pieces set
 		assertTrue(0 != p.kingSq[Color.WHITE]);
@@ -74,6 +77,12 @@ public class PositionTest extends TestCase {
 		
 		//now clear them
 		p.clear();
+        for (int color = 0; color < Color.MAXCOLOR; color++){
+            for (int piece = 0; piece < Pieces.MAXPIECE; piece++){
+            	assertEquals(0L, p.getPieces(color, piece) );
+            }
+        }
+        
 		assertEquals(-1, p.kingSq[Color.WHITE]);
 		assertEquals(-1, p.kingSq[Color.BLACK]);
 		//assertEquals(PIECE[Chess.ROOK] == p.board[Chess.A1]);
@@ -93,16 +102,47 @@ public class PositionTest extends TestCase {
 		
 	}
 
-	
 	public void testNewStartingPosition()
 	{
-		Position p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		Position p = createStartingPosition();
 		assertStartingPosition(p);
+		p.Display();
+		String expectedBoard = 
+                        "   -----------------\n" +
+						"8 | r n b q k b n r |\n" +
+						"7 | p p p p p p p p |\n" +
+						"6 | - - - - - - - - |\n" +
+						"5 | - - - - - - - - |\n" +
+						"4 | - - - - - - - - |\n" +
+						"3 | - - - - - - - - |\n" +
+						"2 | P P P P P P P P |\n" +
+						"1 | R N B Q K B N R |\n" +
+						"   -----------------\n" +
+						"    a b c d e f g h\n";
+		Assert.assertEquals(expectedBoard, Position.formatBoard(p));
+
+		String expectedBitboard =
+                        "   -----------------\n" +
+						"8 | r n b q - b n r |\n" +
+						"7 | p p p p p p p p |\n" +
+						"6 | - - - - - - - - |\n" +
+						"5 | - - - - - - - - |\n" +
+						"4 | - - - - - - - - |\n" +
+						"3 | - - - - - - - - |\n" +
+						"2 | P P P P P P P P |\n" +
+						"1 | R N B Q - B N R |\n" +
+						"   -----------------\n" +
+						"    a b c d e f g h\n";
+		Assert.assertEquals(expectedBitboard, Position.formatBitboard(p));
 	}
 
-	public void testMovingPieces()
+	private Position createStartingPosition() {
+		return new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+	}
+
+	public void testMovingPiecesQueensGambitAccepted()
 	{
-		Position p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		Position p = createStartingPosition();
 		assertStartingPosition(p);
 		
 		// 1. e4
@@ -124,6 +164,35 @@ public class PositionTest extends TestCase {
 		assertEquals("rnbqkbnr/ppp1pppp/8/8/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		p.placePiece(Color.WHITE, Pieces.PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
+
+		String expectedBoard = 
+                "   -----------------\n" +
+				"8 | r n b q k b n r |\n" +
+				"7 | p p p - p p p p |\n" +
+				"6 | - - - - - - - - |\n" +
+				"5 | - - - P - - - - |\n" +
+				"4 | - - - - - - - - |\n" +
+				"3 | - - - - - - - - |\n" +
+				"2 | P P P P - P P P |\n" +
+				"1 | R N B Q K B N R |\n" +
+				"   -----------------\n" +
+				"    a b c d e f g h\n";
+		Assert.assertEquals(expectedBoard, Position.formatBoard(p));
+
+		String expectedBitboard =
+                "   -----------------\n" +
+				"8 | r n b q - b n r |\n" +
+				"7 | p p p - p p p p |\n" +
+				"6 | - - - - - - - - |\n" +
+				"5 | - - - P - - - - |\n" +
+				"4 | - - - - - - - - |\n" +
+				"3 | - - - - - - - - |\n" +
+				"2 | P P P P - P P P |\n" +
+				"1 | R N B Q - B N R |\n" +
+				"   -----------------\n" +
+				"    a b c d e f g h\n";
+		Assert.assertEquals(expectedBitboard, Position.formatBitboard(p));
+
 	}
 
 	private void assertStartingPosition(Position p) {

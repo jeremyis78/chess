@@ -47,7 +47,6 @@ public class Position
 //	};
 	
 	private static final long EDGES = 0xFF818181818181FFL;
-
 	private static final int KING_NOT_PLACED = -1;
 
 	//TODO: 1/9/2010 - Add a bitmap in the pieces array for the king
@@ -57,7 +56,7 @@ public class Position
     long pieces[][] = new long[Color.MAXCOLOR][Pieces.MAXPIECE];
     long all[] = new long[MAXALL];
     int board[] = new int[64];
-    int kingSq[] = new int[Color.MAXCOLOR];
+    int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 	
 	public Position(){
 	}
@@ -69,19 +68,26 @@ public class Position
 	//Return a bitbrd of the pieces whose color is 'side'
 	// and piece is 'p' 
 	//
-	public long getPieces(int side, int p){
-	    if (p <= Pieces.QUEEN) {
-	        return pieces[side][p];
-	    }
-	    if(isKingPlaced(side))
-	    {
+	public long getPieces(int side, int piece){
+	    if (isNotTheKing(piece)) {
+	        return pieces[side][piece];
+	    } else if(isKingPlaced(side)) {
 	    	return 1L << kingSq[side];
 	    }
 	    return 0L;
 	}
 
+	private boolean isNotTheKing(int p) {
+		return p <= Pieces.QUEEN;
+	}
+
 	private boolean isKingPlaced(int side) {
 		return kingSq[side] != KING_NOT_PLACED;
+	}
+	
+	public int getBoard(int sq)
+	{
+		return board[sq];
 	}
 	
 	
@@ -96,67 +102,9 @@ public class Position
 	/* +--------+--------+---------+----------+-----------+---------+  */
 	/*                                                                 */
 	/*******************************************************************/
-	
-	String Get() {
-	    //Copies a string of characters representing
-	    //the FEN board position (1st field in a FEN string)
-	    //into FEN_Board
-	
-	    StringBuffer sb = new StringBuffer();
 		
-	    long mask = 1; //, m = 1;
-	    
-//	    char fen[100] = {'\0'};
-//	    int index = 0; //fen index;
-	    
-	    int i, j;
-	    for(i = H1; i >= A1; i-=8){
-	        mask = 1L << i;
-	        
-	        int k = i + 8;  //set upper bound on next for-loop
-	        
-//	        int rankno = i/8 + 1;
-	        
-	        int emptySquares = 0;
-	        
-	        for(j = i; j < k; ++j, mask <<= 1){
-	            //If there's a piece at that square
-	            //Print '<PIECE>'
-	            //     where <PIECE> is a single character from set
-	            //		 { K, Q, R, N, B, P, k, q, r, n, b, p }
-	            boolean nopiece = true;
-	            for (int c = 0; c < Color.MAXCOLOR; c++){
-	                for (int p = 0; p < Pieces.MAXPIECE; p++){ 
-	                    if (Util.bool(mask & pieces[c][p])){
-	                        nopiece = false;
-	                        if(emptySquares == 0)
-	                            sb.append(PIECE_STR[c][p]);
-	                            //fen[index++] = PIECE_STR[c][p];
-	                        else {
-	                            sb.append(emptySquares);
-	                            //fen[index++] = '0' + emptySquares;
-	                            
-	                            sb.append(PIECE_STR[c][p]);
-	                            //fen[index++] = PIECE_STR[c][p];
-	                            
-	                            emptySquares = 0;
-	                        }
-	                    } 
-	                    }
-	            }
-	            if (nopiece)
-	                emptySquares++;
-	        }
-	        sb.append("/"); 
-	        //fen[index++] = '/'; //append the rank separator
-	        
-	    }
-	    //strcpy(FEN_Board, fen);
-	    return sb.toString();
-	}
-	
 	public void clear(){
-	    kingSq[Color.WHITE] = kingSq[Color.BLACK] = -1;
+	    kingSq[Color.WHITE] = kingSq[Color.BLACK] = KING_NOT_PLACED;
 	    
 	    for (int i = Color.WHITE; i <= Color.BLACK; i++){
 	        pieces[i][Pieces.PAWNS] = pieces[i][Pieces.KNIGHTS] = 0L;
@@ -572,52 +520,63 @@ public class Position
 		return new Integer(i).toString().charAt(0);
 	}
 	
+	public void DisplayBoard()
+	{
+		out.print(formatBoard(this));
+	}
 	
-	public void DisplayBoard(){
-	    out.print("   -----------------\n");
+	public static String formatBoard(Position position){
+		StringBuilder display = new StringBuilder();
+		display.append("   -----------------\n");
 	    for (int i = A8; i >= A1; i-=8){
-	        out.print(i/8 + 1 + " | "); //Print the rank number
+	        display.append(i/8 + 1 + " | "); //Print the rank number
 	        for (int j = i; j < i+8; j++){
-	            switch(board[j]){
+	            switch(position.getBoard(j)){
 	                //white pieces: pawns, knights, bishops, rooks, queens, king
-	            case 1: out.print(BOARD_PIECE[0] + " ");
+	            case 1: display.append(BOARD_PIECE[0] + " ");
 	                break;
-	            case 2: out.print(BOARD_PIECE[1] + " ");
+	            case 2: display.append(BOARD_PIECE[1] + " ");
 	                break;
-	            case 5: out.print(BOARD_PIECE[2] + " ");
+	            case 5: display.append(BOARD_PIECE[2] + " ");
 	                break;
-	            case 6: out.print(BOARD_PIECE[3] + " ");
+	            case 6: display.append(BOARD_PIECE[3] + " ");
 	                break;
-	            case 7: out.print(BOARD_PIECE[4] + " ");
+	            case 7: display.append(BOARD_PIECE[4] + " ");
 	                break;
-	            case 3: out.print(BOARD_PIECE[5] + " ");
+	            case 3: display.append(BOARD_PIECE[5] + " ");
 	                break;
 	                
 	                //black pieces: pawns, knights, bishops, rooks, queens, king
-	            case -1: out.print(BOARD_PIECE[6] + " ");
+	            case -1: display.append(BOARD_PIECE[6] + " ");
 	                break;
-	            case -2: out.print(BOARD_PIECE[7] + " ");
+	            case -2: display.append(BOARD_PIECE[7] + " ");
 	                break;
-	            case -5: out.print(BOARD_PIECE[8] + " ");
+	            case -5: display.append(BOARD_PIECE[8] + " ");
 	                break;
-	            case -6: out.print(BOARD_PIECE[9] + " ");
-								 break;
-	            case -7: out.print(BOARD_PIECE[10] + " ");
+	            case -6: display.append(BOARD_PIECE[9] + " ");
+	            	break;
+	            case -7: display.append(BOARD_PIECE[10] + " ");
 	                break;
-	            case -3: out.print(BOARD_PIECE[11] + " ");
+	            case -3: display.append(BOARD_PIECE[11] + " ");
 	                break;
-	            default: out.print("- ");
+	            default: display.append("- ");
 	                break;
 	            }
 			}
-	        out.print("|\n");
+	        display.append("|\n");
 	    }
-	    out.print("   -----------------\n");
-	    out.print("    a b c d e f g h\n");	
+	    display.append("   -----------------\n");
+	    display.append("    a b c d e f g h\n");
+	    return display.toString();
 	}
 	 
+	void DisplayBitboardBoard()
+	{
+		out.print(formatBitboard(this));
+	}
 	
-	void DisplayBitboardBoard(){
+	public static String formatBitboard(Position position){
+		StringBuilder display = new StringBuilder();
 	    //Displays ASCII chessboard position
 	    
 	    //This prints the board so that a1 is in the lower
@@ -632,15 +591,15 @@ public class Position
 	    //To display only the first rank (a1-h1) it should be 8.
 		//To display 2nd and 1st rank (a2-h2 and a1-h1) it should be 16, & so on.
 	    
-	    out.print("   -----------------\n");
+	    display.append("   -----------------\n");
 	    
 	    int i, j;
 	    for(i = num_of_sq_to_display - 8; i >=0; i-=8){
 	        mask = 1L << i;
 	        
 	        int k = i + 8;  //set upper bound on next for-loop
-	        //		out.print(i/8 + 1 << ' '; //Print the rank number
-	        out.print(i/8 + 1 + " | "); //Print the rank number
+	        //		display.append(i/8 + 1 << ' '; //Print the rank number
+	        display.append(i/8 + 1 + " | "); //Print the rank number
 	        
 	        for(j = i; j < k; ++j, mask <<= 1){
 	            //If there's a piece at that square
@@ -648,20 +607,21 @@ public class Position
 	            boolean nopiece = true;
 	            for (int c = Color.WHITE; c <= Color.BLACK; c++){
 	                for (int p = 0; p <= Pieces.QUEENS; p++){ 
-	                    if (Util.bool(mask & pieces[c][p])){
-	                        out.print(PIECE_STR[c][p] + " ");  
+	                    if (Util.bool(mask & position.getPieces(c, p))){
+	                        display.append(PIECE_STR[c][p] + " ");  
 	                        nopiece = false;
 	                            }
 	                }//end for p
 	            }//end for c
 	            if (nopiece){
-	                out.print("- "); //print "- " for empty square
+	                display.append("- "); //print "- " for empty square
 	            }
 	        }
-	        out.print("|\n");
+	        display.append("|\n");
 	    }
-	    out.print("   -----------------\n");
-	    out.print("    a b c d e f g h\n");	
+	    display.append("   -----------------\n");
+	    display.append("    a b c d e f g h\n");
+	    return display.toString();
 	}
 	 
 	String GetConsoleFEN(){
