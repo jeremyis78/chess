@@ -130,7 +130,7 @@ public class BitmapTest extends TestCase {
 		{
 			current = Bitmap.clearBit(current, bitToClear);
 			long notCurrent = ~current;
-			int mostSignificantBitSet = Bitmap.getMSBit(notCurrent);
+			int mostSignificantBitSet = Bitmap.highestBitNumber(notCurrent);
 			assertEquals(bitToClear, mostSignificantBitSet);
 		}
 	}
@@ -142,14 +142,14 @@ public class BitmapTest extends TestCase {
 		assertEquals(16L, fourthBitSet);
 		assertEquals(1125899906842624L, fiftiethBitSet);
 		
-		long leastSignificantBitSet = Bitmap.getLSBit(fourthBitSet);
+		long leastSignificantBitSet = Bitmap.lowestBitNumber(fourthBitSet);
 		assertEquals(4, leastSignificantBitSet);
 		
-		leastSignificantBitSet = Bitmap.getLSBit(fiftiethBitSet);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(fiftiethBitSet);
 		assertEquals(50, leastSignificantBitSet);
 		
 		long fourthORFiftieth = fourthBitSet | fiftiethBitSet;
-		leastSignificantBitSet = Bitmap.getLSBit(fourthORFiftieth);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(fourthORFiftieth);
 		assertEquals(4, leastSignificantBitSet);
 	}
 	
@@ -160,20 +160,20 @@ public class BitmapTest extends TestCase {
 		long allBitsSet = -1L;
 		long noBitSet = 0L;
 		
-		long leastSignificantBitSet = Bitmap.getLSBit(noBitSet);
+		long leastSignificantBitSet = Bitmap.lowestBitNumber(noBitSet);
 		assertEquals(-1, leastSignificantBitSet);
 		
-		leastSignificantBitSet = Bitmap.getLSBit(firstBitSet);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(firstBitSet);
 		assertEquals(0, leastSignificantBitSet);
 		
-		leastSignificantBitSet = Bitmap.getLSBit(lastBitSet);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(lastBitSet);
 		assertEquals(63, leastSignificantBitSet);
 		
-		leastSignificantBitSet = Bitmap.getLSBit(allBitsSet);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(allBitsSet);
 		assertEquals(0, leastSignificantBitSet);
 		
 		long firstAndLastBitSet = firstBitSet | lastBitSet;
-		leastSignificantBitSet = Bitmap.getLSBit(firstAndLastBitSet);
+		leastSignificantBitSet = Bitmap.lowestBitNumber(firstAndLastBitSet);
 		assertEquals(0, leastSignificantBitSet);
 	}
 
@@ -184,20 +184,20 @@ public class BitmapTest extends TestCase {
 		long allBitsSet = -1L;
 		long noBitSet = 0L;
 		
-		long mostSignificantBitSet = Bitmap.getMSBit(noBitSet);
+		long mostSignificantBitSet = Bitmap.highestBitNumber(noBitSet);
 		assertEquals(-1, mostSignificantBitSet);
 		
-		mostSignificantBitSet = Bitmap.getMSBit(firstBitSet);
+		mostSignificantBitSet = Bitmap.highestBitNumber(firstBitSet);
 		assertEquals(0, mostSignificantBitSet);
 
-		mostSignificantBitSet = Bitmap.getMSBit(lastBitSet);
+		mostSignificantBitSet = Bitmap.highestBitNumber(lastBitSet);
 		assertEquals(63, mostSignificantBitSet);
 		
-		mostSignificantBitSet = Bitmap.getMSBit(allBitsSet);
+		mostSignificantBitSet = Bitmap.highestBitNumber(allBitsSet);
 		assertEquals(63, mostSignificantBitSet);
 		
 		long firstAndLastBitSet = firstBitSet | lastBitSet;
-		mostSignificantBitSet = Bitmap.getMSBit(firstAndLastBitSet);
+		mostSignificantBitSet = Bitmap.highestBitNumber(firstAndLastBitSet);
 		assertEquals(63, mostSignificantBitSet);
 	}
 

@@ -7,11 +7,12 @@ package com.jeremybrooks.chess;
 /**
  * A Bitboard is some representation of the chessboard where each bit represents
  * some binary state.
- * For example, a Bitboard with the value 0x0000 0000 0000 FF00
+ * <p>For example, a Bitboard with the value 0x0000 0000 0000 FF00
  * would represent all of the white pawns in the starting position.  Where as
  * 0x8100 0000 0000 0000 would represent the black rooks' starting position.
  *
  * Here's the 64-bit internal represention of the chessboard:
+ * <pre>
  *
  *                                                   MSB           
  *                                                   /             
@@ -49,8 +50,6 @@ package com.jeremybrooks.chess;
  *			e4 = 8*3 + 4 = 28                          
  *                                                                 
  *
- *
- *
  *If you wanted a bitboard of all the pieces on the board at the start
  *of the chess game you'd have the following bitboard (typedef'd as bitbrd):
  *
@@ -61,7 +60,7 @@ package com.jeremybrooks.chess;
  *  0 = white rook on a1, 1 = white knight on b1,..., 15 = white pawn on h2
  *
  *The next 32 least significant bits (16,17,18,...,46,47) of "initial"
- *represent the empty 32 empty squares in the middle of the board.
+ *represent the 32 empty squares in the middle of the board.
  *
  *The most significant 16 bits (48,49,50,...,62,63) of "initial" represent
  *the black pieces: 
@@ -83,7 +82,7 @@ package com.jeremybrooks.chess;
  *                is a1h8) are occupied
  *  Bitboard (4) keeps track of how the 15 diagonals (whose main diagonal
  *               is h1a8) are occupied
- *
+ *</pre>
  * @author jeremy
  *
  */
@@ -331,7 +330,7 @@ public class Bitmap {
 		return board;
 	}
 
-	static int getLSBit(long pieces)
+	static int lowestBitNumber(long pieces)
 	{
 		if (pieces != 0L)
 		{
@@ -347,7 +346,7 @@ public class Bitmap {
 		return -1;
 	}
 
-	static int getMSBit(long pieces){
+	static int highestBitNumber(long pieces){
 		if (pieces != 0L)
 		{
 			long mask = 1L << 63;
