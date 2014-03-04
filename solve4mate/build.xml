@@ -201,6 +201,7 @@
 		<delete dir="${instrumented.dir}" />
 		<delete dir="${reports.dir}" />
 		<delete file="cobertura.log" />
+		<delete file="cobertura.ser" />
 		<delete file="${cobertura.datafile}" />
 	</target>
 

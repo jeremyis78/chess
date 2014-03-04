@@ -595,7 +595,7 @@ public class GameState {
 	}
 
 	void display(){
-	    Displayer displayer = new Displayer();
+	    AbstractDisplayer displayer = new Displayer();
 	    System.out.println(displayer.formatBoard(pos));
 	}
 

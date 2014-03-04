@@ -220,13 +220,13 @@ public class Bitmap {
 	 * Use appropriate constants above for the index 
 	 */
 	public static final int PIECE[] = {
-	    /*  pawn   001 */	1, 	
+	    /*  pawn   001 */	1,
 	    /*  knight 010 */	2,
 	    /*  bishop 101 */	5,
 	    /*  rook   110 */	6,
 	    /*  queen  111 */	7,
 	    /*  king   011 */	3,
-	    /*  none   100 */   0
+	    /*  none   100 */   0 
 	};
 
 	//takes an int index (a board character) and maps it to a corresponding piece

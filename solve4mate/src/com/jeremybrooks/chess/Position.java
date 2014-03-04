@@ -527,7 +527,7 @@ public class Position
 	
 	void DisplayBitboardBoard()
 	{
-		out.print(new Displayer().formatAllBitboards(this));
+		out.print(new BitboardDisplayer().formatBoard(this));
 	}
 	
 	/**
@@ -566,25 +566,18 @@ public class Position
 	 */
 	public void erasePiece(int c, int p, int sq){
 	    long mask = 1L << sq;
-	    all[ALL] ^= mask;
+	    all[Bitmap.ALL] ^= mask;
 	    all[ALL90] ^= 1L << SQ2BIT90R[sq];
 	    all[ALL45L] ^= 1L << SQ2BIT45L[sq];
 	    all[ALL45R] ^= 1L << SQ2BIT45R[sq];
 	    board[sq] = BOARD_EMPTY_SQUARE;
-	
-	    if (p != Pieces.KING){
+	    if (p == Pieces.KING)
+	    {
+	    	kingSq[c] = KING_NOT_PLACED;
+	    }  else {
 	        pieces[c][p] ^= mask;
 	        pieces[c][Pieces.ALLPIECES] ^= mask;
 	    } 
-	
-	    //    if (p == Pieces.KING){
-	    //  kingSq[c] = -1; 
-	    //  //we are assuming that if we erase a king we will
-	    //  //place another somewhere else with placePiece()
-	    //} else {
-	    //    pieces[c][p] ^= mask;
-	    //    pieces[c][ALLPIECES] ^= mask;
-	    //} 
 	}
 	
 	

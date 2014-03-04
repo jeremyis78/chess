@@ -102,7 +102,6 @@ public class PositionTest extends TestCase {
 	{
 		Position p = createStartingPosition();
 		assertStartingPosition(p);
-		p.Display();
 		String expectedBoard = 
                         "   -----------------\n" +
 						"8 | r n b q k b n r |\n" +
@@ -129,7 +128,7 @@ public class PositionTest extends TestCase {
 						"1 | R N B Q - B N R |\n" +
 						"   -----------------\n" +
 						"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBitboard, new Displayer().formatAllBitboards(p));
+		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
 	}
 
 	private Position createStartingPosition() {
@@ -187,7 +186,7 @@ public class PositionTest extends TestCase {
 				"1 | R N B Q - B N R |\n" +
 				"   -----------------\n" +
 				"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBitboard, new Displayer().formatAllBitboards(p));
+		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
 
 	}
 
@@ -211,6 +210,24 @@ public class PositionTest extends TestCase {
 		return Util.displaySquaresStr(p.getPieces(colorIndex, piecesIndex));
 	}
 
+	public void testPlacePieceOverwritesExistingPiece()
+	{
+		Position p = createStartingPosition();
+		
+		int squareToOverwrite = Bitmap.A1;
+		int squareOfWhiteQueen = Bitmap.D1;
+		assertEquals(PIECE[Bitmap.ROOK], p.getBoard(squareToOverwrite));
+		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
+		
+		p.placePiece(Color.WHITE, Pieces.QUEEN, squareToOverwrite);
+		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareToOverwrite));
+		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
+		
+		p.erasePiece(Color.WHITE, Pieces.QUEEN, squareToOverwrite);
+		assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(squareToOverwrite));
+		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
+	}
+	
 	public void testSetTooManyWhiteKings()
 	{
 		String tooManyWhiteKingsOnDifferentRanks = "2K5/8/8/8/8/8/8/7K";
@@ -316,15 +333,9 @@ public class PositionTest extends TestCase {
 		Position p = new Position();
 
 		int sq = Bitmap.E1;
-
-		//Set the white king
-		int color = Color.WHITE;
-		int piece = Pieces.KING;
-		int boardPieceIndex = Bitmap.KING;
-		
-		p.placePiece(color, piece, sq);
-		assertEquals(PIECE[boardPieceIndex], p.board[sq]);
-		assertEquals(sq, p.kingSq[color]);
+		p.placePiece(Color.WHITE, Pieces.KING, sq);
+		assertEquals(PIECE[Bitmap.KING], p.getBoard(sq));
+		assertEquals(sq, p.kingSq[Color.WHITE]);
 		
 		//Get the appropriate bitboard masks
         long sqMask = 1L << sq;
@@ -337,18 +348,14 @@ public class PositionTest extends TestCase {
 		assertEquals(sqMask45L, p.all[ALL45L]);
 		assertEquals(sqMask45R, p.all[ALL45R]);
 
-		
-		//reset
-		p.erasePiece(color, piece, sq);
-		
+		p.erasePiece(Color.WHITE, Pieces.KING, sq);
+
 
 		//Set the black king
 		sq = Bitmap.G6;  //Change the placement
-		color = Color.BLACK;
-
-		p.placePiece(color, piece, sq);
-		assertEquals(-PIECE[boardPieceIndex], p.board[sq]);
-		assertEquals(sq, p.kingSq[color]);
+		p.placePiece(Color.BLACK, Pieces.KING, sq);
+		assertEquals(-PIECE[Bitmap.KING], p.getBoard(sq));
+		assertEquals(sq, p.kingSq[Color.BLACK]);
 		
 		//Get the appropriate bitboard masks
         sqMask = 1L << sq;
@@ -397,49 +404,6 @@ public class PositionTest extends TestCase {
 		assertEquals(sqMask45R, p.all[ALL45R]);
 	}
 
-	
-//	public void testIsLegal() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testDisplay() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testDisplayFEN() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testDisplayBoard() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testDisplayBitboardBoard() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testShowBoard() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testGetConsoleFEN() {
-//		fail("Not yet implemented");
-//	}
-
-
-	/*
- 	public static boolean isSameColor(int c, int p)
-	{
-		if ( (p > 0 && c == Color.WHITE) || (p < 0 && c == Color.BLACK) )
-	            return true;
-		return false;
-	}
-	
-	public static boolean isEmpty(int p)
-	{
-		return (p == BOARD_EMPTY_SQUARE);
-	}
-	 */
 	public void testMovePiece() {
 		fail("Not yet implemented");
 	}
@@ -462,11 +426,31 @@ public class PositionTest extends TestCase {
 	}
 
 	public void testIsEmpty() {
-		fail("not implemented");
+		Position p = createStartingPosition();
+
+		for(int currentSquare = Bitmap.A1;
+				currentSquare <= Bitmap.H2;
+				currentSquare++)
+		{
+			
+			assertFalse(Position.isEmpty(p.getBoard(currentSquare)));
+		}
+
+		for(int currentSquare = Bitmap.A3;
+				currentSquare <= Bitmap.H6;
+				currentSquare++)
+		{
+			assertTrue(Position.isEmpty(p.getBoard(currentSquare)));
+		}
+		
+		for(int currentSquare = Bitmap.A7;
+				currentSquare <= Bitmap.H8;
+				currentSquare++)
+		{
+			
+			assertFalse(Position.isEmpty(p.getBoard(currentSquare)));
+		}
+
 	}
 	
-	public void testPlaceAndEraseKings2() {
-		fail("not implemented");
-	}
-
 }
