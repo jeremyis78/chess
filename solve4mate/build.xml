@@ -48,6 +48,9 @@
 			<fileset dir="${lib}">
 				<include name="*.jar" />
 			</fileset>
+			<fileset dir="c:\eclipse\plugins">
+				<include name="org.hamcrest.core*.jar" />
+			</fileset>
 		</path>
 	</target>
 

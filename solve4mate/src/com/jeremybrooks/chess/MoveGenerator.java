@@ -216,6 +216,13 @@ public class MoveGenerator {
 	    return temp;
 	}
 
+	public int[] generate(GameState g, int side, int depth)
+	{
+	    GenerateCaptures(g, g.moves, side, depth);
+	    GenerateNonCaptures(g, g.moves, side, depth);
+		return g.moves;
+	}
+	
 	//
 	// The move generation functions
 	//
@@ -255,7 +262,7 @@ public class MoveGenerator {
 	    for (int p = PAWN; p <= KING; p++) {
 	        mover = PIECE[p];
 	        pieces = g.pos.getPieces (side, p);
-	        while (pieces > 0) {
+	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
 	            pro = 0;
 	            pieceAttacks = 0;
@@ -298,7 +305,7 @@ public class MoveGenerator {
 	            g.attacked[depth] |= pieceAttacks;
 
 	            attackedPieces = pieceAttacks & g.pos.pieces[Util.opp(side)][Pieces.ALLPIECES];
-	            while (attackedPieces > 0) {
+	            while (morePieces(attackedPieces)) {
 	                to = FirstPiece (attackedPieces);
 	                cap = Math.abs(g.pos.board[to]);
 	                if (!Util.bool(pro)) {     //Capture only
@@ -368,7 +375,7 @@ public class MoveGenerator {
 	            break;
 	    }
 	    // Pawn promotions
-	    while (promoters > 0) {
+	    while (morePieces(promoters)) {
 	        to = FirstPiece (promoters);
 	        from = minusOneRank(side, to);
 	        for (int i = QUEEN; i >= KNIGHT; i--) {
@@ -379,14 +386,14 @@ public class MoveGenerator {
 	        promoters = ClearPiece(promoters, to);
 	    }
 	    // Pawns advance two squares
-	    while (advanceTwo > 0) {
+	    while (morePieces(advanceTwo)) {
 	        to = FirstPiece (advanceTwo);
 	        from = minusTwoRank(side, to);
 	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        advanceTwo = ClearPiece(advanceTwo, to);
 	    }
 	    // Pawns advance one square
-	    while (pMoves > 0) {
+	    while (morePieces(pMoves)) {
 	        to = FirstPiece (pMoves);
 	        from = minusOneRank(side, to);
 	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
@@ -401,7 +408,7 @@ public class MoveGenerator {
 
 	    for (int p = KNIGHT; p <= KING; p++) {
 	        pieces = g.pos.getPieces (side, p);
-	        while (pieces > 0) {
+	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
 	            switch (p) {
 	                case KNIGHT:
@@ -424,7 +431,7 @@ public class MoveGenerator {
 	                    pMoves = att.king[from] & empty & ~att.king[g.pos.kingSq[Util.opp(side)]];
 	                    break;
 	            }
-	            while (pMoves > 0) {
+	            while (morePieces(pMoves)) {
 	                to = FirstPiece (pMoves);
 	                move = EncodeMove(from,to,PIECE[p],0,0);
 	                if (p == KING){
@@ -467,6 +474,11 @@ public class MoveGenerator {
 
 	    g.numberOfLegalMoves[depth] = n;
 	    return g.numberOfLegalMoves[depth];
+	}
+	
+	private static boolean morePieces(long pieceBoard)
+	{
+		return pieceBoard != 0;
 	}
 
 	public int GenerateKingEscapes (GameState g, int moves[], int side, int depth)
@@ -541,7 +553,7 @@ public class MoveGenerator {
 	            }
 	        }
 
-	        while (Util.bool(capturers)) {
+	        while (morePieces(capturers)) {
 	            from = FirstPiece (capturers);
 	            mover = Math.abs(g.pos.board[from]);
 
@@ -575,7 +587,7 @@ public class MoveGenerator {
 	                //if (!isPinned(g, from, checker, mover, cap)){
 	                if (isLegal(g, move, side)){
 	                    //cout << "Added capture the checker move\n";
-	                    moves[n++] = move;//EncodeMove (from, checker, mover, cap, pro);
+	                    moves[n++] = move;
 	                    //g.legalMoves[depth]++;
 	                    //g.addMove (move);
 	                }
@@ -640,7 +652,7 @@ public class MoveGenerator {
 	    } else if (Util.PieceCount (checkers) == 2) {  //Two pieces checking the king
 		// Add king moves that would capture either checking piece
 	        kingMoves = att.king[kingSq] & checkers;
-	        while (kingMoves > 0){
+	        while (morePieces(kingMoves)){
 	            to = FirstPiece(kingMoves);
 	            cap = Math.abs(g.pos.board[to]);
 	            move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
@@ -656,7 +668,7 @@ public class MoveGenerator {
 
 	    // Add king moves to flight squares (and captures)
 	    kingMoves = att.king[kingSq] & ~g.pos.all[ALL];
-	    while (kingMoves > 0){
+	    while (morePieces(kingMoves)){
 	        to = FirstPiece(kingMoves);
 	        //Same reason as above...hafta make sure the king doesn't just
 	        //move away from the sliding checking piece.
@@ -724,7 +736,7 @@ public class MoveGenerator {
 	    //below (then remove the 'if((1L << to) & targets){' checks
 
 	    //Pawn promotions
-	    while (promoters > 0) {
+	    while (morePieces(promoters)) {
 	        to = FirstPiece (promoters);
 	        //Add move ONLY if the move is to 'targets'
 	        if (Util.bool((1L << to) & targets))
@@ -747,7 +759,7 @@ public class MoveGenerator {
 	        promoters = ClearPiece (promoters, to);
 	    }
 	    // Pawns advance two squares
-	    while (advanceTwo > 0)
+	    while (morePieces(advanceTwo))
 	    {
 	        to = FirstPiece (advanceTwo);
 	        //Add move ONLY if the move is to 'targets'
@@ -764,7 +776,7 @@ public class MoveGenerator {
 	        advanceTwo = ClearPiece (advanceTwo, to);
 	    }
 	    // Pawns advance one square
-	    while (pMoves > 0) {
+	    while (morePieces(pMoves)) {
 	        to = FirstPiece (pMoves);
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets))
@@ -790,7 +802,7 @@ public class MoveGenerator {
 
 	    for (int p = KNIGHT; p <= QUEEN; p++) {
 	        pieces = g.pos.getPieces (side, p);
-	        while (pieces > 0) {
+	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
 	            //now make pMoves only those moves which will interpose
 	            //between the king and the checker (by ANDing with targets).
@@ -811,7 +823,7 @@ public class MoveGenerator {
 	                    }
 	                    break;
 	            }
-	            while (pMoves > 0) {
+	            while (morePieces(pMoves)) {
 	                to = FirstPiece (pMoves);
 	                //Add move ONLY if it is to 'targets'
 	                //if ((1L << to) & targets) {
