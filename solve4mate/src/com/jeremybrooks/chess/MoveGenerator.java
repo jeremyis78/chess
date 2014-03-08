@@ -66,7 +66,7 @@ public class MoveGenerator {
 	//is not always 8 it returns the diagonal length minus the outer 2 bits
 	//for the occupied status  
 
-	private byte Status(long b, int sq){
+	private static byte Status(long b, int sq){
 		//Compute the x and y coordinates from 'sq' (aka, reverse linear index)
 		//
 		//No transformation function T is needed since the ranks
@@ -80,7 +80,7 @@ public class MoveGenerator {
 		return (byte) ((b >> shiftby) & 63);
 	}
 
-	private byte Status90(long b, int sq){
+	private static byte Status90(long b, int sq){
 		//Compute the x and y coordinates from 'sq' (aka, reverse linear index)
 		//
 		//The transformation function T for x and y is 
@@ -95,7 +95,7 @@ public class MoveGenerator {
 	}
 
 
-	private byte Status45L(long b, int sq){
+	private static byte Status45L(long b, int sq){
 	    
 	    //for diagonals of length 3 or less, status should be zero
 	    
@@ -154,7 +154,7 @@ public class MoveGenerator {
 	}
 
 
-	private byte Status45R(long b, int sq){
+	private static byte Status45R(long b, int sq){
 
 	    //for diagonals of length 3 or less, status should be zero
 	    
@@ -250,7 +250,7 @@ public class MoveGenerator {
 	    long pieceAttacks = 0;    //must be zeroed
 	    long attackedPieces;      //as in "the enemy pieces that are attacked"
 
-	    n = g.legalMoves[depth];
+	    n = g.numberOfLegalMoves[depth];
 
 	    for (int p = PAWN; p <= KING; p++) {
 	        mover = PIECE[p];
@@ -320,8 +320,8 @@ public class MoveGenerator {
 	            pieces = ClearPiece (pieces, from);
 	        }
 	    }
-	    g.legalMoves[depth] = n;
-	    return g.legalMoves[depth];
+	    g.numberOfLegalMoves[depth] = n;
+	    return g.numberOfLegalMoves[depth];
 	}
 
 
@@ -344,7 +344,7 @@ public class MoveGenerator {
 	    //*                                                                         *
 	    //***************************************************************************
 
-	    n = g.legalMoves[depth];
+	    n = g.numberOfLegalMoves[depth];
 	    empty = ~g.pos.all[ALL];
 
 	    switch (side) {
@@ -465,8 +465,8 @@ public class MoveGenerator {
 	        break;
 	    }
 
-	    g.legalMoves[depth] = n;
-	    return g.legalMoves[depth];
+	    g.numberOfLegalMoves[depth] = n;
+	    return g.numberOfLegalMoves[depth];
 	}
 
 	public int GenerateKingEscapes (GameState g, int moves[], int side, int depth)
@@ -488,7 +488,7 @@ public class MoveGenerator {
 	    long interpose = 0;
 	    long kingMoves;
 
-	    n = g.legalMoves[depth];
+	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
 	    switch (side) {
 	        case Color.WHITE:
@@ -633,7 +633,7 @@ public class MoveGenerator {
 	                //attack from northwest
 	                interpose = att.plus7[kingSq] & att.minus7[checker];
 	            }
-	            g.legalMoves[depth] = n;  //required for call to GenInter() below
+	            g.numberOfLegalMoves[depth] = n;  //required for call to GenInter() below
 	            //DisplayBoard(interpose);
 	            n += GenerateInterpositions (g, moves, side, depth, interpose);
 	        }
@@ -674,9 +674,9 @@ public class MoveGenerator {
 	    }
 
 	    //cout << "moves added: " << n << endl;
-	    g.legalMoves[depth] = n;
+	    g.numberOfLegalMoves[depth] = n;
 	    //cout << "legalMoves: " << g.legalMoves[depth] << endl;
-	    return g.legalMoves[depth];
+	    return g.numberOfLegalMoves[depth];
 	}
 
 
@@ -706,7 +706,7 @@ public class MoveGenerator {
 	    //*                                                                         *
 	    //***************************************************************************
 
-	    n = g.legalMoves[depth];
+	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
 	    empty = ~g.pos.all[ALL];
 
@@ -773,8 +773,9 @@ public class MoveGenerator {
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-	            if(isLegal(g, EncodeMove(from, to, PIECE[PAWN], 0, 0), side)){
-	                moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
+	            int encodedMove = EncodeMove(from, to, PIECE[PAWN], 0, 0);
+	            if(isLegal(g, encodedMove, side)){
+	                moves[n++] = encodedMove;
 	                numip++;
 	            }
 	        }
@@ -817,8 +818,9 @@ public class MoveGenerator {
 
 	                //Only add an interposer if it's not pinned to the King
 	                //if (!isPinned(g, from, to, PIECE[p], 0)){
-	                if(isLegal(g, EncodeMove(from, to, PIECE[p], 0, 0), side)){
-	                   moves[n++] = EncodeMove (from, to, PIECE[p], 0, 0);
+	                int encodedMove = EncodeMove(from, to, PIECE[p], 0, 0);
+	                if(isLegal(g, encodedMove, side)){
+	                   moves[n++] = encodedMove;
 	                   numip++;
 	                   //g.legalMoves[depth]++;
 	                   //g.addMove (move);
@@ -898,71 +900,6 @@ public class MoveGenerator {
 	}
 
 
-	private boolean isAttacked (GameState g, int sq)
-	{
-	    // Pretend the square sq contains a Queen AND a Knight
-	    // then generate the captures for those pieces on that square.
-	    // If those captures BITWISE-ANDed with the opponent's pieces
-	    // returns nonzero then this square is attacked.
-	    switch (g.sideToMove) {
-	    case Color.WHITE:
-	        if (Util.bool(att.whitepawn[sq] & g.pos.pieces[Color.BLACK][Pieces.PAWNS]))
-	            return true;
-	        else if (Util.bool(att.knight[sq] & g.pos.pieces[Color.BLACK][Pieces.KNIGHTS]))
-	            return true;
-	        else if (Util.bool(att.king[sq] & g.pos.getPieces (Color.BLACK, KING)))
-	            return true;
-	        else {
-	            long rankFileAtt, diagAtt;
-	            long rooksQueens, bishopsQueens;
-	            
-	            //DisplayBoard(att.rank[sq][Status(g.pos.all[ALL], sq)]);
-	            //DisplayBoard(att.file[sq][Status90(g.pos.all[ALL90],sq)]);
-	            
-	            //cout << "att.rank["<<sq<<"]["<<Status(g.pos.all[ALL],sq)<<"]\n";
-	            
-	            rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
-	                att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	            rooksQueens = g.pos.pieces[Color.BLACK][Pieces.ROOKS] |
-	                g.pos.pieces[Color.BLACK][Pieces.QUEENS];
-	            if (Util.bool(rankFileAtt & rooksQueens))
-	                return true;
-	            diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	            bishopsQueens = g.pos.pieces[Color.BLACK][Pieces.BISHOPS] |
-	                g.pos.pieces[Color.BLACK][Pieces.QUEENS];
-	            if (Util.bool(diagAtt & bishopsQueens))
-	                return true;
-	        }
-	        break;
-	    case Color.BLACK:
-	        if (Util.bool(att.blackpawn[sq] & g.pos.pieces[Color.WHITE][Pieces.PAWNS]))
-	            return true;
-	        else if (Util.bool(att.knight[sq] & g.pos.pieces[Color.WHITE][Pieces.KNIGHTS]))
-	            return true;
-	        else if (Util.bool(att.king[sq] & g.pos.getPieces (Color.WHITE, KING)))
-	            return true;
-	        else {
-	            long rankFileAtt, diagAtt;
-	            long rooksQueens, bishopsQueens;
-	            
-	            rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
-	                att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	            rooksQueens = g.pos.pieces[Color.WHITE][Pieces.ROOKS] | 
-	                g.pos.pieces[Color.WHITE][Pieces.QUEENS];
-	            if (Util.bool(rankFileAtt & rooksQueens))
-	                return true;
-	            diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	            bishopsQueens = g.pos.pieces[Color.WHITE][Pieces.BISHOPS] |
-	                g.pos.pieces[Color.WHITE][Pieces.QUEENS];
-	            if (Util.bool(diagAtt & bishopsQueens))
-	                return true;
-	        }
-	        break;
-	    }
-	    return false;
-	}
 
 	// Returns a bitbrd of the pieces (excluding the king) attacking 
 	// "square".  "side" represents the color/side whose pieces we want to
@@ -1073,7 +1010,7 @@ public class MoveGenerator {
 	    return attacks;
 	}
 
-	private int isPawnPromotion(int side, int from){
+	private static int isPawnPromotion(int side, int from){
 	    switch(side){
 	    case Color.WHITE:
 	        if(from + 8 >= A8){
@@ -1095,7 +1032,7 @@ public class MoveGenerator {
 	// Returns the from square given the square
 	// the pawn moved to. (pawn advanced one square)
 	//
-	private int minusOneRank(int side, int to){
+	private static int minusOneRank(int side, int to){
 	    if (side == Color.WHITE) {
 	        return (to - 8);
 	    } else {
@@ -1109,7 +1046,7 @@ public class MoveGenerator {
 	// Returns the from square given the square
 	// the pawn moved to. (pawn advanced two squares)
 	//
-	private int minusTwoRank(int side, int to){
+	private static int minusTwoRank(int side, int to){
 	    if (side == Color.WHITE) {
 	        return (to - 16);
 	    } else {
@@ -1227,47 +1164,6 @@ public class MoveGenerator {
 	    g.undoMove(move, side);
 	    return legal;
 	}
-
-
-	// getPawnMoves()
-	//
-	// Fills in the bitbrds for 'side':
-//	     'advOne' -  pawns that can advance one square (excludes promotions).
-//	     'prom'   -  pawns that advanced one square and sit on promotion rank
-//	     'advTwo' -  pawns that advanced two squares
-	//
-
-	
-	
-// 1/9/2010 - Replaced because we can't pass primitives by reference in java
-//	
-//	void getPawnMoves(GameState g, int side, long &advOne,
-//	                  long &prom, long &advTwo){
-//	    long empty;
-//
-//	    empty = ~g.pos.all[ALL];
-//
-//	    switch (side) {
-//	    case Color.WHITE:
-//	        advOne = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & ~EIGHTHRANK;
-//	        // 'advOne' is all moves except those to the eighth rank
-//	        prom = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & EIGHTHRANK;
-//	        // 'prom' is only the moves to the eighth rank
-//	        advTwo = g.pos.pieces[Color.WHITE][Pieces.PAWNS] & SECONDRANK;
-//	        advTwo = (advTwo << 8) & empty;
-//	        advTwo = (advTwo << 8) & empty;
-//	        break;
-//	    case Color.BLACK:
-//	        advOne = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & ~FIRSTRANK;
-//	        // 'advOne' is all moves except those to the first rank
-//	        prom = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & FIRSTRANK;
-//	        // 'prom' is only the moves to the first rank
-//	        advTwo = g.pos.pieces[Color.BLACK][Pieces.PAWNS] & SEVENTHRANK;
-//	        advTwo = (advTwo >> 8) & empty;
-//	        advTwo = (advTwo >> 8) & empty;
-//	        break;
-//	    }
-//	}
 	
 	private long getPawnAdvanceOne(GameState g, int side)
 	{
@@ -1333,7 +1229,8 @@ public class MoveGenerator {
 
 	
 	
-	private int EncodeMove (int from, int to, int mov, int cap, int pro)
+	/*package scope just to test it; ideally private*/
+	static int EncodeMove (int from, int to, int mov, int cap, int pro)
 	{
 	    return (from | (to << 6) | (mov << 12) | (cap << 15) | (pro << 18));
 	}

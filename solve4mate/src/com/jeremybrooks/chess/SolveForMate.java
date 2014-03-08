@@ -110,7 +110,7 @@ public class SolveForMate {
 	      // Display the root moves and the best value seen so far in the tree
 	      //
 	      out.println("Root-Move  Best-Value");
-	      for(int i=0; i<g.legalMoves[0]; i++){
+	      for(int i=0; i<g.numberOfLegalMoves[0]; i++){
 	    	  Util.displayMove(g.moves[i], false, false);
 	    	  out.println("       " + g.movesValue[i]);
 	      }

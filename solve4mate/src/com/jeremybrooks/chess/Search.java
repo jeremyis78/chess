@@ -145,7 +145,7 @@ public class Search {
 
 	    //Find the best move by its minimax value
 	    int bestMove = 0;
-	    for(int i=0; i<g.legalMoves[0]; i++){
+	    for(int i=0; i<g.numberOfLegalMoves[0]; i++){
 	        if(g.movesValue[i] == best){
 	            bestMove = g.moves[i];
 	        }
@@ -173,7 +173,7 @@ public class Search {
 	    }
 	    //Now reset the legal moves to zero so everything
 	    //works correctly for the search.
-	    g.legalMoves[depth] = 0;
+	    g.numberOfLegalMoves[depth] = 0;
 
 
 	    if(side == Color.WHITE){
@@ -207,11 +207,11 @@ public class Search {
 	        mg.GenerateNonCaptures(g, moves, side, depth);
 	    } else {
 	        mg.GenerateKingEscapes(g, moves, side, depth);
-	        if (g.legalMoves[depth] == 0){ //checkmate
+	        if (g.numberOfLegalMoves[depth] == 0){ //checkmate
 	            return evaluate(g, side, depth);
 	        }
 	    }
-	    numMoves = g.legalMoves[depth];
+	    numMoves = g.numberOfLegalMoves[depth];
 
 	    // Try each move
 	    best = -MAXWINDOW;
@@ -297,11 +297,11 @@ public class Search {
 	        mg.GenerateNonCaptures(g, moves, side, depth);
 	    } else {
 	        mg.GenerateKingEscapes(g, moves, side, depth);
-	        if (g.legalMoves[depth] == 0){ //checkmate
+	        if (g.numberOfLegalMoves[depth] == 0){ //checkmate
 	            return evaluate(g, side, depth);
 	        }
 	    }
-	    numMoves = g.legalMoves[depth];
+	    numMoves = g.numberOfLegalMoves[depth];
 
 	    // Try each move
 	    best = +MAXWINDOW;

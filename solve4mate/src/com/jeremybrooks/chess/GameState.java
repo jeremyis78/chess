@@ -63,8 +63,8 @@ public class GameState {
     int				currentLine[] = new int[MAX_DEPTH]; //line we are searching
     int				bestLine[] = new int[MAX_DEPTH];    //the best line of play
     int             numberOfLinesToMate;    //# of lines of play that lead to mate
-    int	            legalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
-    int             legalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
+    int	            numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
+    int             numberOfLegalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
     int             moves[] = new int[100];             //legal moves from this state
     int             movesValue[] = new int[100];        //minimax value of the moves from this state 
     int             nodes = 0;                  //nodes searched
@@ -100,17 +100,12 @@ public class GameState {
 	        enPassantSq[i] = NOSQUARE;	//No En Passant Target Square at start
 	        halfMoveClock[i] = 0;	
 	        attacked[i] = 0;		
-	        legalMoves[i] = 0;
-	        legalMovesToDepth[i] = 0;
+	        numberOfLegalMoves[i] = 0;
+	        numberOfLegalMovesToDepth[i] = 0;
 	        currentLine[i] = 0;
 	        bestLine[i] = 0;
 	    }             
 	    castle[0] = CASTLE_START;
-
-//   1/9/2010 - sets moves/movesValue to 0, no longer need java guarantees 0's
-//	    memset(moves, 0, 100*sizeof(move_t));
-//	    memset(movesValue, 0, 100*sizeof(int));
-
 	    movesIndex = 0;
 	}
 
@@ -149,15 +144,15 @@ public class GameState {
 	    //definitions.h for gamestate
 	    searchDepth = 3;
 	    numberOfLinesToMate = 0;
-	    legalMoves[0] = 0;
+	    numberOfLegalMoves[0] = 0;
 	    for (int i = 1; i < MAX_DEPTH; i++){
 	        castle[i] = 0;
 	        enPassantSq[i] = NOSQUARE;
 	        halfMoveClock[i] = 0;	
 	        fullMoveClock[i] = 0;
 	        attacked[i] = 0;		
-	        legalMoves[i] = 0;
-	        legalMovesToDepth[i] = 0;
+	        numberOfLegalMoves[i] = 0;
+	        numberOfLegalMovesToDepth[i] = 0;
 	        currentLine[i] = 0;
 	        bestLine[i] = 0;
 	    }
@@ -216,7 +211,7 @@ public class GameState {
 	    halfMoveClock[0] = 0;
 	    fullMoveClock[0] = 0;
 	    for(int i=0; i<MAX_DEPTH; i++){
-	        legalMoves[i] = 0;
+	        numberOfLegalMoves[i] = 0;
 	    }
 	    Arrays.fill(currentLine, 0);
 	    Arrays.fill(bestLine, 0);
@@ -320,7 +315,7 @@ public class GameState {
 
 
 	boolean movesLeft(){
-	  if (movesIndex < (legalMovesToDepth[depth] + legalMoves[depth]))
+	  if (movesIndex < (numberOfLegalMovesToDepth[depth] + numberOfLegalMoves[depth]))
 		return true;
 	  else 
 		return false;
@@ -474,7 +469,7 @@ public class GameState {
 	    //Compute the number of moves that come before
 	    //this depth in the moves[] array
 	    for(int i = 0; i < depth; i++)
-	        legalMovesToDepth[depth] += legalMoves[i];
+	        numberOfLegalMovesToDepth[depth] += numberOfLegalMoves[i];
 	    movesIndex = 0;
 	    
 	    return false;
@@ -509,7 +504,7 @@ public class GameState {
 	    
 	    // Undo any moves made here at this depth
 	    // by setting legalMoves to zero.
-	    legalMoves[depth] = 0;
+	    numberOfLegalMoves[depth] = 0;
 	    
 	    //Undo the depth
 	    depth--;
