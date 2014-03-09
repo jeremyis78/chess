@@ -309,18 +309,18 @@ public class MoveGenerator {
 	                to = FirstPiece (attackedPieces);
 	                cap = Math.abs(g.pos.board[to]);
 	                if (!Util.bool(pro)) {     //Capture only
-	                    //TODO: make sure king does not move into check!!!!!
-	                  move = EncodeMove(from, to, PIECE[p], cap, 0);  
-	                  //if((piece)p == KING && !isAttacked(g, side, to)){
-	                  if(p == KING && isLegal(g, move, side)){
-	                        moves[n++] = EncodeMove (from, to, PIECE[p], cap, 0);
-	                    } else {
-	                        moves[n++] = EncodeMove (from, to, PIECE[p], cap, 0);
-	                    }
+	                	//TODO: make sure king does not move into check!!!!!
+	                	move = EncodeMove(from, to, PIECE[p], cap, 0);  
+	                	//if((piece)p == KING && !isAttacked(g, side, to)){
+	                	if(p == KING && isLegal(g, move, side)){
+	                		moves[n++] = move;
+	                	} else {
+	                		moves[n++] = move;
+	                	}
 	                } else {        //Capture and promotion
-	                    for (int i = QUEEN; i >= KNIGHT; i--) {
-	                        moves[n++] = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
-	                    }
+	                	for (int i = QUEEN; i >= KNIGHT; i--) {
+	                		moves[n++] = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
+	                	}
 	                }
 	                attackedPieces = ClearPiece (attackedPieces, to);
 	            }
@@ -1071,9 +1071,9 @@ public class MoveGenerator {
 	        && g.pos.board[F1] == BOARD_EMPTY_SQUARE
 	        && g.pos.board[G1] == BOARD_EMPTY_SQUARE 
 	        && !isAttacked (g, side, E1)
-	        && !isAttacked (g, side,F1)
-	        && !isAttacked (g, side,G1)
-	        && !isAttacked (g, side,H1)) {
+	        && !isAttacked (g, side, F1)
+	        && !isAttacked (g, side, G1)
+	        && !isAttacked (g, side, H1)) {
 	        return true;
 	    }
 	    return false;
@@ -1087,6 +1087,7 @@ public class MoveGenerator {
 	        && !isAttacked (g, side, E1)
 	        && !isAttacked (g, side, D1)
 	        && !isAttacked (g, side, C1)
+	        && !isAttacked (g, side, B1)
 	        && !isAttacked (g, side, A1)) {
 	        return true;
 	    }
