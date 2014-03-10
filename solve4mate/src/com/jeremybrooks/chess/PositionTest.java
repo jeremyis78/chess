@@ -274,21 +274,6 @@ public class PositionTest extends TestCase {
 		assertInvalid(invalidPiece, "board contains invalid piece 'z'");
 	}
 
-	public void testSetAdjacentKings()
-	{
-		String adjacentKings = "8/8/8/8/8/8/6K1/7k";
-		assertInvalid(adjacentKings, "board cannot have adjacent kings");
-	}
-
-	public void testSetMissingKingOrKings()
-	{
-		String missingBlackKing = "8/8/8/8/8/8/6K1/8";
-		assertInvalid(missingBlackKing, "board is missing one or both kings");
-
-		String missingWhiteKing = "8/8/8/8/8/8/6k1/8";
-		assertInvalid(missingWhiteKing, "board is missing one or both kings");
-	}
-
 	private void assertInvalid(String position, String expectedError) {
 		try {
 			setupPosition(position);

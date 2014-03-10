@@ -58,6 +58,13 @@ public class Position
 	    return 0L;
 	}
 
+	public int getWhiteKingSquare() {
+		if(isKingPlaced(Color.WHITE)) {
+	    	return kingSq[Color.WHITE];
+	    }
+	    return KING_NOT_PLACED;
+	}
+
 	public long getBlackPawns() {
 		return pieces[Color.BLACK][Pieces.PAWNS];
 	}
@@ -84,6 +91,13 @@ public class Position
 	    }
 	    return 0L;
 	}
+	
+	public int getBlackKingSquare() {
+		if(isKingPlaced(Color.BLACK)) {
+	    	return kingSq[Color.BLACK];
+	    }
+	    return KING_NOT_PLACED;
+	}
 
 	//Return a bitbrd of the pieces whose color is 'side'
 	// and piece is 'p' 
@@ -107,7 +121,7 @@ public class Position
 		return p <= Pieces.QUEEN;
 	}
 
-	private boolean isKingPlaced(int side) {
+	public boolean isKingPlaced(int side) {
 		return kingSq[side] != KING_NOT_PLACED;
 	}
 	
@@ -278,14 +292,14 @@ public class Position
 			}
 		}
 		
-		if( eitherKingIsMissing(isKingPlaced) )
-		{
-			throw new IllegalArgumentException("board is missing one or both kings");
-		}
-	    
-	    if(areKingsAdjacent()){
-	        throw new IllegalArgumentException("board cannot have adjacent kings");
-	    }
+//		if( eitherKingIsMissing(isKingPlaced) )
+//		{
+//			throw new IllegalArgumentException("board is missing one or both kings");
+//		}
+//	    
+//	    if(areKingsAdjacent()){
+//	        throw new IllegalArgumentException("board cannot have adjacent kings");
+//	    }
 
 		return true;
 	}
