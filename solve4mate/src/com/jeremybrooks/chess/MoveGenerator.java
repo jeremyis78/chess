@@ -506,13 +506,13 @@ public class MoveGenerator {
 	    //n = 0;
 	    switch (side) {
 	        case Color.WHITE:
-	            checkers = Attackers(g, side, g.pos.kingSq[side]);
+	            checkers = attackers(g, side, g.pos.kingSq[side]);
 	            promoteRank = EIGHTHRANK;
 	            enPassantRank = FIFTHRANK;
 	            kingSq = g.pos.kingSq[side];
 	            break;
 	        case Color.BLACK:
-	            checkers = Attackers (g, side, g.pos.kingSq[side]);
+	            checkers = attackers (g, side, g.pos.kingSq[side]);
 	            promoteRank = FIRSTRANK;
 	            enPassantRank = FOURTHRANK;
 	            kingSq = g.pos.kingSq[side];
@@ -540,7 +540,7 @@ public class MoveGenerator {
 	        cap = Math.abs(g.pos.board[checker]);
 
 	        //Generate captures to checker's square
-	        capturers = Attackers (g, Util.opp(side), checker);
+	        capturers = attackers (g, Util.opp(side), checker);
 
 	        //Add to 'capturers' pawns that would capture enpassant
 	        if(TO_PIECE[cap] == PAWN && g.enPassantSq[depth] != NOSQUARE){
@@ -848,82 +848,24 @@ public class MoveGenerator {
 	    return numip;//g.legalMoves[depth];
 	}
 
-
-	public boolean isAttacked (GameState g, int side, int sq)
+	public boolean isAttacked(GameState g, int side, int sq)
 	{
-	    // Returns true/false based on whether opponent, ie (!side)
-	    // is attacking 'sq'
-	    //
-	    // Pretend the square sq contains a Queen, Knight and a pawn
-	    // then generate the captures for those pieces on that square.
-	    // If those captures BITWISE-ANDed with the opponent's pieces
-	    // returns nonzero then this square is attacked.
-	    switch (side) {
-	        case Color.WHITE:
-	            if (Util.bool(att.whitepawn[sq] & g.pos.getOpponentPawns(side)))
-	                return true;
-	            else if (Util.bool(att.knight[sq] & g.pos.getOpponentKnights(side)))
-	                return true;
-	            else if (Util.bool(att.king[sq] & g.pos.getOpponentKing(side)))
-	                return true;
-	            else {
-	                long rankFileAtt, diagAtt;
-	                long rooksQueens, bishopsQueens;
-
-	                rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
-	                    att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	                rooksQueens = g.pos.getOpponentRooks(side) | g.pos.getOpponentQueens(side);
-	                if (Util.bool(rankFileAtt & rooksQueens))
-	                    return true;
-	                diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                    att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	                bishopsQueens = g.pos.getOpponentBishops(side) | g.pos.getOpponentQueens(side);
-	                if (Util.bool(diagAtt & bishopsQueens))
-	                    return true;
-	            }
-	            break;
-	        case Color.BLACK:
-	            if (Util.bool(att.blackpawn[sq] & g.pos.getOpponentPawns(side)))
-	                return true;
-	            else if (Util.bool(att.knight[sq] & g.pos.getOpponentKnights(side)))
-	                return true;
-	            else if (Util.bool(att.king[sq] & g.pos.getOpponentKing(side)))
-	                return true;
-	            else {
-	                long rankFileAtt, diagAtt;
-	                long rooksQueens, bishopsQueens;
-
-	                rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
-	                    att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	                rooksQueens = g.pos.getOpponentRooks(side) | g.pos.getOpponentQueens(side);
-	                if (Util.bool(rankFileAtt & rooksQueens))
-	                    return true;
-	                diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                    att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	                bishopsQueens = g.pos.getOpponentBishops(side) | g.pos.getOpponentQueens(side);
-	                if (Util.bool(diagAtt & bishopsQueens))
-	                    return true;
-	            }
-	            break;
-	    }
-	    return false;
+		return Util.bool(attackers(g, side, sq));
 	}
-
-
 
 	// Returns a bitbrd of the pieces (excluding the king) attacking 
 	// "square".  "side" represents the color/side whose pieces we want to
 	// see that are under attack.
 	// To see all the black pieces attacking e4 do this:
 	//
-//	    attacks = Attackers(g, Color.WHITE, E4);
+    //	    attacks = Attackers(g, Color.WHITE, E4);
 	//
 	// To see all the white pieces attacking g8 do this;
 	//
-//	    attacks = Attackers(g, Color.BLACK, G8);
+    //	    attacks = Attackers(g, Color.BLACK, G8);
 	//
 	//NOTE: the king is not included in the attackers
-	private long Attackers (GameState g, int side, int sq)
+	private long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
 	{
 	    // Pretend "sq" contains a Queen AND a Knight.
 	    // If that QUEEN/KNIGHT combo can capture a piece from
@@ -934,9 +876,9 @@ public class MoveGenerator {
 	    long rooksQueens, bishopsQueens;
 
 
-	    switch (side) {
+	    switch (sideUnderAttack) {
 	         case Color.WHITE:
-	             attackers |= att.whitepawn[sq] & g.pos.getOpponentPawns(side);
+	             attackers |= att.whitepawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
 
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  if (/*there's a pawn on either side*/)
@@ -944,36 +886,36 @@ public class MoveGenerator {
 //	                          (1L << g.enPassantSq[depth]);
 
 //	              }
-	             attackers |= att.knight[sq] & g.pos.getOpponentKnights(side);
-	             attackers |= att.king[sq] & g.pos.getOpponentKing(side);
+	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
+	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
-	                 att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	             rooksQueens = g.pos.getOpponentRooks(side) | g.pos.getOpponentQueens(side);
+	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.all[ALL], squareUnderAttack)] |
+	                 att.file[squareUnderAttack][Status90 (g.pos.all[ALL90], squareUnderAttack)];
+	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                 att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	             bishopsQueens = g.pos.getOpponentBishops(side) | g.pos.getOpponentQueens(side);
+	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.all[ALL45L], squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (g.pos.all[ALL45R], squareUnderAttack)];
+	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	        case Color.BLACK:
-	             attackers |= att.blackpawn[sq] & g.pos.getOpponentPawns(side);
+	             attackers |= att.blackpawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  attackers |= att.pawn[side][from] &
 //	                      (1L << g.enPassantSq[depth]);
 //	              }
-	             attackers |= att.knight[sq] & g.pos.getOpponentKnights(side);
-	             attackers |= att.king[sq] & g.pos.getOpponentKing(side);
+	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
+	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] | 
-	                 att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	             rooksQueens = g.pos.getOpponentRooks(side) | g.pos.getOpponentQueens(side);
+	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.all[ALL], squareUnderAttack)] | 
+	                 att.file[squareUnderAttack][Status90 (g.pos.all[ALL90], squareUnderAttack)];
+	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
-	                 att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	             bishopsQueens = g.pos.getOpponentBishops(side) | g.pos.getOpponentQueens(side);
+	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.all[ALL45L], squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (g.pos.all[ALL45R], squareUnderAttack)];
+	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	    }
