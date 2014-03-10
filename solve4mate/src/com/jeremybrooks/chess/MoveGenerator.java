@@ -504,18 +504,16 @@ public class MoveGenerator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
+	    kingSq = g.pos.kingSq[side];
+	    checkers = attackers(g, side, g.pos.kingSq[side]);
 	    switch (side) {
 	        case Color.WHITE:
-	            checkers = attackers(g, side, g.pos.kingSq[side]);
 	            promoteRank = EIGHTHRANK;
 	            enPassantRank = FIFTHRANK;
-	            kingSq = g.pos.kingSq[side];
 	            break;
 	        case Color.BLACK:
-	            checkers = attackers (g, side, g.pos.kingSq[side]);
 	            promoteRank = FIRSTRANK;
 	            enPassantRank = FOURTHRANK;
-	            kingSq = g.pos.kingSq[side];
 	            break;
 	    }
 
@@ -564,6 +562,8 @@ public class MoveGenerator {
 	                //if (!isPinned(g, from, checker, mover, cap)){
 	                move = EncodeMove(from,checker,mover,cap,0);
 	                if(isLegal(g, move, side)){
+//	    	        	System.err.print("Adding pawn captures and promotes to any piece: ");
+//	    	        	Util.displayMove(move, false, false);
 	                    for (pro = QUEEN; pro >= KNIGHT; pro--) {
 	                        moves[n++] = EncodeMove(from,checker, mover,cap,PIECE[pro]);
 	                        //g.legalMoves[depth]++;
@@ -579,8 +579,9 @@ public class MoveGenerator {
 	                    move = EncodeMove(from,to,PIECE[PAWN],cap,0);
 	                    //if (!isPinned(g, from, to, PIECE[PAWN], cap)){
 	                    if (isLegal(g, move, side)){
-	                        moves[n++] = move;//EncodeMove (from, to, PIECE[PAWN],
-	                                          //       cap, 0);
+//	        	        	System.err.print("Added pawn captures via en-passant: ");
+//	        	        	Util.displayMove(move, false, false);
+	                        moves[n++] = move;
 	                        //g.legalMoves[depth]++;
 	                    }
 	                }                
@@ -588,7 +589,8 @@ public class MoveGenerator {
 	                move = EncodeMove(from,checker,mover,cap,pro);
 	                //if (!isPinned(g, from, checker, mover, cap)){
 	                if (isLegal(g, move, side)){
-	                    //cout << "Added capture the checker move\n";
+//	    	        	System.err.print("Added capture the checking piece: ");
+//	    	        	Util.displayMove(move, false, false);
 	                    moves[n++] = move;
 	                    //g.legalMoves[depth]++;
 	                    //g.addMove (move);
@@ -660,7 +662,8 @@ public class MoveGenerator {
 	            move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
 	            if (isLegal (g, move, side)) {
 	                //cap = abs (g.pos.board[to]);
-	                //cout << "Added king captures one of the 2 checking pieces move\n";
+//		        	System.err.print("Adding king captures one of two checking pieces: ");
+//		        	Util.displayMove(move, false, false);
 	                moves[n++] = move;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
 	            }
 
@@ -682,7 +685,9 @@ public class MoveGenerator {
 	        }
 	        move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
 	        if ( isLegal(g, move, side)){
-	            moves[n++] = move;//EncodeMove(kingSq, to, PIECE[KING], cap, 0);
+//	        	System.err.print("Adding king escapes via flight square: ");
+//	        	Util.displayMove(move, false, false);
+	            moves[n++] = move;
 	        }
 	        kingMoves = ClearPiece(kingMoves, to);
 	    }
@@ -703,7 +708,11 @@ public class MoveGenerator {
 	{
 	    //TODO: finished this function...now just call it from
 	    //      GenerateInCheckMoves() where appropriate.
-
+		if(!Util.bool(targets))
+		{
+			System.out.println("There's no interposing squares (or targets); no interposition moves");
+			return 0;
+		}
 	    long pieces;
 	    long pMoves;
 	    long advanceTwo;
@@ -841,7 +850,7 @@ public class MoveGenerator {
 	                }
 	                pMoves = ClearPiece (pMoves, to);
 	            }
-	            pMoves = ClearPiece (pieces, from);
+	            pieces = ClearPiece (pieces, from);
 	        }
 	    }
 	    //g.legalMoves[depth] = n;
@@ -1103,10 +1112,10 @@ public class MoveGenerator {
 
 	    //Save the king square in case the king is the moving piece
 	    //int kingSq = g.pos.kingSq[side];
-
 	    g.makeMove(move, side);
 	    legal = !isAttacked(g, side, g.pos.kingSq[side]);  //use the saved king square
 	    g.undoMove(move, side);
+	    System.err.println("Is "+Util.displayMoveStr(move, false, false)+" legal? "+legal);
 	    return legal;
 	}
 	

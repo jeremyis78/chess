@@ -1,8 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -203,6 +201,117 @@ public class MoveGeneratorTest {
 				"Ke1-d2,Ke1-f1,Ke1-g1 0-0"); 
 		assertMovesAreEqual(expectedMoves, actualMoves);
 	}
+	
+//	@Test
+//	public void testGenerateInterpositions()
+//	{
+//		String position = "R6k/7b/6n1/4q3/3r4/8/8/K7 b - - 0 1";
+//		Set<String> actualMoves = generateKingEscapes(position);
+//		Set<String> expectedMoves = toSet("Kh8-g7,Bh7-g8,Ng6-f8,Qe5-e8,Qe5-b8,Rd4-d8"); 
+//		assertMovesAreEqual(expectedMoves, actualMoves);
+//		
+//	}
+	
+    //***************************************************************************
+    //*                                                                         *
+    //* Single checker:                                                         *
+    //*    Generate captures to checker's square                                *
+    //*    If that checker is not a knight, generate interposing moves.         *
+    //*                                                                         *
+    //* Two checkers:                                                           *
+    //*    Generate king captures to either checker's square who is left en     *
+    //*    prise (unprotected).                                                 *
+    //*                                                                         *
+    //* Always:                                                                 *
+    //*    Generate king moves to flight squares                                *
+    //*                                                                         *
+    //***************************************************************************
+	@Test
+	public void testEscapeCheckFromOneCheckingPiece()
+	{
+		String kingCanTakeChecker =	"6Rk/R7/8/8/8/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(kingCanTakeChecker);
+		Set<String> expectedMoves = toSet("Kh8xg8"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeAPawnCheckByCapturingEnPassant()
+	{
+		String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - c3 0 1";
+		Set<String> actualMoves = generateKingEscapes(enPassantCapture);
+		Set<String> expectedMoves = toSet("Pd4xc3,Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeAPawnCheckNoEnPassant()
+	{
+		String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(enPassantCapture);
+		Set<String> expectedMoves = toSet("Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeCheckViaCaptureAndFlightSquare()
+	{
+		String bishopCanTakeCheckerAndKingHasFlightSquare = "5RRk/5b2/8/8/8/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(bishopCanTakeCheckerAndKingHasFlightSquare);
+		Set<String> expectedMoves = toSet("Bf7xg8,Kh8-h7"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testGenerateInterpositions()
+	{
+		String position = "R6k/7b/6n1/4q3/3r4/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(position);
+		Set<String> expectedMoves = toSet("Kh8-g7,Bh7-g8,Ng6-f8,Qe5-e8,Qe5-b8,Rd4-d8"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeCheckmateFromTwoCheckingPieces()
+	{
+		String checkmated = "2RRQ3/8/1N6/3k4/8/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(checkmated);
+		Set<String> expectedMoves = toSet(""); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeCheckFromBothKnightAndRook()
+	{
+		String knightAndRookChecking = "3RQ3/8/1N6/3k4/8/8/8/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(knightAndRookChecking);
+		Set<String> expectedMoves = toSet("Kd5-c5"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeCheckFromBishopAndRook()
+	{
+		String bishopAndRookChecking = "8/3R4/8/2B5/3k4/8/4Q3/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(bishopAndRookChecking);
+		Set<String> expectedMoves = toSet("Kd4xc5,Kd4-c3"); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testEscapeCheckmateFromBishopDiscoveredCheck()
+	{
+		String bishopAndRookChecking = "8/3R4/8/8/1B1k4/8/4Q3/K7 b - - 0 1";
+		Set<String> actualMoves = generateKingEscapes(bishopAndRookChecking);
+		Set<String> expectedMoves = toSet(""); 
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+//	@Test
+//	public void testKingFlightSquaresFromCheckingPiece()
+//	{
+//		fail("not implemented yet");
+//	}
 
 	public void testPrintingMoves() {
 		
@@ -267,6 +376,15 @@ public class MoveGeneratorTest {
 		mg.GenerateKingEscapes(g, g.moves, g.sideToMove, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
+
+//	private Set<String> generateInterpositions(String positionFen) {
+//		g.set(positionFen);
+//		System.out.println(new Displayer().formatBoard(g.pos));
+//		System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+//		int depth = 0;
+//		mg.GenerateInterpositions(g, g.moves, g.sideToMove, depth);
+//		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+//	}
 
 	private Set<String> formatGameStatesCoordinateMoveSet(int numberOfLegalMoves) {
 		Set<String> moves = new HashSet<>();
