@@ -4,67 +4,87 @@ import static com.jeremybrooks.chess.Bitmap.*;
 
 import java.io.PrintStream;
 
-/*******************************************************************/
-/*	                       position.cpp                            */
-/*******************************************************************/
-/*                                                                 */
-/*  This file contains the implementation for the position class.  */
-/*  A position represents the physical locations of all pieces on  */
-/*  the chessboard.                                                */
-/*                                                                 */
-/*******************************************************************/
-
-//Declare a constant brd object for using attacks and masks
-//in the position class
-//const brd att;
+/**                                                                 
+ *  A position represents the physical locations of all pieces on
+ *  the chessboard.
+ * 
+ * @author jeremy
+ *
+ */
 
 public class Position
 {
+	private static final String EMPTY_BOARD = "8/8/8/8/8/8/8/8";
 	private static PrintStream out = System.out;
-
-//	private static final long PIECE_START[][] = {
-//	{	/* W pawns   */ 0x000000000000FF00L,  //bitbrd(0xFF00),	
-//		/* W knights */ 0x0000000000000042L,  //bitbrd(0x42),
-//		/* W bishops */ 0x0000000000000024L,  //bitbrd(0x24),
-//		/* W rooks   */ 0x0000000000000081L,  //bitbrd(0x81),
-//		/* W queen   */ 0x0000000000000010L,  //bitbrd(0x10),
-//		/* W pieces  */ 0x000000000000FFFFL   //bitbrd(0xFFFF),
-//	},
-//	{	/* B pawns   */ 0x00FF000000000000L,  //bitbrd(0xFF) << 56;
-//		/* B knights */ 0x4200000000000000L,  //bitbrd(0x42) << 56;
-//		/* B bishops */ 0x2400000000000000L,  //bitbrd(0x24) << 56;
-//		/* B rooks   */ 0x8100000000000000L,  //bitbrd(0x81) << 56;
-//		/* B queen   */ 0x0800000000000000L,  //bitbrd(0x08) << 56;
-//		/* B pieces  */ 0xFFFF000000000000L   //bitbrd(0xFFFF) << 48;
-//	}
-//	};
-//	
-//	private static final long ALL_START[] = {
-//		/*  all     */ 0xFFFF00000000FFFFL,	
-//		/*  all90   */ 0xC3C3C3C3C3C3C3C3L,
-//		/*  all45L  */ 0xFB31861C38618CDFL,
-//		/*  all45R  */ 0xFB31861C38618CDFL
-//	};
-	
-	private static final long EDGES = 0xFF818181818181FFL;
 	private static final int KING_NOT_PLACED = -1;
 
-	//TODO: 1/9/2010 - Add a bitmap in the pieces array for the king
-	//and remove the kingSq[] array and w/bKingSq variables
-	//TODO: 1/9/2010 - Remove the board[] array and calculate what the board
-	//looks like on the fly instead.
-    long pieces[][] = new long[Color.MAXCOLOR][Pieces.MAXPIECE];
+    private long pieces[][] = new long[Color.MAXCOLOR][Pieces.MAXPIECE];
     long all[] = new long[MAXALL];
     int board[] = new int[64];
     int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
-	
+
 	public Position(){
+		set(EMPTY_BOARD);
 	}
 	
 	public Position(final String FEN_Board){
 		set(FEN_Board);
 	}
 	
+	public long getWhitePawns() {
+		return pieces[Color.WHITE][Pieces.PAWNS];
+	}
+
+	public long getWhiteKnights() {
+		return pieces[Color.WHITE][Pieces.KNIGHTS];
+	}
+
+	public long getWhiteBishops() {
+		return pieces[Color.WHITE][Pieces.BISHOPS];
+	}
+
+	public long getWhiteRooks() {
+		return pieces[Color.WHITE][Pieces.ROOKS];
+	}
+
+	public long getWhiteQueens() {
+		return pieces[Color.WHITE][Pieces.QUEENS];
+	}
+
+	public long getWhiteKing() {
+		if(isKingPlaced(Color.WHITE)) {
+	    	return 1L << kingSq[Color.WHITE];
+	    }
+	    return 0L;
+	}
+
+	public long getBlackPawns() {
+		return pieces[Color.BLACK][Pieces.PAWNS];
+	}
+
+	public long getBlackKnights() {
+		return pieces[Color.BLACK][Pieces.KNIGHTS];
+	}
+
+	public long getBlackBishops() {
+		return pieces[Color.BLACK][Pieces.BISHOPS];
+	}
+
+	public long getBlackRooks() {
+		return pieces[Color.BLACK][Pieces.ROOKS];
+	}
+
+	public long getBlackQueens() {
+		return pieces[Color.BLACK][Pieces.QUEENS];
+	}
+	
+	public long getBlackKing() {
+		if(isKingPlaced(Color.BLACK)) {
+	    	return 1L << kingSq[Color.BLACK];
+	    }
+	    return 0L;
+	}
+
 	//Return a bitbrd of the pieces whose color is 'side'
 	// and piece is 'p' 
 	//
@@ -76,6 +96,12 @@ public class Position
 	    }
 	    return 0L;
 	}
+	
+	public long getOpponentPiecesExceptKing(int color)
+	{
+		int opponentColor = (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
+		return pieces[opponentColor][Pieces.ALLPIECES];
+	}
 
 	private boolean isNotTheKing(int p) {
 		return p <= Pieces.QUEEN;
@@ -85,9 +111,9 @@ public class Position
 		return kingSq[side] != KING_NOT_PLACED;
 	}
 	
-	public int getBoard(int sq)
+	public int getBoard(int square)
 	{
-		return board[sq];
+		return board[square];
 	}
 	
 	
@@ -104,21 +130,25 @@ public class Position
 	/*******************************************************************/
 		
 	public void clear(){
-	    kingSq[Color.WHITE] = kingSq[Color.BLACK] = KING_NOT_PLACED;
-	    
+	    kingSq[Color.WHITE] = KING_NOT_PLACED;
+	    kingSq[Color.BLACK] = KING_NOT_PLACED;
 	    for (int i = Color.WHITE; i <= Color.BLACK; i++){
-	        pieces[i][Pieces.PAWNS] = pieces[i][Pieces.KNIGHTS] = 0L;
-	        pieces[i][Pieces.BISHOPS] = pieces[i][Pieces.ROOKS] = 0L;
-	        pieces[i][Pieces.QUEENS] = pieces[i][Pieces.ALLPIECES] = 0L;
+	        pieces[i][Pieces.PAWNS] = 0L;
+	        pieces[i][Pieces.KNIGHTS] = 0L;
+	        pieces[i][Pieces.BISHOPS] = 0L;
+	        pieces[i][Pieces.ROOKS] = 0L;
+	        pieces[i][Pieces.QUEENS] = 0L;
+	        pieces[i][Pieces.ALLPIECES] = 0L;
 	    }
-	    all[ALL] = all[ALL90] = all[ALL45L] = all[ALL45R] = 0L;
+	    all[ALL] = 0L;
+	    all[ALL90] = 0L;
+	    all[ALL45L] = 0L;
+	    all[ALL45R] = 0L;
 	    
 	    for (int i = A1; i <= H8; i++)
-	        board[i] = BOARD_EMPTY_SQUARE; 
-	    
-	    //Assign a sentinal value for the board's edges
-	    //	for (int i = 0; i < 28; i++)
-	    //		board[BOARD_EDGES[i]] = BOARD_EDGE_SQUARE; 
+	    {
+	    	board[i] = BOARD_EMPTY_SQUARE; 
+	    }
 	}
 	
 	static void validateFiles(String rankFen)
@@ -151,7 +181,6 @@ public class Position
 		boolean[] isKingPlaced = new boolean[] {false, false};
 				
 		String[] ranks = fen.split("/");
-//		out.println("ranks.length = " + ranks.length);
 		if (ranks.length != 8)
 		{
 			throw new IllegalArgumentException("fen must contain eight ranks");
@@ -177,7 +206,6 @@ public class Position
 				}
 				else
 				{
-		            //Get the appropriate bitboard masks
 		            long sqMask = 1L << sq;
 		            long sqMask90 = 1L << SQ2BIT90R[sq];
 		            long sqMask45L = 1L << SQ2BIT45L[sq];
@@ -201,7 +229,7 @@ public class Position
 		                break;
 		            case 'K':
 		                if(isKingPlaced[Color.WHITE])
-		                { //if(kingSq[Color.WHITE] != -1){
+		                {
 		                    throw new IllegalArgumentException("board has too many white kings");
 		                }
 		                all[ALL] |= sqMask;
@@ -209,7 +237,6 @@ public class Position
 		                all[ALL45L] |= sqMask45L;
 		                all[ALL45R] |= sqMask45R;
 		                board[sq] = PIECE[Bitmap.KING];
-		                //wKingSq = sq;
 		                kingSq[Color.WHITE] = sq;
 		                isKingPlaced[Color.WHITE] = true;
 		                break;
@@ -230,7 +257,7 @@ public class Position
 		                break;
 		            case 'k':
 		                if(isKingPlaced[Color.BLACK])
-		                {//if(kingSq[Color.BLACK] != -1){
+		                {
 		                    throw new IllegalArgumentException("board has too many black kings");
 		                }
 		                all[ALL] |= sqMask;
@@ -238,13 +265,12 @@ public class Position
 		                all[ALL45L] |= sqMask45L;
 		                all[ALL45R] |= sqMask45R;
 		                board[sq] = -PIECE[Bitmap.KING];
-		                //bKingSq = sq;
 		                kingSq[Color.BLACK] = sq;
 		                isKingPlaced[Color.BLACK] = true;
 		                break;
 		            default: //illegal character
 		                throw new IllegalArgumentException("board contains invalid piece '" + c + "'"); 
-		            }//end switch(c)
+		            }
 		            sq++;
 		            //files++;
 				}
@@ -272,120 +298,10 @@ public class Position
 		return !(isKingPlaced[Color.WHITE] && isKingPlaced[Color.BLACK]);
 	}
 	
-	
-	
-	boolean isLegal(int move, int sideToMove){
-	    //Determines whether or not a move is legal
-	    //for 'sideToMove' player.
-	    //For now just makes sure the king is not exposed
-	    //to attack. (TODO: or is left in check )
-	    //Call this function after each move to determine
-	    //its legality.
-	    //PRECONDITION: Any squares in the board[] array
-	    //              that are along the edge of the board
-	    //              that is a1-h1, h1-h8, a1-a8, or a8-h8
-	    //              must be either a piece or BOARD_EDGE
-	    //              It MUST be this way for this algorithm to work
-	
-	    //Algorithm:
-	    //      Starting with the king square find the first
-	    //    piece in each of the 8 directions (do them
-	    //    individually).  If that piece is an enemy piece
-	    //    see if it can attack along that kind of 
-	    //    ray (rank/file or diagonal). If it can
-	    //    then the move is illegal.
-	    //      Finally, pretend the king is a knight
-	    //    and examine the squares that the knight would attack
-	    //    and see if an enemy knight is sitting there.  If so,
-	    //    the move is illegal.  Then check for pawns checking the king.
-	    //    Return true otherwise.
-	    //    
-	
-	    int from, to;
-//	    int cap;  1/9/2010 not used in this function
-	    boolean legal = true;  //return value initialized to a legal move
-	    int bq = 0x01;  //bishop or queen
-	    int rq = 0x02;  //rook or queen
-	    int dir[] = new int[]{+7, +8, +9, +1, -7, -8, -9, -1};  //directional increment
-	    int dirPiece[] = new int[]{bq, rq, bq, rq, bq, rq, bq, rq};
-	    int attacker;
-	    int kingSquare;
-	   
-	    from = move & 0x3F;         //first six bits
-	    to = (move >> 6) & 0x3F;    //next six bits   
-//	    cap = (move >> 15) & 0x7;   //captured piece
-	
-	    //move the piece
-	    board[to] = board[from];
-	
-	    //remove it from the old square 
-	    if (Util.bool(EDGES & (1L << from)))
-	        board[from] = BOARD_EDGE_SQUARE;
-	    else
-	        board[from] = BOARD_EMPTY_SQUARE;   //remove the moving piece
-	
-	    // just to compile comment out below line
-	    kingSquare = kingSq[sideToMove];
-	
-	    // See if a knight is checking the king
-	
-	    //if (att.knight[kingSq] & pieces[!sideToMove][KNIGHTS])
-	    //    legal = 0;
-	
-	    // Now check to see if king has been exposed to check
-	    // Exit loop as soon as we find it isn't a legal move
-	
-	    for (int i = 0; legal && i < 8; i++){
-	        int j; 
-	        for (j = kingSquare; board[j] != BOARD_EDGE_SQUARE; j += dir[i]){
-	            
-	            // If the attacker and the king are on the same ray
-	            // and the attacker is NOT on the board's edge
-	            // see if it can attack the king along that ray
-	
-	            if (!isEmpty(board[j]) && !isSameColor(sideToMove, board[j])){
-					attacker = Math.abs(board[j]);
-		            switch(attacker){
-		                case Pieces.BISHOP:
-		                case Pieces.ROOK:
-		                case Pieces.QUEEN:
-		                    if (Util.bool(attacker & dirPiece[i]))
-		                        legal = false;
-		                    break;
-		                default: //any other piece, still legal
-		                    break;
-		            }
-				}
-	        }
-	
-	        // If the attacker and the king are on the same ray
-	        // and the attacker IS on the board's edge
-	        // see if it can attack the king along that ray
-	
-	        if (!isEmpty(board[j]) && !isSameColor(sideToMove, board[j])){
-				attacker = Math.abs(board[j]);
-	            switch(attacker){
-	                case Pieces.BISHOP:
-	                case Pieces.ROOK:
-	                case Pieces.QUEEN:
-	                    if (Util.bool(attacker & dirPiece[i]))
-	                        legal = false;
-	                    break;
-	                default: //any other piece, still legal
-	                    break;
-	            }
-			}
-	    } //end for i        
-	
-	    return legal;
-	}
-	
-	
 	void Display(){
 		DisplayBoard();
 		DisplayBitboardBoard();
 	}
-	
 	
 	void displayFEN(){
 	    System.out.print(getFen());
@@ -397,50 +313,48 @@ public class Position
 	    int fenIndex = 0;
 	    int contEmptySquares = 0;
 	    for (int i = A8; i >= A1; i-=8){
-	        //cout << i/8 + 1 << " | "; //Print the rank number
 	        if (i < A8){
 	            fen[fenIndex++] = '/'; //Rank separator only on first 7..not the last one
 	        }
 	        for (int j = i; j < i+8; j++){
 	            switch(board[j]){
-	                //white pieces: pawns, knights, bishops, rooks, queens, king
-	            case 1: //cout << BOARD_PIECE[0] << ' ';
+	            //white pieces: pawns, knights, bishops, rooks, queens, king
+	            case 1:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[0];
 	                break;
-	            case 2: //cout << BOARD_PIECE[1] << ' ';
+	            case 2:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares);
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[1];
 	                break;
-	            case 5: //cout << BOARD_PIECE[2] << ' ';
+	            case 5:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[2];
 	                break;
-	            case 6: //cout << BOARD_PIECE[3] << ' ';
+	            case 6:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    //sb.append(contEmptySquares);
 	                    contEmptySquares = 0;
 	                }
 					fen[fenIndex++] = BOARD_PIECE[3];
 					break;
-	            case 7: //cout << BOARD_PIECE[4] << ' ';
+	            case 7:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[4];
 	                break;
-	            case 3: //cout << BOARD_PIECE[5] << ' ';
+	            case 3:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
@@ -448,50 +362,50 @@ public class Position
 	                fen[fenIndex++] = BOARD_PIECE[5];
 	                break;
 	                
-	                //black pieces: pawns, knights, bishops, rooks, queens, king
-	            case -1: //cout << BOARD_PIECE[6] << ' ';
+	            //black pieces: pawns, knights, bishops, rooks, queens, king
+	            case -1:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 					fen[fenIndex++] = BOARD_PIECE[6];
 					break;
-	            case -2: //cout << BOARD_PIECE[7] << ' ';
+	            case -2:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[7];
 	                break;
-	            case -5: //cout << BOARD_PIECE[8] << ' ';
+	            case -5:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[8];
 	                break;
-	            case -6: //cout << BOARD_PIECE[9] << ' ';
+	            case -6:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[9];
 	                break;
-	            case -7: //cout << BOARD_PIECE[10] << ' ';
+	            case -7:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[10];
 	                break;
-	            case -3: //cout << BOARD_PIECE[11] << ' ';
+	            case -3:
 	                if (contEmptySquares > 0){
 	                    fen[fenIndex++] = toChar(contEmptySquares); 
 	                    contEmptySquares = 0;
 	                }
 	                fen[fenIndex++] = BOARD_PIECE[11];
 	                break;
-	            default: //cout << "- ";
+	            default:
 	                //increment a counter for contiguous empty squares
 	                contEmptySquares++;
 	                break;
@@ -578,66 +492,6 @@ public class Position
 	        pieces[c][p] ^= mask;
 	        pieces[c][Pieces.ALLPIECES] ^= mask;
 	    } 
-	}
-	
-	
-	void movePiece(int c, int p, int cap, int pro, int from, int to){
-	    long maskTo, maskFr;
-	    maskTo = 1L << to;
-	    maskFr = 1L << from;
-	    board[from] = BOARD_EMPTY_SQUARE;
-	    if (p == Bitmap.KING){
-	        kingSq[c] = to;
-	    } else {
-	        //Remove non-king piece on 'from' square(XOR-ASSIGN "^=")
-	        pieces[c][p] ^= maskFr;
-	        pieces[c][Pieces.ALLPIECES] ^= maskFr;
-	
-	        //Add non-king piece on 'to' square (OR-ASSIGN "|=")
-		if (pro == NONE) {
-		    pieces[c][p] |= maskTo;
-		} else {
-		    pieces[c][pro] |= maskTo;
-		}
-	        pieces[c][Pieces.ALLPIECES] |= maskTo;
-	    }
-	
-	    //Remove the piece at square 'from' (to be run for all pieces
-	    //including the king)
-	    all[ALL] ^= maskFr;
-	    all[ALL90] ^= 1L << SQ2BIT90R[from];
-	    all[ALL45L] ^= 1L << SQ2BIT45L[from];
-	    all[ALL45R] ^= 1L << SQ2BIT45R[from];
-	
-	    //Add the piece at square 'to'(all pieces including king)
-	    all[ALL] |= maskTo;
-	    all[ALL90] |= 1L << SQ2BIT90R[to];
-	    all[ALL45L] |= 1L << SQ2BIT45L[to];
-	    all[ALL45R] |= 1L << SQ2BIT45R[to];
-		
-	    //Remove the captured piece
-	    //Update the board array with either the piece or the promotion piece
-	     switch(c){
-	     case Color.WHITE:
-	         if (cap != NONE)
-	             erasePiece(Color.BLACK, cap, to);
-	
-	         if (pro == NONE){
-	             board[to] = PIECE[p];
-	         } else {
-	             board[to] = PIECE[pro];
-	         }
-	         break;
-	     case Color.BLACK:
-	         if (cap != NONE)
-	             erasePiece(Color.WHITE, cap, to);
-	         if (pro == NONE){
-	             board[to] = -PIECE[p];
-	         } else {
-	             board[to] = -PIECE[pro];
-	         }
-	         break;
-	     }
 	}
 	
 	public static boolean isSameColor(int c, int p)

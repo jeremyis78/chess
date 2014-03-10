@@ -304,7 +304,7 @@ public class MoveGenerator {
 	            //Following line doesn't do anythign right now!
 	            g.attacked[depth] |= pieceAttacks;
 
-	            attackedPieces = pieceAttacks & g.pos.pieces[Util.opp(side)][Pieces.ALLPIECES];
+	            attackedPieces = pieceAttacks & g.pos.getOpponentPiecesExceptKing(side);
 	            while (morePieces(attackedPieces)) {
 	                to = FirstPiece (attackedPieces);
 	                cap = Math.abs(g.pos.board[to]);
@@ -356,20 +356,20 @@ public class MoveGenerator {
 
 	    switch (side) {
 	        case Color.WHITE:
-	            pMoves = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & ~EIGHTHRANK;
+	            pMoves = (g.pos.getWhitePawns() << 8) & empty & ~EIGHTHRANK;
 	            // 'pMoves' is all moves except those to the eighth rank
-	            promoters = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & EIGHTHRANK;
+	            promoters = (g.pos.getWhitePawns() << 8) & empty & EIGHTHRANK;
 	            // 'promoters' is only the moves to the eighth rank
-	            advanceTwo = g.pos.pieces[Color.WHITE][Pieces.PAWNS] & SECONDRANK;
+	            advanceTwo = g.pos.getWhitePawns() & SECONDRANK;
 	            advanceTwo = (advanceTwo << 8) & empty;
 	            advanceTwo = (advanceTwo << 8) & empty;
 	            break;
 	        case Color.BLACK:
-	            pMoves = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & ~FIRSTRANK;
+	            pMoves = (g.pos.getBlackPawns() >> 8) & empty & ~FIRSTRANK;
 	            // 'pMoves' is all moves except those to the first rank
-	            promoters = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & FIRSTRANK;
+	            promoters = (g.pos.getBlackPawns() >> 8) & empty & FIRSTRANK;
 	            // 'promoters' is only the moves to the first rank
-	            advanceTwo = g.pos.pieces[Color.BLACK][Pieces.PAWNS] & SEVENTHRANK;
+	            advanceTwo = g.pos.getBlackPawns() & SEVENTHRANK;
 	            advanceTwo = (advanceTwo >> 8) & empty;
 	            advanceTwo = (advanceTwo >> 8) & empty;
 	            break;
@@ -427,7 +427,7 @@ public class MoveGenerator {
 	                    }
 	                    break;
 	                case KING:
-			  //exclude moves that are attacked by opponent's king 
+	                	//exclude moves that are attacked by opponent's king 
 	                    pMoves = att.king[from] & empty & ~att.king[g.pos.kingSq[Util.opp(side)]];
 	                    break;
 	            }
@@ -858,11 +858,11 @@ public class MoveGenerator {
 	    // returns nonzero then this square is attacked.
 	    switch (side) {
 	        case Color.WHITE:
-	            if (Util.bool(att.whitepawn[sq] & g.pos.pieces[Color.BLACK][Pieces.PAWNS]))
+	            if (Util.bool(att.whitepawn[sq] & g.pos.getBlackPawns()))
 	                return true;
-	            else if (Util.bool(att.knight[sq] & g.pos.pieces[Color.BLACK][Pieces.KNIGHTS]))
+	            else if (Util.bool(att.knight[sq] & g.pos.getBlackKnights()))
 	                return true;
-	            else if (Util.bool(att.king[sq] & g.pos.getPieces (Color.BLACK, KING)))
+	            else if (Util.bool(att.king[sq] & g.pos.getBlackKing()))
 	                return true;
 	            else {
 	                long rankFileAtt, diagAtt;
@@ -870,24 +870,22 @@ public class MoveGenerator {
 
 	                rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
 	                    att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	                rooksQueens = g.pos.pieces[Color.BLACK][Pieces.ROOKS] |
-	                    g.pos.pieces[Color.BLACK][Pieces.QUEENS];
+	                rooksQueens = g.pos.getBlackRooks() | g.pos.getBlackQueens();
 	                if (Util.bool(rankFileAtt & rooksQueens))
 	                    return true;
 	                diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
 	                    att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	                bishopsQueens = g.pos.pieces[Color.BLACK][Pieces.BISHOPS] |
-	                    g.pos.pieces[Color.BLACK][Pieces.QUEENS];
+	                bishopsQueens = g.pos.getBlackBishops() | g.pos.getBlackQueens();
 	                if (Util.bool(diagAtt & bishopsQueens))
 	                    return true;
 	            }
 	            break;
 	        case Color.BLACK:
-	            if (Util.bool(att.blackpawn[sq] & g.pos.pieces[Color.WHITE][Pieces.PAWNS]))
+	            if (Util.bool(att.blackpawn[sq] & g.pos.getWhitePawns()))
 	                return true;
-	            else if (Util.bool(att.knight[sq] & g.pos.pieces[Color.WHITE][Pieces.KNIGHTS]))
+	            else if (Util.bool(att.knight[sq] & g.pos.getWhiteKnights()))
 	                return true;
-	            else if (Util.bool(att.king[sq] & g.pos.getPieces (Color.WHITE, KING)))
+	            else if (Util.bool(att.king[sq] & g.pos.getWhiteKing()))
 	                return true;
 	            else {
 	                long rankFileAtt, diagAtt;
@@ -895,14 +893,12 @@ public class MoveGenerator {
 
 	                rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
 	                    att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	                rooksQueens = g.pos.pieces[Color.WHITE][Pieces.ROOKS] |
-	                    g.pos.pieces[Color.WHITE][Pieces.QUEENS];
+	                rooksQueens = g.pos.getWhiteRooks() | g.pos.getWhiteQueens();
 	                if (Util.bool(rankFileAtt & rooksQueens))
 	                    return true;
 	                diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
 	                    att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	                bishopsQueens = g.pos.pieces[Color.WHITE][Pieces.BISHOPS] |
-	                    g.pos.pieces[Color.WHITE][Pieces.QUEENS];
+	                bishopsQueens = g.pos.getWhiteBishops() | g.pos.getWhiteQueens();
 	                if (Util.bool(diagAtt & bishopsQueens))
 	                    return true;
 	            }
@@ -938,7 +934,7 @@ public class MoveGenerator {
 
 	    switch (side) {
 	         case Color.WHITE:
-	             attackers |= att.whitepawn[sq] & g.pos.pieces[Color.BLACK][Pieces.PAWNS];
+	             attackers |= att.whitepawn[sq] & g.pos.getBlackPawns();
 
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  if (/*there's a pawn on either side*/)
@@ -946,44 +942,36 @@ public class MoveGenerator {
 //	                          (1L << g.enPassantSq[depth]);
 
 //	              }
-	             attackers |= att.knight[sq] & g.pos.pieces[Color.BLACK][Pieces.KNIGHTS];
-	             attackers |= att.king[sq] & g.pos.getPieces (Color.BLACK, KING);
+	             attackers |= att.knight[sq] & g.pos.getBlackKnights();
+	             attackers |= att.king[sq] & g.pos.getBlackKing();
 
 	             rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] |
 	                 att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	             rooksQueens = g.pos.pieces[Color.BLACK][Pieces.ROOKS] |
-	                 g.pos.pieces[Color.BLACK][Pieces.QUEENS];
-
+	             rooksQueens = g.pos.getBlackRooks() | g.pos.getBlackQueens();
 	             attackers |= rankFileAtt & rooksQueens;
 
 	             diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
 	                 att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	             bishopsQueens = g.pos.pieces[Color.BLACK][Pieces.BISHOPS] |
-	                 g.pos.pieces[Color.BLACK][Pieces.QUEENS];
-
+	             bishopsQueens = g.pos.getBlackBishops() | g.pos.getBlackQueens();
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	        case Color.BLACK:
-	             attackers |= att.blackpawn[sq] & g.pos.pieces[Color.WHITE][Pieces.PAWNS];
+	             attackers |= att.blackpawn[sq] & g.pos.getWhitePawns();
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  attackers |= att.pawn[side][from] &
 //	                      (1L << g.enPassantSq[depth]);
 //	              }
-	             attackers |= att.knight[sq] & g.pos.pieces[Color.WHITE][Pieces.KNIGHTS];
-	             attackers |= att.king[sq] & g.pos.getPieces (Color.WHITE, KING);
+	             attackers |= att.knight[sq] & g.pos.getWhiteKnights();
+	             attackers |= att.king[sq] & g.pos.getWhiteKing();
 
 	             rankFileAtt = att.rank[sq][Status (g.pos.all[ALL], sq)] | 
 	                 att.file[sq][Status90 (g.pos.all[ALL90], sq)];
-	             rooksQueens = g.pos.pieces[Color.WHITE][Pieces.ROOKS] |
-	                 g.pos.pieces[Color.WHITE][Pieces.QUEENS];
-
+	             rooksQueens = g.pos.getWhiteRooks() | g.pos.getWhiteQueens();
 	             attackers |= rankFileAtt & rooksQueens;
 
 	             diagAtt = att.L45[sq][Status45L (g.pos.all[ALL45L], sq)] |
 	                 att.R45[sq][Status45R (g.pos.all[ALL45R], sq)];
-	             bishopsQueens = g.pos.pieces[Color.WHITE][Pieces.BISHOPS] |
-	                 g.pos.pieces[Color.WHITE][Pieces.QUEENS];
-
+	             bishopsQueens = g.pos.getWhiteBishops() | g.pos.getWhiteQueens();
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	    }
@@ -1187,11 +1175,11 @@ public class MoveGenerator {
 
 	    switch (side) {
 	    case Color.WHITE:
-	        advOne = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & ~EIGHTHRANK;
+	        advOne = (g.pos.getWhitePawns() << 8) & empty & ~EIGHTHRANK;
 	        // 'advOne' is all moves except those to the eighth rank
 	        break;
 	    case Color.BLACK:
-	        advOne = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & ~FIRSTRANK;
+	        advOne = (g.pos.getBlackPawns() >> 8) & empty & ~FIRSTRANK;
 	        // 'advOne' is all moves except those to the first rank
 	        break;
 	    }
@@ -1207,12 +1195,12 @@ public class MoveGenerator {
 
 	    switch (side) {
 	    case Color.WHITE:
-	        advTwo = g.pos.pieces[Color.WHITE][Pieces.PAWNS] & SECONDRANK;
+	        advTwo = g.pos.getWhitePawns() & SECONDRANK;
 	        advTwo = (advTwo << 8) & empty;
 	        advTwo = (advTwo << 8) & empty;
 	        break;
 	    case Color.BLACK:
-	        advTwo = g.pos.pieces[Color.BLACK][Pieces.PAWNS] & SEVENTHRANK;
+	        advTwo = g.pos.getBlackPawns() & SEVENTHRANK;
 	        advTwo = (advTwo >> 8) & empty;
 	        advTwo = (advTwo >> 8) & empty;
 	        break;
@@ -1229,11 +1217,11 @@ public class MoveGenerator {
 
 	    switch (side) {
 	    case Color.WHITE:
-	        prom = (g.pos.pieces[Color.WHITE][Pieces.PAWNS] << 8) & empty & EIGHTHRANK;
+	        prom = (g.pos.getWhitePawns() << 8) & empty & EIGHTHRANK;
 	        // 'prom' is only the moves to the eighth rank
 	        break;
 	    case Color.BLACK:
-	        prom = (g.pos.pieces[Color.BLACK][Pieces.PAWNS] >> 8) & empty & FIRSTRANK;
+	        prom = (g.pos.getBlackPawns() >> 8) & empty & FIRSTRANK;
 	        // 'prom' is only the moves to the first rank
 	        break;
 	    }

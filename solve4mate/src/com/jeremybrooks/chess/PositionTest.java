@@ -1,10 +1,17 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.Bitmap.ALL;
+import static com.jeremybrooks.chess.Bitmap.ALL45L;
+import static com.jeremybrooks.chess.Bitmap.ALL45R;
+import static com.jeremybrooks.chess.Bitmap.ALL90;
+import static com.jeremybrooks.chess.Bitmap.BOARD_EMPTY_SQUARE;
+import static com.jeremybrooks.chess.Bitmap.PIECE;
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT45L;
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT45R;
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT90R;
+import junit.framework.TestCase;
 
 import org.junit.Assert;
-
-import junit.framework.TestCase;
 
 public class PositionTest extends TestCase {
 
@@ -17,8 +24,9 @@ public class PositionTest extends TestCase {
 			"k1K1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p",
 			"8/8/8/8/8/8/8/k1K5",
 			"1k1K1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1",
-			"q1n5/1P3P2/2P5/8/K7/8/k6P/8"
-		                 };
+			"q1n5/1P3P2/2P5/8/K7/8/k6P/8",
+            "1K1Q1R1B/1N4P1/8/8/8/8/1k1q1r1b/1n4p1"
+			};
 	}
 	
 //	Position p;
@@ -41,6 +49,12 @@ public class PositionTest extends TestCase {
 		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.ROOK));
 		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.QUEEN));
 		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.KING));
+		assertEquals(0L, p.getWhitePawns());
+		assertEquals(0L, p.getWhiteKnights());
+		assertEquals(0L, p.getWhiteBishops());
+		assertEquals(0L, p.getWhiteRooks());
+		assertEquals(0L, p.getWhiteQueens());
+		assertEquals(0L, p.getWhiteKing());
 
 		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.PAWN));
 		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KNIGHT));
@@ -48,19 +62,18 @@ public class PositionTest extends TestCase {
 		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.ROOK));
 		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.QUEEN));
 		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KING));
+		assertEquals(0L, p.getBlackPawns());
+		assertEquals(0L, p.getBlackKnights());
+		assertEquals(0L, p.getBlackBishops());
+		assertEquals(0L, p.getBlackRooks());
+		assertEquals(0L, p.getBlackQueens());
+		assertEquals(0L, p.getBlackKing());
+		
+		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
+		{
+			assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(square));
+		}
 	}
-
-//	public void testPositionString() {
-//		fail("Not yet implemented");
-//	}	
-//
-//	public void testGetPieces() {
-//		fail("Not yet implemented");
-//	}
-//
-//	public void testGet() {
-//		fail("Not yet implemented");
-//	}
 
 	public void testClear() {
 		Position p = createStartingPosition();
@@ -86,7 +99,7 @@ public class PositionTest extends TestCase {
 		
 	}
 
-	public void testSet()
+	public void testSetAndGetFen()
 	{
 		Position p = new Position();
 		for(int i=0; i<FEN.length; i++)
@@ -97,7 +110,7 @@ public class PositionTest extends TestCase {
 		}
 		
 	}
-
+	
 	public void testNewStartingPosition()
 	{
 		Position p = createStartingPosition();
@@ -129,6 +142,9 @@ public class PositionTest extends TestCase {
 						"   -----------------\n" +
 						"    a b c d e f g h\n";
 		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
+		
+		assertEquals(1L<<Bitmap.E1, p.getWhiteKing());
+		assertEquals(1L<<Bitmap.E8, p.getBlackKing());
 	}
 
 	private Position createStartingPosition() {
@@ -397,19 +413,11 @@ public class PositionTest extends TestCase {
         long sqMask45L = 1L << SQ2BIT45L[sq];
         long sqMask45R = 1L << SQ2BIT45R[sq];
 
-        assertEquals(sqMask, p.pieces[color][piece]);
+        assertEquals(sqMask, p.getPieces(color,piece));
         assertEquals(sqMask, p.all[ALL]);
 		assertEquals(sqMask90, p.all[ALL90]);
 		assertEquals(sqMask45L, p.all[ALL45L]);
 		assertEquals(sqMask45R, p.all[ALL45R]);
-	}
-
-	public void testMovePiece() {
-		fail("Not yet implemented");
-	}
-
-	public void testIsValid() {
-		fail("Not yet implemented");
 	}
 
 	public void testIsSameColor() {

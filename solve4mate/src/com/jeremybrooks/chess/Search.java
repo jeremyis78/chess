@@ -241,7 +241,7 @@ public class Search {
 	        //*****************************************
 	        g.makeMove(moves[i], side);
 	        g.currentLine[depth] = moves[i];
-		val = min(g,alpha,beta,Util.opp(side),depth+1);
+	        val = min(g,alpha,beta,Util.opp(side),depth+1);
 	        best = Math.max(best, val);
 		if(depth==0){
 		  g.movesValue[i] = val;
@@ -418,16 +418,16 @@ public class Search {
 	    // Compute material value
 	    for (int i = Pieces.PAWNS; i <= Pieces.QUEENS; i++){
 	        wScore += whitePieceValue[i] * 
-	            Util.PieceCount(g.pos.pieces[Color.WHITE][i]);
+	            Util.PieceCount(g.pos.getPieces(Color.WHITE,i));
 	        
 	        bScore += blackPieceValue[i] * 
-	            Util.PieceCount(g.pos.pieces[Color.BLACK][i]);
+	            Util.PieceCount(g.pos.getPieces(Color.BLACK,i));
 	    }
 	    
 	    // Estimate positional value
 	    for(int i = 0; i<2; i++){
 	        // For knights
-	        pieces = g.pos.pieces[i][Pieces.KNIGHTS];
+	        pieces = g.pos.getPieces(i, Pieces.KNIGHTS);
 	        while(pieces > 0){
 	            pieceSq = mg.FirstPiece(pieces);
 	            if (i == Color.WHITE){
@@ -438,7 +438,7 @@ public class Search {
 	            pieces = mg.ClearPiece(pieces, pieceSq);
 	        }
 	        // For bishops
-	        pieces = g.pos.pieces[i][Pieces.BISHOPS];
+	        pieces = g.pos.getPieces(i, Pieces.BISHOPS);
 	        while(pieces > 0){
 	            pieceSq = mg.FirstPiece(pieces);
 	            if (i == Color.WHITE){
@@ -449,7 +449,7 @@ public class Search {
 	            pieces = mg.ClearPiece(pieces, pieceSq);
 	        }
 	        // For rooks
-	        pieces = g.pos.pieces[i][Pieces.ROOKS];
+	        pieces = g.pos.getPieces(i, Pieces.ROOKS);
 	        while(pieces > 0){
 	            pieceSq = mg.FirstPiece(pieces);
 	            if (i == Color.WHITE){
