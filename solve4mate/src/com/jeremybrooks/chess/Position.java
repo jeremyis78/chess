@@ -31,29 +31,69 @@ public class Position
 		set(FEN_Board);
 	}
 	
-	public long getWhitePawns() {
-		return pieces[Color.WHITE][Pieces.PAWNS];
+	public long getPawns(int side)
+	{
+		return pieces[side][Pieces.PAWNS];		
 	}
 
-	public long getWhiteKnights() {
-		return pieces[Color.WHITE][Pieces.KNIGHTS];
+	public long getOpponentPawns(int side)
+	{
+		return pieces[Util.opp(side)][Pieces.PAWNS];		
+	}
+	
+	public long getKnights(int side)
+	{
+		return pieces[side][Pieces.KNIGHTS];		
+	}
+	
+	public long getOpponentKnights(int side)
+	{
+		return pieces[Util.opp(side)][Pieces.KNIGHTS];		
 	}
 
-	public long getWhiteBishops() {
-		return pieces[Color.WHITE][Pieces.BISHOPS];
+	public long getBishops(int side)
+	{
+		return pieces[side][Pieces.BISHOPS];		
 	}
 
-	public long getWhiteRooks() {
-		return pieces[Color.WHITE][Pieces.ROOKS];
+	public long getOpponentBishops(int side)
+	{
+		return pieces[Util.opp(side)][Pieces.BISHOPS];		
 	}
 
-	public long getWhiteQueens() {
-		return pieces[Color.WHITE][Pieces.QUEENS];
+	public long getRooks(int side)
+	{
+		return pieces[side][Pieces.ROOKS];		
 	}
 
-	public long getWhiteKing() {
-		if(isKingPlaced(Color.WHITE)) {
-	    	return 1L << kingSq[Color.WHITE];
+	public long getOpponentRooks(int side)
+	{
+		return pieces[Util.opp(side)][Pieces.ROOKS];		
+	}
+
+	public long getQueens(int side)
+	{
+		return pieces[side][Pieces.QUEENS];		
+	}
+
+	public long getOpponentQueens(int side)
+	{
+		return pieces[Util.opp(side)][Pieces.QUEENS];		
+	}
+	
+	public long getKing(int side)
+	{
+		if(isKingPlaced(side)) {
+	    	return 1L << kingSq[side];
+	    }
+	    return 0L;
+	}
+
+	public long getOpponentKing(int side)
+	{
+		int opponentSide = (side == Color.WHITE) ? Color.BLACK : Color.WHITE; 
+		if(isKingPlaced(opponentSide)) {
+	    	return 1L << kingSq[opponentSide];
 	    }
 	    return 0L;
 	}
@@ -65,33 +105,6 @@ public class Position
 	    return KING_NOT_PLACED;
 	}
 
-	public long getBlackPawns() {
-		return pieces[Color.BLACK][Pieces.PAWNS];
-	}
-
-	public long getBlackKnights() {
-		return pieces[Color.BLACK][Pieces.KNIGHTS];
-	}
-
-	public long getBlackBishops() {
-		return pieces[Color.BLACK][Pieces.BISHOPS];
-	}
-
-	public long getBlackRooks() {
-		return pieces[Color.BLACK][Pieces.ROOKS];
-	}
-
-	public long getBlackQueens() {
-		return pieces[Color.BLACK][Pieces.QUEENS];
-	}
-	
-	public long getBlackKing() {
-		if(isKingPlaced(Color.BLACK)) {
-	    	return 1L << kingSq[Color.BLACK];
-	    }
-	    return 0L;
-	}
-	
 	public int getBlackKingSquare() {
 		if(isKingPlaced(Color.BLACK)) {
 	    	return kingSq[Color.BLACK];
@@ -99,9 +112,6 @@ public class Position
 	    return KING_NOT_PLACED;
 	}
 
-	//Return a bitbrd of the pieces whose color is 'side'
-	// and piece is 'p' 
-	//
 	public long getPieces(int side, int piece){
 	    if (isNotTheKing(piece)) {
 	        return pieces[side][piece];
