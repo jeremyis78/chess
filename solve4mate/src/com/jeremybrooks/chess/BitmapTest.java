@@ -1,5 +1,8 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
+import org.junit.Test;
+
 import junit.framework.TestCase;
 
 public class BitmapTest extends TestCase {
@@ -201,5 +204,41 @@ public class BitmapTest extends TestCase {
 		assertEquals(63, mostSignificantBitSet);
 	}
 
-	
+	@Test
+	public void testSet() {
+		Bitmap b = rankBitmap(E4);
+		Bitmap c = fileBitmap(E4);
+		Bitmap d = rankBitmap(H8);
+		
+		Bitmap bORd = b.bitwiseOr(d);
+		assertEquals(rankBitmap(E4).toString(), b.toString());
+		assertEquals(rankBitmap(E4).longValue() | rankBitmap(H8).longValue(), bORd.longValue());
+
+		Bitmap bXORd = b.bitwiseXor(d);
+		assertEquals(rankBitmap(E4).toString(), b.toString());
+		assertEquals(rankBitmap(E4).bitwiseOr(rankBitmap(H8)).toString(), bXORd.toString());
+		
+		Bitmap a3h8 = rankBitmap(A3).bitwiseOr(rankBitmap(H8));
+		assertEquals(emptyBitmap().toString(), a3h8.bitwiseXor(a3h8).toString());
+
+
+/*		Bitmap b     		= Bitmap.set(12);
+		Bitmap c     		= Bitmap.set(45);
+		boolean bORe4  		= b.or(Bitmap.E4);
+		boolean bANDe4		= b.and(E4);
+		boolean bXORe4 		= b.xor(E4);
+		int bCount         	= b.count();
+		int bFirstBit      	= b.first();
+		Bitmap bOREQUALc 	= b.orAssign(c);
+		Bitmap bANDEQUALc	= b.andAssign(c);
+		Bitmap bXOREQUALc	= b.xorAssign(c);
+		
+		Bitmap bShiftedEight = b.leftShift(8);
+		Bitmap bShiftedEightRight = b.rightShift(8);
+		Bitmap bRotated90DegreesRight = b.rotate90DegRight();
+		Bitmap bRotated45DegreesRight = b.rotate45DegRight();
+		Bitmap bRotated45DegreesLeft = b.roate45DegLeft();
+		*/
+	}
+
 }

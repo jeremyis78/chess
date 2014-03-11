@@ -4,6 +4,10 @@
  */
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT45L;
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT45R;
+import static com.jeremybrooks.chess.Bitmap.SQ2BIT90R;
+
 /**
  * A Bitboard is some representation of the chessboard where each bit represents
  * some binary state.
@@ -186,17 +190,7 @@ public class Bitmap {
 	
 	//For g.pos.board[]
 	public static final char BOARD_EMPTY_SQUARE = ' ';
-	public static final char BOARD_EDGE_SQUARE = 'E';
 	
-	//TODO: how do i convert the below to java????
-	public static final int BOARD_EDGES[] = {
-	    A1, B1, C1, D1, E1, F1, G1, H1,
-	    A2, A3, A4, A5, A6, A7,
-	    H2, H3, H4, H5, H6, H7,
-	    A8, B8, C8, D8, E8, F8, G8, H8
-	};
-	    
-
 	public static final char BOARD_PIECE[] = {
 	    'P','N','B','R','Q','K',
 	    'p','n','b','r','q','k'	
@@ -241,28 +235,6 @@ public class Bitmap {
 	    QUEEN       // 7
 	};
 
-	//TODO: move PIECE_STR definition to console.h
-	public static final char PIECE_CH[] = {'P','N','B','R','Q','K',};
-
-	//TODO: move PIECE_VALUE[] to eval.h maybe?...YES, move it.
-	public static final int
-	PIECE_VALUE[] = {	
-	    /*  pawn   */	100, 	
-	    /*  knight */	300,
-	    /*  bishop */	300,
-	    /*  rook   */	500,
-	    /*  queen  */	900,
-	    /*  king   */	100000	//TODO: what should the king be worth??
-	};
-
-
-	public static final char
-	PIECE_STR[][] = {
-	    {'P','N','B','R','Q','K',},
-	    {'p','n','b','r','q','k',}
-	};
-
-	
 	//********************************************************************
 	//*	Given a square (A1-H8) the following SQ2BIT??? arrays will       *
 	//*   return the corresponding bit position in a bitbrd rotated???   *
@@ -324,6 +296,136 @@ public class Bitmap {
 	static final int CAP  = 0x7 << 15;    //CAPtured piece
 	static final int PRO  = 0x7 << 18;    //PROmotion piece
 
+	
+	/* members */
+	private long bitmap = 0L;
+	
+	private Bitmap()
+	{
+	}
+
+	private Bitmap(int bitToSet)
+	{
+		bitmap = 1L << bitToSet;
+	}
+
+	private Bitmap(long bitmap)
+	{
+		this.bitmap = bitmap;
+	}
+
+	public long longValue()
+	{
+		return bitmap;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return Util.DisplayBoardStr(bitmap);
+	}
+	
+	public Bitmap bitwiseOr(Bitmap bitsToSet)
+	{
+		long temp = bitmap;
+		temp |= bitsToSet.longValue();
+		return new Bitmap(temp);
+	}
+
+	public Bitmap bitwiseAnd(Bitmap bitsToSet)
+	{
+		long temp = bitmap;
+		temp &= bitsToSet.longValue();
+		return new Bitmap(temp);
+	}
+
+	public Bitmap bitwiseXor(Bitmap bitsToUnset)
+	{
+		long temp = bitmap;
+		temp ^= bitsToUnset.longValue();
+		return new Bitmap(temp);
+	}
+
+	public Bitmap notBits()
+	{
+		return new Bitmap(~bitmap);
+	}
+
+	public static Bitmap emptyBitmap()
+	{
+		return new Bitmap();
+	}
+
+	public static Bitmap createBitmap(long bits)
+	{
+		return new Bitmap(bits);
+	}
+
+	/*
+	 * long mask = 1L << sq;
+	    all[ALL] |= mask;
+	    all[ALL90] |= 1L << SQ2BIT90R[sq];
+	    all[ALL45L] |= 1L << SQ2BIT45L[sq];
+	    all[ALL45R] |= 1L << SQ2BIT45R[sq];
+	    
+	    rankBoard.or(Bitboard.rank(E4))
+	    fileBoard.or(Bitboard.file(E4))
+	    rightBoard.or(Bitboard.right(E4))
+	    leftBoard.or(Bitboard.left(E4))
+	 */
+	/**
+	 * Returns a bitmap (unrotated) with given bit set.
+	 * 
+	 * @param bitToSet the number of the bit to set
+	 * @return
+	 */
+	public static Bitmap rankBitmap(int bitToSet)
+	{
+		return new Bitmap(bitToSet);
+	}
+
+	/**
+	 * Returns a bitmap rotated 90 degrees right with given bit set.
+	 * 
+	 * @param bitToSet the number of the bit to set
+	 * @return
+	 */
+	public static Bitmap fileBitmap(int bitToSet)
+	{
+		return new Bitmap(SQ2BIT90R[bitToSet]);
+	}
+
+	/**
+	 * Returns a bitmap rotated 45 degrees right with the given bit set.
+	 * 
+	 * @param bitToSet the number of the bit to set
+	 * @return
+	 */
+	public static Bitmap rightDiagonalBitmap(int bitToSet)
+	{
+		return new Bitmap(SQ2BIT45R[bitToSet]);
+	}
+
+	/**
+	 * Returns a bitmap rotated 45 degrees left with given bit set.
+	 * 
+	 * @param bitToSet the number of the bit to set
+	 * @return
+	 */
+	public static Bitmap leftDiagonalBitmap(int bitToSet)
+	{
+		return new Bitmap(SQ2BIT45L[bitToSet]);
+	}
+
+	public boolean isNotEmpty()
+	{
+		return hasMore(bitmap);
+	}
+
+	public static boolean hasMore(long board)
+	{
+		return board != 0;
+	}
 	
 	static long clearBit(long board, int bit){
 		board &= ~(1L << bit);

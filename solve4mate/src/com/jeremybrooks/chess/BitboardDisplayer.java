@@ -1,9 +1,12 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.PIECE_STR;
-
 public class BitboardDisplayer extends AbstractDisplayer {
 
+	private static final char EMPTY_CHARACTER = '-';
+	private static final char PIECE_CHARACTER[][] = {
+	    {'P','N','B','R','Q','K',},
+	    {'p','n','b','r','q','k',}
+	};
 
 	public void appendPiece(Position position, int currentSquare) {
 		long maskForCurrentSquare = 1L << currentSquare;
@@ -13,14 +16,13 @@ public class BitboardDisplayer extends AbstractDisplayer {
 		for (int c = Color.WHITE; c <= Color.BLACK; c++){
 		    for (int p = 0; p <= Pieces.QUEENS; p++){ 
 		        if (Util.bool(maskForCurrentSquare & position.getPieces(c, p))){
-		            display.append(PIECE_STR[c][p]);  
+		            display.append(PIECE_CHARACTER[c][p]);  
 		            nopiece = false;
 		                }
 		    }
 		}
 		if (nopiece){
-		    display.append("-"); //print "- " for empty square
+		    display.append(EMPTY_CHARACTER);
 		}
 	}
-
 }
