@@ -19,10 +19,13 @@ public class MoveGenerator {
 
 	
 	
-	Attacks att;
+	protected static final Attacks att = new Attacks();
+	private static final Generator capturesGenerator = new CaptureGenerator();
+	private static final Generator nonCapturesGenerator = new NonCaptureGenerator();
+	private static final Generator escapeGenerator = new EscapeGenerator();
 
 	public MoveGenerator(){
-		att = new Attacks();
+		
 	}
 	
 	
@@ -37,29 +40,13 @@ public class MoveGenerator {
 //		board &= ~(1L << bit);
 //	}
 
-	public long ClearPiece(long board, int bit){
+	protected static long ClearPiece(long board, int bit){
 		return Bitmap.clearBit(board, bit);
 	}
 
-	public int FirstPiece(long pieces){
+	protected static int FirstPiece(long pieces){
 		return Bitmap.lowestBitNumber(pieces);
 	}
-
-	private int LastPiece(long pieces){
-		return Bitmap.highestBitNumber(pieces);
-	}
-
-	//unsigned int PieceCount(bitbrd pieces){
-//		unsigned int n;
-//		for (n = 0; pieces != 0; n++, pieces &= (pieces - 1));
-//		return unsigned(n);
-	//}
-
-
-	private boolean Occupied(GameState g, int sq){
-		return g.pos.board[sq] != BOARD_EMPTY_SQUARE;
-	}
-
 
 	//These functions return the occupied status (middle six bits)
 	//of a Rank, File or Diagonal.  For a diagonal (R45, L45) whose length
@@ -244,458 +231,24 @@ public class MoveGenerator {
 	// found in this function added to it after this function completes
 	public int GenerateCaptures (GameState g, int moves[], int side, int depth)
 	{
-	    // This includes pawns that capture to promote to a Q,R,B,N
-
-	    int to = 0;
-	    int from = 0;
-	    int cap = 0;
-	    int pro = 0;
-	    int n;       //move index counter
-	    int mover;
-	    int move;
-	    long pieces;
-	    long pieceAttacks = 0;    //must be zeroed
-	    long attackedPieces;      //as in "the enemy pieces that are attacked"
-
-	    n = g.numberOfLegalMoves[depth];
-
-	    for (int p = PAWN; p <= KING; p++) {
-	        mover = PIECE[p];
-	        pieces = g.pos.getPieces (side, p);
-	        while (morePieces(pieces)) {
-	            from = FirstPiece (pieces);
-	            pro = 0;
-	            pieceAttacks = 0;
-	            switch (p) {
-	            case PAWN:
-	                pieceAttacks = att.pawn[side][from];
-	                pro = isPawnPromotion(side, from);
-
-	                //EnPassant captures
-	                if (g.enPassantSq[depth] != NOSQUARE)
-	                {
-	                    if (Util.bool(pieceAttacks & (1L << g.enPassantSq[depth])))
-	                    {
-	                        to = g.enPassantSq[depth];
-	                        cap = PIECE[PAWN];
-	                        moves[n++] = EncodeMove (from, to, PIECE[PAWN], cap, 0);
-	                    }
-	                }
-	                break;
-	            case KNIGHT:
-	                pieceAttacks = att.knight[from];
-	                break;
-	            case BISHOP:   //fall through
-	            case ROOK:     //fall through
-	            case QUEEN:
-	                if (Util.bool(mover & ROOK_OR_QUEEN)) {
-	                    pieceAttacks |= RookAttacks (g, from);
-	                }
-	                if (Util.bool(mover & BISHOP_OR_QUEEN)) {
-	                    pieceAttacks |= BishopAttacks (g, from);
-	                }
-	                break;
-	            case KING:
-	                pieceAttacks = att.king[from];
-	                break;
-	            }
-
-	            //Add or update which squares are currently attacked
-	            //Following line doesn't do anythign right now!
-	            g.attacked[depth] |= pieceAttacks;
-
-	            attackedPieces = pieceAttacks & g.pos.getOpponentPiecesExceptKing(side);
-	            while (morePieces(attackedPieces)) {
-	                to = FirstPiece (attackedPieces);
-	                cap = Math.abs(g.pos.board[to]);
-	                if (!Util.bool(pro)) {     //Capture only
-	                	//TODO: make sure king does not move into check!!!!!
-	                	move = EncodeMove(from, to, PIECE[p], cap, 0);  
-	                	//if((piece)p == KING && !isAttacked(g, side, to)){
-	                	if(p == KING && isLegal(g, move, side)){
-	                		moves[n++] = move;
-	                	} else {
-	                		moves[n++] = move;
-	                	}
-	                } else {        //Capture and promotion
-	                	for (int i = QUEEN; i >= KNIGHT; i--) {
-	                		moves[n++] = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
-	                	}
-	                }
-	                attackedPieces = ClearPiece (attackedPieces, to);
-	            }
-	            pieces = ClearPiece (pieces, from);
-	        }
-	    }
-	    g.numberOfLegalMoves[depth] = n;
-	    return g.numberOfLegalMoves[depth];
+		return capturesGenerator.generate(g, moves, side, depth);
 	}
-
 
 	// Side effect: g.legalMoves[depth] has the number of moves
 	// found in this function added to it after this function completes
 	public int GenerateNonCaptures (GameState g, int moves[], int side, int depth)
 	{
-	    long pieces;
-	    long pMoves = 0;
-	    long advanceTwo = 0;
-	    long promoters = 0;
-	    long empty;
-	    int n;
-	    int to, from;
-	    int move = 0; //the encoded move!!!! move_t
-
-	    //***************************************************************************
-	    //*                                                                         *
-	    //* Add all non-capturing pawn moves (promotions, advance-two, advance-one) *
-	    //*                                                                         *
-	    //***************************************************************************
-
-	    n = g.numberOfLegalMoves[depth];
-	    empty = ~g.pos.all[ALL];
-
-	    switch (side) {
-	        case Color.WHITE:
-	        	long whitePawns = g.pos.getPawns(Color.WHITE);
-	            pMoves = (whitePawns << 8) & empty & ~EIGHTHRANK;
-	            // 'pMoves' is all moves except those to the eighth rank
-	            promoters = (whitePawns << 8) & empty & EIGHTHRANK;
-	            // 'promoters' is only the moves to the eighth rank
-	            advanceTwo = whitePawns & SECONDRANK;
-	            advanceTwo = (advanceTwo << 8) & empty;
-	            advanceTwo = (advanceTwo << 8) & empty;
-	            break;
-	        case Color.BLACK:
-	        	long blackPawns = g.pos.getPawns(Color.BLACK);
-	            pMoves = (blackPawns >> 8) & empty & ~FIRSTRANK;
-	            // 'pMoves' is all moves except those to the first rank
-	            promoters = (blackPawns >> 8) & empty & FIRSTRANK;
-	            // 'promoters' is only the moves to the first rank
-	            advanceTwo = blackPawns & SEVENTHRANK;
-	            advanceTwo = (advanceTwo >> 8) & empty;
-	            advanceTwo = (advanceTwo >> 8) & empty;
-	            break;
-	    }
-	    // Pawn promotions
-	    while (morePieces(promoters)) {
-	        to = FirstPiece (promoters);
-	        from = minusOneRank(side, to);
-	        for (int i = QUEEN; i >= KNIGHT; i--) {
-	            moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
-	            //g.legalMoves[depth]++;
-	            //g.addMove (move);
-	        }
-	        promoters = ClearPiece(promoters, to);
-	    }
-	    // Pawns advance two squares
-	    while (morePieces(advanceTwo)) {
-	        to = FirstPiece (advanceTwo);
-	        from = minusTwoRank(side, to);
-	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
-	        advanceTwo = ClearPiece(advanceTwo, to);
-	    }
-	    // Pawns advance one square
-	    while (morePieces(pMoves)) {
-	        to = FirstPiece (pMoves);
-	        from = minusOneRank(side, to);
-	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
-	        pMoves = ClearPiece (pMoves, to);
-	    }
-
-	    //***************************************************************************
-	    //*                                                                         *
-	    //* Add all non-capturing knight, bishop, rook, queen, king moves           *
-	    //*                                                                         *
-	    //***************************************************************************
-
-	    for (int p = KNIGHT; p <= KING; p++) {
-	        pieces = g.pos.getPieces (side, p);
-	        while (morePieces(pieces)) {
-	            from = FirstPiece (pieces);
-	            switch (p) {
-	                case KNIGHT:
-	                    pMoves = att.knight[from] & empty;
-	                    break;
-	                case BISHOP:   //fall through
-	                case ROOK:     //fall through
-	                case QUEEN:
-	                    if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
-	                    {
-	                        pMoves |= BishopAttacks (g, from) & empty;
-	                    }
-	                    if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
-	                    {
-	                        pMoves |= RookAttacks (g, from) & empty;
-	                    }
-	                    break;
-	                case KING:
-	                	//exclude moves that are attacked by opponent's king 
-	                    pMoves = att.king[from] & empty & ~att.king[g.pos.kingSq[Util.opp(side)]];
-	                    break;
-	            }
-	            while (morePieces(pMoves)) {
-	                to = FirstPiece (pMoves);
-	                move = EncodeMove(from,to,PIECE[p],0,0);
-	                if (p == KING){
-	                	if (!isAttacked(g, side, to)){
-	                    //if(isLegal(g, move, side)){
-	                        moves[n++] = EncodeMove (from, to, PIECE[KING], 0, 0);
-	                    }
-	                } else {
-	                    moves[n++] = EncodeMove (from, to, PIECE[p], 0, 0);
-	                }
-	                pMoves = ClearPiece (pMoves, to);
-	            }
-	            pieces = ClearPiece (pieces, from);
-	        }
-	    }
-
-	    //***************************************************************************
-	    //*                                                                         *
-	    //* Add castling moves, if any                                              *
-	    //*                                                                         *
-	    //***************************************************************************
-	    switch (side) {
-	    case Color.WHITE:
-	        if(canWhiteShortCastle(g, side, depth)){
-	            moves[n++] = EncodeMove(E1,G1,PIECE[KING],0,0);
-	        }
-	        if(canWhiteLongCastle(g, side, depth)){
-	            moves[n++] = EncodeMove(E1,C1,PIECE[KING],0,0);
-	        }
-	        break;
-	    case Color.BLACK:
-	        if(canBlackShortCastle(g, side, depth)){
-	            moves[n++] = EncodeMove(E8,G8,PIECE[KING],0,0);
-	        }
-	        if(canBlackLongCastle(g, side, depth)){
-	            moves[n++] = EncodeMove(E8,C8,PIECE[KING],0,0);
-	        }
-	        break;
-	    }
-
-	    g.numberOfLegalMoves[depth] = n;
-	    return g.numberOfLegalMoves[depth];
+		return nonCapturesGenerator.generate(g, moves, side, depth);
 	}
 	
-	private static boolean morePieces(long pieceBoard)
+	public static boolean morePieces(long pieceBoard)
 	{
 		return pieceBoard != 0;
 	}
 
 	public int GenerateKingEscapes (GameState g, int moves[], int side, int depth)
 	{
-	    int checker;
-	    int n;
-	    int from = 0;
-	    int to = 0;
-	    int mover = 0;
-	    int cap = 0;
-	    int pro = 0;
-	    int kingSq = -1;
-	    int move;
-	    long checkers = 0;            // pieces checking 'side's king
-	    long capturers;           // pieces that can caputre the checker
-	    long attackers;
-	    long promoteRank = 0;
-	    long enPassantRank = 0;
-	    long interpose = 0;
-	    long kingMoves;
-
-	    n = g.numberOfLegalMoves[depth];
-	    //n = 0;
-	    kingSq = g.pos.kingSq[side];
-	    checkers = attackers(g, side, g.pos.kingSq[side]);
-	    switch (side) {
-	        case Color.WHITE:
-	            promoteRank = EIGHTHRANK;
-	            enPassantRank = FIFTHRANK;
-	            break;
-	        case Color.BLACK:
-	            promoteRank = FIRSTRANK;
-	            enPassantRank = FOURTHRANK;
-	            break;
-	    }
-
-	    //***************************************************************************
-	    //*                                                                         *
-	    //* Single checker:                                                         *
-	    //*    Generate captures to checker's square                                *
-	    //*    If that checker is not a knight, generate interposing moves.         *
-	    //*                                                                         *
-	    //* Two checkers:                                                           *
-	    //*    Generate king captures to either checker's square who is left en     *
-	    //*    prise (unprotected).                                                 *
-	    //*                                                                         *
-	    //* Always:                                                                 *
-	    //*    Generate king moves to flight squares                                *
-	    //*                                                                         *
-	    //***************************************************************************
-
-
-	    if (Util.PieceCount(checkers) == 1) {
-	        checker = FirstPiece (checkers);
-	        cap = Math.abs(g.pos.board[checker]);
-
-	        //Generate captures to checker's square
-	        capturers = attackers (g, Util.opp(side), checker);
-
-	        //Add to 'capturers' pawns that would capture enpassant
-	        if(TO_PIECE[cap] == PAWN && g.enPassantSq[depth] != NOSQUARE){
-	            attackers = g.pos.getPieces(side, PAWN);
-	            if (Util.bool((attackers & enPassantRank) & att.mask[checker-1]))
-	            {
-	                capturers = capturers | att.mask[checker-1];
-	            }
-	            if (Util.bool((attackers & enPassantRank) & att.mask[checker+1]))
-	            {
-	                capturers = capturers | att.mask[checker+1];
-	            }
-	        }
-
-	        while (morePieces(capturers)) {
-	            from = FirstPiece (capturers);
-	            mover = Math.abs(g.pos.board[from]);
-
-	            if (TO_PIECE[mover] == PAWN && Util.bool(checkers & promoteRank)) {
-	                // Pawn promotion
-	                //if (!isPinned(g, from, checker, mover, cap)){
-	                move = EncodeMove(from,checker,mover,cap,0);
-	                if(isLegal(g, move, side)){
-//	    	        	System.err.print("Adding pawn captures and promotes to any piece: ");
-//	    	        	Util.displayMove(move, false, false);
-	                    for (pro = QUEEN; pro >= KNIGHT; pro--) {
-	                        moves[n++] = EncodeMove(from,checker, mover,cap,PIECE[pro]);
-	                        //g.legalMoves[depth]++;
-	                    }
-	                }
-	            } else if (TO_PIECE[mover] == PAWN &&
-	                       g.enPassantSq[depth] != NOSQUARE){
-	                attackers = att.pawn[side][from];
-	                if (Util.bool(attackers & (1L << g.enPassantSq[depth]))){
-	                    // Pawn captures en Passant
-	                    to = g.enPassantSq[depth];
-	                    cap = PIECE[PAWN];
-	                    move = EncodeMove(from,to,PIECE[PAWN],cap,0);
-	                    //if (!isPinned(g, from, to, PIECE[PAWN], cap)){
-	                    if (isLegal(g, move, side)){
-//	        	        	System.err.print("Added pawn captures via en-passant: ");
-//	        	        	Util.displayMove(move, false, false);
-	                        moves[n++] = move;
-	                        //g.legalMoves[depth]++;
-	                    }
-	                }                
-	            } else {
-	                move = EncodeMove(from,checker,mover,cap,pro);
-	                //if (!isPinned(g, from, checker, mover, cap)){
-	                if (isLegal(g, move, side)){
-//	    	        	System.err.print("Added capture the checking piece: ");
-//	    	        	Util.displayMove(move, false, false);
-	                    moves[n++] = move;
-	                    //g.legalMoves[depth]++;
-	                    //g.addMove (move);
-	                }
-	            }
-	            capturers = ClearPiece (capturers, from);
-	        }
-
-	        if(cap != KNIGHT){
-	            //Generate interpositions (still a single checking piece)
-	            //compute squares between king and the checking piece
-	            
-	            //interpose = getInterposingSquares(kingSq, checker);
-	            //
-	            // TODO: Replace the code below with the code above by
-	            //       pulling out the code below into 
-	            //       getInterposingSquares(int sq1, int sq2)
-
-	            if (Util.bool(att.plus8[kingSq] & checkers))
-	            {
-	                //attack from north
-	                interpose = att.plus8[kingSq] & att.minus8[checker];
-	            }
-	            else if (Util.bool(att.plus9[kingSq] & checkers))
-	            {
-	                //attack from north-east
-	                interpose = att.plus9[kingSq] & att.minus9[checker];
-	            }
-	            else if (Util.bool(att.plus1[kingSq] & checkers))
-	            {
-	                //attack from east
-	                interpose = att.plus1[kingSq] & att.minus1[checker];
-	            }
-	            else if (Util.bool(att.minus7[kingSq] & checkers))
-	            {
-	                //attack from south-east
-	                interpose = att.minus7[kingSq] & att.plus7[checker];
-	            }
-	            else if (Util.bool(att.minus8[kingSq] & checkers))
-	            {
-	                //attack from south
-	                interpose = att.minus8[kingSq] & att.plus8[checker];
-	            }
-	            else if (Util.bool(att.minus9[kingSq] & checkers))
-	            {
-	                //attack from south-west
-	                interpose = att.minus9[kingSq] & att.plus9[checker];
-	            }
-	            else if (Util.bool(att.minus1[kingSq] & checkers))
-	            {
-	                //attack from west
-	                interpose = att.minus1[kingSq] & att.plus1[checker];
-	            }
-	            else if (Util.bool(att.plus7[kingSq] & checkers))
-	            {
-	                //attack from northwest
-	                interpose = att.plus7[kingSq] & att.minus7[checker];
-	            }
-	            g.numberOfLegalMoves[depth] = n;  //required for call to GenInter() below
-	            //DisplayBoard(interpose);
-	            n += GenerateInterpositions (g, moves, side, depth, interpose);
-	        }
-	    } else if (Util.PieceCount (checkers) == 2) {  //Two pieces checking the king
-		// Add king moves that would capture either checking piece
-	        kingMoves = att.king[kingSq] & checkers;
-	        while (morePieces(kingMoves)){
-	            to = FirstPiece(kingMoves);
-	            cap = Math.abs(g.pos.board[to]);
-	            move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
-	            if (isLegal (g, move, side)) {
-	                //cap = abs (g.pos.board[to]);
-//		        	System.err.print("Adding king captures one of two checking pieces: ");
-//		        	Util.displayMove(move, false, false);
-	                moves[n++] = move;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
-	            }
-
-	            kingMoves = ClearPiece(kingMoves, to);
-	        }
-	    } 
-
-	    // Add king moves to flight squares (and captures)
-	    kingMoves = att.king[kingSq] & ~g.pos.all[ALL];
-	    while (morePieces(kingMoves)){
-	        to = FirstPiece(kingMoves);
-	        //Same reason as above...hafta make sure the king doesn't just
-	        //move away from the sliding checking piece.
-	        //
-	        if (g.pos.board[to] != BOARD_EMPTY_SQUARE){
-	            cap = Math.abs(g.pos.board[to]);
-	        } else {
-	            cap = 0;
-	        }
-	        move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
-	        if ( isLegal(g, move, side)){
-//	        	System.err.print("Adding king escapes via flight square: ");
-//	        	Util.displayMove(move, false, false);
-	            moves[n++] = move;
-	        }
-	        kingMoves = ClearPiece(kingMoves, to);
-	    }
-
-	    //cout << "moves added: " << n << endl;
-	    g.numberOfLegalMoves[depth] = n;
-	    //cout << "legalMoves: " << g.legalMoves[depth] << endl;
-	    return g.numberOfLegalMoves[depth];
+		return escapeGenerator.generate(g, moves, side, depth);
 	}
 
 
@@ -703,7 +256,7 @@ public class MoveGenerator {
 	// Generate moves to any squares that are set in 'targets'
 	// Side effect: g.legalMoves[depth] has the number of moves
 	// found in this function added to it.
-	private int GenerateInterpositions (GameState g, int moves[], int side, int depth,
+	protected int GenerateInterpositions (GameState g, int moves[], int side, int depth,
 	                             long targets)
 	{
 	    //TODO: finished this function...now just call it from
@@ -874,7 +427,7 @@ public class MoveGenerator {
     //	    attacks = Attackers(g, Color.BLACK, G8);
 	//
 	//NOTE: the king is not included in the attackers
-	private long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
+	protected long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
 	{
 	    // Pretend "sq" contains a Queen AND a Knight.
 	    // If that QUEEN/KNIGHT combo can capture a piece from
@@ -935,7 +488,7 @@ public class MoveGenerator {
 	// RookAttacks() returns a bitboard of the squares that 
 	// a rook on "from" would attack, including captures.
 
-	private long RookAttacks (GameState g, int from)
+	long RookAttacks (GameState g, int from)
 	{
 	    long attacks;
 	    int stat1, stat2;
@@ -951,7 +504,7 @@ public class MoveGenerator {
 	// BishopAttacks() returns a bitboard of the squares that 
 	// a bishop on "from" would attack, including captures.
 
-	private long BishopAttacks (GameState g, int from)
+	long BishopAttacks (GameState g, int from)
 	{
 	    long attacks;
 	    int stat1, stat2;
@@ -963,7 +516,7 @@ public class MoveGenerator {
 	    return attacks;
 	}
 
-	private static int isPawnPromotion(int side, int from){
+	static int isPawnPromotion(int side, int from){
 	    switch(side){
 	    case Color.WHITE:
 	        if(from + 8 >= A8){
@@ -985,7 +538,7 @@ public class MoveGenerator {
 	// Returns the from square given the square
 	// the pawn moved to. (pawn advanced one square)
 	//
-	private static int minusOneRank(int side, int to){
+	protected static int minusOneRank(int side, int to){
 	    if (side == Color.WHITE) {
 	        return (to - 8);
 	    } else {
@@ -999,7 +552,7 @@ public class MoveGenerator {
 	// Returns the from square given the square
 	// the pawn moved to. (pawn advanced two squares)
 	//
-	private static int minusTwoRank(int side, int to){
+	protected static int minusTwoRank(int side, int to){
 	    if (side == Color.WHITE) {
 	        return (to - 16);
 	    } else {
@@ -1007,7 +560,7 @@ public class MoveGenerator {
 	    }
 	}
 
-	private boolean canWhiteShortCastle(GameState g, int side, int depth){
+	protected boolean canWhiteShortCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.W_SHORT_CASTLE)
 	        && g.pos.board[F1] == BOARD_EMPTY_SQUARE
 	        && g.pos.board[G1] == BOARD_EMPTY_SQUARE 
@@ -1020,7 +573,7 @@ public class MoveGenerator {
 	    return false;
 	}
 
-	private boolean canWhiteLongCastle(GameState g, int side, int depth){
+	protected boolean canWhiteLongCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.W_LONG_CASTLE) &&
 	        g.pos.board[D1] == BOARD_EMPTY_SQUARE
 	        && g.pos.board[C1] == BOARD_EMPTY_SQUARE
@@ -1035,7 +588,7 @@ public class MoveGenerator {
 	    return false;
 	}
 
-	private boolean canBlackShortCastle(GameState g, int side, int depth){
+	protected boolean canBlackShortCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.B_SHORT_CASTLE)
 	        && g.pos.board[F8] == BOARD_EMPTY_SQUARE
 	        && g.pos.board[G8] == BOARD_EMPTY_SQUARE 
@@ -1048,7 +601,7 @@ public class MoveGenerator {
 	    return false;
 	}
 
-	private boolean canBlackLongCastle(GameState g, int side, int depth){
+	protected boolean canBlackLongCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.B_LONG_CASTLE)
 	        && g.pos.board[D8] == BOARD_EMPTY_SQUARE
 	        && g.pos.board[C8] == BOARD_EMPTY_SQUARE
@@ -1107,7 +660,7 @@ public class MoveGenerator {
 	// save the king square upfront...then make the king move with the saved
 	// value.
 	// Returns false if the king is in check after 'move' is made.
-	private boolean isLegal(GameState g, int move, int side){
+	boolean isLegal(GameState g, int move, int side){
 	    boolean legal;
 
 	    //Save the king square in case the king is the moving piece
