@@ -604,22 +604,6 @@ public class UtilTest extends TestCase {
 		assertEquals(expected, Util.formatSideBySide(left,right));
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
     public void testGetA1H8diagFunction(){
     	for(int i=0; i<15; i++)
     	{

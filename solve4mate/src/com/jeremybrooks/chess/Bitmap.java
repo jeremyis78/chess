@@ -4,10 +4,6 @@
  */
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT45L;
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT45R;
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT90R;
-
 /**
  * A Bitboard is some representation of the chessboard where each bit represents
  * some binary state.

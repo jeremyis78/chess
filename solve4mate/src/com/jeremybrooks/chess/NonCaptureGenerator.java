@@ -126,10 +126,10 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	                if (p == KING){
 	                	if (!isAttacked(g, side, to)){
 	                    //if(isLegal(g, move, side)){
-	                        moves[n++] = EncodeMove (from, to, PIECE[KING], 0, 0);
+	                        moves[n++] = move;
 	                    }
 	                } else {
-	                    moves[n++] = EncodeMove (from, to, PIECE[p], 0, 0);
+	                    moves[n++] = move;
 	                }
 	                pMoves = ClearPiece (pMoves, to);
 	            }

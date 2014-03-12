@@ -255,9 +255,6 @@ public class Attacks {
     void genMasksPlusMinus(){
 	  	log.info("generating plus/minus masks");
 
-        int rank, file;
-        long mask = 0;
-        
         //For each square, generate the masks plus[1,7,8,9] and minus[1,7,8,9]
         //Also, there should never be more than 7 squares attacked 
         //in the each bitmap
@@ -442,11 +439,6 @@ public class Attacks {
         int attacks = 0;    //originally an unsigned char in C++
         //occ is the occupied squares on the rank BITWISE-ANDed with 01111110b
         
-        
-        //NOTE: This is the failsafe testIndex....to ensure we exit from the loop
-        //without getting hung.
-        int testIndex = 0; 
-        
         for (square=0; piece != 0x100; piece <<= 1, ++square){
             // square = 0  --> piece = 0x01
             // square = 1  --> piece = 0x02
@@ -508,7 +500,6 @@ public class Attacks {
                 //out.println(Util.formatPieceOccupiedMoves(piece, status << 1, base[square][status]));
 
             }//end for status
-        	//if (testIndex == 8) break; //must have this here because piece never equals 0
         }//end for piece
     }
 
@@ -742,7 +733,6 @@ public class Attacks {
         int len = DLEN[diagonal];
         byte mask = 1;
         int x=0;
-        long m;		
         for (int d=dstartsq[diagonal];  x < len; d += 7){
             boolean isSet = (b & (mask << x++)) != 0;
         	if(isSet) 
@@ -854,7 +844,6 @@ public class Attacks {
 
         int king5x5		= 0x000729C0;
         int knight5x5	= 0x00A8822A;
-        int all5x5		= 0x01FFFFFF;
 
         //Mapping from the 5x5 grid to the 8x8 chessboard represented
         //in a 64-bit bitboard (long).

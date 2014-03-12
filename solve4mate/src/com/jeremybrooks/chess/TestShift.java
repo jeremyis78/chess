@@ -4,8 +4,7 @@ public class TestShift {
 
     public static void main(String[] args) {
     
-        int  i = 0x10;             // decimal 16        
-        long l = 0x10L;            // decimal 16
+        int  i = 0x10;        
         
         /** Decimal to Binary *************************************/
         System.out.println();

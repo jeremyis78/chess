@@ -207,7 +207,6 @@ public class BitmapTest extends TestCase {
 	@Test
 	public void testSet() {
 		Bitmap b = rankBitmap(E4);
-		Bitmap c = fileBitmap(E4);
 		Bitmap d = rankBitmap(H8);
 		
 		Bitmap bORd = b.bitwiseOr(d);

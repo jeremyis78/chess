@@ -327,7 +327,7 @@ public class MoveGeneratorTest {
 		};
 		for(String position: positions)
 		{
-			g.set("r1b2k1r/1pQn2pp/pP2p3/2p1Pp1N/B2p2q1/B2P4/P1P2PPP/R3K2R w KQ f6 0 1");
+			g.set(position);
 			System.out.println(new Displayer().formatBoard(g.pos));
 			System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
 			int depth = 0;
