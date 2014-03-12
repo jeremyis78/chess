@@ -28,7 +28,7 @@ public class Position
 
     private long pieces[][] = new long[2][6];
     long all[] = new long[MAXALL];
-    int board[] = new int[64];
+    private int board[] = new int[64];
     private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
 	public Position(){
@@ -99,7 +99,7 @@ public class Position
 
 	public long getOpponentKing(int side)
 	{
-		int opponentSide = (side == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE; 
+		int opponentSide = Util.opp(side); 
 		if(isKingPlaced(opponentSide)) {
 	    	return 1L << kingSq[opponentSide];
 	    }
@@ -147,8 +147,17 @@ public class Position
 	{
 		return board[square];
 	}
+
+	public boolean isNotEmpty(int square)
+	{
+		return !isEmpty(square);
+	}
 	
-	
+	public boolean isEmpty(int square)
+	{
+		return (board[square] == BOARD_EMPTY_SQUARE);
+	}
+
 	/*******************************************************************/
 	/*              The bits of an EncodedMove                         */
 	/*******************************************************************/
@@ -515,10 +524,4 @@ public class Position
 		return false;
 	}
 	
-	public static boolean isEmpty(int p)
-	{
-		return (p == BOARD_EMPTY_SQUARE);
-	}
-
-
 }

@@ -73,7 +73,7 @@ public class PositionTest extends TestCase {
 		//Test that there are some pieces set
 		assertTrue(0 != p.getKingSquare(WHITE));
 		assertTrue(0 != p.getKingSquare(BLACK));
-		assertTrue(PIECE[Bitmap.ROOK] == p.board[Bitmap.A1]);
+		assertTrue(PIECE[Bitmap.ROOK] == p.getBoard(Bitmap.A1));
 		assertEquals(0xFFFF00000000FFFFL, p.all[ALL]);
 		
 		//now clear them
@@ -408,7 +408,7 @@ public class PositionTest extends TestCase {
 	private static void assertCorrectPlacement(Position p, int sq, int color, int piece, int boardPieceIndex)
 	{
 		int multiplier = (color == 0 ? 1 : -1);
-		assertEquals(multiplier * PIECE[boardPieceIndex], p.board[sq]);
+		assertEquals(multiplier * PIECE[boardPieceIndex], p.getBoard(sq));
 
 		
 		//Get the appropriate bitboard masks
@@ -445,14 +445,14 @@ public class PositionTest extends TestCase {
 				currentSquare++)
 		{
 			
-			assertFalse(Position.isEmpty(p.getBoard(currentSquare)));
+			assertFalse(p.isEmpty(currentSquare));
 		}
 
 		for(int currentSquare = Bitmap.A3;
 				currentSquare <= Bitmap.H6;
 				currentSquare++)
 		{
-			assertTrue(Position.isEmpty(p.getBoard(currentSquare)));
+			assertTrue(p.isEmpty(currentSquare));
 		}
 		
 		for(int currentSquare = Bitmap.A7;
@@ -460,7 +460,7 @@ public class PositionTest extends TestCase {
 				currentSquare++)
 		{
 			
-			assertFalse(Position.isEmpty(p.getBoard(currentSquare)));
+			assertFalse(p.isEmpty(currentSquare));
 		}
 
 	}

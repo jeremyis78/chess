@@ -76,7 +76,7 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	            attackedPieces = pieceAttacks & g.pos.getOpponentPiecesExceptKing(side);
 	            while (morePieces(attackedPieces)) {
 	                to = FirstPiece (attackedPieces);
-	                cap = Math.abs(g.pos.board[to]);
+	                cap = Math.abs(g.pos.getBoard(to));
 	                if (!Util.bool(pro)) {     //Capture only
 	                	//TODO: make sure king does not move into check!!!!!
 	                	move = EncodeMove(from, to, PIECE[p], cap, 0);  

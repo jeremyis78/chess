@@ -68,7 +68,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 
 	    if (Util.PieceCount(checkers) == 1) {
 	        checker = FirstPiece (checkers);
-	        cap = Math.abs(g.pos.board[checker]);
+	        cap = Math.abs(g.pos.getBoard(checker));
 
 	        //Generate captures to checker's square
 	        capturers = attackers (g, Util.opp(side), checker);
@@ -88,7 +88,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 
 	        while (morePieces(capturers)) {
 	            from = FirstPiece (capturers);
-	            mover = Math.abs(g.pos.board[from]);
+	            mover = Math.abs(g.pos.getBoard(from));
 
 	            if (TO_PIECE[mover] == PAWN && Util.bool(checkers & promoteRank)) {
 	                // Pawn promotion
@@ -191,7 +191,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        kingMoves = att.king[kingSq] & checkers;
 	        while (morePieces(kingMoves)){
 	            to = FirstPiece(kingMoves);
-	            cap = Math.abs(g.pos.board[to]);
+	            cap = Math.abs(g.pos.getBoard(to));
 	            move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
 	            if (isLegal (g, move, side)) {
 	                //cap = abs (g.pos.board[to]);
@@ -211,8 +211,8 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        //Same reason as above...hafta make sure the king doesn't just
 	        //move away from the sliding checking piece.
 	        //
-	        if (g.pos.board[to] != BOARD_EMPTY_SQUARE){
-	            cap = Math.abs(g.pos.board[to]);
+	        if (g.pos.isNotEmpty(to)) { //g.pos.getBoard(to) != BOARD_EMPTY_SQUARE){
+	            cap = Math.abs(g.pos.getBoard(to));
 	        } else {
 	            cap = 0;
 	        }

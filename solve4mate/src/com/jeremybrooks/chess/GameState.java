@@ -406,8 +406,8 @@ public class GameState {
 	        }             
 	    } else {
 	        //EnPassant
-	        if( moving == PAWN && captured == PAWN && 
-	            pos.board[to] == BOARD_EMPTY_SQUARE) {
+	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
+	        {
 	            switch(side){
 	            case Bitmap.WHITE:
 	                pos.erasePiece(Bitmap.BLACK, PAWN, to - 8);
@@ -564,9 +564,8 @@ public class GameState {
 	    //Place captured piece back on the board
 	    if(captured != NONE){
 	        //Put the EnPassant captured pawn back
-	        if( moving == PAWN && captured == PAWN && 
-	            pos.board[to] == BOARD_EMPTY_SQUARE) {
-	            
+	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
+	        {
 	            switch(side){
 	            case Bitmap.WHITE:
 	                pos.placePiece(Bitmap.BLACK, PAWN, to - 8);

@@ -562,8 +562,8 @@ public class MoveGenerator {
 
 	protected boolean canWhiteShortCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.W_SHORT_CASTLE)
-	        && g.pos.board[F1] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[G1] == BOARD_EMPTY_SQUARE 
+	        && g.pos.isEmpty(F1)
+	        && g.pos.isEmpty(G1) 
 	        && !isAttacked (g, side, E1)
 	        && !isAttacked (g, side, F1)
 	        && !isAttacked (g, side, G1)
@@ -575,9 +575,9 @@ public class MoveGenerator {
 
 	protected boolean canWhiteLongCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.W_LONG_CASTLE) &&
-	        g.pos.board[D1] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[C1] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[B1] == BOARD_EMPTY_SQUARE 
+	        g.pos.isEmpty(D1)
+	        && g.pos.isEmpty(C1)
+	        && g.pos.isEmpty(B1) 
 	        && !isAttacked (g, side, E1)
 	        && !isAttacked (g, side, D1)
 	        && !isAttacked (g, side, C1)
@@ -590,8 +590,8 @@ public class MoveGenerator {
 
 	protected boolean canBlackShortCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.B_SHORT_CASTLE)
-	        && g.pos.board[F8] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[G8] == BOARD_EMPTY_SQUARE 
+	        && g.pos.isEmpty(F8)
+	        && g.pos.isEmpty(G8) 
 	        && !isAttacked (g, side, E8)
 	        && !isAttacked (g, side, F8)
 	        && !isAttacked (g, side, G8)
@@ -603,9 +603,9 @@ public class MoveGenerator {
 
 	protected boolean canBlackLongCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.B_LONG_CASTLE)
-	        && g.pos.board[D8] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[C8] == BOARD_EMPTY_SQUARE
-	        && g.pos.board[B8] == BOARD_EMPTY_SQUARE 
+	        && g.pos.isEmpty(D8)
+	        && g.pos.isEmpty(C8)
+	        && g.pos.isEmpty(B8) 
 	        && !isAttacked (g, side, E8)
 	        && !isAttacked (g, side, D8)
 	        && !isAttacked (g, side, C8)
