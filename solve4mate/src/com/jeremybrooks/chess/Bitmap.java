@@ -190,8 +190,6 @@ public class Bitmap {
 
 
 	//For accessing the constant PIECE and PIECE_VALUE arrays below
-	//TODO: this might be confused with Piece.java
-	//public enum piece {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING, NONE};
 	public static final int PAWN = 0;
 	public static final int KNIGHT = 1;
 	public static final int BISHOP = 2;

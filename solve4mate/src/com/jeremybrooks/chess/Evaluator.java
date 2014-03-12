@@ -135,7 +135,7 @@ public class Evaluator {
 		//Does king have legal moves?
 		numMoves = mg.GenerateKingEscapes(g, moves, side, depth);
 		if (numMoves == 0){
-			if (mg.isAttacked(g, side, g.pos.kingSq[side])){
+			if (mg.isAttacked(g, side, g.pos.getKingSquare(side))){
 				// Mate
 				mate = true;
 

@@ -29,7 +29,7 @@ public class Position
     private long pieces[][] = new long[2][6];
     long all[] = new long[MAXALL];
     int board[] = new int[64];
-    int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
+    private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
 	public Position(){
 		set(EMPTY_BOARD);
@@ -106,18 +106,8 @@ public class Position
 	    return 0L;
 	}
 
-	public int getWhiteKingSquare() {
-		if(isKingPlaced(Bitmap.WHITE)) {
-	    	return kingSq[Bitmap.WHITE];
-	    }
-	    return KING_NOT_PLACED;
-	}
-
-	public int getBlackKingSquare() {
-		if(isKingPlaced(Bitmap.BLACK)) {
-	    	return kingSq[Bitmap.BLACK];
-	    }
-	    return KING_NOT_PLACED;
+	public int getKingSquare(int side) {
+		return kingSq[side];
 	}
 
 	public long getPieces(int side, int piece){
@@ -529,5 +519,6 @@ public class Position
 	{
 		return (p == BOARD_EMPTY_SQUARE);
 	}
+
 
 }

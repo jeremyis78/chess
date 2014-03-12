@@ -37,8 +37,8 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    kingSq = g.pos.kingSq[side];
-	    checkers = attackers(g, side, g.pos.kingSq[side]);
+	    kingSq = g.pos.getKingSquare(side);
+	    checkers = attackers(g, side, g.pos.getKingSquare(side));
 	    switch (side) {
 	        case Bitmap.WHITE:
 	            promoteRank = EIGHTHRANK;

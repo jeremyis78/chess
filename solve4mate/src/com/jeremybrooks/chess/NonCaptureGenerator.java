@@ -117,7 +117,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	                    break;
 	                case KING:
 	                	//exclude moves that are attacked by opponent's king 
-	                    pMoves = att.king[from] & empty & ~att.king[g.pos.kingSq[Util.opp(side)]];
+	                    pMoves = att.king[from] & empty & ~att.king[g.pos.getKingSquare(Util.opp(side))];
 	                    break;
 	            }
 	            while (morePieces(pMoves)) {

@@ -1,5 +1,6 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
 /**
  * Validates that both kings are present and not adjacent to each other.
  * @author jeremy
@@ -14,19 +15,19 @@ public class DefaultPositionValidator implements PositionValidator {
 		{
 			throw new IllegalArgumentException("board is missing one or both kings");
 		}
-	    if(areKingsAdjacent(position)){
+	    if(areKingsAdjacent(position))
+	    {
 	        throw new IllegalArgumentException("board cannot have adjacent kings");
 	    }
 	}
 
 	private static boolean areKingsAdjacent(Position position) {
-		return Util.adjacentSquares(position.getWhiteKingSquare(),
-				position.getBlackKingSquare());
+		return Util.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
 	}
 
 	private static boolean eitherKingIsMissing(Position position) {
-		boolean isWhiteKingMissing = !position.isKingPlaced(Bitmap.WHITE);
-		boolean isBlackKingMissing = !position.isKingPlaced(Bitmap.BLACK);
+		boolean isWhiteKingMissing = !position.isKingPlaced(WHITE);
+		boolean isBlackKingMissing = !position.isKingPlaced(BLACK);
 		return isWhiteKingMissing || isBlackKingMissing;
 	}
 }

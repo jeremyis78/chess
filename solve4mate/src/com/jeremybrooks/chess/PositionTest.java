@@ -71,8 +71,8 @@ public class PositionTest extends TestCase {
 		Position p = createStartingPosition();
 		
 		//Test that there are some pieces set
-		assertTrue(0 != p.kingSq[Bitmap.WHITE]);
-		assertTrue(0 != p.kingSq[Bitmap.BLACK]);
+		assertTrue(0 != p.getKingSquare(WHITE));
+		assertTrue(0 != p.getKingSquare(BLACK));
 		assertTrue(PIECE[Bitmap.ROOK] == p.board[Bitmap.A1]);
 		assertEquals(0xFFFF00000000FFFFL, p.all[ALL]);
 		
@@ -104,9 +104,8 @@ public class PositionTest extends TestCase {
 		assertEquals(0L, p.getOpponentQueens(Bitmap.WHITE));
 		assertEquals(0L, p.getOpponentKing(Bitmap.WHITE));
         
-		assertEquals(-1, p.kingSq[Bitmap.WHITE]);
-		assertEquals(-1, p.kingSq[Bitmap.BLACK]);
-		//assertEquals(PIECE[Chess.ROOK] == p.board[Chess.A1]);
+		assertEquals(-1, p.getKingSquare(WHITE));
+		assertEquals(-1, p.getKingSquare(BLACK));
 		assertEquals(0x0L, p.all[ALL]);
 		
 	}
@@ -353,10 +352,10 @@ public class PositionTest extends TestCase {
 	public void testPlaceAndEraseKings() {
 		Position p = new Position();
 
-		int sq = Bitmap.E1;
-		p.placePiece(Bitmap.WHITE, KING, sq);
-		assertEquals(PIECE[Bitmap.KING], p.getBoard(sq));
-		assertEquals(sq, p.kingSq[Bitmap.WHITE]);
+		int sq = E1;
+		p.placePiece(WHITE, KING, sq);
+		assertEquals(PIECE[KING], p.getBoard(sq));
+		assertEquals(sq, p.getKingSquare(WHITE));
 		
 		//Get the appropriate bitboard masks
         long sqMask = 1L << sq;
@@ -376,7 +375,7 @@ public class PositionTest extends TestCase {
 		sq = Bitmap.G6;  //Change the placement
 		p.placePiece(Bitmap.BLACK, KING, sq);
 		assertEquals(-PIECE[KING], p.getBoard(sq));
-		assertEquals(sq, p.kingSq[Bitmap.BLACK]);
+		assertEquals(sq, p.getKingSquare(BLACK));
 		
 		//Get the appropriate bitboard masks
         sqMask = 1L << sq;

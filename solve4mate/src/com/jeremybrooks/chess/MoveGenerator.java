@@ -666,7 +666,7 @@ public class MoveGenerator {
 	    //Save the king square in case the king is the moving piece
 	    //int kingSq = g.pos.kingSq[side];
 	    g.makeMove(move, side);
-	    legal = !isAttacked(g, side, g.pos.kingSq[side]);  //use the saved king square
+	    legal = !isAttacked(g, side, g.pos.getKingSquare(side));  //use the saved king square
 	    g.undoMove(move, side);
 	    System.err.println("Is "+Util.displayMoveStr(move, false, false)+" legal? "+legal);
 	    return legal;
