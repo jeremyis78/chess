@@ -1,5 +1,7 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
+
 public class BitboardDisplayer extends AbstractDisplayer {
 
 	private static final char EMPTY_CHARACTER = '-';
@@ -13,8 +15,8 @@ public class BitboardDisplayer extends AbstractDisplayer {
 		//If there's a piece at that square
 		//Print PIECE[c][p] otherwise print "-"
 		boolean nopiece = true;
-		for (int c = Color.WHITE; c <= Color.BLACK; c++){
-		    for (int p = 0; p <= Pieces.QUEENS; p++){ 
+		for (int c = Bitmap.WHITE; c <= Bitmap.BLACK; c++){
+		    for (int p = 0; p <= QUEEN; p++){ 
 		        if (Util.bool(maskForCurrentSquare & position.getPieces(c, p))){
 		            display.append(PIECE_CHARACTER[c][p]);  
 		            nopiece = false;

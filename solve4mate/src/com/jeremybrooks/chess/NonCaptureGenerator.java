@@ -42,8 +42,8 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    empty = ~g.pos.all[ALL];
 
 	    switch (side) {
-	        case Color.WHITE:
-	        	long whitePawns = g.pos.getPawns(Color.WHITE);
+	        case Bitmap.WHITE:
+	        	long whitePawns = g.pos.getPawns(Bitmap.WHITE);
 	            pMoves = (whitePawns << 8) & empty & ~EIGHTHRANK;
 	            // 'pMoves' is all moves except those to the eighth rank
 	            promoters = (whitePawns << 8) & empty & EIGHTHRANK;
@@ -52,8 +52,8 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	            advanceTwo = (advanceTwo << 8) & empty;
 	            advanceTwo = (advanceTwo << 8) & empty;
 	            break;
-	        case Color.BLACK:
-	        	long blackPawns = g.pos.getPawns(Color.BLACK);
+	        case Bitmap.BLACK:
+	        	long blackPawns = g.pos.getPawns(Bitmap.BLACK);
 	            pMoves = (blackPawns >> 8) & empty & ~FIRSTRANK;
 	            // 'pMoves' is all moves except those to the first rank
 	            promoters = (blackPawns >> 8) & empty & FIRSTRANK;
@@ -143,7 +143,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    //*                                                                         *
 	    //***************************************************************************
 	    switch (side) {
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        if(canWhiteShortCastle(g, side, depth)){
 	            moves[n++] = EncodeMove(E1,G1,PIECE[KING],0,0);
 	        }
@@ -151,7 +151,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	            moves[n++] = EncodeMove(E1,C1,PIECE[KING],0,0);
 	        }
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        if(canBlackShortCastle(g, side, depth)){
 	            moves[n++] = EncodeMove(E8,G8,PIECE[KING],0,0);
 	        }

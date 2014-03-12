@@ -4,6 +4,7 @@
  */
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
 import java.io.PrintStream;
 
 import org.apache.log4j.Logger;
@@ -259,21 +260,21 @@ public class Attacks {
         //Also, there should never be more than 7 squares attacked 
         //in the each bitmap
         
-        for (int sq=0; sq<64; sq++){
+        for (int sq=A1; sq<=H8; sq++){
             plus1[sq] = 0;
-            for(int bit=sq+1; File(bit) != FILE1; bit++){
+            for(int bit=sq+1; fileNumber(bit) != FILE1; bit++){
                 plus1[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(plus1[sq]) < 8);
             
             minus1[sq] = 0;
-            for(int bit=sq-1; File(bit) != FILE8 && bit >= 0; bit--){
+            for(int bit=sq-1; fileNumber(bit) != FILE8 && bit >= 0; bit--){
                 minus1[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(minus1[sq]) < 8);
 
             plus8[sq] = 0;
-            for(int bit=sq+8; Rank(bit) <= RANK8; bit+=8){
+            for(int bit=sq+8; Bitmap.rankNumber(bit) <= RANK8; bit+=8){
                 plus8[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(plus8[sq]) < 8);
@@ -285,104 +286,30 @@ public class Attacks {
             assert(Util.PieceCount(minus8[sq]) < 8);
             
             plus9[sq] = 0;
-            for (int bit=sq+9; (bit % 8) != 0 && (bit / 8) != 8; bit+=9){ 
+            for (int bit=sq+9; Bitmap.fileNumber(bit) != 0 && Bitmap.rankNumber(bit) != 8; bit+=9){ 
                 plus9[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(plus9[sq]) < 8);
 
             minus9[sq] = 0;
-            for (int bit=sq-9; (bit % 8) != 7 && bit >= 0; bit-=9){
+            for (int bit=sq-9; Bitmap.fileNumber(bit) != 7 && bit >= 0; bit-=9){
                 minus9[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(minus9[sq]) < 8);
 
             plus7[sq] = 0;
-            for(int bit=sq+7; File(bit) != FILE8 && Rank(bit) != 8; bit+=7){
+            for(int bit=sq+7; Bitmap.fileNumber(bit) != FILE8 && Bitmap.rankNumber(bit) != 8; bit+=7){
                 plus7[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(plus7[sq]) < 8);
 
             minus7[sq] = 0;
-            for(int bit=sq-7; (bit % 8) != 0 && bit >= 0; bit-=7){
+            for(int bit=sq-7; Bitmap.fileNumber(bit) != 0 && bit >= 0; bit-=7){
                 minus7[sq] |= 1L << bit;
             }
             assert(Util.PieceCount(minus7[sq]) < 8);
 
-        }//END FOR
-    /*
-        // minus1[]: Non-zero for all files EXCEPT a-file
-        for (int sq=0; sq<64; sq++){
-            minus1[sq] = 0;
-            for(int bit=sq-1; File(bit) != FILE8 && bit >= 0; bit--){
-                minus1[sq] |= long(1) << bit;
-            }
         }
-
-        plus8[]:  Non-zero for all squares EXCEPT those on 8th rank
-        for (int sq=0; sq<64; sq++){
-            plus8[sq] = 0;
-            for(int bit=sq+8; Rank(bit) <= RANK8; bit+=8){
-                plus8[sq] |= long(1) << bit;
-            }
-        }
-
-        // minus8[]: Non-zero for all squares EXCEPT those on 1st rank
-        for (int sq=0; sq<64; sq++){
-            minus8[sq] = 0;
-            for(int bit=sq-8; bit >= 0; bit-=8){
-                minus8[sq] |= long(1) << bit;
-            }
-        }
-
-        // plus9[]:  Squares on h-file are zero
-        //
-        //Stop the inner loop when we 'wrap' around the chessboard 
-        //back to the a-file or first-rank
-        for (int sq=0; sq<64; sq++){
-            plus9[sq] = 0;
-            for (int bit=sq+9; (bit % 8) != 0 && (bit / 8) != 8; bit+=9){ 
-                plus9[sq] |= long(1) << bit;
-            }
-        }
-
-        // minus9[]:  Squares on a-file are zero
-        //
-        // Stop the inner loop when we 'wrap around'
-        // back to the h-file or when bit < 0
-        //
-        // for each square
-        //   while (square - 9) does not wrap around the chessboard
-        //      minus9[sq] = long(1) << square - 9
-
-        for (int sq=0; sq<64; sq++){
-            minus9[sq] = 0;
-            for (int bit=sq-9; (bit % 8) != 7 && bit >= 0; bit-=9){
-                minus9[sq] |= long(1) << bit;
-            }
-        }
-
-        // plus7[]:  Squares on the a-file and eighth-rank are zero
-        //
-        // Stop the inner loop when
-        //   file(bit) == 7  OR  rank(bit) == 0
-        for(int sq=0; sq<64; sq++){
-            plus7[sq] = 0;
-            for(int bit=sq+7; File(bit) != FILE8 && Rank(bit) != 8; bit+=7){
-                plus7[sq] |= long(1) << bit;
-            }
-        }
-
-        // minus7[]: Squares on the h-file and first-rank are zero
-        //
-        // Stop the inner loop when 
-        //    file(bit) == 0  OR  bit < 0
-        for(int sq=0; sq<64; sq++){
-            minus7[sq] = 0;
-            for(int bit=sq-7; (bit % 8) != 0 && bit >= 0; bit-=7){
-                minus7[sq] |= long(1) << bit;
-            }
-        }
-    */
     }
 
 
@@ -513,7 +440,7 @@ public class Attacks {
             shift = 8 * (sq / 8);   //int division required
             for (int st = 0; st < 64; ++st){
                 //board = base[sq % 8][st];
-                rank[sq][st] = ((long)base[sq % 8][st]) << shift; //board << shift;
+                rank[sq][st] = ((long)base[fileNumber(sq)][st]) << shift;
             }
         }
     }
@@ -556,13 +483,13 @@ public class Attacks {
 	  	log.info("generating file attacks");
 
         byte mask = 1;
-        int r, maskindex;
-        for (int f = Bitmap.A1; f <= Bitmap.H8; ++f){
-            r = f / 8;  //integer division intended
+        int rankNumber, maskindex;
+        for (int f = A1; f <= H8; ++f){
+            rankNumber = rankNumber(f);
             for (int st=0; st < 64; ++st){
                 for (int i=0; i < 8; ++i){
-                    maskindex = (f%8) + (i * 8);
-                    if((base[r][st] & (mask << i)) > 0)	//if it's set, set bit
+                    maskindex = fileNumber(f) + (i * 8);
+                    if((base[rankNumber][st] & (mask << i)) > 0)	//if it's set, set bit
                         file[f][st] |= 1L << maskindex;
                 }
             }
@@ -756,8 +683,8 @@ public class Attacks {
 	  	log.info("generating white pawn attacks");
         for (i = Bitmap.A1; i <= Bitmap.H7; i++){
         	//System.out.println("i: " + i);
-        	boolean isLeftEdge = (i % 8) == 0;
-        	boolean isRightEdge = ((i + 1) % 8) == 0;
+        	boolean isLeftEdge = fileNumber(i) == 0;
+        	boolean isRightEdge = fileNumber(i+1) == 0;
             if(!isLeftEdge && !isRightEdge){ 
                 //i-th square is not on the board's edge
                 whitepawn[i] = pawn[w][i] = mask[i+7] | mask[i+9];
@@ -775,8 +702,8 @@ public class Attacks {
 	  	log.info("generating black pawn attacks");
         for (i = Bitmap.H8; i >= Bitmap.A2; i--){
         	//System.out.println("i: " + i);
-        	boolean isLeftEdge = (i % 8) == 0;
-        	boolean isRightEdge = ((i + 1) % 8) == 0;
+        	boolean isLeftEdge = fileNumber(i) == 0;
+        	boolean isRightEdge = fileNumber(i + 1) == 0;
         	if(!isLeftEdge && !isRightEdge){ 
                 //i-th square is not on the board's edge
                 blackpawn[i] = pawn[b][i] = mask[i-7] | mask[i-9];
@@ -1111,6 +1038,27 @@ public class Attacks {
     	return sb.toString().trim();
     }
 
+    
+    public void rankAttacksAsRealLifeScenario(){
+    	Displayer d = new Displayer();
+    	String msg = "TODO: describe me\n\n";
+    	StringBuffer sb = new StringBuffer();
+    	sb.append(msg);
+    	Position position = new Position();
+    	for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
+			long pieceBitmap = 1L << sq;
+    		for (int st = 0; st < 64; ++st){
+    			System.out.println(Util.formatByteBitmap("o:", st << 1) + "\n");
+    			System.out.println(Util.formatLongBitmapAsBoard(pieceBitmap, rank[sq][st]) + "\n");
+    			position.placePiece(Bitmap.WHITE, ROOK, sq);
+    			long blockingPieces = (st << 1);
+    			position.setPieces(Bitmap.BLACK, PAWN, blockingPieces); //occupied status represented by pawns
+    			System.out.println(d.formatBoard(position));
+    		}
+        }
+    	return; //sb.toString().trim();
+    }
+
     public String diagonal45DegreesRightAttacksAsHumanReadableString(){
     	String msg = "TODO: describe me\n\n";
     	StringBuffer sb = new StringBuffer();
@@ -1358,17 +1306,6 @@ public class Attacks {
 //
 //    }
 
-    /*
-     * helper methods
-     */
-    
-    // Return the rank number (zero-based)
-    public static int Rank(int sq){ return (sq / 8); } //integer division
-
-    // Return the file number (zero-based)
-    public static int File(int sq){ return (sq % 8); }
-
-    
     
     public static final void main(String[] args){
     	Attacks attacks = new Attacks();
@@ -1382,7 +1319,7 @@ public class Attacks {
     	//attacks.DisplayAll();
     	//System.out.print(attacks.getBaseAttacks());
     	
-    	out.print(attacks.diagonal45DegreesRightAttacksAsHumanReadableString());
+    	attacks.rankAttacksAsRealLifeScenario();
     }
     
 }

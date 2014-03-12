@@ -81,7 +81,7 @@ public class Search {
 	    g.numberOfLegalMoves[depth] = 0;
 
 
-	    if(side == Color.WHITE){
+	    if(side == Bitmap.WHITE){
 	      best = max(g, -MAXWINDOW, +MAXWINDOW, side, 0);
 	    } else {
 	      best = min(g, -MAXWINDOW, +MAXWINDOW, side, 0);

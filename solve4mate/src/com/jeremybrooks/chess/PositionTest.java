@@ -1,14 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.ALL;
-import static com.jeremybrooks.chess.Bitmap.ALL45L;
-import static com.jeremybrooks.chess.Bitmap.ALL45R;
-import static com.jeremybrooks.chess.Bitmap.ALL90;
-import static com.jeremybrooks.chess.Bitmap.BOARD_EMPTY_SQUARE;
-import static com.jeremybrooks.chess.Bitmap.PIECE;
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT45L;
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT45R;
-import static com.jeremybrooks.chess.Bitmap.SQ2BIT90R;
+import static com.jeremybrooks.chess.Bitmap.*;
 import junit.framework.TestCase;
 
 import org.junit.Assert;
@@ -43,31 +35,31 @@ public class PositionTest extends TestCase {
 
 	public void testPositionEmpty() {
 		Position p = new Position();
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.PAWN));
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.KNIGHT));
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.BISHOP));
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.ROOK));
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.QUEEN));
-		assertEquals(0L, p.getPieces(Color.WHITE, Pieces.KING));
-		assertEquals(0L, p.getPawns(Color.WHITE));
-		assertEquals(0L, p.getKnights(Color.WHITE));
-		assertEquals(0L, p.getBishops(Color.WHITE));
-		assertEquals(0L, p.getRooks(Color.WHITE));
-		assertEquals(0L, p.getQueens(Color.WHITE));
-		assertEquals(0L, p.getKing(Color.WHITE));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, PAWN));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, KNIGHT));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, BISHOP));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, ROOK));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, QUEEN));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, KING));
+		assertEquals(0L, p.getPawns(Bitmap.WHITE));
+		assertEquals(0L, p.getKnights(Bitmap.WHITE));
+		assertEquals(0L, p.getBishops(Bitmap.WHITE));
+		assertEquals(0L, p.getRooks(Bitmap.WHITE));
+		assertEquals(0L, p.getQueens(Bitmap.WHITE));
+		assertEquals(0L, p.getKing(Bitmap.WHITE));
 
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.PAWN));
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KNIGHT));
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.BISHOP));
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.ROOK));
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.QUEEN));
-		assertEquals(0L, p.getPieces(Color.BLACK, Pieces.KING));
-		assertEquals(0L, p.getOpponentPawns(Color.WHITE));
-		assertEquals(0L, p.getOpponentKnights(Color.WHITE));
-		assertEquals(0L, p.getOpponentBishops(Color.WHITE));
-		assertEquals(0L, p.getOpponentRooks(Color.WHITE));
-		assertEquals(0L, p.getOpponentQueens(Color.WHITE));
-		assertEquals(0L, p.getOpponentKing(Color.WHITE));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, PAWN));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, KNIGHT));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, BISHOP));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, ROOK));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, QUEEN));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, KING));
+		assertEquals(0L, p.getOpponentPawns(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentKnights(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentBishops(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentRooks(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentQueens(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentKing(Bitmap.WHITE));
 		
 		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
 		{
@@ -79,21 +71,41 @@ public class PositionTest extends TestCase {
 		Position p = createStartingPosition();
 		
 		//Test that there are some pieces set
-		assertTrue(0 != p.kingSq[Color.WHITE]);
-		assertTrue(0 != p.kingSq[Color.BLACK]);
+		assertTrue(0 != p.kingSq[Bitmap.WHITE]);
+		assertTrue(0 != p.kingSq[Bitmap.BLACK]);
 		assertTrue(PIECE[Bitmap.ROOK] == p.board[Bitmap.A1]);
 		assertEquals(0xFFFF00000000FFFFL, p.all[ALL]);
 		
 		//now clear them
 		p.clear();
-        for (int color = 0; color < Color.MAXCOLOR; color++){
-            for (int piece = 0; piece < Pieces.MAXPIECE; piece++){
-            	assertEquals(0L, p.getPieces(color, piece) );
-            }
-        }
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, PAWN));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, KNIGHT));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, BISHOP));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, ROOK));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, QUEEN));
+		assertEquals(0L, p.getPieces(Bitmap.WHITE, KING));
+		assertEquals(0L, p.getPawns(Bitmap.WHITE));
+		assertEquals(0L, p.getKnights(Bitmap.WHITE));
+		assertEquals(0L, p.getBishops(Bitmap.WHITE));
+		assertEquals(0L, p.getRooks(Bitmap.WHITE));
+		assertEquals(0L, p.getQueens(Bitmap.WHITE));
+		assertEquals(0L, p.getKing(Bitmap.WHITE));
+
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, PAWN));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, KNIGHT));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, BISHOP));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, ROOK));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, QUEEN));
+		assertEquals(0L, p.getPieces(Bitmap.BLACK, KING));
+		assertEquals(0L, p.getOpponentPawns(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentKnights(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentBishops(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentRooks(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentQueens(Bitmap.WHITE));
+		assertEquals(0L, p.getOpponentKing(Bitmap.WHITE));
         
-		assertEquals(-1, p.kingSq[Color.WHITE]);
-		assertEquals(-1, p.kingSq[Color.BLACK]);
+		assertEquals(-1, p.kingSq[Bitmap.WHITE]);
+		assertEquals(-1, p.kingSq[Bitmap.BLACK]);
 		//assertEquals(PIECE[Chess.ROOK] == p.board[Chess.A1]);
 		assertEquals(0x0L, p.all[ALL]);
 		
@@ -109,6 +121,14 @@ public class PositionTest extends TestCase {
 			p.clear();
 		}
 		
+	}
+	
+	public void testSetPieces()
+	{
+		long bitmap = 6L;
+		Position p = new Position();
+		p.setPieces(Bitmap.WHITE, PAWN, bitmap);
+		System.out.println(new Displayer().formatBoard(p));
 	}
 	
 	public void testNewStartingPosition()
@@ -143,8 +163,8 @@ public class PositionTest extends TestCase {
 						"    a b c d e f g h\n";
 		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
 		
-		assertEquals(1L<<Bitmap.E1, p.getKing(Color.WHITE));
-		assertEquals(1L<<Bitmap.E8, p.getOpponentKing(Color.WHITE));
+		assertEquals(1L<<Bitmap.E1, p.getKing(Bitmap.WHITE));
+		assertEquals(1L<<Bitmap.E8, p.getOpponentKing(Bitmap.WHITE));
 	}
 
 	private Position createStartingPosition() {
@@ -157,23 +177,23 @@ public class PositionTest extends TestCase {
 		assertStartingPosition(p);
 		
 		// 1. e4
-		p.placePiece(Color.WHITE, Pieces.PAWN, Bitmap.E4);
+		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.E4);
 		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPPPPPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Color.WHITE, Pieces.PAWN, Bitmap.E2);
+		p.erasePiece(Bitmap.WHITE, PAWN, Bitmap.E2);
 		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		
 		// 1. ... d5
-		p.placePiece(Color.BLACK, Pieces.PAWN, Bitmap.D5);
+		p.placePiece(Bitmap.BLACK, PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/pppppppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Color.BLACK, Pieces.PAWN, Bitmap.D7);
+		p.erasePiece(Bitmap.BLACK, PAWN, Bitmap.D7);
 		assertEquals("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		
 		// 2. e4xd5
-		p.erasePiece(Color.BLACK, Pieces.PAWN, Bitmap.D5);
+		p.erasePiece(Bitmap.BLACK, PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/ppp1pppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Color.WHITE, Pieces.PAWN, Bitmap.E4);
+		p.erasePiece(Bitmap.WHITE, PAWN, Bitmap.E4);
 		assertEquals("rnbqkbnr/ppp1pppp/8/8/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.placePiece(Color.WHITE, Pieces.PAWN, Bitmap.D5);
+		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
 
 		String expectedBoard = 
@@ -207,19 +227,19 @@ public class PositionTest extends TestCase {
 	}
 
 	private void assertStartingPosition(Position p) {
-		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Color.WHITE, Pieces.PAWN));
-		assertEquals("a1 h1 ", toSquares(p, Color.WHITE, Pieces.ROOK));
-		assertEquals("b1 g1 ", toSquares(p, Color.WHITE, Pieces.KNIGHT));
-		assertEquals("c1 f1 ", toSquares(p, Color.WHITE, Pieces.BISHOP));
-		assertEquals("d1 ", toSquares(p, Color.WHITE, Pieces.QUEEN));
-		assertEquals("e1 ", toSquares(p, Color.WHITE, Pieces.KING));
+		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Bitmap.WHITE, PAWN));
+		assertEquals("a1 h1 ", toSquares(p, Bitmap.WHITE, ROOK));
+		assertEquals("b1 g1 ", toSquares(p, Bitmap.WHITE, KNIGHT));
+		assertEquals("c1 f1 ", toSquares(p, Bitmap.WHITE, BISHOP));
+		assertEquals("d1 ", toSquares(p, Bitmap.WHITE, QUEEN));
+		assertEquals("e1 ", toSquares(p, Bitmap.WHITE, KING));
 
-		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", toSquares(p, Color.BLACK, Pieces.PAWN));
-		assertEquals("a8 h8 ", toSquares(p, Color.BLACK, Pieces.ROOK));
-		assertEquals("b8 g8 ", toSquares(p, Color.BLACK, Pieces.KNIGHT));
-		assertEquals("c8 f8 ", toSquares(p, Color.BLACK, Pieces.BISHOP));
-		assertEquals("d8 ", toSquares(p, Color.BLACK, Pieces.QUEEN));
-		assertEquals("e8 ", toSquares(p, Color.BLACK, Pieces.KING));
+		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", toSquares(p, Bitmap.BLACK, PAWN));
+		assertEquals("a8 h8 ", toSquares(p, Bitmap.BLACK, ROOK));
+		assertEquals("b8 g8 ", toSquares(p, Bitmap.BLACK, KNIGHT));
+		assertEquals("c8 f8 ", toSquares(p, Bitmap.BLACK, BISHOP));
+		assertEquals("d8 ", toSquares(p, Bitmap.BLACK, QUEEN));
+		assertEquals("e8 ", toSquares(p, Bitmap.BLACK, KING));
 	}
 
 	private String toSquares(Position p, int colorIndex, int piecesIndex) {
@@ -235,11 +255,11 @@ public class PositionTest extends TestCase {
 		assertEquals(PIECE[Bitmap.ROOK], p.getBoard(squareToOverwrite));
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 		
-		p.placePiece(Color.WHITE, Pieces.QUEEN, squareToOverwrite);
+		p.placePiece(Bitmap.WHITE, QUEEN, squareToOverwrite);
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareToOverwrite));
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 		
-		p.erasePiece(Color.WHITE, Pieces.QUEEN, squareToOverwrite);
+		p.erasePiece(Bitmap.WHITE, QUEEN, squareToOverwrite);
 		assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(squareToOverwrite));
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 	}
@@ -334,9 +354,9 @@ public class PositionTest extends TestCase {
 		Position p = new Position();
 
 		int sq = Bitmap.E1;
-		p.placePiece(Color.WHITE, Pieces.KING, sq);
+		p.placePiece(Bitmap.WHITE, KING, sq);
 		assertEquals(PIECE[Bitmap.KING], p.getBoard(sq));
-		assertEquals(sq, p.kingSq[Color.WHITE]);
+		assertEquals(sq, p.kingSq[Bitmap.WHITE]);
 		
 		//Get the appropriate bitboard masks
         long sqMask = 1L << sq;
@@ -349,14 +369,14 @@ public class PositionTest extends TestCase {
 		assertEquals(sqMask45L, p.all[ALL45L]);
 		assertEquals(sqMask45R, p.all[ALL45R]);
 
-		p.erasePiece(Color.WHITE, Pieces.KING, sq);
+		p.erasePiece(Bitmap.WHITE, KING, sq);
 
 
 		//Set the black king
 		sq = Bitmap.G6;  //Change the placement
-		p.placePiece(Color.BLACK, Pieces.KING, sq);
-		assertEquals(-PIECE[Bitmap.KING], p.getBoard(sq));
-		assertEquals(sq, p.kingSq[Color.BLACK]);
+		p.placePiece(Bitmap.BLACK, KING, sq);
+		assertEquals(-PIECE[KING], p.getBoard(sq));
+		assertEquals(sq, p.kingSq[Bitmap.BLACK]);
 		
 		//Get the appropriate bitboard masks
         sqMask = 1L << sq;
@@ -374,9 +394,9 @@ public class PositionTest extends TestCase {
 	{
 		Position p = new Position();
 		int sq = Bitmap.A3;
-		for(int color=Color.WHITE; color <= Color.BLACK; color++)
+		for(int color=Bitmap.WHITE; color <= Bitmap.BLACK; color++)
 		{
-			for(int piece=Pieces.PAWNS; piece<=Pieces.QUEENS; piece++)
+			for(int piece=PAWN; piece<=QUEEN; piece++)
 			{
 				sq++; //just for a good test so we are setting different bits each time
 				p.placePiece(color, piece, sq);
@@ -411,10 +431,10 @@ public class PositionTest extends TestCase {
 		assertTrue("precondition: white pieces are positive", whitePiece > 0);
 		assertTrue("precondition: black pieces are negative", blackPiece < 0);
 		
-		assertTrue(Position.isSameColor(Color.WHITE, whitePiece));
-		assertTrue(Position.isSameColor(Color.BLACK, blackPiece));
-		assertFalse(Position.isSameColor(Color.WHITE, blackPiece));
-		assertFalse(Position.isSameColor(Color.BLACK, whitePiece));
+		assertTrue(Position.isSameColor(Bitmap.WHITE, whitePiece));
+		assertTrue(Position.isSameColor(Bitmap.BLACK, blackPiece));
+		assertFalse(Position.isSameColor(Bitmap.WHITE, blackPiece));
+		assertFalse(Position.isSameColor(Bitmap.BLACK, whitePiece));
 	
 	}
 

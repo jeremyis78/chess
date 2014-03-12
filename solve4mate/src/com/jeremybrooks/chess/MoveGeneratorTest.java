@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess;
 
 import static org.junit.Assert.*;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,11 +25,11 @@ public class MoveGeneratorTest {
 	@Test
 	public void testEncodeMove()
 	{
-		int fromSquare = Bitmap.B7;
-		int toSquare = Bitmap.C8;
-		int movingPiece = Bitmap.PIECE[Bitmap.TO_PIECE[Pieces.PAWN]];
-		int capturedPiece = Bitmap.PIECE[Bitmap.TO_PIECE[Pieces.BISHOP]];
-		int promotedPiece = Bitmap.PIECE[Bitmap.TO_PIECE[Pieces.QUEEN]];
+		int fromSquare = B7;
+		int toSquare = C8;
+		int movingPiece = PIECE[TO_PIECE[PAWN]];
+		int capturedPiece = PIECE[TO_PIECE[BISHOP]];
+		int promotedPiece = PIECE[TO_PIECE[QUEEN]];
 		int encodedMove = MoveGenerator.EncodeMove(fromSquare, toSquare, movingPiece, capturedPiece, promotedPiece);
 		
 		assertEquals(fromSquare, encodedMove & 0x3F);

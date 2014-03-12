@@ -168,13 +168,9 @@ public class Bitmap {
 	public enum Rank { RANK1, RANK2, RANK3, RANK4, RANK5, RANK6, RANK7, RANK8 };
 	public enum File { FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, FILE7, FILE8 };
 
+	public static final int WHITE = 0;
+	public static final int BLACK = 1;
 	
-//The following was refactored into Color.java and Piece.java
-//
-//	//For accessing g.pos.pieces[][] and g.pos.all[]
-//	public enum COLOR {WHITE, BLACK, MAXCOLOR};
-//	public enum PIECE {PAWNS, KNIGHTS, BISHOPS, ROOKS, QUEENS, ALLPIECES, MAXPIECE};
-
 	//TODO: still needs to be defined somewhere better
 	//	public enum XXXXX {ALL, ALL90, ALL45L, ALL45R, MAXALL};
 	public static final int ALL = 0;
@@ -458,5 +454,28 @@ public class Bitmap {
 		}
 		return -1;
 	}
+	
+	/**
+	 *  Return the number of the rank (zero-based) on which the given square lies.
+	 *  
+	 * @param sq the square to evaluate
+	 * @return the integer value of <code>sq / 8</code>
+	 */
+	static int rankNumber(int sq)
+	{
+		return (sq / 8); //integer division
+	}
+
+	/**
+	 *  Return the number of the file (zero-based) on which the given square lies.
+	 *  
+	 * @param sq the square to evaluate
+	 * @return the value of <code>sq % 8</code>
+	 */
+	static int fileNumber(int sq)
+	{ 
+		return (sq % 8);
+	}
+
 
 }

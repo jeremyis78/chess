@@ -26,26 +26,15 @@ public class Util {
     public static boolean bool(long i){ return i != 0; }
 	
     public static int opp(int side){
-	    return side == Color.WHITE ? Color.BLACK : Color.WHITE;
+	    return side == Bitmap.WHITE ? Bitmap.BLACK : Bitmap.WHITE;
 	}
 
     public static int Toggle(int sideToMove){
-		if(sideToMove == Color.WHITE)
-			return Color.BLACK; 
-		return Color.WHITE;	
+		if(sideToMove == Bitmap.WHITE)
+			return Bitmap.BLACK; 
+		return Bitmap.WHITE;	
 	}
 
-	/* c++ version
-	byte ReverseBits(byte b){
-	    byte r=0;
-	    byte mask[]={0x1,0x2,0x4,0x8,0x10,0x20,0x40,0x80};
-	    for(int i=0, j=7; i<8; ++i, --j)
-	        if (bool(b & mask[i]))
-	            r |= mask[j];
-	    return r;
-	}
-	*/
-	
     public static byte ReverseBits(byte b)
 	{
 	    byte r = 0;
@@ -58,7 +47,6 @@ public class Util {
 	    }
 	    return r;
 	}
-	
 
     public static long ReverseBits(long b){
 	    long r = 0;
@@ -72,10 +60,10 @@ public class Util {
 
 
     public static boolean adjacentSquares(int sq1, int sq2){
-	    int x1 = (sq1 % 8);
-	    int y1 = (sq1 / 8);  //integer division
-	    int x2 = (sq2 % 8);
-	    int y2 = (sq2 / 8);  //integer division
+	    int x1 = Bitmap.fileNumber(sq1);//(sq1 % 8);
+	    int y1 = Bitmap.rankNumber(sq1);//(sq1 / 8);  //integer division
+	    int x2 = Bitmap.fileNumber(sq2);//(sq2 % 8);
+	    int y2 = Bitmap.rankNumber(sq2);//(sq2 / 8);  //integer division
 	    
 	    //Squares sq1 and sq2 are adjacent if the square of 
 	    //the distance between them is less than or equal to two.
@@ -104,24 +92,6 @@ public class Util {
 	        //return -1;
 	    	throw new IllegalArgumentException(s + " is an invalid square");
 	}
-
-	
-	//TODO: 1/2/10 - need to fix SqToStr so it returns the string rather than modifying
-	//the char array passed in.
-	
-	/* do we really need this one?
-	int SqToStr(int sq, char s[]) {
-	    if (sq >= Bitboard.A1 && sq <= Bitboard.H8){
-	        s[0] = (sq % 8) + 'a';
-	        s[1] = (sq / 8) + '1';  //integer division
-	        s[2] = '\0';
-	    } else {
-	        s[0] = '\0';	
-	        return -1;
-	    }
-	    return 1;
-	}
-	*/
 	
     public static String SqToStr(int sq){
 	    StringBuffer sb = new StringBuffer();
@@ -169,57 +139,16 @@ public class Util {
 	    case 7: ch = 'Q'; break;
 	    default: throw new IllegalArgumentException("expecting a piece that's one of (1,2,3,5,6,7), found: " + piece);
 	    }
-	    if (color == Color.BLACK) 
+	    if (color == Bitmap.BLACK) 
 	        return Character.toLowerCase(ch);
-	    else if (color == Color.WHITE)
+	    else if (color == Bitmap.WHITE)
 	    	return ch;
 	    throw new IllegalArgumentException("expecting color that's one of {0|1), found: " + color);
 	}
 
-
-	// Displays the what compiler compiled the chess engine. 
-//	void displayCompiler(){
-//	    char system[12];
-//
-//	  //Check which version of compiler is being used
-//	#ifdef _MSC_VER
-//	#define microsoft     //define microsoft for future reference
-//	    strcpy(system, "MSDOS");
-//	    //typedef unsigned __int64 bitbrd;
-//	#elif unix
-//	    strcpy(system, "UNIX/LINUX");
-//	    //typedef unsigned long long bitbrd;
-//	#else
-//	    strcpy(system, "unknown");
-//	#endif        
-//	    std::cout << "Chess engine compiled for " << system << endl; 
-//	}
-
-
     public static void DisplayBitbrd(long board){
 		out.printf("0x%016X", board);
 	}
-
-	/*
-	void DisplayBitbrd(bitbrd board){
-		//Now printf the 64bit int choosing the correct printf flag for 
-		//various compilers
-		#ifdef microsoft	
-			printf("0x%I64X\n", board);
-		#elif unix
-			char *p = (char*)&board;
-			printf("0x%016llX\n", board);
-			for (int i=0; i < 8; i++)
-				cout << hex << *(p+i) << '\t' << p+i << dec << endl;
-				//printf("%02h\t%02u\n", *(p+i), p+i);
-		#else
-			printf("can't print 64-bit int: something else other than\
-	unix or microsoft compiler\n")
-		#endif
-	}
-	*/
-
-
 
 	// displayMoves()
 	//
@@ -315,22 +244,6 @@ public class Util {
 	    //out.printf("0x%06X %s %s ", m, coordStr, SANStr);
 	    return coordStr.toString();
 	}
-
-	//  1/2/2010 - below doesn't appear to be used
-	/*
-	void DisplayMove(int sq){
-	    int rank, file = sq;
-	    for (rank=1; file > 7; ++rank)
-	        file -= 8;
-	    if(rank <= 8 && file < 8){
-	        //printf("%c%d, ", 'a' + file, rank);
-	        out.printf("%c%d, ", 'a' + file, rank);
-	    } else {
-	        out.printf("DisplayMove(%d): arguments must be in range [0..63]\n",
-						 sq, 'a'+file, rank);
-	    }
-	}
-	*/
 
     public static void DisplayMoves(long moves){
 		out.print(DisplayMovesStr(moves));

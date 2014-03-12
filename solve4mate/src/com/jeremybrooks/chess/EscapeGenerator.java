@@ -40,11 +40,11 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	    kingSq = g.pos.kingSq[side];
 	    checkers = attackers(g, side, g.pos.kingSq[side]);
 	    switch (side) {
-	        case Color.WHITE:
+	        case Bitmap.WHITE:
 	            promoteRank = EIGHTHRANK;
 	            enPassantRank = FIFTHRANK;
 	            break;
-	        case Color.BLACK:
+	        case Bitmap.BLACK:
 	            promoteRank = FIRSTRANK;
 	            enPassantRank = FOURTHRANK;
 	            break;

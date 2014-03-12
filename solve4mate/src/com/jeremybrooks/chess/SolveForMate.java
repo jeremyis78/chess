@@ -65,7 +65,7 @@ public class SolveForMate {
 	    		// Display the board to solve for mate
 	    		//
 	    		g.setSearchDepth(getDepthToMate(mateInN));
-	    		if(g.sideToMove == Color.WHITE){
+	    		if(g.sideToMove == Bitmap.WHITE){
 	    			out.print("White ");
 	    		} else {
 	    			out.print("Black ");

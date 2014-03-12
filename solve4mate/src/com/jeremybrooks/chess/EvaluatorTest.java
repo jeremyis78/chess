@@ -15,7 +15,7 @@ public class EvaluatorTest {
 		
 		String initialPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 		g.set(initialPosition);
-		int scoreAtStartOfGame = evaluator.evaluate(g, Color.WHITE, 0, false, true);
+		int scoreAtStartOfGame = evaluator.evaluate(g, Bitmap.WHITE, 0, false, true);
 		assertFalse("white should have no advantage", scoreAtStartOfGame > 0);
 		assertFalse("black should have no advantage", scoreAtStartOfGame < 0);
 		assertEquals(0, scoreAtStartOfGame);

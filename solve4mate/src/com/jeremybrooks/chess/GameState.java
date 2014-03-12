@@ -53,7 +53,7 @@ public class GameState {
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
 			
     Position        pos;
-    int           	sideToMove = Color.WHITE; //Color.BLACK		
+    int           	sideToMove = Bitmap.WHITE; //Color.BLACK		
     int             depth;			//current depth of search
     long	    	attacked[] = new long[MAX_DEPTH];
     int				castle[] = new int[MAX_DEPTH + 1];
@@ -205,7 +205,7 @@ public class GameState {
 
 	void clear(){
 	    pos.clear();
-	    sideToMove = Color.WHITE;
+	    sideToMove = Bitmap.WHITE;
 	    castle[0] = 0;
 	    enPassantSq[0] = NOSQUARE;
 	    halfMoveClock[0] = 0;
@@ -227,10 +227,10 @@ public class GameState {
 	void setSide(final String s)
 	{
 	    if ("w".equals(s)) {
-	        sideToMove = Color.WHITE;
+	        sideToMove = Bitmap.WHITE;
 	        return;
 	    } else if ("b".equals(s)) {
-	        sideToMove = Color.BLACK;
+	        sideToMove = Bitmap.BLACK;
 	        return;
 	    }
         throw new IllegalArgumentException("FEN 2nd field: should be 'w' or 'b'");
@@ -284,8 +284,8 @@ public class GameState {
 	        return;
 	    }
 	    sq = Util.StrToSq(s);
-	    if ((sq >= A3 && sq <= H3 && sideToMove == Color.BLACK) ||
-	               (sq >= A6 && sq <= H6 && sideToMove == Color.WHITE) ){
+	    if ((sq >= A3 && sq <= H3 && sideToMove == Bitmap.BLACK) ||
+	               (sq >= A6 && sq <= H6 && sideToMove == Bitmap.WHITE) ){
 	        enPassantSq[0] = (byte) sq;
 	    } else {
 	        throw new IllegalArgumentException("FEN fields conflict: " + 
@@ -353,7 +353,7 @@ public class GameState {
 	    if (moving == KING){
 	        //cout << "***** Should reach here ONLY if the KING moves!\n";
 	        switch(side){
-	            case Color.WHITE:
+	            case Bitmap.WHITE:
 	                //white king moved; castling is no longer legal for him
 	                castle[depth + 1] = castle[depth] & (B_SHORT_CASTLE | B_LONG_CASTLE);
 	                if (to == G1 && from == E1)
@@ -369,7 +369,7 @@ public class GameState {
 	                    castling = true;
 	                }
 	                break;
-	            case Color.BLACK:
+	            case Bitmap.BLACK:
 	                //black king moved; castling is no longer legal for him
 	                castle[depth + 1] = castle[depth] & (W_SHORT_CASTLE | W_LONG_CASTLE);
 	                if (to == G8 && from == E8){
@@ -393,7 +393,7 @@ public class GameState {
 	    }
 	    else if (moving == ROOK)
 	    {
-	        if (side == Color.WHITE){
+	        if (side == Bitmap.WHITE){
 	            if (Util.bool(castle[depth] & W_LONG_CASTLE) && from == A1)
 	                castle[depth + 1] = castle[depth] & ~W_LONG_CASTLE;
 	            else if (Util.bool(castle[depth] & W_SHORT_CASTLE) && from == H1)
@@ -409,18 +409,18 @@ public class GameState {
 	        if( moving == PAWN && captured == PAWN && 
 	            pos.board[to] == BOARD_EMPTY_SQUARE) {
 	            switch(side){
-	            case Color.WHITE:
-	                pos.erasePiece(Color.BLACK, PAWN, to - 8);
+	            case Bitmap.WHITE:
+	                pos.erasePiece(Bitmap.BLACK, PAWN, to - 8);
 	                captured = NONE;	
 	                break;
-	            case Color.BLACK:
-	                pos.erasePiece(Color.WHITE, PAWN, to + 8);
+	            case Bitmap.BLACK:
+	                pos.erasePiece(Bitmap.WHITE, PAWN, to + 8);
 	                captured = NONE;
 	                break;
 	            }
 	        } else if (moving == PAWN && pawnAdvTwo) {
 	            //Pawn advances two squares
-	        	if(side == Color.WHITE)
+	        	if(side == Bitmap.WHITE)
 	                enPassantSq[depth + 1] = (byte)(from + 8);
 	            else
 	                enPassantSq[depth + 1] = (byte)(from - 8);
@@ -455,11 +455,11 @@ public class GameState {
 	    }
 
 	    switch(side){
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        //sideToMove = BLACK;
 	        fullMoveClock[depth + 1] = fullMoveClock[depth];
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        //sideToMove = WHITE;
 	        fullMoveClock[depth + 1] = (byte)(fullMoveClock[depth] + 1);
 	        break;
@@ -530,7 +530,7 @@ public class GameState {
 	    //Undo a castling move (that is, undo the rook move)
 	    if (moving == KING){
 	        switch(side){
-	        case Color.WHITE:
+	        case Bitmap.WHITE:
 	            if (to == G1 && from == E1){
 	                from2 = H1;
 	                to2 = F1;
@@ -541,7 +541,7 @@ public class GameState {
 	                castling = true;
 	            }
 	            break;
-	        case Color.BLACK:
+	        case Bitmap.BLACK:
 	            if (to == G8 && from == E8){
 	                from2 = H8;
 	                to2 = F8;
@@ -568,11 +568,11 @@ public class GameState {
 	            pos.board[to] == BOARD_EMPTY_SQUARE) {
 	            
 	            switch(side){
-	            case Color.WHITE:
-	                pos.placePiece(Color.BLACK, PAWN, to - 8);
+	            case Bitmap.WHITE:
+	                pos.placePiece(Bitmap.BLACK, PAWN, to - 8);
 	                break;
-	            case Color.BLACK:
-	                pos.placePiece(Color.WHITE, PAWN, to + 8);
+	            case Bitmap.BLACK:
+	                pos.placePiece(Bitmap.WHITE, PAWN, to + 8);
 	                break;
 	            }
 

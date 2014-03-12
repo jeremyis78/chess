@@ -19,13 +19,13 @@ public class UtilTest extends TestCase {
 	
 	
 	public void testOpp() {
-		assertEquals(Color.BLACK, Util.opp(Color.WHITE));
-		assertEquals(Color.WHITE, Util.opp(Color.BLACK));
+		assertEquals(Bitmap.BLACK, Util.opp(Bitmap.WHITE));
+		assertEquals(Bitmap.WHITE, Util.opp(Bitmap.BLACK));
 	}
 
 	public void testToggle() {
-		assertEquals(Color.BLACK, Util.Toggle(Color.WHITE));
-		assertEquals(Color.WHITE, Util.Toggle(Color.BLACK));
+		assertEquals(Bitmap.BLACK, Util.Toggle(Bitmap.WHITE));
+		assertEquals(Bitmap.WHITE, Util.Toggle(Bitmap.BLACK));
 	}
 
 	public void testReverseByte() {
@@ -127,31 +127,31 @@ public class UtilTest extends TestCase {
 	}
 
 	public void testPieceToChar() {
-		assertEquals('P', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.PAWN]));
-		assertEquals('p', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.PAWN]));
+		assertEquals('P', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.PAWN]));
+		assertEquals('p', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.PAWN]));
 
-		assertEquals('N', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.KNIGHT]));
-		assertEquals('n', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.KNIGHT]));
+		assertEquals('N', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.KNIGHT]));
+		assertEquals('n', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.KNIGHT]));
 
-		assertEquals('K', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.KING]));
-		assertEquals('k', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.KING]));
+		assertEquals('K', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.KING]));
+		assertEquals('k', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.KING]));
 
-		assertEquals('B', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.BISHOP]));
-		assertEquals('b', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.BISHOP]));
+		assertEquals('B', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.BISHOP]));
+		assertEquals('b', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.BISHOP]));
 
-		assertEquals('R', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.ROOK]));
-		assertEquals('r', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.ROOK]));
+		assertEquals('R', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.ROOK]));
+		assertEquals('r', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.ROOK]));
 
-		assertEquals('Q', Util.PieceToChar(Color.WHITE, Bitmap.PIECE[Bitmap.QUEEN]));
-		assertEquals('q', Util.PieceToChar(Color.BLACK, Bitmap.PIECE[Bitmap.QUEEN]));
+		assertEquals('Q', Util.PieceToChar(Bitmap.WHITE, Bitmap.PIECE[Bitmap.QUEEN]));
+		assertEquals('q', Util.PieceToChar(Bitmap.BLACK, Bitmap.PIECE[Bitmap.QUEEN]));
 		
 		try{
-			Util.PieceToChar(Color.WHITE, 4);
+			Util.PieceToChar(Bitmap.WHITE, 4);
 			fail("4 is not a valid piece");
 		} catch (IllegalArgumentException e){}
 
 		try{
-			Util.PieceToChar(Color.WHITE, 8);
+			Util.PieceToChar(Bitmap.WHITE, 8);
 			fail("8 is not a valid piece");
 		} catch (IllegalArgumentException e){}
 

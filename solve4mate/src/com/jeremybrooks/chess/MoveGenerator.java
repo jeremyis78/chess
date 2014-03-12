@@ -60,8 +60,8 @@ public class MoveGenerator {
 		//are already aligned.
 		
 		//'x' not needed here
-		int y = sq / 8;
-		int shiftby = y * 8 + 1;
+		int yCoordinateOfSquare = rankNumber(sq);
+		int shiftby = yCoordinateOfSquare * 8 + 1;
 
 		//SHIFT 'b' RIGHT by ((y * 8) + 1) the AND with 63 (for the 6 bits)
 		return (byte) ((b >> shiftby) & 63);
@@ -73,9 +73,9 @@ public class MoveGenerator {
 		//The transformation function T for x and y is 
 		// T(x1, y1) = (y1, x1)   (x and y are swapped)
 		
-		int x = sq % 8;
+		int xCoordinateOfSquare = fileNumber(sq);
 		//'y' not needed
-		int shiftby = x * 8 + 1;
+		int shiftby = xCoordinateOfSquare * 8 + 1;
 
 		//SHIFT 'b' RIGHT by ((x * 8) + 1) then AND with 63 (for the 6 bits)
 		return (byte) ((b >> shiftby) & 63);
@@ -86,8 +86,8 @@ public class MoveGenerator {
 	    
 	    //for diagonals of length 3 or less, status should be zero
 	    
-	    int x = sq % 8;
-	    int y = sq / 8;
+	    int x = fileNumber(sq);
+	    int y = rankNumber(sq);
 	    
 	    byte temp = 0;
 	    switch (x+y){
@@ -149,8 +149,8 @@ public class MoveGenerator {
 	    //We perform the transformation function T on x and y
 	    //where T(x1, y1) = (7 - x1, y1)
 	    
-	    int x = 7 - (sq % 8);  
-	    int y = sq / 8;
+	    int x = 7 - fileNumber(sq);  
+	    int y = rankNumber(sq);
 	    
 	    byte temp = 0;
 	    switch (x+y){
@@ -439,7 +439,7 @@ public class MoveGenerator {
 
 
 	    switch (sideUnderAttack) {
-	         case Color.WHITE:
+	         case Bitmap.WHITE:
 	             attackers |= att.whitepawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
 
 //	              if (g.enPassantSq[depth] != NOSQUARE){
@@ -461,7 +461,7 @@ public class MoveGenerator {
 	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
-	        case Color.BLACK:
+	        case Bitmap.BLACK:
 	             attackers |= att.blackpawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  attackers |= att.pawn[side][from] &
@@ -488,15 +488,15 @@ public class MoveGenerator {
 	// RookAttacks() returns a bitboard of the squares that 
 	// a rook on "from" would attack, including captures.
 
-	long RookAttacks (GameState g, int from)
+	long RookAttacks (GameState g, int rookSquare)
 	{
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status (g.pos.all[ALL], from);
-	    stat2 = Status90 (g.pos.all[ALL90], from);
-	    attacks = att.rank[from][stat1];
-	    attacks |= att.file[from][stat2];
+	    stat1 = Status (g.pos.all[ALL], rookSquare);
+	    stat2 = Status90 (g.pos.all[ALL90], rookSquare);
+	    attacks = att.rank[rookSquare][stat1];
+	    attacks |= att.file[rookSquare][stat2];
 	    return attacks;
 	}
 
@@ -504,26 +504,26 @@ public class MoveGenerator {
 	// BishopAttacks() returns a bitboard of the squares that 
 	// a bishop on "from" would attack, including captures.
 
-	long BishopAttacks (GameState g, int from)
+	long BishopAttacks (GameState g, int bishopSquare)
 	{
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status45L (g.pos.all[ALL45L], from);
-	    stat2 = Status45R (g.pos.all[ALL45R], from);
-	    attacks = att.L45[from][stat1];
-	    attacks |= att.R45[from][stat2];
+	    stat1 = Status45L (g.pos.all[ALL45L], bishopSquare);
+	    stat2 = Status45R (g.pos.all[ALL45R], bishopSquare);
+	    attacks = att.L45[bishopSquare][stat1];
+	    attacks |= att.R45[bishopSquare][stat2];
 	    return attacks;
 	}
 
 	static int isPawnPromotion(int side, int from){
 	    switch(side){
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        if(from + 8 >= A8){
 	            return 1;
 	        }
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        if(from - 8 <= H1){
 	            return 1;
 	        }
@@ -539,7 +539,7 @@ public class MoveGenerator {
 	// the pawn moved to. (pawn advanced one square)
 	//
 	protected static int minusOneRank(int side, int to){
-	    if (side == Color.WHITE) {
+	    if (side == Bitmap.WHITE) {
 	        return (to - 8);
 	    } else {
 	        return (to + 8);
@@ -553,7 +553,7 @@ public class MoveGenerator {
 	// the pawn moved to. (pawn advanced two squares)
 	//
 	protected static int minusTwoRank(int side, int to){
-	    if (side == Color.WHITE) {
+	    if (side == Bitmap.WHITE) {
 	        return (to - 16);
 	    } else {
 	        return (to + 16);
@@ -680,11 +680,11 @@ public class MoveGenerator {
 	    empty = ~g.pos.all[ALL];
 
 	    switch (side) {
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        advOne = (g.pos.getPawns(side) << 8) & empty & ~EIGHTHRANK;
 	        // 'advOne' is all moves except those to the eighth rank
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        advOne = (g.pos.getPawns(side) >> 8) & empty & ~FIRSTRANK;
 	        // 'advOne' is all moves except those to the first rank
 	        break;
@@ -700,12 +700,12 @@ public class MoveGenerator {
 	    empty = ~g.pos.all[ALL];
 
 	    switch (side) {
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        advTwo = g.pos.getPawns(side) & SECONDRANK;
 	        advTwo = (advTwo << 8) & empty;
 	        advTwo = (advTwo << 8) & empty;
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        advTwo = g.pos.getPawns(side) & SEVENTHRANK;
 	        advTwo = (advTwo >> 8) & empty;
 	        advTwo = (advTwo >> 8) & empty;
@@ -722,11 +722,11 @@ public class MoveGenerator {
 	    empty = ~g.pos.all[ALL];
 
 	    switch (side) {
-	    case Color.WHITE:
+	    case Bitmap.WHITE:
 	        prom = (g.pos.getPawns(side) << 8) & empty & EIGHTHRANK;
 	        // 'prom' is only the moves to the eighth rank
 	        break;
-	    case Color.BLACK:
+	    case Bitmap.BLACK:
 	        prom = (g.pos.getPawns(side) >> 8) & empty & FIRSTRANK;
 	        // 'prom' is only the moves to the first rank
 	        break;

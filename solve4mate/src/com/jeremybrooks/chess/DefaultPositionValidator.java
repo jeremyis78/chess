@@ -25,8 +25,8 @@ public class DefaultPositionValidator implements PositionValidator {
 	}
 
 	private static boolean eitherKingIsMissing(Position position) {
-		boolean isWhiteKingMissing = !position.isKingPlaced(Color.WHITE);
-		boolean isBlackKingMissing = !position.isKingPlaced(Color.BLACK);
+		boolean isWhiteKingMissing = !position.isKingPlaced(Bitmap.WHITE);
+		boolean isBlackKingMissing = !position.isKingPlaced(Bitmap.BLACK);
 		return isWhiteKingMissing || isBlackKingMissing;
 	}
 }

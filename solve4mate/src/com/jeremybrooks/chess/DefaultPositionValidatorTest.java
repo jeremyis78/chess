@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess;
 
 import static org.junit.Assert.*;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +19,8 @@ public class DefaultPositionValidatorTest {
 	@Test
 	public void testTwoNonAdjacentKingsIsValid() {
 		Position nonAdjacentKings = new Position();
-		nonAdjacentKings.placePiece(Color.WHITE, Pieces.KING, Bitmap.H8);
-		nonAdjacentKings.placePiece(Color.BLACK, Pieces.KING, Bitmap.G6);
+		nonAdjacentKings.placePiece(Bitmap.WHITE, KING, H8);
+		nonAdjacentKings.placePiece(Bitmap.BLACK, KING, G6);
 		validator.validateOrThrow(nonAdjacentKings);
 	}
 

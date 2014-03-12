@@ -1,5 +1,6 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
 import java.io.PrintStream;
 
 public class Evaluator {
@@ -159,21 +160,21 @@ public class Evaluator {
 		}
 
 		// Compute material value
-		for (int i = Pieces.PAWNS; i <= Pieces.QUEENS; i++){
+		for (int i = PAWN; i <= QUEEN; i++){
 			wScore += whitePieceValue[i] * 
-					Util.PieceCount(g.pos.getPieces(Color.WHITE,i));
+					Util.PieceCount(g.pos.getPieces(Bitmap.WHITE,i));
 
 			bScore += blackPieceValue[i] * 
-					Util.PieceCount(g.pos.getPieces(Color.BLACK,i));
+					Util.PieceCount(g.pos.getPieces(Bitmap.BLACK,i));
 		}
 
 		// Estimate positional value
 		for(int i = 0; i<2; i++){
 			// For knights
-			pieces = g.pos.getPieces(i, Pieces.KNIGHTS);
+			pieces = g.pos.getPieces(i, KNIGHT);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
-				if (i == Color.WHITE){
+				if (i == Bitmap.WHITE){
 					wScore += knightPV[i][pieceSq];
 				} else {
 					bScore += knightPV[i][pieceSq];
@@ -181,10 +182,10 @@ public class Evaluator {
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
 			// For bishops
-			pieces = g.pos.getPieces(i, Pieces.BISHOPS);
+			pieces = g.pos.getPieces(i, BISHOP);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
-				if (i == Color.WHITE){
+				if (i == Bitmap.WHITE){
 					wScore += bishopPV[i][pieceSq];
 				} else {
 					bScore += bishopPV[i][pieceSq];
@@ -192,10 +193,10 @@ public class Evaluator {
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
 			// For rooks
-			pieces = g.pos.getPieces(i, Pieces.ROOKS);
+			pieces = g.pos.getPieces(i, ROOK);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
-				if (i == Color.WHITE){
+				if (i == Bitmap.WHITE){
 					wScore += rookPV[i][pieceSq];
 				} else {
 					bScore += rookPV[i][pieceSq];

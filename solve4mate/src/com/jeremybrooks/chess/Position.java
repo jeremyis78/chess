@@ -14,11 +14,19 @@ import java.io.PrintStream;
 
 public class Position
 {
+	
+	private static final int PAWNS = 0;
+	private static final int KNIGHTS = 1;
+	private static final int BISHOPS = 2;
+	private static final int ROOKS = 3;
+	private static final int QUEENS = 4;
+	private static final int ALLPIECES = 5;
+
 	private static final String EMPTY_BOARD = "8/8/8/8/8/8/8/8";
 	private static PrintStream out = System.out;
 	private static final int KING_NOT_PLACED = -1;
 
-    private long pieces[][] = new long[Color.MAXCOLOR][Pieces.MAXPIECE];
+    private long pieces[][] = new long[2][6];
     long all[] = new long[MAXALL];
     int board[] = new int[64];
     int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
@@ -33,52 +41,52 @@ public class Position
 	
 	public long getPawns(int side)
 	{
-		return pieces[side][Pieces.PAWNS];		
+		return pieces[side][PAWNS];		
 	}
 
 	public long getOpponentPawns(int side)
 	{
-		return pieces[Util.opp(side)][Pieces.PAWNS];		
+		return pieces[Util.opp(side)][PAWNS];		
 	}
 	
 	public long getKnights(int side)
 	{
-		return pieces[side][Pieces.KNIGHTS];		
+		return pieces[side][KNIGHTS];		
 	}
 	
 	public long getOpponentKnights(int side)
 	{
-		return pieces[Util.opp(side)][Pieces.KNIGHTS];		
+		return pieces[Util.opp(side)][KNIGHTS];		
 	}
 
 	public long getBishops(int side)
 	{
-		return pieces[side][Pieces.BISHOPS];		
+		return pieces[side][BISHOPS];		
 	}
 
 	public long getOpponentBishops(int side)
 	{
-		return pieces[Util.opp(side)][Pieces.BISHOPS];		
+		return pieces[Util.opp(side)][BISHOPS];		
 	}
 
 	public long getRooks(int side)
 	{
-		return pieces[side][Pieces.ROOKS];		
+		return pieces[side][ROOKS];		
 	}
 
 	public long getOpponentRooks(int side)
 	{
-		return pieces[Util.opp(side)][Pieces.ROOKS];		
+		return pieces[Util.opp(side)][ROOKS];		
 	}
 
 	public long getQueens(int side)
 	{
-		return pieces[side][Pieces.QUEENS];		
+		return pieces[side][QUEENS];		
 	}
 
 	public long getOpponentQueens(int side)
 	{
-		return pieces[Util.opp(side)][Pieces.QUEENS];		
+		return pieces[Util.opp(side)][QUEENS];		
 	}
 	
 	public long getKing(int side)
@@ -91,7 +99,7 @@ public class Position
 
 	public long getOpponentKing(int side)
 	{
-		int opponentSide = (side == Color.WHITE) ? Color.BLACK : Color.WHITE; 
+		int opponentSide = (side == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE; 
 		if(isKingPlaced(opponentSide)) {
 	    	return 1L << kingSq[opponentSide];
 	    }
@@ -99,15 +107,15 @@ public class Position
 	}
 
 	public int getWhiteKingSquare() {
-		if(isKingPlaced(Color.WHITE)) {
-	    	return kingSq[Color.WHITE];
+		if(isKingPlaced(Bitmap.WHITE)) {
+	    	return kingSq[Bitmap.WHITE];
 	    }
 	    return KING_NOT_PLACED;
 	}
 
 	public int getBlackKingSquare() {
-		if(isKingPlaced(Color.BLACK)) {
-	    	return kingSq[Color.BLACK];
+		if(isKingPlaced(Bitmap.BLACK)) {
+	    	return kingSq[Bitmap.BLACK];
 	    }
 	    return KING_NOT_PLACED;
 	}
@@ -120,15 +128,25 @@ public class Position
 	    }
 	    return 0L;
 	}
-	
+
+	public void setPieces(int side, int piece, long bitmap) {
+		int squareOfPiece = 0;
+		while(bitmap != 0)
+		{
+			squareOfPiece = Bitmap.lowestBitNumber(bitmap);
+			placePiece(side, piece, squareOfPiece);
+			bitmap = Bitmap.clearBit(bitmap, squareOfPiece);
+		}
+	}
+
 	public long getOpponentPiecesExceptKing(int color)
 	{
-		int opponentColor = (color == Color.WHITE) ? Color.BLACK : Color.WHITE;
-		return pieces[opponentColor][Pieces.ALLPIECES];
+		int opponentColor = (color == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE;
+		return pieces[opponentColor][ALLPIECES];
 	}
 
 	private boolean isNotTheKing(int p) {
-		return p <= Pieces.QUEEN;
+		return p <= QUEEN;
 	}
 
 	public boolean isKingPlaced(int side) {
@@ -154,15 +172,15 @@ public class Position
 	/*******************************************************************/
 		
 	public void clear(){
-	    kingSq[Color.WHITE] = KING_NOT_PLACED;
-	    kingSq[Color.BLACK] = KING_NOT_PLACED;
-	    for (int i = Color.WHITE; i <= Color.BLACK; i++){
-	        pieces[i][Pieces.PAWNS] = 0L;
-	        pieces[i][Pieces.KNIGHTS] = 0L;
-	        pieces[i][Pieces.BISHOPS] = 0L;
-	        pieces[i][Pieces.ROOKS] = 0L;
-	        pieces[i][Pieces.QUEENS] = 0L;
-	        pieces[i][Pieces.ALLPIECES] = 0L;
+	    kingSq[Bitmap.WHITE] = KING_NOT_PLACED;
+	    kingSq[Bitmap.BLACK] = KING_NOT_PLACED;
+	    for (int i = Bitmap.WHITE; i <= Bitmap.BLACK; i++){
+	        pieces[i][PAWNS] = 0L;
+	        pieces[i][KNIGHTS] = 0L;
+	        pieces[i][BISHOPS] = 0L;
+	        pieces[i][ROOKS] = 0L;
+	        pieces[i][QUEENS] = 0L;
+	        pieces[i][ALLPIECES] = 0L;
 	    }
 	    all[ALL] = 0L;
 	    all[ALL90] = 0L;
@@ -237,22 +255,22 @@ public class Position
 		            
 		            switch(c){
 		            case 'P':
-		                placePiece(Color.WHITE, PAWN, sq);
+		                placePiece(Bitmap.WHITE, PAWN, sq);
 		                break;
 		            case 'N':
-		                placePiece(Color.WHITE, Pieces.KNIGHT, sq);
+		                placePiece(Bitmap.WHITE, KNIGHT, sq);
 		                break;
 		            case 'B':
-		                placePiece(Color.WHITE, Pieces.BISHOP, sq);
+		                placePiece(Bitmap.WHITE, BISHOP, sq);
 		                break;
 		            case 'R':
-		                placePiece(Color.WHITE, Pieces.ROOK, sq);
+		                placePiece(Bitmap.WHITE, ROOK, sq);
 		                break;
 		            case 'Q':
-		                placePiece(Color.WHITE, Pieces.QUEEN, sq);
+		                placePiece(Bitmap.WHITE, QUEEN, sq);
 		                break;
 		            case 'K':
-		                if(isKingPlaced[Color.WHITE])
+		                if(isKingPlaced[Bitmap.WHITE])
 		                {
 		                    throw new IllegalArgumentException("board has too many white kings");
 		                }
@@ -261,26 +279,26 @@ public class Position
 		                all[ALL45L] |= sqMask45L;
 		                all[ALL45R] |= sqMask45R;
 		                board[sq] = PIECE[Bitmap.KING];
-		                kingSq[Color.WHITE] = sq;
-		                isKingPlaced[Color.WHITE] = true;
+		                kingSq[Bitmap.WHITE] = sq;
+		                isKingPlaced[Bitmap.WHITE] = true;
 		                break;
 		            case 'p':
-		                placePiece(Color.BLACK, PAWN, sq);
+		                placePiece(Bitmap.BLACK, PAWN, sq);
 		                break;
 		            case 'n':
-		                placePiece(Color.BLACK, Pieces.KNIGHT, sq);
+		                placePiece(Bitmap.BLACK, KNIGHT, sq);
 		                break;
 		            case 'b':
-		                placePiece(Color.BLACK, Pieces.BISHOP, sq);
+		                placePiece(Bitmap.BLACK, BISHOP, sq);
 		                break;
 		            case 'r':
-		                placePiece(Color.BLACK, Pieces.ROOK, sq);
+		                placePiece(Bitmap.BLACK, ROOK, sq);
 		                break;
 		            case 'q':
-		                placePiece(Color.BLACK, Pieces.QUEEN, sq);
+		                placePiece(Bitmap.BLACK, QUEEN, sq);
 		                break;
 		            case 'k':
-		                if(isKingPlaced[Color.BLACK])
+		                if(isKingPlaced[Bitmap.BLACK])
 		                {
 		                    throw new IllegalArgumentException("board has too many black kings");
 		                }
@@ -289,8 +307,8 @@ public class Position
 		                all[ALL45L] |= sqMask45L;
 		                all[ALL45R] |= sqMask45R;
 		                board[sq] = -PIECE[Bitmap.KING];
-		                kingSq[Color.BLACK] = sq;
-		                isKingPlaced[Color.BLACK] = true;
+		                kingSq[Bitmap.BLACK] = sq;
+		                isKingPlaced[Bitmap.BLACK] = true;
 		                break;
 		            default: //illegal character
 		                throw new IllegalArgumentException("board contains invalid piece '" + c + "'"); 
@@ -463,17 +481,17 @@ public class Position
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];
 	    all[ALL45L] |= 1L << SQ2BIT45L[sq];
 	    all[ALL45R] |= 1L << SQ2BIT45R[sq];
-	    if (c == Color.WHITE){
+	    if (c == Bitmap.WHITE){
 	      board[sq] = PIECE[p];
 	    } else {
 	      board[sq] = -PIECE[p];
 	    }
 	
-	    if (p == Pieces.KING){
+	    if (p == KING){
 	            kingSq[c] = sq;
 	    } else {
 	        pieces[c][p] |= mask;
-	        pieces[c][Pieces.ALLPIECES] |= mask;
+	        pieces[c][ALLPIECES] |= mask;
 	    }
 	}
 	
@@ -491,18 +509,18 @@ public class Position
 	    all[ALL45L] ^= 1L << SQ2BIT45L[sq];
 	    all[ALL45R] ^= 1L << SQ2BIT45R[sq];
 	    board[sq] = BOARD_EMPTY_SQUARE;
-	    if (p == Pieces.KING)
+	    if (p == KING)
 	    {
 	    	kingSq[c] = KING_NOT_PLACED;
 	    }  else {
 	        pieces[c][p] ^= mask;
-	        pieces[c][Pieces.ALLPIECES] ^= mask;
+	        pieces[c][ALLPIECES] ^= mask;
 	    } 
 	}
 	
 	public static boolean isSameColor(int c, int p)
 	{
-		if ( (p > 0 && c == Color.WHITE) || (p < 0 && c == Color.BLACK) )
+		if ( (p > 0 && c == Bitmap.WHITE) || (p < 0 && c == Bitmap.BLACK) )
 	            return true;
 		return false;
 	}
@@ -511,4 +529,5 @@ public class Position
 	{
 		return (p == BOARD_EMPTY_SQUARE);
 	}
+
 }
