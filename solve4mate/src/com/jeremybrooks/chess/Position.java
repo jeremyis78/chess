@@ -301,27 +301,9 @@ public class Position
 				
 			}
 		}
-		
-//		if( eitherKingIsMissing(isKingPlaced) )
-//		{
-//			throw new IllegalArgumentException("board is missing one or both kings");
-//		}
-//	    
-//	    if(areKingsAdjacent()){
-//	        throw new IllegalArgumentException("board cannot have adjacent kings");
-//	    }
-
 		return true;
 	}
 
-	private boolean areKingsAdjacent() {
-		return Util.adjacentSquares(kingSq[Color.WHITE], kingSq[Color.BLACK]);
-	}
-
-	private boolean eitherKingIsMissing(boolean[] isKingPlaced) {
-		return !(isKingPlaced[Color.WHITE] && isKingPlaced[Color.BLACK]);
-	}
-	
 	void Display(){
 		DisplayBoard();
 		DisplayBitboardBoard();

@@ -1,9 +1,5 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.E4;
-import static com.jeremybrooks.chess.Bitmap.H8;
-import static com.jeremybrooks.chess.Bitmap.fileBitmap;
-import static com.jeremybrooks.chess.Bitmap.rankBitmap;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Assert;
