@@ -27,7 +27,7 @@ public class Position
 	private static final int KING_NOT_PLACED = -1;
 
     private long pieces[][] = new long[2][6];
-    long all[] = new long[MAXALL];
+    private long all[] = new long[MAXALL];
     private int board[] = new int[64];
     private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
@@ -134,6 +134,23 @@ public class Position
 		int opponentColor = (color == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE;
 		return pieces[opponentColor][ALLPIECES];
 	}
+
+    public long getAllPieces(int rotationInDegrees)
+    {
+    	switch(rotationInDegrees)
+    	{
+    	case -45:
+    		return all[ALL45L];
+    	case 0:
+    		return all[ALL];
+    	case 45:
+    		return all[ALL45R];
+    	case 90:
+    		return all[ALL90];
+    	default:
+    		throw new IllegalArgumentException("rotation can only be -45, 0, 45 and 90. '"+rotationInDegrees+"' was passed in");
+    	}
+    }
 
 	private boolean isNotTheKing(int p) {
 		return p <= QUEEN;

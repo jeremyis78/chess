@@ -205,7 +205,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	    } 
 
 	    // Add king moves to flight squares (and captures)
-	    kingMoves = att.king[kingSq] & ~g.pos.all[ALL];
+	    kingMoves = att.king[kingSq] & ~g.pos.getAllPieces(0);
 	    while (morePieces(kingMoves)){
 	        to = FirstPiece(kingMoves);
 	        //Same reason as above...hafta make sure the king doesn't just

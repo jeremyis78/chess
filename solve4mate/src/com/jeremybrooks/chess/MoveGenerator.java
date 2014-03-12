@@ -284,7 +284,7 @@ public class MoveGenerator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    empty = ~g.pos.all[ALL];
+	    empty = ~g.pos.getAllPieces(0);
 
 	    //getPawnMoves(g, side, pMoves, promoters, advanceTwo);
 	    pMoves = getPawnAdvanceOne(g, side);
@@ -451,13 +451,13 @@ public class MoveGenerator {
 	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
 	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.all[ALL], squareUnderAttack)] |
-	                 att.file[squareUnderAttack][Status90 (g.pos.all[ALL90], squareUnderAttack)];
+	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.getAllPieces(0), squareUnderAttack)] |
+	                 att.file[squareUnderAttack][Status90 (g.pos.getAllPieces(90), squareUnderAttack)];
 	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.all[ALL45L], squareUnderAttack)] |
-	                 att.R45[squareUnderAttack][Status45R (g.pos.all[ALL45R], squareUnderAttack)];
+	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.getAllPieces(-45), squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (g.pos.getAllPieces(45), squareUnderAttack)];
 	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
@@ -470,13 +470,13 @@ public class MoveGenerator {
 	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
 	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.all[ALL], squareUnderAttack)] | 
-	                 att.file[squareUnderAttack][Status90 (g.pos.all[ALL90], squareUnderAttack)];
+	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.getAllPieces(0), squareUnderAttack)] | 
+	                 att.file[squareUnderAttack][Status90 (g.pos.getAllPieces(90), squareUnderAttack)];
 	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.all[ALL45L], squareUnderAttack)] |
-	                 att.R45[squareUnderAttack][Status45R (g.pos.all[ALL45R], squareUnderAttack)];
+	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.getAllPieces(-45), squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (g.pos.getAllPieces(45), squareUnderAttack)];
 	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
@@ -493,8 +493,8 @@ public class MoveGenerator {
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status (g.pos.all[ALL], rookSquare);
-	    stat2 = Status90 (g.pos.all[ALL90], rookSquare);
+	    stat1 = Status (g.pos.getAllPieces(0), rookSquare);
+	    stat2 = Status90 (g.pos.getAllPieces(90), rookSquare);
 	    attacks = att.rank[rookSquare][stat1];
 	    attacks |= att.file[rookSquare][stat2];
 	    return attacks;
@@ -509,8 +509,8 @@ public class MoveGenerator {
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status45L (g.pos.all[ALL45L], bishopSquare);
-	    stat2 = Status45R (g.pos.all[ALL45R], bishopSquare);
+	    stat1 = Status45L (g.pos.getAllPieces(-45), bishopSquare);
+	    stat2 = Status45R (g.pos.getAllPieces(45), bishopSquare);
 	    attacks = att.L45[bishopSquare][stat1];
 	    attacks |= att.R45[bishopSquare][stat2];
 	    return attacks;
@@ -677,7 +677,7 @@ public class MoveGenerator {
 		long advOne = 0;
 	    long empty;
 
-	    empty = ~g.pos.all[ALL];
+	    empty = ~g.pos.getAllPieces(0);
 
 	    switch (side) {
 	    case Bitmap.WHITE:
@@ -697,7 +697,7 @@ public class MoveGenerator {
 		long advTwo = 0;
 		long empty;
 
-	    empty = ~g.pos.all[ALL];
+	    empty = ~g.pos.getAllPieces(0);// all[ALL];
 
 	    switch (side) {
 	    case Bitmap.WHITE:
@@ -719,7 +719,7 @@ public class MoveGenerator {
 		long prom = 0;
 		long empty;
 
-	    empty = ~g.pos.all[ALL];
+	    empty = ~g.pos.getAllPieces(0);
 
 	    switch (side) {
 	    case Bitmap.WHITE:

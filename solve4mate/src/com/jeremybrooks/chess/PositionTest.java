@@ -74,7 +74,7 @@ public class PositionTest extends TestCase {
 		assertTrue(0 != p.getKingSquare(WHITE));
 		assertTrue(0 != p.getKingSquare(BLACK));
 		assertTrue(PIECE[Bitmap.ROOK] == p.getBoard(Bitmap.A1));
-		assertEquals(0xFFFF00000000FFFFL, p.all[ALL]);
+		assertEquals(0xFFFF00000000FFFFL, p.getAllPieces(0));// .all[ALL]);
 		
 		//now clear them
 		p.clear();
@@ -106,7 +106,7 @@ public class PositionTest extends TestCase {
         
 		assertEquals(-1, p.getKingSquare(WHITE));
 		assertEquals(-1, p.getKingSquare(BLACK));
-		assertEquals(0x0L, p.all[ALL]);
+		assertEquals(0x0L, p.getAllPieces(0));
 		
 	}
 
@@ -363,10 +363,10 @@ public class PositionTest extends TestCase {
         long sqMask45L = 1L << SQ2BIT45L[sq];
         long sqMask45R = 1L << SQ2BIT45R[sq];
 
-		assertEquals(sqMask, p.all[ALL]);
-		assertEquals(sqMask90, p.all[ALL90]);
-		assertEquals(sqMask45L, p.all[ALL45L]);
-		assertEquals(sqMask45R, p.all[ALL45R]);
+		assertEquals(sqMask, p.getAllPieces(0));
+		assertEquals(sqMask90, p.getAllPieces(90));
+		assertEquals(sqMask45L, p.getAllPieces(-45));
+		assertEquals(sqMask45R, p.getAllPieces(45));
 
 		p.erasePiece(Bitmap.WHITE, KING, sq);
 
@@ -383,10 +383,10 @@ public class PositionTest extends TestCase {
         sqMask45L = 1L << SQ2BIT45L[sq];
         sqMask45R = 1L << SQ2BIT45R[sq];
 
-		assertEquals(sqMask, p.all[ALL]);
-		assertEquals(sqMask90, p.all[ALL90]);
-		assertEquals(sqMask45L, p.all[ALL45L]);
-		assertEquals(sqMask45R, p.all[ALL45R]);
+		assertEquals(sqMask, p.getAllPieces(0));
+		assertEquals(sqMask90, p.getAllPieces(90));
+		assertEquals(sqMask45L, p.getAllPieces(-45));
+		assertEquals(sqMask45R, p.getAllPieces(45));
 	}
 
 	public void testPlaceAndErasePieces()
@@ -418,10 +418,10 @@ public class PositionTest extends TestCase {
         long sqMask45R = 1L << SQ2BIT45R[sq];
 
         assertEquals(sqMask, p.getPieces(color,piece));
-        assertEquals(sqMask, p.all[ALL]);
-		assertEquals(sqMask90, p.all[ALL90]);
-		assertEquals(sqMask45L, p.all[ALL45L]);
-		assertEquals(sqMask45R, p.all[ALL45R]);
+        assertEquals(sqMask, p.getAllPieces(0));
+		assertEquals(sqMask90, p.getAllPieces(90));
+		assertEquals(sqMask45L, p.getAllPieces(-45));
+		assertEquals(sqMask45R, p.getAllPieces(45));
 	}
 
 	public void testIsSameColor() {

@@ -39,7 +39,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    //***************************************************************************
 
 	    n = g.numberOfLegalMoves[depth];
-	    empty = ~g.pos.all[ALL];
+	    empty = ~g.pos.getAllPieces(0);
 
 	    switch (side) {
 	        case Bitmap.WHITE:
