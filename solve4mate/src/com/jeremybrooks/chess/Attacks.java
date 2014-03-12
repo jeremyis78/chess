@@ -1045,15 +1045,24 @@ public class Attacks {
     	StringBuffer sb = new StringBuffer();
     	sb.append(msg);
     	Position position = new Position();
+    	int counter = 0;
     	for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
 			long pieceBitmap = 1L << sq;
     		for (int st = 0; st < 64; ++st){
-    			System.out.println(Util.formatByteBitmap("o:", st << 1) + "\n");
-    			System.out.println(Util.formatLongBitmapAsBoard(pieceBitmap, rank[sq][st]) + "\n");
-    			position.placePiece(Bitmap.WHITE, ROOK, sq);
-    			long blockingPieces = (st << 1);
-    			position.setPieces(Bitmap.BLACK, PAWN, blockingPieces); //occupied status represented by pawns
-    			System.out.println(d.formatBoard(position));
+//    			System.out.println("Square: " + sq + " rank: " + rankNumber(sq) + " rank*8: "+(rankNumber(sq) * 8) + " occupied: " + (st << 1));
+//    			System.out.println(Util.formatByteBitmap("o:", st << 1) + "\n");
+//    			System.out.println(Util.formatLongBitmapAsBoard(pieceBitmap, rank[sq][st]) + "\n");
+    			long occupied = (st << 1);
+    			int shiftLeft = rankNumber(sq) * 8;
+				long blockingPieces = occupied << shiftLeft;
+    			position.setPieces(BLACK, PAWN, blockingPieces); //occupied status represented by pawns
+    			position.placePiece(WHITE, ROOK, sq);
+//    			System.out.println(d.formatBoard(position));
+//    			System.out.println(counter++ + "(" + sq + "," + st + ")  given: " + position.getFen() + "  attacks along rank: " + Util.formatSquares(rank[sq][st]));
+
+    			System.out.println(sq +"\t" + st + "\t" + "\""+Util.formatSquares(rank[sq][st])+"\"" + "\t#FEN: " + position.getFen());
+
+    			position.clear();
     		}
         }
     	return; //sb.toString().trim();

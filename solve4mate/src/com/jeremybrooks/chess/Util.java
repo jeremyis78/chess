@@ -454,7 +454,21 @@ public class Util {
 
 	
 	
-	
+    public static String formatSquares(long bitmap)
+    {
+    	StringBuilder formatted = new StringBuilder();
+		int squareOfPiece = 0;
+		boolean isFirst = true;
+		while(bitmap != 0)
+		{
+			if(!isFirst) formatted.append(" ");
+			isFirst = false;
+			squareOfPiece = Bitmap.lowestBitNumber(bitmap);
+			formatted.append(SqToStr(squareOfPiece));
+			bitmap = Bitmap.clearBit(bitmap, squareOfPiece);
+		}
+		return formatted.toString();
+    }
 
     
 
