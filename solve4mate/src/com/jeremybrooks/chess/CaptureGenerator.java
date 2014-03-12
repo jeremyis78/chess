@@ -1,13 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.BISHOP;
-import static com.jeremybrooks.chess.Bitmap.KING;
-import static com.jeremybrooks.chess.Bitmap.KNIGHT;
-import static com.jeremybrooks.chess.Bitmap.NOSQUARE;
-import static com.jeremybrooks.chess.Bitmap.PAWN;
-import static com.jeremybrooks.chess.Bitmap.PIECE;
-import static com.jeremybrooks.chess.Bitmap.QUEEN;
-import static com.jeremybrooks.chess.Bitmap.ROOK;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 public class CaptureGenerator extends MoveGenerator implements Generator {
 

@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+
 /**
  * Validates that both kings are present and not adjacent to each other.
  * @author jeremy

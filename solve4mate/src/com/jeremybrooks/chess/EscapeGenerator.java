@@ -1,18 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.ALL;
-import static com.jeremybrooks.chess.Bitmap.BOARD_EMPTY_SQUARE;
-import static com.jeremybrooks.chess.Bitmap.EIGHTHRANK;
-import static com.jeremybrooks.chess.Bitmap.FIFTHRANK;
-import static com.jeremybrooks.chess.Bitmap.FIRSTRANK;
-import static com.jeremybrooks.chess.Bitmap.FOURTHRANK;
-import static com.jeremybrooks.chess.Bitmap.KING;
-import static com.jeremybrooks.chess.Bitmap.KNIGHT;
-import static com.jeremybrooks.chess.Bitmap.NOSQUARE;
-import static com.jeremybrooks.chess.Bitmap.PAWN;
-import static com.jeremybrooks.chess.Bitmap.PIECE;
-import static com.jeremybrooks.chess.Bitmap.QUEEN;
-import static com.jeremybrooks.chess.Bitmap.TO_PIECE;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 public class EscapeGenerator extends MoveGenerator implements Generator {
 
