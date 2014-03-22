@@ -1009,86 +1009,41 @@ public class Attacks {
         return sb.toString().trim();
     }
 
-    public String rankAttacksAsHumanReadableString(){
-    	String msg = "TODO: describe me\n\n";
-    	StringBuffer sb = new StringBuffer();
-    	sb.append(msg);
-    	for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
-			long pieceBitmap = 1L << sq;
-    		for (int st = 0; st < 64; ++st){
-    			sb.append(Util.formatByteBitmap("o:", st << 1) + "\n");
-    			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, rank[sq][st]) + "\n");
-            }
-        }
-    	return sb.toString().trim();
-    }
-
-    
-    public String fileAttacksAsHumanReadableString(){
-    	String msg = "TODO: describe me\n\n";
-    	StringBuffer sb = new StringBuffer();
-    	sb.append(msg);
-    	for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
-			long pieceBitmap = 1L << sq;
-    		for (int st = 0; st < 64; ++st){
-    			sb.append(Util.formatByteBitmap("o:", st << 1) + "\n");
-    			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, file[sq][st]) + "\n");
-            }
-        }
-    	return sb.toString().trim();
-    }
-
-    
-    public void rankAttacksAsRealLifeScenario(){
-    	Displayer d = new Displayer();
-    	String msg = "TODO: describe me\n\n";
-    	StringBuffer sb = new StringBuffer();
-    	sb.append(msg);
+    public void rookAttacks(){
     	Position position = new Position();
-    	int counter = 0;
-    	for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
-			long pieceBitmap = 1L << sq;
+    	for (int rookSquare = Bitmap.A1; rookSquare <= Bitmap.H8; ++rookSquare){
     		for (int st = 0; st < 64; ++st){
-//    			System.out.println("Square: " + sq + " rank: " + rankNumber(sq) + " rank*8: "+(rankNumber(sq) * 8) + " occupied: " + (st << 1));
-//    			System.out.println(Util.formatByteBitmap("o:", st << 1) + "\n");
-//    			System.out.println(Util.formatLongBitmapAsBoard(pieceBitmap, rank[sq][st]) + "\n");
-    			long occupied = (st << 1);
-    			int shiftLeft = rankNumber(sq) * 8;
-				long blockingPieces = occupied << shiftLeft;
-    			position.setPieces(BLACK, PAWN, blockingPieces); //occupied status represented by pawns
-    			position.placePiece(WHITE, ROOK, sq);
-//    			System.out.println(d.formatBoard(position));
-//    			System.out.println(counter++ + "(" + sq + "," + st + ")  given: " + position.getFen() + "  attacks along rank: " + Util.formatSquares(rank[sq][st]));
-
-    			System.out.println(sq +"\t" + st + "\t" + "\""+Util.formatSquares(rank[sq][st])+"\"" + "\t#FEN: " + position.getFen());
-
+    			long occupiedBitsOnRankOrFile = (st << 1);
+    			int shiftLeft = rankNumber(rookSquare) * 8;
+				long blockingPiecesOnRank = occupiedBitsOnRankOrFile << shiftLeft;
+				long blockingPiecesOnFile = toBitboardRotatedRight90Degrees(blockingPiecesOnRank);
+				position.setPieces(BLACK, PAWN, blockingPiecesOnRank); //occupied status represented by pawns
+    			position.setPieces(BLACK, PAWN, blockingPiecesOnFile);
+    			position.placePiece(WHITE, ROOK, rookSquare);
+    			System.out.println(Util.SqToStr(rookSquare) +"\t" + occupiedBitsOnRankOrFile + "\t" + position.getFen() + "\t" + Util.formatSquares(rank[rookSquare][st]) + "\t" + Util.formatSquares(file[rookSquare][st]));
     			position.clear();
     		}
         }
-    	return; //sb.toString().trim();
     }
 
-    public String diagonal45DegreesRightAttacksAsHumanReadableString(){
-    	String msg = "TODO: describe me\n\n";
-    	StringBuffer sb = new StringBuffer();
-    	sb.append(msg);
-//    	for (int sq = Bitboard.A1; sq <= Bitboard.H8; ++sq){
-//			long pieceBitmap = 1L << sq; //Bitboard.SQ2BIT45R[sq];
-//    		for (int st = 0; st < 64; ++st){
-//    			sb.append(Util.formatByteBitmap("o:", st << 1) + "\n");
-//    			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, R45[sq][st]) + "\n");
-//            }
-//        }
-//    	return sb.toString().trim();
+    private long toBitboardRotatedRight90Degrees(long blockingPiecesOnRank) {
+    	long blockers = 0L;
+    	while(blockingPiecesOnRank != 0)
+    	{
+    		int squareIndex = Bitmap.lowestBitNumber(blockingPiecesOnRank);
+    		Bitmap fileBlockerBitmap = Bitmap.fileBitmap(squareIndex);
+    		blockers = blockers | fileBlockerBitmap.longValue();
+    		blockingPiecesOnRank = Bitmap.clearBit(blockingPiecesOnRank, squareIndex);
+    	}
+    	return blockers;
+    }
     
-    
-    
-    
+	public void bishopAttacksRight45(){
         int dstartsq[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-        int len, maxstatus;
-
+        Position position = new Position();
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
-            len = DLEN[d];	//get diagonal length
+            int  len = DLEN[d];	//get diagonal length
+            int maxstatus = 0;
             if (len < 3)
                 maxstatus = 0;
             else
@@ -1096,31 +1051,22 @@ public class Attacks {
             
             //NOW one loop for each sq in diagonal
             int i=0;		//keeps track of which attacks[?] to use
-            for (int sq = dstartsq[d]; i < len ; sq += 9, i++){
-    			long pieceBitmap = 1L << sq;
-            	//And finally, one loop for each status
-                for (byte st = 0; st <= maxstatus; st++){
-                    //cout << int(st) << ',';
-        			sb.append(Util.formatByteBitmap("o:", st << 1) + "\tstatus: " + st + "\n");
-        			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, R45[sq][st]) + "\n");
+            for (int bishopSquare = dstartsq[d]; i < len ; bishopSquare += 9, i++){
+                for (int st = 0; st <= maxstatus; st++){
+        			short occupiedBitsOnDiagonal = (short) (st << 1);
+        			long occupiedBitboard = getA1H8diag(d, occupiedBitsOnDiagonal);
+        			position.setPieces(BLACK, PAWN, occupiedBitboard);
+        			position.placePiece(WHITE, BISHOP, bishopSquare);
+        			System.out.println(Util.SqToStr(bishopSquare) + "\t" + occupiedBitsOnDiagonal + "\t" + position.getFen() + "\t" + Util.formatSquares(R45[bishopSquare][st]));// + "\n" + new Displayer().formatBoard(position));
+        			position.clear();
                 }
             }
         }
-        return sb.toString();
     }
-    
-    public String diagonal45DegreesLeftAttacksAsHumanReadableString(){
-    	String msg = "TODO: describe me\n\n";
-    	StringBuffer sb = new StringBuffer();
-    	sb.append(msg);
-//    	for (int sq = Bitboard.A1; sq <= Bitboard.H8; ++sq){
-//			long pieceBitmap = 1L << sq;
-//    		for (int st = 0; st < 64; ++st){
-//    			sb.append(Util.formatByteBitmap("o:", st << 1) + "\n");
-//    			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, L45[sq][st]) + "\n");
-//            }
-//        }
-        int dstartsq[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
+
+    public void bishopAttacksLeft45(){
+    	int dstartsq[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
+    	Position position = new Position();
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             int len = DLEN[d];	//get diagonal length
             int maxstatus;		//maximum status to count to
@@ -1133,18 +1079,19 @@ public class Attacks {
             
             //NOW one loop for each sq in diagonal
             int i=0;		//keeps track of which attacks[?] to use
-            for (int sq = dstartsq[d]; i < len ; sq += 7, i++){
-    			long pieceBitmap = 1L << sq;
+            for (int bishopSquare = dstartsq[d]; i < len ; bishopSquare += 7, i++){
             	//And finally, one loop for each status
                 for (byte st = 0; st <= maxstatus; st++){
-        			sb.append(Util.formatByteBitmap("o:", st << 1) + "\tstatus: " + st + "\n");
-        			sb.append(Util.formatLongBitmapAsBoard(pieceBitmap, L45[sq][st]) + "\n");
+        			short occupiedBitsOnDiagonal = (short) (st << 1);
+        			long occupiedBitboard = getH1A8diag(d, occupiedBitsOnDiagonal);
+					position .setPieces(BLACK, PAWN, occupiedBitboard);
+        			position.placePiece(WHITE, BISHOP, bishopSquare);
+        			System.out.println(Util.SqToStr(bishopSquare) + "\t" + occupiedBitsOnDiagonal + "\t" + position.getFen() + "\t" + Util.formatSquares(L45[bishopSquare][st]));// + "\n" + new Displayer().formatBoard(position));
+        			position.clear();
                 }
             }
         }
-    	return sb.toString().trim();
     }
-
     
     
 //    void DisplayAll(){
@@ -1328,7 +1275,7 @@ public class Attacks {
     	//attacks.DisplayAll();
     	//System.out.print(attacks.getBaseAttacks());
     	
-    	attacks.rankAttacksAsRealLifeScenario();
+    	attacks.bishopAttacksLeft45();
     }
     
 }

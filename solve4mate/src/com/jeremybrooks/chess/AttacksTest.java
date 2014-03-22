@@ -1,6 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,23 +26,92 @@ public class AttacksTest {
 				attacks.baseAttacksAsHumanReadableString().trim());
 	}
 	
-	@Test 
-	public void testGenRankAttacks(){
-		assertFileEqualsString(BASE_DIR + "correct-rank-attacks.txt", attacks.rankAttacksAsHumanReadableString());
+//	@Test 
+//	public void testGenRankAttacks(){
+//		assertFileEqualsString(BASE_DIR + "correct-rank-attacks.txt", attacks.rankAttacksAsHumanReadableString());
+//	}
+
+	@Test
+	public void testRookAttacks()
+	{
+		String filename = BASE_DIR + "rook-attacks.txt";
+		File correctFile = new File(filename);
+		try (BufferedReader br = new BufferedReader(new FileReader(correctFile)))
+		{
+			while (br.ready())
+			{
+				String[] fields = br.readLine().split("\t");
+				int squareIndex = Util.StrToSq(fields[0]);
+				int occupationIndex = occupationIndex(fields[1]);
+				String associatedFEN = fields[2];
+				String expectedMovesOnRank = fields[3];
+				String expectedMovesOnFile = fields[4];
+				assertEquals(expectedMovesOnRank, Util.formatSquares(attacks.rank[squareIndex][occupationIndex]));
+				assertEquals(expectedMovesOnFile, Util.formatSquares(attacks.file[squareIndex][occupationIndex]));
+			}
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 	}
 
 	@Test
-	public void testGenFileAttacks() {
-		//fail("Not yet implemented");
-		//System.out.println(attacks.fileAttacksAsHumanReadableString());
-		assertFileEqualsString(BASE_DIR + "correct-file-attacks.txt", attacks.fileAttacksAsHumanReadableString());
+	public void testBishopAttacks45DegreesRight()
+	{
+		String filename = BASE_DIR + "bishop-attacks-right45.txt";
+		File correctFile = new File(filename);
+		try (BufferedReader br = new BufferedReader(new FileReader(correctFile)))
+		{
+			while (br.ready())
+			{
+				String[] fields = br.readLine().split("\t");
+				int squareIndex = Util.StrToSq(fields[0]);
+				int occupationIndex = occupationIndex(fields[1]);
+				String associatedFEN = fields[2];
+				String expectedMovesOn45DegreesRight = fields[3];
+				assertEquals(expectedMovesOn45DegreesRight, Util.formatSquares(attacks.R45[squareIndex][occupationIndex]));
+			}
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 	}
 
 	@Test
-	public void testGenDiagonal45DegreesRightAttacks() {
-		//fail("It appears this output is incorrect....first few are okay but not farther on");
-		assertFileEqualsString(BASE_DIR + "correct-rotated-45-right-attacks.txt", attacks.diagonal45DegreesRightAttacksAsHumanReadableString());
+	public void testBishopAttacks45DegreesLeft()
+	{
+		String filename = BASE_DIR + "bishop-attacks-left45.txt";
+		File correctFile = new File(filename);
+		try (BufferedReader br = new BufferedReader(new FileReader(correctFile)))
+		{
+			while (br.ready())
+			{
+				String[] fields = br.readLine().split("\t");
+				int squareIndex = Util.StrToSq(fields[0]);
+				int occupationIndex = occupationIndex(fields[1]);
+				String associatedFEN = fields[2];
+				String expectedMovesOn45DegreesLeft = fields[3];
+				assertEquals(expectedMovesOn45DegreesLeft, Util.formatSquares(attacks.L45[squareIndex][occupationIndex]));
+			}
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 	}
+
+	private static int occupationIndex(String occupationBitmap) {
+		return Integer.parseInt(occupationBitmap)>>1;
+	}
+
+//	@Test
+//	public void testGenFileAttacks() {
+//		//fail("Not yet implemented");
+//		//System.out.println(attacks.fileAttacksAsHumanReadableString());
+//		assertFileEqualsString(BASE_DIR + "correct-file-attacks.txt", attacks.fileAttacksAsHumanReadableString());
+//	}
+
+//	@Test
+//	public void testGenDiagonal45DegreesRightAttacks() {
+//		//fail("It appears this output is incorrect....first few are okay but not farther on");
+//		assertFileEqualsString(BASE_DIR + "correct-rotated-45-right-attacks.txt", attacks.diagonal45DegreesRightAttacksAsHumanReadableString());
+//	}
 
 	@Test
 	public void testGetA1H8diag(){
@@ -56,10 +125,10 @@ public class AttacksTest {
 		assertFileEqualsString(BASE_DIR + "set-all-bits-in-a1-h8-diagonals.txt", sb.toString());
 	}
 
-	@Test
-	public void testGenDiagonal45DegreesLeftAttacks() {
-		assertFileEqualsString(BASE_DIR + "correct-rotated-45-left-attacks.txt", attacks.diagonal45DegreesLeftAttacksAsHumanReadableString());
-	}
+//	@Test
+//	public void testGenDiagonal45DegreesLeftAttacks() {
+//		assertFileEqualsString(BASE_DIR + "correct-rotated-45-left-attacks.txt", attacks.diagonal45DegreesLeftAttacksAsHumanReadableString());
+//	}
 
 	@Test
 	public void testGetH1A8diag(){

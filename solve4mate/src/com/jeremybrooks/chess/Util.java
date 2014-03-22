@@ -448,12 +448,14 @@ public class Util {
 	    }
 	    return sb.append("  a b c d e f g h\n").toString();
 	}
-    
-    
-    
-
 	
-	
+    /**
+     * Pretty print the squares represented within the bitmap.  
+     * If no squares (bits) are found, then "NONE" is returned.
+     * 
+     * @param bitmap the bitmap containing bits representing named squares 
+     * @return a string of the named squares (bits) set in bitmap
+     */
     public static String formatSquares(long bitmap)
     {
     	StringBuilder formatted = new StringBuilder();
@@ -467,7 +469,8 @@ public class Util {
 			formatted.append(SqToStr(squareOfPiece));
 			bitmap = Bitmap.clearBit(bitmap, squareOfPiece);
 		}
-		return formatted.toString();
+		String formattedSquares = formatted.toString().trim();
+		return formattedSquares.isEmpty() ? "NONE" : formattedSquares;
     }
 
     
@@ -494,7 +497,7 @@ public class Util {
 	    //Trim last space and return
 	    return sb.toString().trim();
 	}
-    
+
     public static String formatByteBitmap(String header, byte bitmap){
     	return header + formatByteBitmap(bitmap);
     }
