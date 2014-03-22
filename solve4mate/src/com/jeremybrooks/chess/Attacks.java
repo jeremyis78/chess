@@ -265,49 +265,49 @@ public class Attacks {
             for(int bit=sq+1; fileNumber(bit) != FILE1; bit++){
                 plus1[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(plus1[sq]) < 8);
+            assert(Util.bitCount(plus1[sq]) < 8);
             
             minus1[sq] = 0;
             for(int bit=sq-1; fileNumber(bit) != FILE8 && bit >= 0; bit--){
                 minus1[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(minus1[sq]) < 8);
+            assert(Util.bitCount(minus1[sq]) < 8);
 
             plus8[sq] = 0;
             for(int bit=sq+8; Bitmap.rankNumber(bit) <= RANK8; bit+=8){
                 plus8[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(plus8[sq]) < 8);
+            assert(Util.bitCount(plus8[sq]) < 8);
             
             minus8[sq] = 0;
             for(int bit=sq-8; bit >= 0; bit-=8){
                 minus8[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(minus8[sq]) < 8);
+            assert(Util.bitCount(minus8[sq]) < 8);
             
             plus9[sq] = 0;
             for (int bit=sq+9; Bitmap.fileNumber(bit) != 0 && Bitmap.rankNumber(bit) != 8; bit+=9){ 
                 plus9[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(plus9[sq]) < 8);
+            assert(Util.bitCount(plus9[sq]) < 8);
 
             minus9[sq] = 0;
             for (int bit=sq-9; Bitmap.fileNumber(bit) != 7 && bit >= 0; bit-=9){
                 minus9[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(minus9[sq]) < 8);
+            assert(Util.bitCount(minus9[sq]) < 8);
 
             plus7[sq] = 0;
             for(int bit=sq+7; Bitmap.fileNumber(bit) != FILE8 && Bitmap.rankNumber(bit) != 8; bit+=7){
                 plus7[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(plus7[sq]) < 8);
+            assert(Util.bitCount(plus7[sq]) < 8);
 
             minus7[sq] = 0;
             for(int bit=sq-7; Bitmap.fileNumber(bit) != 0 && bit >= 0; bit-=7){
                 minus7[sq] |= 1L << bit;
             }
-            assert(Util.PieceCount(minus7[sq]) < 8);
+            assert(Util.bitCount(minus7[sq]) < 8);
 
         }
     }

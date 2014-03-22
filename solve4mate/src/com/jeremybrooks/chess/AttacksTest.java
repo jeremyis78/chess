@@ -26,11 +26,6 @@ public class AttacksTest {
 				attacks.baseAttacksAsHumanReadableString().trim());
 	}
 	
-//	@Test 
-//	public void testGenRankAttacks(){
-//		assertFileEqualsString(BASE_DIR + "correct-rank-attacks.txt", attacks.rankAttacksAsHumanReadableString());
-//	}
-
 	@Test
 	public void testRookAttacks()
 	{
@@ -100,19 +95,6 @@ public class AttacksTest {
 		return Integer.parseInt(occupationBitmap)>>1;
 	}
 
-//	@Test
-//	public void testGenFileAttacks() {
-//		//fail("Not yet implemented");
-//		//System.out.println(attacks.fileAttacksAsHumanReadableString());
-//		assertFileEqualsString(BASE_DIR + "correct-file-attacks.txt", attacks.fileAttacksAsHumanReadableString());
-//	}
-
-//	@Test
-//	public void testGenDiagonal45DegreesRightAttacks() {
-//		//fail("It appears this output is incorrect....first few are okay but not farther on");
-//		assertFileEqualsString(BASE_DIR + "correct-rotated-45-right-attacks.txt", attacks.diagonal45DegreesRightAttacksAsHumanReadableString());
-//	}
-
 	@Test
 	public void testGetA1H8diag(){
 		StringBuffer sb = new StringBuffer();
@@ -124,11 +106,6 @@ public class AttacksTest {
     	}
 		assertFileEqualsString(BASE_DIR + "set-all-bits-in-a1-h8-diagonals.txt", sb.toString());
 	}
-
-//	@Test
-//	public void testGenDiagonal45DegreesLeftAttacks() {
-//		assertFileEqualsString(BASE_DIR + "correct-rotated-45-left-attacks.txt", attacks.diagonal45DegreesLeftAttacksAsHumanReadableString());
-//	}
 
 	@Test
 	public void testGetH1A8diag(){

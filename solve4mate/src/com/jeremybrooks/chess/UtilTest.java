@@ -108,15 +108,6 @@ public class UtilTest extends TestCase {
 		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", Util.displaySquaresStr(bpawns));
 	}
 
-	public void testPieceCount() {
-		for (int i=0; i<BIT_COUNT_ITERATIONS; i++){
-			assertEquals(1, Util.PieceCount(1L));
-			assertEquals(1, Util.PieceCount(0x8000000000000000L));
-			assertEquals(8, Util.PieceCount(0x00FF000000000000L));
-			assertEquals(64, Util.PieceCount(0xFFFFFFFFFFFFFFFFL));
-		}
-	}
-	
 	public void testBitCount(){
 		for (int i=0; i<BIT_COUNT_ITERATIONS; i++){
 			assertEquals(1, Util.bitCount(1L));

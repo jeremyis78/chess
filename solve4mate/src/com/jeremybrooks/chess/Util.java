@@ -116,17 +116,12 @@ public class Util {
 	    }
 	    return sb.toString();
 	}
-	
-    public static int PieceCount(long pieces){
-		int n = 0;
-		for ( ; pieces != 0; n++, pieces &= (pieces - 1));
-		return n;
-	}
-    
+	    
     public static int bitCount(long pieces)
     {
     	return Long.bitCount(pieces);
     }
+    
 // test: sqtoStr(), displayMove(int m), 
     public static char PieceToChar(int color, int piece){
 	    char ch = '^'; //should be set to an invalid character
@@ -566,7 +561,7 @@ public class Util {
     	if (bool(0xFFFFFF00 & attackBitmap)){
     		throw new IllegalArgumentException("attackBitmap: " + Integer.toBinaryString(attackBitmap) + " can only have bits set in the least significant byte");
     	}
-    	if (PieceCount(pieceBitmap) > 1){
+    	if (bitCount(pieceBitmap) > 1){
     		throw new IllegalArgumentException("pieceBitmap: " + Integer.toBinaryString(pieceBitmap) + " can have only a single bit set");
     	}
 		return 	formatByteBitmap("piece   : ", (byte)pieceBitmap) + "\n" +
@@ -626,7 +621,7 @@ public class Util {
      */
     public static String formatLongBitmapAsBoard(long singleBitBitmap, long multipleBitsBitmap){
 
-    	if (PieceCount(singleBitBitmap) > 1){
+    	if (bitCount(singleBitBitmap) > 1){
     		throw new IllegalArgumentException("singleBitBitmap: " + Long.toBinaryString(singleBitBitmap) + " can have only a single bit set");
     	}
     	if (bool(singleBitBitmap & multipleBitsBitmap)){

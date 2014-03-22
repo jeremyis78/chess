@@ -54,7 +54,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	    //***************************************************************************
 
 
-	    if (Util.PieceCount(checkers) == 1) {
+	    if (Util.bitCount(checkers) == 1) {
 	        checker = FirstPiece (checkers);
 	        cap = Math.abs(g.pos.getBoard(checker));
 
@@ -174,7 +174,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	            //DisplayBoard(interpose);
 	            n += GenerateInterpositions (g, moves, side, depth, interpose);
 	        }
-	    } else if (Util.PieceCount (checkers) == 2) {  //Two pieces checking the king
+	    } else if (Util.bitCount (checkers) == 2) {  //Two pieces checking the king
 		// Add king moves that would capture either checking piece
 	        kingMoves = att.king[kingSq] & checkers;
 	        while (morePieces(kingMoves)){

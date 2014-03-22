@@ -162,10 +162,10 @@ public class Evaluator {
 		// Compute material value
 		for (int i = PAWN; i <= QUEEN; i++){
 			wScore += whitePieceValue[i] * 
-					Util.PieceCount(g.pos.getPieces(Bitmap.WHITE,i));
+					Util.bitCount(g.pos.getPieces(Bitmap.WHITE,i));
 
 			bScore += blackPieceValue[i] * 
-					Util.PieceCount(g.pos.getPieces(Bitmap.BLACK,i));
+					Util.bitCount(g.pos.getPieces(Bitmap.BLACK,i));
 		}
 
 		// Estimate positional value
