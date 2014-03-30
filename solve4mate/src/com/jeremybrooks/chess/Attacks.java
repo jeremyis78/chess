@@ -5,7 +5,9 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+
 import java.io.PrintStream;
+import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
@@ -22,6 +24,12 @@ public class Attacks {
 	//To access the length of the main diagonal use dlen[7]
 	//The first diagonal is the zero-th.
 	static final int DLEN[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
+	
+	static final int dstartsqRight45[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
+	
+	static final int dstartsqLeft45[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
+    //TODO: could replace above with (for clarity maybe??) 
+    // {A1,B1,C1,D1,E1,F1,G1,H1,H2,H3,H4,H5,H6,H7,H8}
 
 	private static final int FILE1 = 0;
 	private static final int FILE8 = 7;
@@ -59,12 +67,6 @@ public class Attacks {
     long minus8[] = new long[64];
     long minus9[] = new long[64];
 
-
-  //*************************************************************************/
-  //**************************** Class brd **********************************/
-  // Meant to be instantiated only once (singleton) in the chess program*/
-  // Is this the proper way to create a singleton?
-    //*************************************************************************/
 
     private static Attacks attacks;
     
@@ -375,7 +377,7 @@ public class Attacks {
                 //Store moves
                 //Even though we are storing attacks in a short
                 //attacks should never exceed what would fit in a byte
-                assert(!Util.bool(0xFFFFFF00 & attacks)); 
+                //assert(!Util.bool(0xFFFFFF00 & attacks)); 
                 base[square][status] = (short) attacks;
    
                 //out.println(Util.formatPieceOccupiedMoves(piece, status << 1, base[square][status]));
@@ -478,66 +480,25 @@ public class Attacks {
     	
         //dstartsq are the corresponding diagonals as read from
         //left to right from the above chessboard rotated 45R
-        int dstartsq[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-        //TODO: could replace above with (for clarity maybe??) 
-        // {H1,G1,F1,E1,D1,C1,B1,A1,A2,A3,A4,A5,A6,A7,A8}
-        int len, maxstatus;
-
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
-            len = DLEN[d];	//get diagonal length
-            //get the correct maximum status to count to
-            //maxstatus is the diagonal minus the outer bit on each end
-            if (len < 3)
-                maxstatus = 0;
-            else
-                maxstatus = (1 << (len-2)) - 1;  //maxstatus = 2^(len-2) - 1
-            
+            RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
+        	int len = rightDiagIterator.diagonalLength();
+            int maxstatus = getMaxStatus(len);
             //NOW one loop for each sq in diagonal
-            int i=0;		//keeps track of which attacks[?] to use
-            for (int sq = dstartsq[d]; i < len ; sq += 9, i++){
-                //cout << sq << " -->";
-                
-                //Proper rank square is "r"
-                
+            for (int i=0; i < len ; i++){
                 //And finally, one loop for each status
+            	int sq = rightDiagIterator.next();
                 for (byte st = 0; st <= maxstatus; st++){
-                    //cout << int(st) << ',';
-                    R45[sq][st] = getA1H8diag(d, base[i][st]);
+                    R45[sq][st] = getDiagonalSet(d, base[i][st], new RightDiagonalIterator(d));
                 }
             }
         }
     }
 
 
-    long getA1H8diag(int diagonal, short b){  // 1/2/2010 - b used to be a byte
-    	
-    //"diagonal" is the diagonal that we want to set to "b"
-    //"diagonal" is in range 0..14 inclusive 
-    //"diagonal" corresponds to these diagonals dnum = {diagonal squares)
-//    	0={7}, 1={6,15}, 2={5,14,23},...,7={0,9,18,27,36,45,54,63},...,14={56}
-    	
-        int dstartsq[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-        //TODO: could replace above with (for clarity maybe??) 
-        // {H1,G1,F1,E1,D1,C1,B1,A1,A2,A3,A4,A5,A6,A7,A8}
-        
-        //access length of diagonal dnum by DLEN[dnum]
-        //dstartsq is the diagonal starting square
-        
-        //set the bits set in b to the diagonal dnum in a.
-        long board = 0;
-        int len = DLEN[diagonal];
-        byte mask = 1;
-        int x=0;
-        for (int d = dstartsq[diagonal];  x < len; d += 9){
-        	boolean something = (b & (mask << x++)) != 0;
-            if(something) 
-                //board |= (long(1) << d );	//set bit
-            	board |= (1L << d);
-        }
-        //cout << "\t\tdnum: " << dnum << "\t loops: " << x << endl;
-        return board;
+    long getA1H8diag(int diagonal, short bitmap){
+    	return getDiagonalSet(diagonal, bitmap, new RightDiagonalIterator(diagonal));
     }
-
 
     void genDiagonal45DegreesLeftAttacks(){
     //These are the starting squares of the diagonals
@@ -566,62 +527,66 @@ public class Attacks {
 
     	//dstartsq are the corresponding diagonals as read from
         //left to right from the above chessboard graphic
-        int dstartsq[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
-        //TODO: could replace above with (for clarity maybe??) 
-        // {A1,B1,C1,D1,E1,F1,G1,H1,H2,H3,H4,H5,H6,H7,H8}
+        
         
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
-            int len = DLEN[d];	//get diagonal length
-            int maxstatus;		//maximum status to count to
-            //get the correct maximum status to count to
-            //maxstatus is the diagonal minus the outer bit on each end
-            if (len < 3)
-                maxstatus = 0;
-            else
-                maxstatus = (1 << (len-2)) - 1;  //maxstatus = 2^(len-2) - 1
-            
+        	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
+        	int len = leftDiagIterator.diagonalLength();
+            int maxstatus = getMaxStatus(len);
             //NOW one loop for each sq in diagonal
-            int i=0;		//keeps track of which attacks[?] to use
-            for (int sq = dstartsq[d]; i < len ; sq += 7, i++){
-                //cout << sq << " -->";
-                
-                //Proper rank square is "r"
-                
+            int i = 0;
+            while(leftDiagIterator.hasNext())
+            {
+            	int currentSquare = leftDiagIterator.next();
                 //And finally, one loop for each status
                 for (byte st = 0; st <= maxstatus; st++){
-                    //cout << int(st) << ',';
-                    L45[sq][st] = getH1A8diag(d, base[i][st]);
-                }//end st
-                //cout << endl;
-            }//end sq
-        }//end d
+                    L45[currentSquare][st] = getDiagonalSet(d, base[i][st], new LeftDiagonalIterator(d));
+                }
+                i++;
+            }
+        }
     }
 
-    long getH1A8diag(int diagonal, short b){  // 1/2/2010 b used to be a byte
+    long getH1A8diag(int diagonal, short bitmap){
+    	return getDiagonalSet(diagonal, bitmap, new LeftDiagonalIterator(diagonal));
+    }
+
+    long getDiagonalSet(int diagonal, short bitmap, DiagonalIterator iterator){
     //"diagonal" is the diagonal that we want to set to "b"
     //"diagonal" is in range 0..14 inclusive 
     //"diagonal" corresponds to these diagonals: "diagonal"={diagonal squares)
 //    	0={0}, 1={1,8}, 2={2,9,16},...,7={7,14,21,28,35,42,49,56},...,14={63}
     	
-        int dstartsq[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
-        //TODO: could replace above with (for clarity maybe??) 
-        // {A1,B1,C1,D1,E1,F1,G1,H1,H2,H3,H4,H5,H6,H7,H8}
-        //access length of diagonal "diagonal" by DLEN[diagonal]
-        //dstartsq is the diagonal starting square
-        
         //set the bits set in b to the diagonal dnum in a.
         long board = 0;
-        int len = DLEN[diagonal];
-        byte mask = 1;
-        int x=0;
-        for (int d=dstartsq[diagonal];  x < len; d += 7){
-            boolean isSet = (b & (mask << x++)) != 0;
-        	if(isSet) 
-                board |= (1L << d );	//set bit
+        int diagonalLength = DLEN[diagonal];
+        //int bitToCheck=0;
+        for (int bitToCheck=0;
+        		bitToCheck < diagonalLength;
+        		bitToCheck++)
+        {
+        	int currentSquare=iterator.next();
+        	if(isBitSet(bitmap, bitToCheck)) 
+                board |= (1L << currentSquare);	//set bit
         }
         //cout << "\t\tdnum: " << dnum << "\t loops: " << x << endl;
         return board;
     }
+
+    //get the correct maximum status to count to
+    //maxstatus is the diagonal minus the outer bit on each end
+	private static int getMaxStatus(int len) {
+		int maxstatus;
+		if (len < 3)
+		    maxstatus = 0;
+		else
+		    maxstatus = (1 << (len-2)) - 1;  //maxstatus = 2^(len-2) - 1
+		return maxstatus;
+	}
+
+	private boolean isBitSet(short bitmap, int index) {
+		return (bitmap & (1 << index)) != 0;
+	}
 
     void genPawnAttacks(){
 	  	log.info("generating padiagonal attacks 45 deg right (a1-h8)");
@@ -769,24 +734,24 @@ public class Attacks {
         //Initialize king_attacks and knight_attacks arrays
         
         for (int i = 0; i < 8; i++){
-    	for (int j = 0; j < 8; j++){
-                int sq = j + (i << 3);  //sq = linear index = j + (8 * i)
-                int K = R[i] & C[j] & king5x5;   //Possible moves for king
-                int N = R[i] & C[j] & knight5x5; //Possible moves for knight
-                
-                //Loop through all squares in the 5x5 grid
-                //If there's a move there (a bit set) then set the corresponding
-                //bit in the bitbrd king[sq]/knight[sq], respectively.
-                
-                for (int gridIndex = 0; gridIndex < 25; gridIndex++){
-                	if ( Util.bool(K & (1 << gridIndex)) ){ 
-		                        king[sq] |= 1L << (sq + map[gridIndex]);
-		                    }
-		    		if ( Util.bool(N & (1 << gridIndex)) ){
-		                        knight[sq] |= 1L << (sq + map[gridIndex]);
-                    }
-                }
-    	}
+        	for (int j = 0; j < 8; j++){
+        		int sq = j + (i << 3);  //sq = linear index = j + (8 * i)
+        		int K = R[i] & C[j] & king5x5;   //Possible moves for king
+        		int N = R[i] & C[j] & knight5x5; //Possible moves for knight
+
+        		//Loop through all squares in the 5x5 grid
+        		//If there's a move there (a bit set) then set the corresponding
+        		//bit in the bitbrd king[sq]/knight[sq], respectively.
+
+        		for (int gridIndex = 0; gridIndex < 25; gridIndex++){
+        			if ( Util.bool(K & (1 << gridIndex)) ){ 
+        				king[sq] |= 1L << (sq + map[gridIndex]);
+        			}
+        			if ( Util.bool(N & (1 << gridIndex)) ){
+        				knight[sq] |= 1L << (sq + map[gridIndex]);
+        			}
+        		}
+        	}
         }
     }
 

@@ -221,7 +221,26 @@ public class AttacksTest {
     	}
 		assertFileEqualsString(BASE_DIR + "diagonals-h1a8.txt", sb.toString());
 	}
-
+	
+//	@Test
+//	public void testRight45Iterator()
+//	{
+//		Integer[] dstartsqRight45 = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
+//    	int[] length = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
+//
+//		Attacks.Right45Iterator it = new Attacks.Right45Iterator();
+//		for(Integer current=0; current<dstartsqRight45.length; current++)
+//		{
+//			assertTrue(it.hasNext());
+//			assertEquals(length[current], it.diagonalLength());
+//			Integer nextValue = it.next();
+//			System.out.print(nextValue);
+//			System.out.print(" ");
+//			assertEquals(dstartsqRight45[current], nextValue);
+//		}
+//		assertFalse(it.hasNext());
+//	}
+	
 	/**
 	 * Asserts the trimmed version of the file contents of filename
 	 *  as a string equals the trimmed version of string
