@@ -207,9 +207,8 @@ public class AttacksTest {
     	{
     		String board = Util.formatLongBitmapAsBoard(attacks.getA1H8diag(i,(byte)0xff));
     		sb.append(board + "\n");
-    		//System.out.println(board);
     	}
-		assertFileEqualsString(BASE_DIR + "set-all-bits-in-a1-h8-diagonals.txt", sb.toString());
+		assertFileEqualsString(BASE_DIR + "diagonals-a1h8.txt", sb.toString());
 	}
 
 	@Test
@@ -219,9 +218,8 @@ public class AttacksTest {
     	{
     		String board = Util.formatLongBitmapAsBoard(attacks.getH1A8diag(i,(byte)0xff));
     		sb.append(board + "\n");
-    		//System.out.println(board);
     	}
-		assertFileEqualsString(BASE_DIR + "set-all-bits-in-h1-a8-diagonals.txt", sb.toString());
+		assertFileEqualsString(BASE_DIR + "diagonals-h1a8.txt", sb.toString());
 	}
 
 	/**
