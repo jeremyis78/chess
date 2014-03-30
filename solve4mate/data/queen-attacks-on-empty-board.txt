@@ -1,0 +1,64 @@
+a1	8/8/8/8/8/8/8/Q7	b1 c1 d1 e1 f1 g1 h1	NONE	NONE	NONE	a2 a3 a4 a5 a6 a7 a8	NONE	b2 c3 d4 e5 f6 g7 h8	NONE
+b1	8/8/8/8/8/8/8/1Q6	c1 d1 e1 f1 g1 h1	a1	a2	NONE	b2 b3 b4 b5 b6 b7 b8	NONE	c2 d3 e4 f5 g6 h7	NONE
+c1	8/8/8/8/8/8/8/2Q5	d1 e1 f1 g1 h1	a1 b1	b2 a3	NONE	c2 c3 c4 c5 c6 c7 c8	NONE	d2 e3 f4 g5 h6	NONE
+d1	8/8/8/8/8/8/8/3Q4	e1 f1 g1 h1	a1 b1 c1	c2 b3 a4	NONE	d2 d3 d4 d5 d6 d7 d8	NONE	e2 f3 g4 h5	NONE
+e1	8/8/8/8/8/8/8/4Q3	f1 g1 h1	a1 b1 c1 d1	d2 c3 b4 a5	NONE	e2 e3 e4 e5 e6 e7 e8	NONE	f2 g3 h4	NONE
+f1	8/8/8/8/8/8/8/5Q2	g1 h1	a1 b1 c1 d1 e1	e2 d3 c4 b5 a6	NONE	f2 f3 f4 f5 f6 f7 f8	NONE	g2 h3	NONE
+g1	8/8/8/8/8/8/8/6Q1	h1	a1 b1 c1 d1 e1 f1	f2 e3 d4 c5 b6 a7	NONE	g2 g3 g4 g5 g6 g7 g8	NONE	h2	NONE
+h1	8/8/8/8/8/8/8/7Q	NONE	a1 b1 c1 d1 e1 f1 g1	g2 f3 e4 d5 c6 b7 a8	NONE	h2 h3 h4 h5 h6 h7 h8	NONE	NONE	NONE
+a2	8/8/8/8/8/8/Q7/8	b2 c2 d2 e2 f2 g2 h2	NONE	NONE	b1	a3 a4 a5 a6 a7 a8	a1	b3 c4 d5 e6 f7 g8	NONE
+b2	8/8/8/8/8/8/1Q6/8	c2 d2 e2 f2 g2 h2	a2	a3	c1	b3 b4 b5 b6 b7 b8	b1	c3 d4 e5 f6 g7 h8	a1
+c2	8/8/8/8/8/8/2Q5/8	d2 e2 f2 g2 h2	a2 b2	b3 a4	d1	c3 c4 c5 c6 c7 c8	c1	d3 e4 f5 g6 h7	b1
+d2	8/8/8/8/8/8/3Q4/8	e2 f2 g2 h2	a2 b2 c2	c3 b4 a5	e1	d3 d4 d5 d6 d7 d8	d1	e3 f4 g5 h6	c1
+e2	8/8/8/8/8/8/4Q3/8	f2 g2 h2	a2 b2 c2 d2	d3 c4 b5 a6	f1	e3 e4 e5 e6 e7 e8	e1	f3 g4 h5	d1
+f2	8/8/8/8/8/8/5Q2/8	g2 h2	a2 b2 c2 d2 e2	e3 d4 c5 b6 a7	g1	f3 f4 f5 f6 f7 f8	f1	g3 h4	e1
+g2	8/8/8/8/8/8/6Q1/8	h2	a2 b2 c2 d2 e2 f2	f3 e4 d5 c6 b7 a8	h1	g3 g4 g5 g6 g7 g8	g1	h3	f1
+h2	8/8/8/8/8/8/7Q/8	NONE	a2 b2 c2 d2 e2 f2 g2	g3 f4 e5 d6 c7 b8	NONE	h3 h4 h5 h6 h7 h8	h1	NONE	g1
+a3	8/8/8/8/8/Q7/8/8	b3 c3 d3 e3 f3 g3 h3	NONE	NONE	c1 b2	a4 a5 a6 a7 a8	a1 a2	b4 c5 d6 e7 f8	NONE
+b3	8/8/8/8/8/1Q6/8/8	c3 d3 e3 f3 g3 h3	a3	a4	d1 c2	b4 b5 b6 b7 b8	b1 b2	c4 d5 e6 f7 g8	a2
+c3	8/8/8/8/8/2Q5/8/8	d3 e3 f3 g3 h3	a3 b3	b4 a5	e1 d2	c4 c5 c6 c7 c8	c1 c2	d4 e5 f6 g7 h8	a1 b2
+d3	8/8/8/8/8/3Q4/8/8	e3 f3 g3 h3	a3 b3 c3	c4 b5 a6	f1 e2	d4 d5 d6 d7 d8	d1 d2	e4 f5 g6 h7	b1 c2
+e3	8/8/8/8/8/4Q3/8/8	f3 g3 h3	a3 b3 c3 d3	d4 c5 b6 a7	g1 f2	e4 e5 e6 e7 e8	e1 e2	f4 g5 h6	c1 d2
+f3	8/8/8/8/8/5Q2/8/8	g3 h3	a3 b3 c3 d3 e3	e4 d5 c6 b7 a8	h1 g2	f4 f5 f6 f7 f8	f1 f2	g4 h5	d1 e2
+g3	8/8/8/8/8/6Q1/8/8	h3	a3 b3 c3 d3 e3 f3	f4 e5 d6 c7 b8	h2	g4 g5 g6 g7 g8	g1 g2	h4	e1 f2
+h3	8/8/8/8/8/7Q/8/8	NONE	a3 b3 c3 d3 e3 f3 g3	g4 f5 e6 d7 c8	NONE	h4 h5 h6 h7 h8	h1 h2	NONE	f1 g2
+a4	8/8/8/8/Q7/8/8/8	b4 c4 d4 e4 f4 g4 h4	NONE	NONE	d1 c2 b3	a5 a6 a7 a8	a1 a2 a3	b5 c6 d7 e8	NONE
+b4	8/8/8/8/1Q6/8/8/8	c4 d4 e4 f4 g4 h4	a4	a5	e1 d2 c3	b5 b6 b7 b8	b1 b2 b3	c5 d6 e7 f8	a3
+c4	8/8/8/8/2Q5/8/8/8	d4 e4 f4 g4 h4	a4 b4	b5 a6	f1 e2 d3	c5 c6 c7 c8	c1 c2 c3	d5 e6 f7 g8	a2 b3
+d4	8/8/8/8/3Q4/8/8/8	e4 f4 g4 h4	a4 b4 c4	c5 b6 a7	g1 f2 e3	d5 d6 d7 d8	d1 d2 d3	e5 f6 g7 h8	a1 b2 c3
+e4	8/8/8/8/4Q3/8/8/8	f4 g4 h4	a4 b4 c4 d4	d5 c6 b7 a8	h1 g2 f3	e5 e6 e7 e8	e1 e2 e3	f5 g6 h7	b1 c2 d3
+f4	8/8/8/8/5Q2/8/8/8	g4 h4	a4 b4 c4 d4 e4	e5 d6 c7 b8	h2 g3	f5 f6 f7 f8	f1 f2 f3	g5 h6	c1 d2 e3
+g4	8/8/8/8/6Q1/8/8/8	h4	a4 b4 c4 d4 e4 f4	f5 e6 d7 c8	h3	g5 g6 g7 g8	g1 g2 g3	h5	d1 e2 f3
+h4	8/8/8/8/7Q/8/8/8	NONE	a4 b4 c4 d4 e4 f4 g4	g5 f6 e7 d8	NONE	h5 h6 h7 h8	h1 h2 h3	NONE	e1 f2 g3
+a5	8/8/8/Q7/8/8/8/8	b5 c5 d5 e5 f5 g5 h5	NONE	NONE	e1 d2 c3 b4	a6 a7 a8	a1 a2 a3 a4	b6 c7 d8	NONE
+b5	8/8/8/1Q6/8/8/8/8	c5 d5 e5 f5 g5 h5	a5	a6	f1 e2 d3 c4	b6 b7 b8	b1 b2 b3 b4	c6 d7 e8	a4
+c5	8/8/8/2Q5/8/8/8/8	d5 e5 f5 g5 h5	a5 b5	b6 a7	g1 f2 e3 d4	c6 c7 c8	c1 c2 c3 c4	d6 e7 f8	a3 b4
+d5	8/8/8/3Q4/8/8/8/8	e5 f5 g5 h5	a5 b5 c5	c6 b7 a8	h1 g2 f3 e4	d6 d7 d8	d1 d2 d3 d4	e6 f7 g8	a2 b3 c4
+e5	8/8/8/4Q3/8/8/8/8	f5 g5 h5	a5 b5 c5 d5	d6 c7 b8	h2 g3 f4	e6 e7 e8	e1 e2 e3 e4	f6 g7 h8	a1 b2 c3 d4
+f5	8/8/8/5Q2/8/8/8/8	g5 h5	a5 b5 c5 d5 e5	e6 d7 c8	h3 g4	f6 f7 f8	f1 f2 f3 f4	g6 h7	b1 c2 d3 e4
+g5	8/8/8/6Q1/8/8/8/8	h5	a5 b5 c5 d5 e5 f5	f6 e7 d8	h4	g6 g7 g8	g1 g2 g3 g4	h6	c1 d2 e3 f4
+h5	8/8/8/7Q/8/8/8/8	NONE	a5 b5 c5 d5 e5 f5 g5	g6 f7 e8	NONE	h6 h7 h8	h1 h2 h3 h4	NONE	d1 e2 f3 g4
+a6	8/8/Q7/8/8/8/8/8	b6 c6 d6 e6 f6 g6 h6	NONE	NONE	f1 e2 d3 c4 b5	a7 a8	a1 a2 a3 a4 a5	b7 c8	NONE
+b6	8/8/1Q6/8/8/8/8/8	c6 d6 e6 f6 g6 h6	a6	a7	g1 f2 e3 d4 c5	b7 b8	b1 b2 b3 b4 b5	c7 d8	a5
+c6	8/8/2Q5/8/8/8/8/8	d6 e6 f6 g6 h6	a6 b6	b7 a8	h1 g2 f3 e4 d5	c7 c8	c1 c2 c3 c4 c5	d7 e8	a4 b5
+d6	8/8/3Q4/8/8/8/8/8	e6 f6 g6 h6	a6 b6 c6	c7 b8	h2 g3 f4 e5	d7 d8	d1 d2 d3 d4 d5	e7 f8	a3 b4 c5
+e6	8/8/4Q3/8/8/8/8/8	f6 g6 h6	a6 b6 c6 d6	d7 c8	h3 g4 f5	e7 e8	e1 e2 e3 e4 e5	f7 g8	a2 b3 c4 d5
+f6	8/8/5Q2/8/8/8/8/8	g6 h6	a6 b6 c6 d6 e6	e7 d8	h4 g5	f7 f8	f1 f2 f3 f4 f5	g7 h8	a1 b2 c3 d4 e5
+g6	8/8/6Q1/8/8/8/8/8	h6	a6 b6 c6 d6 e6 f6	f7 e8	h5	g7 g8	g1 g2 g3 g4 g5	h7	b1 c2 d3 e4 f5
+h6	8/8/7Q/8/8/8/8/8	NONE	a6 b6 c6 d6 e6 f6 g6	g7 f8	NONE	h7 h8	h1 h2 h3 h4 h5	NONE	c1 d2 e3 f4 g5
+a7	8/Q7/8/8/8/8/8/8	b7 c7 d7 e7 f7 g7 h7	NONE	NONE	g1 f2 e3 d4 c5 b6	a8	a1 a2 a3 a4 a5 a6	b8	NONE
+b7	8/1Q6/8/8/8/8/8/8	c7 d7 e7 f7 g7 h7	a7	a8	h1 g2 f3 e4 d5 c6	b8	b1 b2 b3 b4 b5 b6	c8	a6
+c7	8/2Q5/8/8/8/8/8/8	d7 e7 f7 g7 h7	a7 b7	b8	h2 g3 f4 e5 d6	c8	c1 c2 c3 c4 c5 c6	d8	a5 b6
+d7	8/3Q4/8/8/8/8/8/8	e7 f7 g7 h7	a7 b7 c7	c8	h3 g4 f5 e6	d8	d1 d2 d3 d4 d5 d6	e8	a4 b5 c6
+e7	8/4Q3/8/8/8/8/8/8	f7 g7 h7	a7 b7 c7 d7	d8	h4 g5 f6	e8	e1 e2 e3 e4 e5 e6	f8	a3 b4 c5 d6
+f7	8/5Q2/8/8/8/8/8/8	g7 h7	a7 b7 c7 d7 e7	e8	h5 g6	f8	f1 f2 f3 f4 f5 f6	g8	a2 b3 c4 d5 e6
+g7	8/6Q1/8/8/8/8/8/8	h7	a7 b7 c7 d7 e7 f7	f8	h6	g8	g1 g2 g3 g4 g5 g6	h8	a1 b2 c3 d4 e5 f6
+h7	8/7Q/8/8/8/8/8/8	NONE	a7 b7 c7 d7 e7 f7 g7	g8	NONE	h8	h1 h2 h3 h4 h5 h6	NONE	b1 c2 d3 e4 f5 g6
+a8	Q7/8/8/8/8/8/8/8	b8 c8 d8 e8 f8 g8 h8	NONE	NONE	h1 g2 f3 e4 d5 c6 b7	NONE	a1 a2 a3 a4 a5 a6 a7	NONE	NONE
+b8	1Q6/8/8/8/8/8/8/8	c8 d8 e8 f8 g8 h8	a8	NONE	h2 g3 f4 e5 d6 c7	NONE	b1 b2 b3 b4 b5 b6 b7	NONE	a7
+c8	2Q5/8/8/8/8/8/8/8	d8 e8 f8 g8 h8	a8 b8	NONE	h3 g4 f5 e6 d7	NONE	c1 c2 c3 c4 c5 c6 c7	NONE	a6 b7
+d8	3Q4/8/8/8/8/8/8/8	e8 f8 g8 h8	a8 b8 c8	NONE	h4 g5 f6 e7	NONE	d1 d2 d3 d4 d5 d6 d7	NONE	a5 b6 c7
+e8	4Q3/8/8/8/8/8/8/8	f8 g8 h8	a8 b8 c8 d8	NONE	h5 g6 f7	NONE	e1 e2 e3 e4 e5 e6 e7	NONE	a4 b5 c6 d7
+f8	5Q2/8/8/8/8/8/8/8	g8 h8	a8 b8 c8 d8 e8	NONE	h6 g7	NONE	f1 f2 f3 f4 f5 f6 f7	NONE	a3 b4 c5 d6 e7
+g8	6Q1/8/8/8/8/8/8/8	h8	a8 b8 c8 d8 e8 f8	NONE	h7	NONE	g1 g2 g3 g4 g5 g6 g7	NONE	a2 b3 c4 d5 e6 f7
+h8	7Q/8/8/8/8/8/8/8	NONE	a8 b8 c8 d8 e8 f8 g8	NONE	NONE	NONE	h1 h2 h3 h4 h5 h6 h7	NONE	a1 b2 c3 d4 e5 f6 g7
