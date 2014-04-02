@@ -89,8 +89,8 @@ public class MoveGeneratorTest {
 
 	@Test
 	public void testGenerateCapturesPosition1() {
-		String positionFen = "R1Q5/1p3p2/1k1qpb2/8/P2p4/P2P2P1/4rPK1/8 w - - 0 1";
-		Set<String> expectedMoves = toSet("Qc8xb7,Qc8xe6");
+		String positionFen = "R1Q5/1p3p2/1k1qpb2/8/P2p4/P2P1np1/6K1/8 w - - 0 1";
+		Set<String> expectedMoves = toSet("Qc8xb7,Qc8xe6,Kg2xf3");
 		Set<String> actualMoves = generateCaptures(positionFen);
 		assertMovesAreEqual(expectedMoves, actualMoves);
 	}

@@ -74,8 +74,10 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                	//TODO: make sure king does not move into check!!!!!
 	                	move = EncodeMove(from, to, PIECE[p], cap, 0);  
 	                	//if((piece)p == KING && !isAttacked(g, side, to)){
-	                	if(p == KING && isLegal(g, move, side)){
-	                		moves[n++] = move;
+	                	if(p == KING){
+	                		if(isLegal(g, move, side)){
+	                			moves[n++] = move;
+	                		}
 	                	} else {
 	                		moves[n++] = move;
 	                	}
