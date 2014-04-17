@@ -28,11 +28,69 @@ public class AttacksTest {
 	private static final int BLACK_PAWN_MOVES_COLUMN = 3;
 
 	Attacks attacks = Attacks.getInstance();
+
+
+	@Test
+	public void testMaskRotated90DegreesLeft(){
+		assertFileEqualsString(BASE_DIR + "bitmasks-rotated-90-degrees-right.txt",
+				maskAsHumanReadableString(attacks.mask90));
+	}
 	
+	@Test
+	public void testMaskRotated45DegreesRight(){
+		assertFileEqualsString(BASE_DIR + "bitmasks-rotated-45-degrees-right.txt",
+				maskAsHumanReadableString(attacks.mask45R));
+	}
+
+	@Test
+	public void testMaskRotated45DegreesLeft(){
+		assertFileEqualsString(BASE_DIR + "bitmasks-rotated-45-degrees-left.txt",
+				maskAsHumanReadableString(attacks.mask45L));
+	}
+
+	private String maskAsHumanReadableString(long mask[]) {
+		StringBuilder readable = new StringBuilder();
+		for(int currentSquare=Bitmap.A1;
+				currentSquare<=Bitmap.H8;
+				currentSquare++)
+		{
+			int shift = 0;
+			long temp = mask[currentSquare];
+			while (Math.abs(temp) != 1L)
+			{
+				temp = temp >> 1;
+				shift++;
+			}
+			readable.append("bit " + currentSquare);
+			readable.append(" maps to " + Util.SqToStr(shift));
+			readable.append(" (1L shifted "+shift+" bits)");
+			readable.append("\n");
+			readable.append(Util.DisplayBoardStr(mask[currentSquare]));
+		}
+		return readable.toString();
+	}
+
 	@Test
 	public void testGenBaseAttacks(){
 		assertFileEqualsString(BASE_DIR + "correct-base-attacks.txt",
 				attacks.baseAttacksAsHumanReadableString().trim());
+		assertAttacksAreByteSized(attacks.base);
+	}
+
+	private void assertAttacksAreByteSized(short baseAttacks[][]) {
+		for(int attackerSquare=Bitmap.A1; attackerSquare<=Bitmap.H1; attackerSquare++)
+		{
+			for(int occupiedCombination=0; occupiedCombination<64; occupiedCombination++)
+			{
+				assertTrue("only the first 8 bits should be allowed; perhaps, check the algorithm for a bug?",
+						doesNotExceedByteWidth(baseAttacks[attackerSquare][occupiedCombination]));
+			}
+		}
+	}
+
+	private static boolean doesNotExceedByteWidth(short attacks) 
+	{
+		return !Util.bool(0xFFFFFF00 & attacks);
 	}
 
 	@Test
@@ -222,25 +280,6 @@ public class AttacksTest {
 		assertFileEqualsString(BASE_DIR + "diagonals-h1a8.txt", sb.toString());
 	}
 	
-//	@Test
-//	public void testRight45Iterator()
-//	{
-//		Integer[] dstartsqRight45 = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-//    	int[] length = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
-//
-//		Attacks.Right45Iterator it = new Attacks.Right45Iterator();
-//		for(Integer current=0; current<dstartsqRight45.length; current++)
-//		{
-//			assertTrue(it.hasNext());
-//			assertEquals(length[current], it.diagonalLength());
-//			Integer nextValue = it.next();
-//			System.out.print(nextValue);
-//			System.out.print(" ");
-//			assertEquals(dstartsqRight45[current], nextValue);
-//		}
-//		assertFalse(it.hasNext());
-//	}
-	
 	/**
 	 * Asserts the trimmed version of the file contents of filename
 	 *  as a string equals the trimmed version of string
@@ -253,8 +292,15 @@ public class AttacksTest {
 		File correctFile = new File(filename);
 		StringBuffer correct = new StringBuffer();
 		try (BufferedReader br = new BufferedReader(new FileReader(correctFile))) {
-			while (br.ready()){
-				correct.append(br.readLine() + "\n");
+			while (br.ready())
+			{
+				String line = br.readLine();
+				String trimmed = line.trim();
+				if(trimmed.startsWith("#") ) //|| trimmed.isEmpty())
+				{
+					continue; //skip comments and empty lines
+				}
+				correct.append(line + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

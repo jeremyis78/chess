@@ -85,7 +85,8 @@ public class Attacks {
       genFileAttacks();
       genDiagonal45DegreesRightAttacks();
       genDiagonal45DegreesLeftAttacks();
-      genPawnAttacks();
+      genWhitePawnAttacks();
+      genBlackPawnAttacks();
       genKingKnightAttacks();
   }
 
@@ -101,127 +102,63 @@ public class Attacks {
 
 	void genMask() {
 		long m = 1;
-		int i;
-		for(i=0; i < 64; i++){
-			mask[i] = m << i;
+		for(int currentSquare=Bitmap.A1; currentSquare <= Bitmap.H8; currentSquare++){
+			mask[currentSquare] = m << currentSquare;
 			//out.printf("0x%08X\n", mask[i]);
 		}
 	}
   
 	void genMask90() {
-		long m;
-		int i;
-		m = 1;      //set bitbrd back to 1
-		int x = 0;  //x runs from 0 to 63 inclusive
-			//i runs 56 to 63, step 1
-			//    j starts at i
-		//    and runs while (j >= 0), step -8	
-		for(i=56; i < 64; i++){
-			for(int j=i; j >= 0; j-=8, x++){
-				mask90[x] = m << j;
+		long m = 1;
+		int squareIndex = 0;  //runs from 0 to 63 inclusive
+		for(int lastSquareOnFile=Bitmap.A8; 
+				lastSquareOnFile <= Bitmap.H8;
+				lastSquareOnFile++)
+		{
+			for(int bitToSet=lastSquareOnFile; 
+					bitToSet >= 0;
+					bitToSet-=8)
+			{
+				mask90[squareIndex] = 1L << bitToSet;
+    			squareIndex++;
 		    }
 		}
 	}
 
+	void genMask45DegreesRight(){
+	  	log.info("generating single-bit bitmasks rotated 45 deg right");
 
-    void genMask45DegreesRight(){
-	  	log.info("generating masks rotated 45 deg right");
-
-    	//Set the bit in mask45R[s] (bitbrd rotated 45 degrees right)
-    //that corresponds to the square s.  Do this for s = {0,...,63}.
-
-    //ALGORITHM:
-    //x runs from 0 to 63 inclusive
-    //i = start square {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56) of the diagonal
-    //j is the square in the diagonal starting at i, 
-//        by adding 9 to j each inner loop we mark off the squares of the diagonal
-//        increment x each inner loop
-//        stop the inner loop once we've touched on all squares in the diagonal 
-    // len is the length of the diagonal we're currently on
-    // it must incremented by one for i = {7,6,...,0} 
-    // and decremented by one for i = {8,16,...,56}
-
-
-    	//For diagonals starting on the first rank and 
-    	//extending up and to the right, starting at h1.
-    	//These diagonals: {h1, g1-h2, f1-h3,..., a1-h8}
-    	long mask = 1;   //set bitbrd back to 1
-    	int x = 0;  //x runs from 0 to 35 inclusive
-
-
-    	//i and len are declared outside loop for compatibility w/ 
-    	//microsoft Visual C++ 6.0 compiler
-    	int i, len;
-
-    	for(i=7, len=1; i >= 0; i--, len++){
-    		for(int j=i, d=len; d > 0; j+=9, d--){
-    			mask45R[x] = mask << j;
-    			//out.println(j);
-    		}
-    	}
-
-    	//For diagonals starting on the a-file and 
-    	//extending up and to the right, starting at a2.
-    	//These diagonals: {a2-g8, a3-f8,..., a7-b8, a8}
-    	mask = 1;  //set bitbrd back to 1
-    	//Now, x runs from 36 to 63 inclusive
-    	for(i=8, len=7; i <= 56; i+=8, len--){
-    		for(int j=i, d=len; d > 0; j+=9, d--){
-    			mask45R[x] = mask << j;
-    			//out.println(j);
-    		}
-    	}
+    	int squareIndex = 0;
+        for(int d = 0; d < 15; d++){ //one loop for each diagonal
+        	DiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
+            while(rightDiagIterator.hasNext())
+            {
+            	int bitToSet = rightDiagIterator.next();
+    			mask45R[squareIndex] = Bitmap.withOneBitSet(bitToSet);
+    			squareIndex++;
+            }
+        }
     }
-
+    
     void genMask45DegreesLeft(){
-	  	log.info("generating masks rotated 45 deg left");
+	  	log.info("generating single-bit bitmasks rotated 45 deg left");
 
-    //Set the bit in mask45L[s] (bitbrd rotated 45 degrees left)
-    //that corresponds to the square s.  Do for all s = {0,...,63}.
-
-    //ALGORITHM:
-    //x runs from 0 to 63 inclusive
-    //i = start square {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63} of the diagonal
-    //j is the square in the diagonal starting at i, 
-//        by adding 7 to j each inner loop we mark off the squares of the diagonal
-//        increment x each inner loop
-//        stop the inner loop once we've touched on all squares in the diagonal 
-    // len is the length of the diagonal we're currently on
-    // it must incremented by one for i ={0,1,...,7} 
-    // and decremented by one for i = {15,23,...,63}
-
-    	//For diagonals starting starting on the first rank and 
-    	//extending up and to the left.
-    	//These diagonals: {a1, b1-a2, c1-a3,..., h1-a8}
-    	long mask = 1;
-    	int x = 0;  
-
-
-    	//i and len are declared outside loop for compatibility w/ 
-    	//microsoft Visual C++ 6.0 compiler
-    	int i, len;
-
-    	for(i=0, len=1; i <= 7; i++, len++){
-    		for(int j=i, d=len; d > 0; j+=7, x++, d--){
-    			mask45L[x] = mask << j;
-    		}
-    	}
-
-    	//For diagonals starting on the h-file and extending up and to the left
-    	//These diagonals: {h2-b8, h3-c8, h4-d8,..., h7-g8, h8}
-    	mask = 1;
-    	x = 36; 
-    	for(i=15, len=7; i <= 63; i+=8, len--){
-    		for(int j=i, d=len; d > 0; j+=7, x++, d--){
-    			mask45L[x] = mask << j;
-    		}
-    	}
+    	int squareIndex = 0;
+        for(int d = 0; d < 15; d++){ //one loop for each diagonal
+        	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
+            while(leftDiagIterator.hasNext())
+            {
+            	int bitToSet = leftDiagIterator.next();
+    			mask45L[squareIndex] = Bitmap.withOneBitSet(bitToSet);
+    			squareIndex++;
+            }
+        }
     }
-
+    
     void genMasksPlusMinus(){
 	  	log.info("generating plus/minus masks");
 
-        //For each square, generate the masks plus[1,7,8,9] and minus[1,7,8,9]
+        //For each square, generate the masks plusN and minusN where N is {1,7,8,9}
         //Also, there should never be more than 7 squares attacked 
         //in the each bitmap
         
@@ -305,24 +242,15 @@ public class Attacks {
      **************************************************************************
      */
 	  	log.info("generating base attacks");
-
-    	final int LEFT_END = 0x80;
-    	final int RIGHT_END = 0x01;
-    	
-        int square;
-        int status;
         
         //These shouldn't exceeded what would fit in a byte
         //We use int's because shifting in java always upcasts to an int anyway
         int piece = 0x01; //originally an unsigned char in C++
-        int occ = 0;      //originally an unsigned char in C++
-        int left = 0;     //originally an unsigned char in C++
-        int right = 0;    //originally an unsigned char in C++
+        int occupied = 0;      //originally an unsigned char in C++
         int p = 0;        //originally an unsigned char in C++
-        int attacks = 0;    //originally an unsigned char in C++
         //occ is the occupied squares on the rank BITWISE-ANDed with 01111110b
         
-        for (square=0; piece != 0x100; piece <<= 1, ++square){
+        for (int square=0; piece != 0x100; piece <<= 1, ++square){
             // square = 0  --> piece = 0x01
             // square = 1  --> piece = 0x02
             // square = 2  --> piece = 0x04
@@ -330,61 +258,61 @@ public class Attacks {
             //   .
             // square = 7  --> piece = 0x80
         	// exit when piece = 0x100
-
-        	//test("406piece", piece);
-        	//System.err.println("testIndex (should not be > 8): " + testIndex++ );
-        	//if (square == 8) break;
         	
-            for (status = 0; status < 64; ++status){
-                occ = status << 1;
-                left = right = 0;
-                
-                //Find square of 1st blocking piece on left
-                p = piece << 1;
-                for (; left == 0 && p != 0; p <<= 1){
-                    left = occ & p;
-                }
-                if (left == 0){
-                    left = LEFT_END;
-                }
-                
-                //Find square of 1st blocking piece on right
-                p = (byte) (piece >> 1);
-                for (; right == 0 && p != 0; p >>>= 1){ //do an UNSIGNED SHIFT
-                	right = occ & p;
-                }
-                if (right == 0)
-                    right = RIGHT_END;
-                
-                // AT THIS POINT:
-                //left is the bitmap of farthest valid move to the 
-                //left (including the capture of the blocking piece).
-                //right is the bitmap of farthest valid move to the 
-                //right (including capture)
-                
-                //Set left and right bounds on moves
-                attacks = left | right;
-                
-                //Set all bits between two blocking pieces
-                while (left > right){
-                    right <<= 1;
-                    left >>= 1;  //should this be an unsigned shift >>>= ????
-                    attacks = attacks | left | right;
-                }
-                //Delete piece's current square as a valid move
-                attacks = attacks ^ piece;	
-                
-                //Store moves
-                //Even though we are storing attacks in a short
-                //attacks should never exceed what would fit in a byte
-                //assert(!Util.bool(0xFFFFFF00 & attacks)); 
-                base[square][status] = (short) attacks;
-   
-                //out.println(Util.formatPieceOccupiedMoves(piece, status << 1, base[square][status]));
-
-            }//end for status
-        }//end for piece
+        	//C5 commented code
+            for (int occupationCombination = 0; //G19
+            		occupationCombination < 64;
+            		occupationCombination++)
+            {
+                occupied = occupationCombination << 1;
+                int leftBlocker = firstLeftSideBlockingPiece(piece, occupied);
+                int rightBlocker = firstRightSideBlockingPiece(piece, occupied);
+                int attacks = attacksIncludingBlockers(piece, leftBlocker, rightBlocker);	
+                base[square][occupationCombination] = (short) attacks;
+            }
+        }
     }
+
+	private static int attacksIncludingBlockers(int piece, int leftBlocker, int rightBlocker) {
+		// 1. attack the blockers
+		// 2. attack all bits between blockers 
+		// 3. exclude the piece doing the attacking
+		int attacks = leftBlocker | rightBlocker; 
+		while (leftBlocker > rightBlocker){
+		    rightBlocker <<= 1;
+		    leftBlocker >>= 1;  //should this be an unsigned shift >>>= ????
+		    attacks |= leftBlocker | rightBlocker;
+		}
+		attacks = attacks ^ piece; //exclude the attacker
+		return attacks;
+	}
+
+	private static int firstRightSideBlockingPiece(int pieceBit, int occupiedBits) {
+    	final int RIGHT_END = 0x01;
+		int p;
+		int right = 0;
+		p = (byte) (pieceBit >> 1);
+		for (; right == 0 && p != 0; p >>>= 1){ //do an UNSIGNED SHIFT
+			right = occupiedBits & p;
+		}
+		if (right == 0)
+		    right = RIGHT_END;
+		return right;
+	}
+
+	private static int firstLeftSideBlockingPiece(int pieceBit, int occupiedBits) {
+    	final int LEFT_END = 0x80;
+		int p;
+		int left = 0;
+		p = pieceBit << 1;
+		for (; left == 0 && p != 0; p <<= 1){
+		    left = occupiedBits & p;
+		}
+		if (left == 0){
+		    left = LEFT_END;
+		}
+		return left;
+	}
 
     
     void genRankAttacks(){
@@ -477,9 +405,6 @@ public class Attacks {
 //          0         \7/
 //                     -
 	  	log.info("generating diagonal attacks 45 deg right (a1-h8)");
-    	
-        //dstartsq are the corresponding diagonals as read from
-        //left to right from the above chessboard rotated 45R
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
         	int len = rightDiagIterator.diagonalLength();
@@ -524,11 +449,6 @@ public class Attacks {
 //          0         \0/
 //                     -
 	  	log.info("generating diagonal attacks 45 deg left (h1-a8)");
-
-    	//dstartsq are the corresponding diagonals as read from
-        //left to right from the above chessboard graphic
-        
-        
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
         	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
         	int len = leftDiagIterator.diagonalLength();
@@ -569,7 +489,7 @@ public class Attacks {
         	if(isBitSet(bitmap, bitToCheck)) 
                 board |= (1L << currentSquare);	//set bit
         }
-        //cout << "\t\tdnum: " << dnum << "\t loops: " << x << endl;
+        //C5 commented code
         return board;
     }
 
@@ -584,172 +504,158 @@ public class Attacks {
 		return maxstatus;
 	}
 
-	private boolean isBitSet(short bitmap, int index) {
+	private static boolean isBitSet(short bitmap, int index) {
+		return (bitmap & (1 << index)) != 0;
+	}
+	
+	private static boolean isBitSet(int bitmap, int index) {
 		return (bitmap & (1 << index)) != 0;
 	}
 
-    void genPawnAttacks(){
-	  	log.info("generating padiagonal attacks 45 deg right (a1-h8)");
+    void genWhitePawnAttacks(){ //G30 functions should do one thing
+		int white = 0;
+        int square;
+        int offsetForAttackingRight = 9; //G19
+        int offsetForAttackingLeft = 7; //G19
 
-		int w = 0, b = 1;
-        int i;
-
-        //NOTE: we compute pawn attacks for all squares
-        //not just the ones a pawn can be on legallly but
-        //because isAttacker() and Attackers() uses them
+        //NOTE: we compute pawn attacks for every square
+        //that is not on the eighth rank (not just the ones a pawn
+        //can be on legally) because MoveGenerator.isAttacked()
+        //uses it.
         
-        //System.out.println("*********** white pawns **************");
 	  	log.info("generating white pawn attacks");
-        for (i = Bitmap.A1; i <= Bitmap.H7; i++){
-        	//System.out.println("i: " + i);
-        	boolean isLeftEdge = fileNumber(i) == 0;
-        	boolean isRightEdge = fileNumber(i+1) == 0;
-            if(!isLeftEdge && !isRightEdge){ 
-                //i-th square is not on the board's edge
-                whitepawn[i] = pawn[w][i] = mask[i+7] | mask[i+9];
-            } else {	
-                //i-th square is on the edge of the board
-                if( isLeftEdge ){   // left edge
-                    whitepawn[i] = pawn[w][i] = mask[i+9];
-                } else { // ((j+1) % 8) == 0 // right edge		
-                    whitepawn[i] = pawn[w][i] = mask[i+7];
-                }
-            }
-            //Util.DisplayBoard(whitepawn[i]);
-        }
-
-	  	log.info("generating black pawn attacks");
-        for (i = Bitmap.H8; i >= Bitmap.A2; i--){
-        	//System.out.println("i: " + i);
-        	boolean isLeftEdge = fileNumber(i) == 0;
-        	boolean isRightEdge = fileNumber(i + 1) == 0;
-        	if(!isLeftEdge && !isRightEdge){ 
-                //i-th square is not on the board's edge
-                blackpawn[i] = pawn[b][i] = mask[i-7] | mask[i-9];
-            } else {	
-                //i-th square is on the edge of the board
-                if(isLeftEdge){
-                    blackpawn[i] = pawn[b][i] =	mask[i-7];
-                } else { // right edge		
-                    blackpawn[i] = pawn[b][i] = mask[i-9];
-                }
-            }
-            //Util.DisplayBoard(blackpawn[i]);
+        for (square = Bitmap.A1; square <= Bitmap.H7; square++){
+        	//Use these conditionals below to ensure we don't "go off the board" and
+        	//all accesses to the mask[64] array are valid. We'll get an AIOOB if 
+        	//we eliminate the redundancy and pull out descriptive local 
+        	//variables ie, pawnAttacksLeft, pawnAttacksRight. (G19 again).
+			if(isOnLeftEdgeOfBoard(square)){
+        		whitepawn[square] = pawn[white][square] = mask[square+offsetForAttackingRight];
+        	} else if (isOnRightEdgeOfBoard(square)) {		
+        		whitepawn[square] = pawn[white][square] = mask[square+offsetForAttackingLeft];
+        	} else {
+        		whitepawn[square] = pawn[white][square] =
+        				mask[square+offsetForAttackingLeft] | mask[square+offsetForAttackingRight];
+        	}
         }
     }
 
+    void genBlackPawnAttacks(){ //G30
+		int black = 1;
+        int square;
+        int offsetForAttackingLeft = -7; //G19
+        int offsetForAttackingRight = -9; //G19
 
-    /*  The newest and fastest version of generating King and Knight 
-     *  attack bitmaps.  This version is 4 times faster than previous
-     *  version which used the STL classes and set_intersection().
-     */
-    void genKingKnightAttacks(){
-        // Comparison of the time (self seconds) of the two functions, 
-        // _GenKingKnightAttacksBitmasks() and GenKingKnightAttacksSTL() 
-        // which use bitmasking and the STL class 'set', respectively.
-        //
-        //Each sample counts as 0.01 seconds.
-        //  %   cumulative   self              self     total           
-        // time   seconds   seconds    calls  ms/call  ms/call  name
-        //1.63      3.89     0.08     1000     0.08     1.92  brd::_STL()
-        //0.66      3.00     0.02     1000     0.02     0.02  brd::_Bitmasks()
+        //NOTE: we compute pawn attacks for every square
+        //that is not on the eighth rank (not just the ones a pawn
+        //can be on legally) because MoveGenerator.isAttacked()
+        //uses it.
 
-        //**************************************************************************
-        // IMPORTANT COMMENTS START HERE!!!!
-        //
+	  	log.info("generating black pawn attacks");
+        for (square = Bitmap.H8; square >= Bitmap.A2; square--){
+        	//Use these conditionals below to ensure we don't "go off the board" and
+        	//all accesses to the mask[64] array are valid. We'll get an AIOOB if 
+        	//we eliminate the redundancy and pull out descriptive local 
+        	//variables ie, pawnAttacksLeft, pawnAttacksRight. (G19 again).
+        	if(isOnLeftEdgeOfBoard(square)){
+        		blackpawn[square] = pawn[black][square] = mask[square + offsetForAttackingLeft];
+        	} else if (isOnRightEdgeOfBoard(square)) {		
+        		blackpawn[square] = pawn[black][square] = mask[square + offsetForAttackingRight];
+        	} else {
+        		blackpawn[square] = pawn[black][square] = 
+        				mask[square + offsetForAttackingLeft] | mask[square + offsetForAttackingRight];	
+        	}
+        }
+    }
+
+	/** 
+	 * Returns true if the square is on the a-file
+	 * @param square square to check
+	 */
+	private boolean isOnLeftEdgeOfBoard(int square) {
+		return fileNumber(square) == 0;
+	}
+
+	/** 
+	 * Returns true if the square is on the h-file
+	 * @param square square to check
+	 */
+    boolean isOnRightEdgeOfBoard(int square) {
+		return fileNumber(square + 1) == 0;
+	}
+
+    void genKingKnightAttacks(){  //violates G30 by doing more than one thing, both king AND knight
         //A 5x5 grid of squares, indexed from 0 to 24, can represent the
-        //squares a piece (king or knight) can move to.  The piece rests
+        //squares a king or knight can move to.  The piece rests
         //on square 12 (12th bit if zero-indexed) in the 5X5 grid.  
         //
-        //For a king the valid moves/bits are as follows:
+        //For a king the attacks(bits) are as follows:
         //		{6,7,8,11,13,16,17,18} = 0x00A1122A
         //
-        //For a knight the valid moves/bits are as follows:
+        //For a knight the attacks(bits) are as follows:
         //		{1,3,5,9,15,19,21,23} = 0x000729C0
         //
         //  The following are the sets of squares
         //that are currently on the board(meaning they don't represent squares
         //that are off-the-board.  For instance, the valid squares when a piece
         //sits on a1 is the intersection (or bitwise ANDing) of the sets
-        //R[0] and C[0] which yields the following:
+        //rowGrid[0] and columnGrid[0] which yields the following:
         //
-        //                0x01FFFC00	// R[0]
-        //	BITWISE-AND   0x01CE739C	// C[0]
+        //                0x01FFFC00	// rowGrid[0]
+        //	BITWISE-AND   0x01CE739C	// colGrid[0]
         // ---------------------------------
-        //                0x01CE7000	// 5x5 grid of valid moves  
+        //                0x01CE7000	// 5x5 grid of possible moves  
         //
-        //NOTE: The 12th bit in the king5x5 and knight5x5 represents
-        //      the current square the piece is resting on.  Make sure
-        //      the 12th bit in either the king5x5 or knight5x5 is always
-        //      zero.
-        //      This will create incorrect results, like the following:
-        //      Nf3-f3
-        //      Kg7-g7
+        //NOTE: This method should make sure the 12th bit in either the king5x5 
+    	//      or knight5x5 is always zero because you can't make a move to the 
+    	//      square you're already on, i.e. Nf3-f3 or Kg7-g7
 
 	  	log.info("generating king/knight attacks");
 
         int king5x5		= 0x000729C0;
         int knight5x5	= 0x00A8822A;
 
-        //Mapping from the 5x5 grid to the 8x8 chessboard represented
-        //in a 64-bit bitboard (long).
-        //
-        //Define a set of numbers which represent the 25 squares that
-        //surround the King or Knight on the regular chessboard. 
-        //Add these numbers to the square the piece is resting on to
-        //give the corresponding bit in the 64-bit bitboard (long).
-        //
-        //Mapping from the 5x5 grid to the 8x8 chessboard represented
-        //in a 64-bit bitboard (long).
-        //TODO: should map be final?
-        int map[] = {-18,-17,-16,-15,-14,-10,-9,-8,-7,-6,-2,-1,0,
-                       1,2,6,7,8,9,10,14,15,16,17,18}; //should be size 25
+        //A mapping to an offset in the 64-bit bitboard that is
+        //indexed by a bit in the 5x5 grid
+        int squareOffset[] = {-18, -17, -16, -15, -14, //G21 (the format and naming demonstrates understanding the algorithm??)  
+        		              -10,  -9,  -8,  -7,  -6,
+        		               -2,  -1,   0,   1,   2,
+        		                6,   7,   8,   9,  10,
+        		               14,  15,  16,  17,  18}; //should be size 25
             
-        //Define Row and Column sets (each element is a 5x5 grid bitmap)
-        final int M = 8;
-        int R[] = new int[M]; //int R[M] = {0};  //initialize to zeroes
-        int C[] = new int[M]; //int C[M] = {0};  //initialize to zeroes
+        //The algorithm depends on the initialized array values being zero
+        final int sizeOfSet = 8;
+        int rowGrid[] = new int[sizeOfSet];
+        int colGrid[] = new int[sizeOfSet];
         
-        //R[i] defines a mask of valid squares (not off the chessboard),
-        //where i is the rank index, an element of {0,1,...,7}
-        R[0] = 0x01FFFC00;	//first rank
-        R[1] = 0x01FFFFE0;	//second rank
-        R[6] = 0x000FFFFF;	//seventh rank
-        R[7] = 0x00007FFF;	//eighth rank
         //All bits in the 5x5 grid are set if we're not on
-        //any of the two outermost ranks of the chessboard.
-        R[2] = R[3] = R[4] = R[5] = 0x01FFFFFF; 
+        //any of the two outermost ranks(rows) or files(columns) of the chessboard.
+        rowGrid[2] = rowGrid[3] = rowGrid[4] = rowGrid[5] = 0x01FFFFFF; //third to sixth rank 
+        rowGrid[0] = 0x01FFFC00;	//first rank
+        rowGrid[1] = 0x01FFFFE0;	//second rank
+        rowGrid[6] = 0x000FFFFF;	//seventh rank
+        rowGrid[7] = 0x00007FFF;	//eighth rank
         
-        //C[i] defines a mask of valid squares (not off the chessboard),
-        //where i is the column index, an element of {0,1,...,7}
-        C[0] = 0x01CE739C;	//a-file
-        C[1] = 0x01EF7BDE;	//b-file
-        C[6] = 0x00F7BDEF;	//g-file
-        C[7] = 0x00739CE7;	//h-file
-        //All bits in the 5x5 grid are set if we're not on
-        //any of the two outermost columns/files of the chessboard.
-        C[2] = C[3] = C[4] = C[5] = 0x01FFFFFF;
-        
-        //cout << "square	valid moves relative to square\n";
-        //Initialize king_attacks and knight_attacks arrays
-        
-        for (int i = 0; i < 8; i++){
-        	for (int j = 0; j < 8; j++){
-        		int sq = j + (i << 3);  //sq = linear index = j + (8 * i)
-        		int K = R[i] & C[j] & king5x5;   //Possible moves for king
-        		int N = R[i] & C[j] & knight5x5; //Possible moves for knight
+        colGrid[2] = colGrid[3] = colGrid[4] = colGrid[5] = 0x01FFFFFF; // c-file to f-file
+        colGrid[0] = 0x01CE739C;	//a-file
+        colGrid[1] = 0x01EF7BDE;	//b-file
+        colGrid[6] = 0x00F7BDEF;	//g-file
+        colGrid[7] = 0x00739CE7;	//h-file
 
-        		//Loop through all squares in the 5x5 grid
-        		//If there's a move there (a bit set) then set the corresponding
-        		//bit in the bitbrd king[sq]/knight[sq], respectively.
+        for (int square = 0; square < 64; square++)
+        {
+        	int rankIndex = rankNumber(square); //G19
+        	int fileIndex = fileNumber(square); //G19
+        	int kingGrid = rowGrid[rankIndex] & colGrid[fileIndex] & king5x5;  //G19 use explanatory variables
+        	int knightGrid = rowGrid[rankIndex] & colGrid[fileIndex] & knight5x5; //G19
 
-        		for (int gridIndex = 0; gridIndex < 25; gridIndex++){
-        			if ( Util.bool(K & (1 << gridIndex)) ){ 
-        				king[sq] |= 1L << (sq + map[gridIndex]);
-        			}
-        			if ( Util.bool(N & (1 << gridIndex)) ){
-        				knight[sq] |= 1L << (sq + map[gridIndex]);
-        			}
+        	for (int gridIndex = 0; gridIndex < 25; gridIndex++){
+        		int bitToSet = square + squareOffset[gridIndex]; //G19
+				if (isBitSet(kingGrid, gridIndex)){ //G28 encapsulate conditionals
+        			king[square] |= Bitmap.withOneBitSet(bitToSet); //N1 choose descriptive names
+        		}
+        		if (isBitSet(knightGrid, gridIndex)){ //G28
+        			knight[square] |= Bitmap.withOneBitSet(bitToSet); //N1
         		}
         	}
         }
