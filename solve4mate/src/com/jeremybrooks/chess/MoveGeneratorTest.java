@@ -151,6 +151,15 @@ public class MoveGeneratorTest {
 		assertFalse(actualMoves.contains("Ke1-c1 0-0-0"));
 		assertFalse(actualMoves.contains("Ke1-g1 0-0"));
 	}
+	
+ 	@Test
+	public void testBlackCastling()
+	{
+		String initialPositions = "r3k2r/p6p/P6P/8/8/8/8/7K b kq - 0 1";
+		Set<String> actualMoves = generateMoves(initialPositions);
+		assertTrue(actualMoves.contains("Ke8-c8 0-0-0"));
+		assertTrue(actualMoves.contains("Ke8-g8 0-0"));
+	}
 
 	@Test
 	public void testBlackCannotCastle()
