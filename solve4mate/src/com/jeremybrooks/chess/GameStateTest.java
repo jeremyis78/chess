@@ -31,7 +31,9 @@ public class GameStateTest {
 		int moveE4 = encodeMove(E2, E4, PIECE[PAWN]);
 		String beforeMove = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 		String afterMove = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
-		assertMoveIsMadeAndUndone(WHITE, moveE4, beforeMove, afterMove);
+		setupState(beforeMove);
+		assertEquals(afterMove, makeMove(WHITE, moveE4));
+		assertEquals(beforeMove, undoMove(WHITE, moveE4));
 	}
 
 	@Test
@@ -39,11 +41,10 @@ public class GameStateTest {
 		int moveKnightTakeE4 = encodeMove(F6, E4, PIECE[KNIGHT], PIECE[PAWN]);
 		String beforeMove = "rnbqkb1r/pppppppp/5n2/8/4P3/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 2";
 		String afterMove = "rnbqkb1r/pppppppp/8/8/4n3/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 3";
-		assertMoveIsMadeAndUndone(BLACK, moveKnightTakeE4, beforeMove, afterMove);
+		setupState(beforeMove);
+		assertEquals(afterMove, makeMove(BLACK, moveKnightTakeE4));
+		assertEquals(beforeMove, undoMove(BLACK, moveKnightTakeE4));
 	}
-
-
-
 
 	@Test @Ignore
 	public void testMakeAndUndoWhitePawnCapturesEnPassant() {
@@ -80,6 +81,26 @@ public class GameStateTest {
 
 	private int encodeMove(int from, int to, int piece, int capturedPiece, int promotionPiece) {
 		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
+	}
+
+	private String setupState(String startState) {
+		String position = startState;
+		gameState.set(startState);
+		String initialState = gameState.get();
+		assertEquals(position, initialState);
+		return initialState;
+	}
+	
+	private String makeMove(int sideToMove, int move) {
+		gameState.makeMove(move, sideToMove);
+		String stateAfterMove = gameState.get();
+		return stateAfterMove;
+	}
+
+	private String undoMove(int sideToMove, int move) {
+		gameState.undoMove(move, sideToMove);
+		String stateAfterUndo = gameState.get();
+		return stateAfterUndo;
 	}
 
 	private void assertMoveIsMadeAndUndone(int sideToMove, int moveE4, String beforeMove, String afterMove) {
