@@ -333,7 +333,11 @@ public class GameState {
 		{
 			castleFen.append("q");
 		}
-		return castleFen.toString();
+		
+		if(castleFen.length() == 0)
+			return "-";
+		else
+			return castleFen.toString();
 	}
 
 	void setEnPassant(final String s)

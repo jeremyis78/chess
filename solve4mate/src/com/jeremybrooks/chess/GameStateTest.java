@@ -28,27 +28,32 @@ public class GameStateTest {
 	
 	@Test
 	public void testMakeAndUndoWhitePieceMoves() {
-		int moveE4 = encodeMove(E2, E4, PIECE[PAWN]);
 		String beforeMove = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+		int moveE4 = encodeMove(E2, E4, PIECE[PAWN]);
 		String afterMove = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
-		setupState(beforeMove);
-		assertEquals(afterMove, makeMove(WHITE, moveE4));
-		assertEquals(beforeMove, undoMove(WHITE, moveE4));
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, moveE4));
+		assertEquals(beforeMove, undoMove(sideToMove, moveE4));
 	}
 
 	@Test
 	public void testMakeAndUndoBlackPieceCaptures() {
-		int moveKnightTakeE4 = encodeMove(F6, E4, PIECE[KNIGHT], PIECE[PAWN]);
 		String beforeMove = "rnbqkb1r/pppppppp/5n2/8/4P3/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 2";
+		int moveKnightTakeE4 = encodeMove(F6, E4, PIECE[KNIGHT], PIECE[PAWN]);
 		String afterMove = "rnbqkb1r/pppppppp/8/8/4n3/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 3";
-		setupState(beforeMove);
-		assertEquals(afterMove, makeMove(BLACK, moveKnightTakeE4));
-		assertEquals(beforeMove, undoMove(BLACK, moveKnightTakeE4));
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, moveKnightTakeE4));
+		assertEquals(beforeMove, undoMove(sideToMove, moveKnightTakeE4));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testMakeAndUndoWhitePawnCapturesEnPassant() {
-		fail("Not yet implemented");
+		String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 23";
+		int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
+		String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, movePawnOnE5CapturesOnD6));
+		assertEquals(beforeMove, undoMove(sideToMove, movePawnOnE5CapturesOnD6));
 	}
 
 	@Test @Ignore
@@ -83,12 +88,12 @@ public class GameStateTest {
 		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
 	}
 
-	private String setupState(String startState) {
+	private int setupState(String startState) {
 		String position = startState;
 		gameState.set(startState);
 		String initialState = gameState.get();
 		assertEquals(position, initialState);
-		return initialState;
+		return gameState.sideToMove;
 	}
 	
 	private String makeMove(int sideToMove, int move) {
