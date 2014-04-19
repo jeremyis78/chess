@@ -348,6 +348,14 @@ public class PositionTest extends TestCase {
 
 	}
 
+	public void testErasePieceSucceedsEvenWhenSquareIsAlreadyEmpty() {
+		Position p = new Position();
+		try {
+			p.erasePiece(E4);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			fail("should not throw if square is already empty");
+		}
+	}
 	public void testPlaceAndEraseKings() {
 		Position p = new Position();
 
