@@ -66,10 +66,10 @@ public class GameStateTest {
 		assertEquals(beforeMove, undoMove(sideToMove, movePawnPromotesOnE8));
 	}
 	
-	@Test @Ignore /* doesn't pass yet */
+	@Test
 	public void testMakeAndUndoWhitePawnCapturesAndPromotes() {
 		String beforeMove = "3r4/4P3/8/8/8/8/8/k6K w - - 5 30";
-		int movePawnCapturesAndPromotesOnD8 = encodeMove(E7, D8, PIECE[PAWN], NONE, PIECE[KNIGHT]);
+		int movePawnCapturesAndPromotesOnD8 = encodeMove(E7, D8, PIECE[PAWN], PIECE[ROOK], PIECE[KNIGHT]);
 		String afterMove = "3N4/8/8/8/8/8/8/k6K b - - 0 30";
 		int sideToMove = setupState(beforeMove);
 		assertEquals(afterMove, makeMove(sideToMove, movePawnCapturesAndPromotesOnD8));

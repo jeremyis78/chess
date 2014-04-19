@@ -584,14 +584,6 @@ public class GameState {
 	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
 	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
 	    promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
-//	    pawnAdvTwo = (Math.abs(to - from) == 16);
-
-	    //Undo the sideToMove
-	    //if (sideToMove == WHITE){
-	    //    sideToMove = BLACK;
-	    //} else {
-	    //    sideToMove = WHITE;	
-	    //}
 	    
 	    // Undo any moves made here at this depth
 	    // by setting legalMoves to zero.
@@ -602,22 +594,8 @@ public class GameState {
 	    depth--;
 	    
 	    //Undo the moving piece
-	    //pos.movePiece(sideToMove, moving, captured, promotion, to, from);   
 	    pos.erasePiece(to);
 	    pos.placePiece(side, moving, from);
-
-
-	    //Replace the captured piece
-	    //if(captured != NONE){
-	    //    pos.erasePiece((color)Toggle((int)sideToMove), captured, to); 
-	        //pos.placePiece((color)Toggle((int)sideToMove), captured, to);
-	    //}
-
-	    //Remove the promotion piece
-	    //if(promotion != NONE){
-	    //    pos.erasePiece((color)Toggle((int)sideToMove), promotion, to);
-	    //}
-
 
 	    //Undo a castling move (that is, undo the rook move)
 	    if (moving == KING){
