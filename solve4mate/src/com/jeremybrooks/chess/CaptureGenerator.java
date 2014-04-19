@@ -14,7 +14,6 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	    int pro = 0;
 	    int n;       //move index counter
 	    int mover;
-	    int move;
 	    long pieces;
 	    long pieceAttacks = 0;    //must be zeroed
 	    long attackedPieces;      //as in "the enemy pieces that are attacked"
@@ -72,7 +71,7 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                cap = Math.abs(g.pos.getBoard(to));
 	                if (!Util.bool(pro)) {     //Capture only
 	                	//TODO: make sure king does not move into check!!!!!
-	                	move = EncodeMove(from, to, PIECE[p], cap, 0);  
+	                	int move = EncodeMove(from, to, PIECE[p], cap, 0);  
 	                	//if((piece)p == KING && !isAttacked(g, side, to)){
 	                	if(p == KING){
 	                		if(isLegal(g, move, side)){
@@ -83,7 +82,13 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                	}
 	                } else {        //Capture and promotion
 	                	for (int i = QUEEN; i >= KNIGHT; i--) {
-	                		moves[n++] = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
+	                		int move = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
+//Adding this validity check exposed the bugs in make and undo move
+//This needs to be added back when that's fixed to ensure there are no moves for pinned pawns on the 7th rank 
+//	                		if(isLegal(g, move, side)) //can't move if pinned
+	                		{
+	                			moves[n++] = move;
+	                		}
 	                	}
 	                }
 	                attackedPieces = ClearPiece (attackedPieces, to);

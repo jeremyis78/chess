@@ -182,7 +182,7 @@ public class GameState {
 //	}
 
 
-	void set(final String fen){
+	public void set(final String fen){
 	    final int numFields = 6;
     
 	    // Read the 'fen' array into variables
@@ -202,6 +202,25 @@ public class GameState {
         setHalfMoveClock(fields[4]); //half);
         setFullMoveClock(fields[5]); // full);
 	}
+	
+	public String get()
+	{
+		StringBuilder fen = new StringBuilder();
+		fen.append(getBoard());
+		fen.append(" ");
+		fen.append(getSide());
+		fen.append(" ");
+		fen.append(getCastle());
+		fen.append(" ");
+		fen.append(getEnPassant());
+		fen.append(" ");
+		fen.append(getHalfMoveClock());
+		fen.append(" ");
+		fen.append(getFullMoveClock());
+		return fen.toString();
+	}
+	
+	
 
 	void clear(){
 	    pos.clear();
@@ -223,6 +242,18 @@ public class GameState {
 	    pos.set(s);  //throws error if any
 	}
 
+	/**
+	 * Gets the pieces on the board at the current depth.
+	 * 
+	 * @return
+	 */
+	private String getBoard()
+	{	
+		//NOTE: depth isn't used here.
+		//As makeMove and undoMove are called the sole position member is updated
+		//
+		return pos.getFen();
+	}
 
 	void setSide(final String s)
 	{
@@ -236,6 +267,10 @@ public class GameState {
         throw new IllegalArgumentException("FEN 2nd field: should be 'w' or 'b'");
 	}
 
+	private String getSide()
+	{
+		return (sideToMove == Bitmap.WHITE) ? "w" : "b";
+	}
 
 	void setCastle(final String s)
 	{
@@ -274,6 +309,32 @@ public class GameState {
 	            "castling field '" + s + "' is invalid");
 	    }
 	}
+	
+	/**
+	 * Get the castling FEN field at the current state (ie, at current depth)
+	 */
+	private String getCastle()
+	{
+		StringBuilder castleFen = new StringBuilder();
+		int castleBitmap = castle[depth];
+		if(Util.bool(castleBitmap & W_SHORT_CASTLE))
+		{
+			castleFen.append("K");
+		}
+		if(Util.bool(castleBitmap & W_LONG_CASTLE))
+		{
+			castleFen.append("Q");
+		}
+		if(Util.bool(castleBitmap & B_SHORT_CASTLE))
+		{
+			castleFen.append("k");
+		}
+		if(Util.bool(castleBitmap & B_LONG_CASTLE))
+		{
+			castleFen.append("q");
+		}
+		return castleFen.toString();
+	}
 
 	void setEnPassant(final String s)
 	{
@@ -292,15 +353,37 @@ public class GameState {
 	            "EnPassant (4th field) or side-to-move (2nd field) conflict");
 	    }
 	}
+	
+	/**
+	 * Get the en-passant FEN field at the current state (ie, at current depth)
+	 * The returned value should be on the 3rd or 6th rank (the only valid values)
+	 * @return square where capture via en passant can occur
+	 */
+	String getEnPassant()
+	{
+		byte epSquare = enPassantSq[depth];
+		if(epSquare == NOSQUARE)
+			return "-";
+		return Util.SqToStr(epSquare);
+	}
 
 	void setHalfMoveClock(final String s)
 	{
 	    byte n = Byte.parseByte(s);
-	    halfMoveClock[0] = n;
+	    halfMoveClock[depth] = n;
 	    if (n < 0){
 	        throw new IllegalArgumentException("FEN 5th field: " +
 	            "Half move clock must be non-negative");
 	    }
+	}
+
+	/**
+	 * Gets the number of halfMoves since the last irreversible 
+	 * move (any capture or pawn move) at the current depth.
+	 * @return the halfMoveClock
+	 */
+	private byte getHalfMoveClock() {
+		return halfMoveClock[depth];
 	}
 
 	void setFullMoveClock(final String s)
@@ -313,6 +396,13 @@ public class GameState {
 	    }  
 	}
 
+	/**
+	 * Gets the current move number at the current depth
+	 * @return the fullMoveClock
+	 */
+	private byte getFullMoveClock() {
+		return fullMoveClock[depth];
+	}
 
 	boolean movesLeft(){
 	  if (movesIndex < (numberOfLegalMovesToDepth[depth] + numberOfLegalMoves[depth]))
@@ -432,35 +522,32 @@ public class GameState {
 	    }
 
 	    //Move the piece
-	    //pos.movePiece(sideToMove, moving, captured, promotion, from, to);
 	    if(captured != NONE){
 	        pos.erasePiece(Util.opp(side), captured, to);
 	    }
-	    if(promotion == NONE) {
-			//cerr << "ERROR if you find this line\n";
-			pos.erasePiece(side, moving, from);
-			pos.placePiece(side, moving, to);
+	    pos.erasePiece(side, moving, from);
+	    if(promotion != NONE) {
+	    	pos.placePiece(side, promotion, to);
 	    } else {
-			pos.placePiece(side, moving, to);
-			pos.erasePiece(side, promotion, from);
+	    	pos.placePiece(side, moving, to);
 	    }
 
 	    //Update the halfmove clock 
 	    //  Reset it for a pawn or capture move (irreversible move)
 	    //  Otherwise, increment it from its previous value
 	    if (captured != NONE || moving == PAWN){
-	        halfMoveClock[depth] = 0;
+	        halfMoveClock[depth + 1] = 0;
 	    } else {
 	         halfMoveClock[depth + 1] = (byte)(halfMoveClock[depth] + 1);
 	    }
 
 	    switch(side){
 	    case Bitmap.WHITE:
-	        //sideToMove = BLACK;
+	        sideToMove = BLACK;
 	        fullMoveClock[depth + 1] = fullMoveClock[depth];
 	        break;
 	    case Bitmap.BLACK:
-	        //sideToMove = WHITE;
+	        sideToMove = WHITE;
 	        fullMoveClock[depth + 1] = (byte)(fullMoveClock[depth] + 1);
 	        break;
 	    }
@@ -505,6 +592,7 @@ public class GameState {
 	    // Undo any moves made here at this depth
 	    // by setting legalMoves to zero.
 	    numberOfLegalMoves[depth] = 0;
+	    halfMoveClock[depth] = 0;
 	    
 	    //Undo the depth
 	    depth--;
@@ -552,13 +640,17 @@ public class GameState {
 	                castling = true;
 	            }
 	            break;
-		}
-		if (castling){
-			//Undo the rook
-			pos.erasePiece(side, ROOK, to2);
-			pos.placePiece(side, ROOK, from2);
-		}
-
+	        }
+	        if (castling){
+	        	//Undo the rook
+	        	pos.erasePiece(side, ROOK, to2);
+	        	pos.placePiece(side, ROOK, from2);
+	        }
+	    }
+	    
+	    //Remove the promotion piece
+	    if (moving == PAWN && promotion != NONE) {
+	    	pos.erasePiece(Util.opp(side), promotion, to);
 	    }
 
 	    //Place captured piece back on the board
@@ -566,6 +658,7 @@ public class GameState {
 	        //Put the EnPassant captured pawn back
 	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
 	        {
+//	        	pos.placePiece(Util.opp(side), PAWN, (side == WHITE) ? to - 8 : to + 8);
 	            switch(side){
 	            case Bitmap.WHITE:
 	                pos.placePiece(Bitmap.BLACK, PAWN, to - 8);
@@ -581,10 +674,7 @@ public class GameState {
 	        }
 	    }
 
-	    //Remove the promotion piece
-	    if (moving == PAWN && promotion != NONE) {
-	    	pos.erasePiece(Util.opp(side), promotion, to);
-	    }
+	    sideToMove = side; //we're undoing the move for side so it will still be side's turn to move 
 	    return false;
 	}
 

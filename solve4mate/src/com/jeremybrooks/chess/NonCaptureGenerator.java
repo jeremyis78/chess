@@ -30,7 +30,6 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    long empty;
 	    int n;
 	    int to, from;
-	    int move = 0; //the encoded move!!!! move_t
 
 	    //***************************************************************************
 	    //*                                                                         *
@@ -78,14 +77,22 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    while (morePieces(advanceTwo)) {
 	        to = FirstPiece (advanceTwo);
 	        from = minusTwoRank(side, to);
-	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
+	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
+	        if(isLegal(g, move, side)) //can't move if pinned
+	        {
+	        	moves[n++] = move;
+	        }
 	        advanceTwo = ClearPiece(advanceTwo, to);
 	    }
 	    // Pawns advance one square
 	    while (morePieces(pMoves)) {
 	        to = FirstPiece (pMoves);
 	        from = minusOneRank(side, to);
-	        moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, 0);
+	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
+	        if(isLegal(g, move, side)) //can't move if pinned
+	        {
+	        	moves[n++] = move;
+	        }
 	        pMoves = ClearPiece (pMoves, to);
 	    }
 
@@ -122,7 +129,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	            }
 	            while (morePieces(pMoves)) {
 	                to = FirstPiece (pMoves);
-	                move = EncodeMove(from,to,PIECE[p],0,0);
+	                int move = EncodeMove(from,to,PIECE[p],0,0);
 	                if (p == KING){
 	                	if (!isAttacked(g, side, to)){
 	                    //if(isLegal(g, move, side)){
