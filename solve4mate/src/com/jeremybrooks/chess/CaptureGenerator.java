@@ -50,10 +50,10 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	            case ROOK:     //fall through
 	            case QUEEN:
 	                if (Util.bool(mover & ROOK_OR_QUEEN)) {
-	                    pieceAttacks |= RookAttacks (g, from);
+	                    pieceAttacks |= rookAttacks (from, g.pos.getAllPieces(0), g.pos.getAllPieces(90));
 	                }
 	                if (Util.bool(mover & BISHOP_OR_QUEEN)) {
-	                    pieceAttacks |= BishopAttacks (g, from);
+	                    pieceAttacks |= bishopAttacks (from, g.pos.getAllPieces(-45), g.pos.getAllPieces(45));
 	                }
 	                break;
 	            case KING:

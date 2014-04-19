@@ -5,6 +5,7 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.Util.*;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -317,19 +318,19 @@ public class GameState {
 	{
 		StringBuilder castleFen = new StringBuilder();
 		int castleBitmap = castle[depth];
-		if(Util.bool(castleBitmap & W_SHORT_CASTLE))
+		if(bool(castleBitmap & W_SHORT_CASTLE))
 		{
 			castleFen.append("K");
 		}
-		if(Util.bool(castleBitmap & W_LONG_CASTLE))
+		if(bool(castleBitmap & W_LONG_CASTLE))
 		{
 			castleFen.append("Q");
 		}
-		if(Util.bool(castleBitmap & B_SHORT_CASTLE))
+		if(bool(castleBitmap & B_SHORT_CASTLE))
 		{
 			castleFen.append("k");
 		}
-		if(Util.bool(castleBitmap & B_LONG_CASTLE))
+		if(bool(castleBitmap & B_LONG_CASTLE))
 		{
 			castleFen.append("q");
 		}
@@ -348,7 +349,7 @@ public class GameState {
 	        enPassantSq[0] = NOSQUARE;
 	        return;
 	    }
-	    sq = Util.StrToSq(s);
+	    sq = StrToSq(s);
 	    if ((sq >= A3 && sq <= H3 && sideToMove == Bitmap.BLACK) ||
 	               (sq >= A6 && sq <= H6 && sideToMove == Bitmap.WHITE) ){
 	        enPassantSq[0] = (byte) sq;
@@ -368,7 +369,7 @@ public class GameState {
 		byte epSquare = enPassantSq[depth];
 		if(epSquare == NOSQUARE)
 			return "-";
-		return Util.SqToStr(epSquare);
+		return SqToStr(epSquare);
 	}
 
 	void setHalfMoveClock(final String s)
@@ -423,106 +424,45 @@ public class GameState {
 	    // Changes sideToMove flag
 	    
 	    int from, to;           //squares involved
-	    int from2 = -1;
-	    int to2 = -1;
 	    int moving, captured, promotion;  //pieces involved
-	    boolean castling = false;
-	    boolean pawnAdvTwo = false;
 
 	    from = move & 0x3F;                         //first 6 bits
 	    to = (move >> 6) & 0x3F;                    //next 6
 	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
 	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
 	    promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
-	    pawnAdvTwo = (Math.abs(to - from) == 16);
 
 	    // If it's a king moving, check for castling
 	    // If it's a rook moving, remove castling for that side if still available
 	    // If it's a pawn capture check for en passant capture 
 	    // or advancing two squares
 
-	    //
-	    // Check for a castling move
-	    //
 	    if (moving == KING){
-	        //cout << "***** Should reach here ONLY if the KING moves!\n";
-	        switch(side){
-	            case Bitmap.WHITE:
-	                //white king moved; castling is no longer legal for him
-	                castle[depth + 1] = castle[depth] & (B_SHORT_CASTLE | B_LONG_CASTLE);
-	                if (to == G1 && from == E1)
-	                {
-	                    from2 = H1;
-	                    to2 = F1;
-	                    castling = true;
-	                }
-	                else if (to == C1 && from == E1)
-	                {
-	                	from2 = A1;
-	                    to2 = D1;
-	                    castling = true;
-	                }
-	                break;
-	            case Bitmap.BLACK:
-	                //black king moved; castling is no longer legal for him
-	                castle[depth + 1] = castle[depth] & (W_SHORT_CASTLE | W_LONG_CASTLE);
-	                if (to == G8 && from == E8){
-	                    //move the white king's rook
-	                    from2 = H8;
-	                    to2 = F8;
-	                    castling = true;
-	                } else if (to == C8 && from == E8){
-	                    from2 = A8;
-	                    to2 = D8;
-	                    castling = true;
-	                }
-	                break;
-	        }
-	        if (castling){
-	            //Move the appropriate rook
-	            //pos.movePiece(sideToMove, ROOK, NONE, NONE, from2, to2);
-		    pos.erasePiece(from2);
-		    pos.placePiece(side, ROOK, to2);
-	        }
+		    updateCastlingFlagsWhenKingMoves(side);
+		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
+			if(rookFrom != NOSQUARE)
+			{
+				if(isOnGFile(to)){
+					moveRook(rookFrom, squareLeftOf(to, side), side);
+				} else if (isOnCFile(to)) {
+					moveRook(rookFrom, squareRightOf(to, side), side);
+				}
+			}
 	    }
 	    else if (moving == ROOK)
 	    {
-	        if (side == Bitmap.WHITE){
-	            if (Util.bool(castle[depth] & W_LONG_CASTLE) && from == A1)
-	                castle[depth + 1] = castle[depth] & ~W_LONG_CASTLE;
-	            else if (Util.bool(castle[depth] & W_SHORT_CASTLE) && from == H1)
-	                castle[depth + 1] = castle[depth] & ~W_SHORT_CASTLE;
-	        } else {
-	            if (Util.bool(castle[depth] & B_LONG_CASTLE) && from == A8)
-	                castle[depth + 1] = castle[depth] & ~B_LONG_CASTLE;
-	            else if (Util.bool(castle[depth] & B_SHORT_CASTLE) && from == H8)
-	                castle[depth + 1] = castle[depth] & ~B_SHORT_CASTLE;
-	        }             
+	        updateCastlingFlagsWhenRookMoves(from, side);             
 	    } else {
 	        //EnPassant
 	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
 	        {
-	            switch(side){
-	            case Bitmap.WHITE:
-	                pos.erasePiece(to - 8);
-	                captured = NONE;	
-	                break;
-	            case Bitmap.BLACK:
-	                pos.erasePiece(to + 8);
-	                captured = NONE;
-	                break;
-	            }
-	        } else if (moving == PAWN && pawnAdvTwo) {
+	        	pos.erasePiece(squareBehind(to, side));
+	        	captured = NONE;
+	        } else if (moving == PAWN && twoSquaresBehind(to, side) == from) {
 	            //Pawn advances two squares
-	        	if(side == Bitmap.WHITE)
-	                enPassantSq[depth + 1] = (byte)(from + 8);
-	            else
-	                enPassantSq[depth + 1] = (byte)(from - 8);
+	        	updateEnPassantSquare(from, side);
 	        }
-
-	        // Castle status remains constant since king and
-	        // rook did not move
-	        castle[depth + 1] = castle[depth];
+	        duplicateCastlingFlags();
 	    }
 
 	    //Move the piece
@@ -540,21 +480,20 @@ public class GameState {
 	    //  Reset it for a pawn or capture move (irreversible move)
 	    //  Otherwise, increment it from its previous value
 	    if (captured != NONE || moving == PAWN){
-	        halfMoveClock[depth + 1] = 0;
+	        resetHalfMoveClock();
 	    } else {
-	         halfMoveClock[depth + 1] = (byte)(halfMoveClock[depth] + 1);
+	    	incrementHalfMoveClock();
 	    }
 
 	    switch(side){
 	    case Bitmap.WHITE:
-	        sideToMove = BLACK;
-	        fullMoveClock[depth + 1] = fullMoveClock[depth];
+	        duplicateFullMoveClock();
 	        break;
 	    case Bitmap.BLACK:
-	        sideToMove = WHITE;
-	        fullMoveClock[depth + 1] = (byte)(fullMoveClock[depth] + 1);
+	        incrementFullMoveClock();
 	        break;
 	    }
+	    sideToMove = opposing(side);
 	    depth++;
 	    
 	    //Compute the number of moves that come before
@@ -566,18 +505,105 @@ public class GameState {
 	    return false;
 	}
 
+	private int correspondingRookIfKingCastled(int from, int to, int side) {
+		int rookSquare = NOSQUARE;
+		switch(side){
+        case Bitmap.WHITE:
+            if (isWhiteShortCastle(from, to)){
+	        	rookSquare = H1; //moveRook(H1, F1, side);
+            } else if (isWhiteLongCastle(from, to)){
+	        	rookSquare =  A1; //moveRook(A1, D1, side);
+            }
+        case Bitmap.BLACK:
+            if (isBlackShortCastle(from, to)){
+	        	rookSquare =  H8; //moveRook(H8, F8, side);
+            } else if (isBlackLongCastle(from, to)){
+	        	rookSquare =  A8; //moveRook(A8, D8, side);
+            }
+        }
+		return rookSquare;
+	}
 
+	private void duplicateCastlingFlags() {
+		// Castle status remains constant since king and
+		// rook did not move
+		castle[depth + 1] = castle[depth];
+	}
 
+	private void incrementFullMoveClock() {
+		fullMoveClock[depth + 1] = (byte)(fullMoveClock[depth] + 1);
+	}
+
+	private void duplicateFullMoveClock() {
+		fullMoveClock[depth + 1] = fullMoveClock[depth];
+	}
+
+	private void incrementHalfMoveClock() {
+		halfMoveClock[depth + 1] = (byte)(halfMoveClock[depth] + 1);
+	}
+
+	private void resetHalfMoveClock() {
+		halfMoveClock[depth + 1] = 0;
+	}
+
+	private void moveRook(int rookFrom, int rookTo, int side) {
+		pos.erasePiece(rookFrom);
+		pos.placePiece(side, ROOK, rookTo);
+	}
+
+	private void updateCastlingFlagsWhenKingMoves(int side) {
+		switch(side) {
+		case WHITE:
+			//white king moved; castling is no longer legal for him
+			castle[depth + 1] = castle[depth] & (B_SHORT_CASTLE | B_LONG_CASTLE);
+			break;
+		case BLACK:
+			//black king moved; castling is no longer legal for him
+			castle[depth + 1] = castle[depth] & (W_SHORT_CASTLE | W_LONG_CASTLE);
+			break;
+		}
+	}
+
+	private void updateCastlingFlagsWhenRookMoves(int rookFromSquare, int side) {
+		if (side == Bitmap.WHITE){
+			if (bool(castle[depth] & W_LONG_CASTLE) && rookFromSquare == A1)
+				castle[depth + 1] = castle[depth] & ~W_LONG_CASTLE;
+			else if (bool(castle[depth] & W_SHORT_CASTLE) && rookFromSquare == H1)
+				castle[depth + 1] = castle[depth] & ~W_SHORT_CASTLE;
+		} else {
+			if (bool(castle[depth] & B_LONG_CASTLE) && rookFromSquare == A8)
+				castle[depth + 1] = castle[depth] & ~B_LONG_CASTLE;
+			else if (bool(castle[depth] & B_SHORT_CASTLE) && rookFromSquare == H8)
+				castle[depth + 1] = castle[depth] & ~B_SHORT_CASTLE;
+		}
+	}
+
+	private boolean isBlackLongCastle(int from, int to) {
+		return to == C8 && from == E8;
+	}
+
+	private boolean isBlackShortCastle(int from, int to) {
+		return to == G8 && from == E8;
+	}
+
+	private boolean isWhiteLongCastle(int from, int to) {
+		return to == C1 && from == E1;
+	}
+
+	private boolean isWhiteShortCastle(int from, int to) {
+		return to == G1 && from == E1;
+	}
+
+	private void updateEnPassantSquare(int from, int side) {
+		enPassantSq[depth + 1] = (byte)squareAhead(from, side);
+	}
 
 	boolean undoMove(int move, int side){
 		// undoMove(int move) updates the state of the game by restoring 
 		// the state of the board before 'move' was made
 	    int from, to;           //squares involved
-	    int from2 = -1;
-	    int to2 = -1;
 	    int moving, captured, promotion;  //pieces involved
 	    boolean castling = false;
-//	    boolean pawnAdvTwo = false;
 
 	    from = move & 0x3F;                         //first 6 bits
 	    to = (move >> 6) & 0x3F;                    //next 6
@@ -599,35 +625,15 @@ public class GameState {
 
 	    //Undo a castling move (that is, undo the rook move)
 	    if (moving == KING){
-	        switch(side){
-	        case Bitmap.WHITE:
-	            if (to == G1 && from == E1){
-	                from2 = H1;
-	                to2 = F1;
-	                castling = true;
-	            } else if (to == C1 && from == E1){
-	                from2 = A1;
-	                to2 = D1;
-	                castling = true;
-	            }
-	            break;
-	        case Bitmap.BLACK:
-	            if (to == G8 && from == E8){
-	                from2 = H8;
-	                to2 = F8;
-	                castling = true;
-	            } else if (to == C8 && from == E8){
-	                from2 = A8;
-	                to2 = D8;
-	                castling = true;
-	            }
-	            break;
-	        }
-	        if (castling){
-	        	//Undo the rook
-	        	pos.erasePiece(to2);
-	        	pos.placePiece(side, ROOK, from2);
-	        }
+		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
+			if(rookFrom != NOSQUARE)
+			{
+				if(isOnGFile(to)){
+					moveRook(squareLeftOf(to, side), rookFrom, side);
+				} else if (isOnCFile(to)) {
+					moveRook(squareRightOf(to, side), rookFrom, side);
+				}
+			}
 	    }
 	    
 	    //Place captured piece back on the board
@@ -635,19 +641,10 @@ public class GameState {
 	        //Put the EnPassant captured pawn back
 	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
 	        {
-//	        	pos.placePiece(Util.opp(side), PAWN, (side == WHITE) ? to - 8 : to + 8);
-	            switch(side){
-	            case Bitmap.WHITE:
-	                pos.placePiece(Bitmap.BLACK, PAWN, to - 8);
-	                break;
-	            case Bitmap.BLACK:
-	                pos.placePiece(Bitmap.WHITE, PAWN, to + 8);
-	                break;
-	            }
-
+	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
 	        } else { //Normal capture
 		        //Put any other captured piece back
-	        	pos.placePiece(Util.opp(side), captured, to);
+	        	pos.placePiece(opposing(side), captured, to);
 	        }
 	    }
 

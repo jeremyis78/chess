@@ -25,7 +25,7 @@ public class Util {
     public static boolean bool(int i){ return i != 0; }
     public static boolean bool(long i){ return i != 0; }
 	
-    public static int opp(int side){
+    public static int opposing(int side){
 	    return side == Bitmap.WHITE ? Bitmap.BLACK : Bitmap.WHITE;
 	}
 
@@ -687,5 +687,41 @@ public class Util {
     	}
     	return sb.toString();
     }
-    
+	// minusOneRank
+	//
+	// Returns the from square given the square
+	// the pawn moved to. (pawn advanced one square)
+	//
+	protected static int squareBehind(int currentSquare, int side){
+	    return (side == Bitmap.WHITE) ? (currentSquare - 8) : (currentSquare + 8);
+	}
+	// minusTwoRank
+	//
+	// Returns the from square given the square
+	// the pawn moved to. (pawn advanced two squares)
+	//
+	protected static int twoSquaresBehind(int currentSquare, int side){
+		return squareBehind(squareBehind(currentSquare, side), side);
+	}
+
+	protected static int squareAhead(int currentSquare, int side){
+	    return (side == Bitmap.WHITE) ? (currentSquare + 8) : (currentSquare - 8);
+	}
+
+	protected static int squareLeftOf(int currentSquare, int side){
+	    return (currentSquare - 1);
+	}
+
+	protected static int squareRightOf(int currentSquare, int side){
+	    return (currentSquare + 1);
+	}
+
+	protected static boolean isOnGFile(int currentSquare){
+	    return (Bitmap.fileNumber(currentSquare) == Bitmap.G1);
+	}
+
+	protected static boolean isOnCFile(int currentSquare){
+	    return (Bitmap.fileNumber(currentSquare) == Bitmap.C1);
+	}
+
 }

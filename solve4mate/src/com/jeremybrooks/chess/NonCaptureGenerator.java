@@ -38,7 +38,8 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    //***************************************************************************
 
 	    n = g.numberOfLegalMoves[depth];
-	    empty = ~g.pos.getAllPieces(0);
+	    long allPiecesByRank = g.pos.getAllPieces(0);
+		empty = ~allPiecesByRank;
 
 	    switch (side) {
 	        case Bitmap.WHITE:
@@ -65,7 +66,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    // Pawn promotions
 	    while (morePieces(promoters)) {
 	        to = FirstPiece (promoters);
-	        from = minusOneRank(side, to);
+	        from = Util.squareBehind(to, side);
 	        for (int i = QUEEN; i >= KNIGHT; i--) {
 	            moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
 	            //g.legalMoves[depth]++;
@@ -76,7 +77,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    // Pawns advance two squares
 	    while (morePieces(advanceTwo)) {
 	        to = FirstPiece (advanceTwo);
-	        from = minusTwoRank(side, to);
+	        from = Util.twoSquaresBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {
@@ -87,7 +88,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    // Pawns advance one square
 	    while (morePieces(pMoves)) {
 	        to = FirstPiece (pMoves);
-	        from = minusOneRank(side, to);
+	        from = Util.squareBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {
@@ -115,16 +116,19 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	                case QUEEN:
 	                    if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
 	                    {
-	                        pMoves |= BishopAttacks (g, from) & empty;
+	                        long allPieces45Left = g.pos.getAllPieces(-45);
+							long allPieces45Right = g.pos.getAllPieces(45);
+							pMoves |= bishopAttacks (from, allPieces45Left, allPieces45Right) & empty;
 	                    }
 	                    if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
 	                    {
-	                        pMoves |= RookAttacks (g, from) & empty;
+	                        long allPiecesByFile = g.pos.getAllPieces(90);
+							pMoves |= rookAttacks (from, allPiecesByRank, allPiecesByFile) & empty;
 	                    }
 	                    break;
 	                case KING:
 	                	//exclude moves that are attacked by opponent's king 
-	                    pMoves = att.king[from] & empty & ~att.king[g.pos.getKingSquare(Util.opp(side))];
+	                    pMoves = att.king[from] & empty & ~att.king[g.pos.getKingSquare(Util.opposing(side))];
 	                    break;
 	            }
 	            while (morePieces(pMoves)) {

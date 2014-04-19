@@ -46,7 +46,7 @@ public class Position
 
 	public long getOpponentPawns(int side)
 	{
-		return pieces[Util.opp(side)][PAWNS];		
+		return pieces[Util.opposing(side)][PAWNS];		
 	}
 	
 	public long getKnights(int side)
@@ -56,7 +56,7 @@ public class Position
 	
 	public long getOpponentKnights(int side)
 	{
-		return pieces[Util.opp(side)][KNIGHTS];		
+		return pieces[Util.opposing(side)][KNIGHTS];		
 	}
 
 	public long getBishops(int side)
@@ -66,7 +66,7 @@ public class Position
 
 	public long getOpponentBishops(int side)
 	{
-		return pieces[Util.opp(side)][BISHOPS];		
+		return pieces[Util.opposing(side)][BISHOPS];		
 	}
 
 	public long getRooks(int side)
@@ -76,7 +76,7 @@ public class Position
 
 	public long getOpponentRooks(int side)
 	{
-		return pieces[Util.opp(side)][ROOKS];		
+		return pieces[Util.opposing(side)][ROOKS];		
 	}
 
 	public long getQueens(int side)
@@ -86,7 +86,7 @@ public class Position
 
 	public long getOpponentQueens(int side)
 	{
-		return pieces[Util.opp(side)][QUEENS];		
+		return pieces[Util.opposing(side)][QUEENS];		
 	}
 	
 	public long getKing(int side)
@@ -99,7 +99,7 @@ public class Position
 
 	public long getOpponentKing(int side)
 	{
-		int opponentSide = Util.opp(side); 
+		int opponentSide = Util.opposing(side); 
 		if(isKingPlaced(opponentSide)) {
 	    	return 1L << kingSq[opponentSide];
 	    }

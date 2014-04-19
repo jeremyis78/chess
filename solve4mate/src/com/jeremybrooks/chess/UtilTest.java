@@ -19,8 +19,8 @@ public class UtilTest extends TestCase {
 	
 	
 	public void testOpp() {
-		assertEquals(Bitmap.BLACK, Util.opp(Bitmap.WHITE));
-		assertEquals(Bitmap.WHITE, Util.opp(Bitmap.BLACK));
+		assertEquals(Bitmap.BLACK, Util.opposing(Bitmap.WHITE));
+		assertEquals(Bitmap.WHITE, Util.opposing(Bitmap.BLACK));
 	}
 
 	public void testToggle() {

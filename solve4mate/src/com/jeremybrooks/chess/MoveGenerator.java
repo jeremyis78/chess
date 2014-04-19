@@ -284,7 +284,8 @@ public class MoveGenerator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    empty = ~g.pos.getAllPieces(0);
+	    long allPiecesByRank = g.pos.getAllPieces(0);
+		empty = ~allPiecesByRank;
 
 	    //getPawnMoves(g, side, pMoves, promoters, advanceTwo);
 	    pMoves = getPawnAdvanceOne(g, side);
@@ -305,7 +306,7 @@ public class MoveGenerator {
 	        //Add move ONLY if the move is to 'targets'
 	        if (Util.bool((1L << to) & targets))
 	        {
-	            from = minusOneRank(side, to);
+	            from = Util.squareBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
@@ -328,7 +329,7 @@ public class MoveGenerator {
 	        to = FirstPiece (advanceTwo);
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets)){ 
-	            from = minusTwoRank(side, to);
+	            from = Util.twoSquaresBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
@@ -345,7 +346,7 @@ public class MoveGenerator {
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets))
 	        {
-	            from = minusOneRank(side, to);
+	            from = Util.squareBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
@@ -379,11 +380,14 @@ public class MoveGenerator {
 	                case QUEEN:
 	                    if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
 	                    {
-	                        pMoves |= BishopAttacks (g, from) & empty & targets;
+	                        long allPieces45Left = g.pos.getAllPieces(-45);
+							long allPieces45Right = g.pos.getAllPieces(45);
+							pMoves |= bishopAttacks (from, allPieces45Left, allPieces45Right) & empty & targets;
 	                    }
 	                    if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
 	                    {
-	                        pMoves |= RookAttacks (g, from) & empty & targets;
+	                        long allPiecesByFile = g.pos.getAllPieces(90);
+							pMoves |= rookAttacks (from, allPiecesByRank, allPiecesByFile) & empty & targets;
 	                    }
 	                    break;
 	            }
@@ -488,13 +492,13 @@ public class MoveGenerator {
 	// RookAttacks() returns a bitboard of the squares that 
 	// a rook on "from" would attack, including captures.
 
-	long RookAttacks (GameState g, int rookSquare)
+	long rookAttacks (int rookSquare, long allPiecesByRank, long allPiecesByFile)
 	{
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status (g.pos.getAllPieces(0), rookSquare);
-	    stat2 = Status90 (g.pos.getAllPieces(90), rookSquare);
+	    stat1 = Status (allPiecesByRank, rookSquare);
+	    stat2 = Status90 (allPiecesByFile, rookSquare);
 	    attacks = att.rank[rookSquare][stat1];
 	    attacks |= att.file[rookSquare][stat2];
 	    return attacks;
@@ -504,13 +508,13 @@ public class MoveGenerator {
 	// BishopAttacks() returns a bitboard of the squares that 
 	// a bishop on "from" would attack, including captures.
 
-	long BishopAttacks (GameState g, int bishopSquare)
+	long bishopAttacks (int bishopSquare, long allPieces45Left, long allPieces45Right)
 	{
 	    long attacks;
 	    int stat1, stat2;
 
-	    stat1 = Status45L (g.pos.getAllPieces(-45), bishopSquare);
-	    stat2 = Status45R (g.pos.getAllPieces(45), bishopSquare);
+	    stat1 = Status45L (allPieces45Left, bishopSquare);
+	    stat2 = Status45R (allPieces45Right, bishopSquare);
 	    attacks = att.L45[bishopSquare][stat1];
 	    attacks |= att.R45[bishopSquare][stat2];
 	    return attacks;
@@ -532,33 +536,6 @@ public class MoveGenerator {
 	    return 0;
 	}
 
-
-	// minusOneRank
-	//
-	// Returns the from square given the square
-	// the pawn moved to. (pawn advanced one square)
-	//
-	protected static int minusOneRank(int side, int to){
-	    if (side == Bitmap.WHITE) {
-	        return (to - 8);
-	    } else {
-	        return (to + 8);
-	    }
-	}
-
-
-	// minusTwoRank
-	//
-	// Returns the from square given the square
-	// the pawn moved to. (pawn advanced two squares)
-	//
-	protected static int minusTwoRank(int side, int to){
-	    if (side == Bitmap.WHITE) {
-	        return (to - 16);
-	    } else {
-	        return (to + 16);
-	    }
-	}
 
 	protected boolean canWhiteShortCastle(GameState g, int side, int depth){
 	    if (Util.bool(g.castle[depth] & GameState.W_SHORT_CASTLE)

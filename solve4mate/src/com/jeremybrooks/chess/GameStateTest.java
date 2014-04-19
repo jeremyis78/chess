@@ -77,14 +77,44 @@ public class GameStateTest {
 				beforeMove, undoMove(sideToMove, movePawnCapturesAndPromotesOnD8));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testMakeAndUndoWhiteShortCastles() {
-		fail("Not yet implemented");
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(E1, G1, PIECE[KING]);
+		String afterMove = "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testMakeAndUndoWhiteLongCastles() {
-		fail("Not yet implemented");
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(E1, C1, PIECE[KING]);
+		String afterMove = "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoBlackShortCastles() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		int move = encodeMove(E8, G8, PIECE[KING]);
+		String afterMove = "r4rk1/8/8/8/8/8/8/R3K2R w KQ - 1 2";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoBlackLongCastles() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		int move = encodeMove(E8, C8, PIECE[KING]);
+		String afterMove = "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 1 2";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
 	}
 
 	private int encodeMove(int from, int to, int piece) {

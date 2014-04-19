@@ -146,7 +146,7 @@ public class Search {
 	        //*****************************************
 	        g.makeMove(moves[i], side);
 	        g.currentLine[depth] = moves[i];
-	        val = min(g,alpha,beta,Util.opp(side),depth+1);
+	        val = min(g,alpha,beta,Util.opposing(side),depth+1);
 	        best = Math.max(best, val);
 		if(depth==0){
 		  g.movesValue[i] = val;
@@ -233,7 +233,7 @@ public class Search {
 	        //*****************************************
 	        g.makeMove(moves[i], side);
 	        g.currentLine[depth] = moves[i];
-		val = max(g,alpha,beta,Util.opp(side), depth+1);
+		val = max(g,alpha,beta,Util.opposing(side), depth+1);
 	        best = Math.min(best, val);
 		if(depth==0){
 		  g.movesValue[i] = val;

@@ -59,7 +59,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        cap = Math.abs(g.pos.getBoard(checker));
 
 	        //Generate captures to checker's square
-	        capturers = attackers (g, Util.opp(side), checker);
+	        capturers = attackers (g, Util.opposing(side), checker);
 
 	        //Add to 'capturers' pawns that would capture enpassant
 	        if(TO_PIECE[cap] == PAWN && g.enPassantSq[depth] != NOSQUARE){
