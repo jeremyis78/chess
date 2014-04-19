@@ -201,7 +201,9 @@ public class Bitmap {
 	
 	/**
 	 * Returns the piece as it is encoded into the "move" integer
-	 * Use appropriate constants above for the index 
+	 * and encoded in the Position.board array.
+	 * Use appropriate constants above for the index
+	 * @see Position.getBoard(int) 
 	 */
 	public static final int PIECE[] = {
 	    /*  pawn   001 */	1,
