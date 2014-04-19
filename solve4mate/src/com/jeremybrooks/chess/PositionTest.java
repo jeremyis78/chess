@@ -127,7 +127,6 @@ public class PositionTest extends TestCase {
 		long bitmap = 6L;
 		Position p = new Position();
 		p.setPieces(Bitmap.WHITE, PAWN, bitmap);
-		System.out.println(new Displayer().formatBoard(p));
 	}
 	
 	public void testNewStartingPosition()
@@ -178,19 +177,19 @@ public class PositionTest extends TestCase {
 		// 1. e4
 		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.E4);
 		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPPPPPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Bitmap.WHITE, PAWN, Bitmap.E2);
+		p.erasePiece(Bitmap.E2);
 		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		
 		// 1. ... d5
 		p.placePiece(Bitmap.BLACK, PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/pppppppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Bitmap.BLACK, PAWN, Bitmap.D7);
+		p.erasePiece(Bitmap.D7);
 		assertEquals("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		
 		// 2. e4xd5
-		p.erasePiece(Bitmap.BLACK, PAWN, Bitmap.D5);
+		p.erasePiece(Bitmap.D5);
 		assertEquals("rnbqkbnr/ppp1pppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Bitmap.WHITE, PAWN, Bitmap.E4);
+		p.erasePiece(Bitmap.E4);
 		assertEquals("rnbqkbnr/ppp1pppp/8/8/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
 		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.D5);
 		assertEquals("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
@@ -258,7 +257,7 @@ public class PositionTest extends TestCase {
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareToOverwrite));
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 		
-		p.erasePiece(Bitmap.WHITE, QUEEN, squareToOverwrite);
+		p.erasePiece(squareToOverwrite); //erase queen
 		assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(squareToOverwrite));
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 	}
@@ -368,7 +367,7 @@ public class PositionTest extends TestCase {
 		assertEquals(sqMask45L, p.getAllPieces(-45));
 		assertEquals(sqMask45R, p.getAllPieces(45));
 
-		p.erasePiece(Bitmap.WHITE, KING, sq);
+		p.erasePiece(sq);
 
 
 		//Set the black king
@@ -400,7 +399,7 @@ public class PositionTest extends TestCase {
 				sq++; //just for a good test so we are setting different bits each time
 				p.placePiece(color, piece, sq);
 				assertCorrectPlacement(p,sq,color,piece,piece);
-				p.erasePiece(color, piece, sq);
+				p.erasePiece(sq);
 			}
 		}
 	}

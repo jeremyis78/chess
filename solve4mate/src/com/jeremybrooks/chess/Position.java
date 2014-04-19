@@ -512,28 +512,38 @@ public class Position
 	}
 	
 	/**
-	 * Erases a piece from the board and bitmaps
+	 * Erases/removes the piece on the given square
 	 * 
-	 * @param c the color of the piece as in Color.WHITE/BLACK
-	 * @param p the index into the PIECE[] array Chess.PAWN, etc
-	 * @param sq the square to place the piece on
+	 * @param sq the square of the piece to remove
 	 */
-	public void erasePiece(int c, int p, int sq){
-	    long mask = 1L << sq;
+	public void erasePiece(int square){
+		int boardPiece = getBoard(square);
+		if(boardPiece == BOARD_EMPTY_SQUARE)
+		{
+			return; //already empty
+		}
+		int color = (boardPiece > 0) ? WHITE : BLACK;
+		int piece = TO_PIECE[Math.abs(boardPiece)];
+	    long mask = 1L << square;
 	    all[Bitmap.ALL] ^= mask;
-	    all[ALL90] ^= 1L << SQ2BIT90R[sq];
-	    all[ALL45L] ^= 1L << SQ2BIT45L[sq];
-	    all[ALL45R] ^= 1L << SQ2BIT45R[sq];
-	    board[sq] = BOARD_EMPTY_SQUARE;
-	    if (p == KING)
+	    all[ALL90] ^= 1L << SQ2BIT90R[square];
+	    all[ALL45L] ^= 1L << SQ2BIT45L[square];
+	    all[ALL45R] ^= 1L << SQ2BIT45R[square];
+	    board[square] = BOARD_EMPTY_SQUARE;
+	    if (piece == KING)
 	    {
-	    	kingSq[c] = KING_NOT_PLACED;
+	    	kingSq[color] = KING_NOT_PLACED;
 	    }  else {
-	        pieces[c][p] ^= mask;
-	        pieces[c][ALLPIECES] ^= mask;
+	        pieces[color][piece] ^= mask;
+	        pieces[color][ALLPIECES] ^= mask;
 	    } 
 	}
-	
+
+	@Deprecated
+	public void erasePiece(int color, int piece, int square){
+		erasePiece(square);
+	}
+
 	public static boolean isSameColor(int c, int p)
 	{
 		if ( (p > 0 && c == Bitmap.WHITE) || (p < 0 && c == Bitmap.BLACK) )

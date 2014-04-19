@@ -481,7 +481,7 @@ public class GameState {
 	        if (castling){
 	            //Move the appropriate rook
 	            //pos.movePiece(sideToMove, ROOK, NONE, NONE, from2, to2);
-		    pos.erasePiece(side, ROOK, from2);
+		    pos.erasePiece(from2);
 		    pos.placePiece(side, ROOK, to2);
 	        }
 	    }
@@ -504,11 +504,11 @@ public class GameState {
 	        {
 	            switch(side){
 	            case Bitmap.WHITE:
-	                pos.erasePiece(Bitmap.BLACK, PAWN, to - 8);
+	                pos.erasePiece(to - 8);
 	                captured = NONE;	
 	                break;
 	            case Bitmap.BLACK:
-	                pos.erasePiece(Bitmap.WHITE, PAWN, to + 8);
+	                pos.erasePiece(to + 8);
 	                captured = NONE;
 	                break;
 	            }
@@ -527,9 +527,9 @@ public class GameState {
 
 	    //Move the piece
 	    if(captured != NONE){
-	        pos.erasePiece(Util.opp(side), captured, to);
+	        pos.erasePiece(to);
 	    }
-	    pos.erasePiece(side, moving, from);
+	    pos.erasePiece(from);
 	    if(promotion != NONE) {
 	    	pos.placePiece(side, promotion, to);
 	    } else {
@@ -603,7 +603,7 @@ public class GameState {
 	    
 	    //Undo the moving piece
 	    //pos.movePiece(sideToMove, moving, captured, promotion, to, from);   
-	    pos.erasePiece(side, moving, to);
+	    pos.erasePiece(to);
 	    pos.placePiece(side, moving, from);
 
 
@@ -647,16 +647,11 @@ public class GameState {
 	        }
 	        if (castling){
 	        	//Undo the rook
-	        	pos.erasePiece(side, ROOK, to2);
+	        	pos.erasePiece(to2);
 	        	pos.placePiece(side, ROOK, from2);
 	        }
 	    }
 	    
-	    //Remove the promotion piece
-	    if (moving == PAWN && promotion != NONE) {
-	    	pos.erasePiece(Util.opp(side), promotion, to);
-	    }
-
 	    //Place captured piece back on the board
 	    if(captured != NONE){
 	        //Put the EnPassant captured pawn back

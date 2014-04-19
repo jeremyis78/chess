@@ -48,7 +48,7 @@ public class GameStateTest {
 
 	@Test
 	public void testMakeAndUndoWhitePawnCapturesEnPassant() {
-		String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 23";
+		String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 2 23";
 		int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
 		String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";
 		int sideToMove = setupState(beforeMove);
@@ -56,14 +56,25 @@ public class GameStateTest {
 		assertEquals(beforeMove, undoMove(sideToMove, movePawnOnE5CapturesOnD6));
 	}
 
-	@Test @Ignore
+	@Test
 	public void testMakeAndUndoWhitePawnPromotes() {
-		fail("Not yet implemented");
+		String beforeMove = "8/4P3/8/8/8/8/8/k6K w - - 5 30";
+		int movePawnPromotesOnE8 = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
+		String afterMove = "4Q3/8/8/8/8/8/8/k6K b - - 0 30";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, movePawnPromotesOnE8));
+		assertEquals(beforeMove, undoMove(sideToMove, movePawnPromotesOnE8));
 	}
 	
-	@Test @Ignore
+	@Test @Ignore /* doesn't pass yet */
 	public void testMakeAndUndoWhitePawnCapturesAndPromotes() {
-		fail("Not yet implemented");
+		String beforeMove = "3r4/4P3/8/8/8/8/8/k6K w - - 5 30";
+		int movePawnCapturesAndPromotesOnD8 = encodeMove(E7, D8, PIECE[PAWN], NONE, PIECE[KNIGHT]);
+		String afterMove = "3N4/8/8/8/8/8/8/k6K b - - 0 30";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, movePawnCapturesAndPromotesOnD8));
+		assertEquals("captured piece must be put back", 
+				beforeMove, undoMove(sideToMove, movePawnCapturesAndPromotesOnD8));
 	}
 
 	@Test @Ignore
