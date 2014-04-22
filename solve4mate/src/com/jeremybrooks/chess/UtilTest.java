@@ -92,6 +92,36 @@ public class UtilTest extends TestCase {
 		}
 	}
 
+	public void testNotOnThirdRank()
+	{
+		assertTrue(Util.notOnThirdRank(Bitmap.G1));
+		assertTrue(Util.notOnThirdRank(Bitmap.H2));
+		for(int square = Bitmap.A3; square <= Bitmap.H3; square++)
+		{
+			assertFalse(Util.notOnThirdRank(square));
+		}
+		assertTrue(Util.notOnThirdRank(Bitmap.A4));
+		assertTrue(Util.notOnThirdRank(Bitmap.B5));
+		assertTrue(Util.notOnThirdRank(Bitmap.C6));
+		assertTrue(Util.notOnThirdRank(Bitmap.D7));
+		assertTrue(Util.notOnThirdRank(Bitmap.F8));
+	}
+
+	public void testNotOnSixthRank()
+	{
+		assertTrue(Util.notOnSixthRank(Bitmap.A8));
+		assertTrue(Util.notOnSixthRank(Bitmap.A7));
+		for(int square = Bitmap.A6; square <= Bitmap.H6; square++)
+		{
+			assertFalse(Util.notOnSixthRank(square));
+		}
+		assertTrue(Util.notOnSixthRank(Bitmap.H5));
+		assertTrue(Util.notOnSixthRank(Bitmap.B4));
+		assertTrue(Util.notOnSixthRank(Bitmap.C3));
+		assertTrue(Util.notOnSixthRank(Bitmap.D2));
+		assertTrue(Util.notOnSixthRank(Bitmap.F1));
+	}
+
 	public void testDisplaySquares() {
 		long wking = getBitboard(Bitmap.E1);
 		assertEquals("e1 ", Util.displaySquaresStr(wking));

@@ -21,11 +21,99 @@ public class GameStateTest {
 	@Test
 	public void testConstructor()
 	{
-		String expectedState = "8/8/8/8/8/8/8/8 w KQkq - 0 0";
+		String expectedState = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
 		String actualState = gameState.get();
 		assertEquals(expectedState, actualState);
 	}
-	
+
+	@Test
+	public void testConstructorWithInvalidSideToMove()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 xx - - 0 1";;
+		String errorMessage = "Side to move 'xx' is invalid; "
+				+ "use 'w' for white or 'b' for black";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithInvalidCastlingFlags()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b KQxx - 0 2";;
+		String errorMessage = "Castling flags 'KQxx' is invalid; "
+				+ "use only characters from KQkq";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithNoValidCastlingFlags()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b ZZ - 0 2";;
+		String errorMessage = "Castling flags 'ZZ' is invalid; "
+				+ "use only characters from KQkq";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithTooManyCastlingFlags()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b KQkqK - 0 2";;
+		String errorMessage = "Castling flags 'KQkqK' are invalid; "
+				+ "use only characters from KQkq";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithNoCastlingFlags()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b  - 0 2";;
+		String errorMessage = "Castling flags '' is invalid; "
+				+ "use only characters from KQkq";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithWhiteToMoveEnPassantSquareIsInvalid()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 w - e3 0 1";;
+		String errorMessage = "Given 'w' to move, the en passant square 'e3' "
+				+ "ought to be on the 6th rank";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithBlackToMoveEnPassantSquareIsInvalid()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b - h6 0 1";;
+		String errorMessage = "Given 'b' to move, the en passant square 'h6' "
+				+ "ought to be on the 3rd rank";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithNegativeHalfMoveClock()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b - - -1 2";;
+		String errorMessage = "Half move clock '-1' must be zero or greater";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	@Test
+	public void testConstructorWithZeroMoveNumber()
+	{
+		String invalidFEN = "k6K/8/8/8/8/8/8/8 b - - 1 0";;
+		String errorMessage = "Move number '0' must be greater than zero";
+		assertConstructionFailsWith(errorMessage, invalidFEN);
+	}
+
+	private void assertConstructionFailsWith(String errorMessage,
+			String invalidFEN) {
+		try {
+			gameState.set(invalidFEN);
+		} catch (IllegalArgumentException e) {
+			assertEquals(errorMessage, e.getMessage());
+		}
+	}
+
 	@Test
 	public void testMakeAndUndoWhitePieceMoves() {
 		String beforeMove = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -208,18 +296,6 @@ public class GameStateTest {
 		assertEquals(beforeMove, undoMove(sideToMove, move));
 	}
 
-	private int encodeMove(int from, int to, int piece) {
-		return MoveGenerator.EncodeMove(from, to, piece, NONE, NONE);
-	}
-
-	private int encodeMove(int from, int to, int piece, int capturedPiece) {
-		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, NONE);
-	}
-
-	private int encodeMove(int from, int to, int piece, int capturedPiece, int promotionPiece) {
-		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
-	}
-
 	private int setupState(String startState) {
 		String position = startState;
 		gameState.set(startState);
@@ -240,4 +316,15 @@ public class GameStateTest {
 		return stateAfterUndo;
 	}
 
+	private int encodeMove(int from, int to, int piece) {
+		return MoveGenerator.EncodeMove(from, to, piece, NONE, NONE);
+	}
+	
+	private int encodeMove(int from, int to, int piece, int capturedPiece) {
+		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, NONE);
+	}
+	
+	private int encodeMove(int from, int to, int piece, int capturedPiece, int promotionPiece) {
+		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
+	}
 }

@@ -49,6 +49,7 @@ public class GameState {
 	    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
 	public static final int MAX_DEPTH = 150;
+	private static final int NO_CASTLING_ALLOWED = 0;
 
 	final byte CASTLE_START = 
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
@@ -57,14 +58,14 @@ public class GameState {
     int sideToMove = Bitmap.WHITE; //Color.BLACK		
     int depth;			//current depth of search
     long attacked[] = new long[MAX_DEPTH];
-    int	castle[] = new int[MAX_DEPTH + 1];
+    int castle[] = new int[MAX_DEPTH + 1];
     byte enPassantSq[] = new byte[MAX_DEPTH + 1];
     byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
     byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
-    int	currentLine[] = new int[MAX_DEPTH]; //line we are searching
-    int	bestLine[] = new int[MAX_DEPTH];    //the best line of play
+    int currentLine[] = new int[MAX_DEPTH]; //line we are searching
+    int bestLine[] = new int[MAX_DEPTH];    //the best line of play
     int numberOfLinesToMate;    //# of lines of play that lead to mate
-    int	numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
+    int numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
     int numberOfLegalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
     int moves[] = new int[100];             //legal moves from this state
     int movesValue[] = new int[100];        //minimax value of the moves from this state 
@@ -73,7 +74,7 @@ public class GameState {
     int alpha = 0;                  //alpha value during/after search
     int beta = 0;                   //beta value during/after search
     int movesIndex; 
-    int	currentMove; //TODO:  is this variable really needed?
+    int currentMove; //TODO:  is this variable really needed?
     int searchDepth;
     
     //TODO: need a variable or something to keep track of 
@@ -93,7 +94,7 @@ public class GameState {
 	    for (int i = 0; i < MAX_DEPTH; i++){
 	        castle[i] = 0;
 	        enPassantSq[i] = NOSQUARE;	//No En Passant Target Square at start
-	        halfMoveClock[i] = 0;	
+	        halfMoveClock[i] = 0;
 	        attacked[i] = 0;		
 	        numberOfLegalMoves[i] = 0;
 	        numberOfLegalMovesToDepth[i] = 0;
@@ -101,59 +102,7 @@ public class GameState {
 	        bestLine[i] = 0;
 	    }             
 	    castle[0] = CASTLE_START;
-	    movesIndex = 0;
-	}
-
-
-	public GameState(final String file)
-	{
-	    // This function sees if the file "start.fen" exists in the cwd.
-	    // If it does it reads in the FEN board position string
-	    // from "start.fen" and starts the engine with that as the
-	    // initial position.
-	    // Otherwise ("start.fen" doesn't exist in cwd), it starts
-	    // the engine at the beginning of a chess game.
-	    
-		final String startFen = 
-			"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-		BufferedReader br;
-		String line;
-		try {
-			br = new BufferedReader(new FileReader(file));
-			line = br.readLine();
-			br.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			line = startFen;
-		}
-		catch (IOException e)
-		{
-			line = startFen;
-		}
-		set(line);
-	    
-	    //Don't fill up the zero index (it's already filled
-	    //in from the input file....HENCE i starts at one!)
-	    //TODO: fix this so it gets all the array indices filled (MAXDEPTH +1) see 
-	    //definitions.h for gamestate
-	    searchDepth = 3;
-	    numberOfLinesToMate = 0;
-	    numberOfLegalMoves[0] = 0;
-	    for (int i = 1; i < MAX_DEPTH; i++){
-	        castle[i] = 0;
-	        enPassantSq[i] = NOSQUARE;
-	        halfMoveClock[i] = 0;	
-	        fullMoveClock[i] = 0;
-	        attacked[i] = 0;		
-	        numberOfLegalMoves[i] = 0;
-	        numberOfLegalMovesToDepth[i] = 0;
-	        currentLine[i] = 0;
-	        bestLine[i] = 0;
-	    }
-	    Arrays.fill(moves, 0);
-	    Arrays.fill(movesValue, 0);
-	    
+	    fullMoveClock[0] = 1;
 	    movesIndex = 0;
 	}
 
@@ -199,21 +148,6 @@ public class GameState {
 		return fen.toString();
 	}
 
-	void clear(){
-	    pos.clear();
-	    sideToMove = Bitmap.WHITE;
-	    castle[0] = 0;
-	    enPassantSq[0] = NOSQUARE;
-	    halfMoveClock[0] = 0;
-	    fullMoveClock[0] = 0;
-	    for(int i=0; i<MAX_DEPTH; i++){
-	        numberOfLegalMoves[i] = 0;
-	    }
-	    Arrays.fill(currentLine, 0);
-	    Arrays.fill(bestLine, 0);
-	    numberOfLinesToMate = 0;
-	}
-
 	void setBoard(final String s)
 	{
 	    pos.set(s);  //throws error if any
@@ -241,7 +175,7 @@ public class GameState {
 	        sideToMove = Bitmap.BLACK;
 	        return;
 	    }
-        throw new IllegalArgumentException("FEN 2nd field: should be 'w' or 'b'");
+        throw new IllegalArgumentException("Side to move '"+s+"' is invalid; use 'w' for white or 'b' for black");
 	}
 
 	private String getSide()
@@ -253,33 +187,43 @@ public class GameState {
 	{
 		if(castlingFlags.length() > 4)
 		{
-			throw new IllegalArgumentException("FEN 3rd field: " + 
-		            "castling field '" + castlingFlags + "' is invalid");
+			throw new IllegalArgumentException("Castling flags '" + castlingFlags + "' "
+					+ "are invalid; use only characters from KQkq");
 		}
 		if(UNSET_FLAG.equals(castlingFlags))
 		{
-			castle[0] = 0;
+			overwriteCastlingFlags(NO_CASTLING_ALLOWED);
 			return;
 		}
-        for (int i = 0; i < castlingFlags.length(); i++){
-        	char flagCharacter = castlingFlags.charAt(i);
-			if("K".equals(flagCharacter))
+        for (char flagChar: castlingFlags.toCharArray())  //int i = 0; i < castlingFlags.length(); i++){
+        {
+			if('K' == flagChar)
 			{
-				castle[0] |= W_SHORT_CASTLE;
+				appendCastlingFlag(W_SHORT_CASTLE);
 			}
-			if("Q".equals(flagCharacter))
+			if('Q' == flagChar)
 			{
-				castle[0] |= W_LONG_CASTLE;
+				appendCastlingFlag(W_LONG_CASTLE);
 			}
-			if("k".equals(flagCharacter))
+			if('k' == flagChar)
 			{
-				castle[0] |= B_SHORT_CASTLE;
+				appendCastlingFlag(B_SHORT_CASTLE);
 			}
-			if("q".equals(flagCharacter))
+			if('q' == flagChar)
 			{
-				castle[0] |= B_LONG_CASTLE;
+				appendCastlingFlag(B_LONG_CASTLE);
 			}
         }
+	}
+	
+	private void appendCastlingFlag(int castlingFlag)
+	{
+		castle[0] |= castlingFlag; 
+	}
+	
+	private void overwriteCastlingFlags(int castlingFlags)
+	{
+		castle[0] = castlingFlags;
 	}
 	
 	/**
@@ -314,22 +258,24 @@ public class GameState {
 
 	void setEnPassant(final String s)
 	{
-	    int sq; 
-
 	    if (UNSET_FLAG.equals(s)){
 	        enPassantSq[0] = NOSQUARE;
 	        return;
 	    }
-	    sq = StrToSq(s);
-	    if ((sq >= A3 && sq <= H3 && sideToMove == Bitmap.BLACK) ||
-	               (sq >= A6 && sq <= H6 && sideToMove == Bitmap.WHITE) ){
-	        enPassantSq[0] = (byte) sq;
-	    } else {
-	        throw new IllegalArgumentException("FEN fields conflict: " + 
-	            "EnPassant (4th field) or side-to-move (2nd field) conflict");
+	    int sq = StrToSq(s);
+	    if(sideToMove == WHITE && Util.notOnSixthRank(sq))
+	    {
+	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
+	        		+ "en passant square '"+s+"' ought to be on the 6th rank");	    	
 	    }
+	    if(sideToMove == BLACK && Util.notOnThirdRank(sq))
+	    {
+	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
+	        		+ "en passant square '"+s+"' ought to be on the 3rd rank");
+	    }
+        enPassantSq[0] = (byte) sq;
 	}
-	
+
 	/**
 	 * Get the en-passant FEN field at the current state (ie, at current depth)
 	 * The returned value should be on the 3rd or 6th rank (the only valid values)
@@ -347,8 +293,8 @@ public class GameState {
 	{
 	    byte n = Byte.parseByte(s);
 	    if (n < 0){
-	    	throw new IllegalArgumentException("FEN 5th field: " +
-	    			"Half move clock must be greater than 0");
+	    	throw new IllegalArgumentException("Half move clock '"+s+"' "
+	    			+ "must be zero or greater");
 	    }
 	    halfMoveClock[depth] = n;
 	}
@@ -366,8 +312,7 @@ public class GameState {
 	{
 	    byte n = Byte.parseByte(s);
 	    if (n <= 0){
-	        throw new IllegalArgumentException("FEN 6th field: " +
-	            "Full move clock must be greater than zero");
+	    	throw new IllegalArgumentException("Move number '"+s+"' must be greater than zero");
 	    }  
 	    fullMoveClock[0] = n;
 	}
