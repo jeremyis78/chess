@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MoveGeneratorTest {
@@ -77,17 +76,27 @@ public class MoveGeneratorTest {
 	}
 
 	@Test
-	@Ignore /* exposes bug where the promoted piece is not removed from
-	 the board (something like that). See CaptureGenerator for details where the
-	 commented out check for legal promotions is commented out */
-	public void testGenerateCapturesPawnPinnedCantCaptureToPromote() {
+	public void testGenerateCapturesPinnedWhitePawnCantCaptureToPromote() {
 		String positionFen = "2rn4/2P5/8/8/8/8/8/2K4k w - - 0 1";
-		Set<String> expectedMoves = toSet("Kc1-b1,Kc1-d1,Kc1-b2,Kc1-c2,Kc1-d2");
+		Set<String> expectedMoves = toSet("");
 		Set<String> actualMoves = generateCaptures(positionFen);
 		assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8Q"));
 		assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8R"));
 		assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8B"));
 		assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8N"));
+		assertMovesAreEqual(expectedMoves, actualMoves);
+	}
+
+	@Test
+	public void testGenerateNonCapturesPinnedWhitePawnCantAdvance() {
+		String positionFen = "k7/8/8/8/8/8/2K1P2r/8 w - - 0 1";
+		Set<String> expectedMoves = toSet(
+				"Kc2-b1,Kc2-c1,Kc2-d1,"
+				+ "Kc2-b2,Kc2-d2,"
+				+ "Kc2-b3,Kc2-c3,Kc2-d3");
+		Set<String> actualMoves = generateNonCaptures(positionFen);
+		assertFalse("invalid move: e2 pawn is pinned", actualMoves.contains("e3"));
+		assertFalse("invalid move: e2 pawn is pinned", actualMoves.contains("e4"));
 		assertMovesAreEqual(expectedMoves, actualMoves);
 	}
 

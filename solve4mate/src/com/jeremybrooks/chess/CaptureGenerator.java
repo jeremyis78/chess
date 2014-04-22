@@ -81,15 +81,16 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                		moves[n++] = move;
 	                	}
 	                } else {        //Capture and promotion
-	                	for (int i = QUEEN; i >= KNIGHT; i--) {
-	                		int move = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
-//Adding this validity check exposed the bugs in make and undo move
-//This needs to be added back when that's fixed to ensure there are no moves for pinned pawns on the 7th rank 
-//	                		if(isLegal(g, move, side)) //can't move if pinned
-	                		{
-	                			moves[n++] = move;
-	                		}
-	                	}
+	                	int move = EncodeMove (from, to, PIECE[p], cap, PIECE[QUEEN]);
+                		if(isLegal(g, move, side)) //can't move if pinned
+                		{
+                			moves[n++] = move;
+                			//If the queen promotion is legal the other promotion choices will be too
+                			for (int i = ROOK; i >= KNIGHT; i--) {
+    	                		move = EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
+                    			moves[n++] = move;
+    	                	}
+                		}
 	                }
 	                attackedPieces = ClearPiece (attackedPieces, to);
 	            }
