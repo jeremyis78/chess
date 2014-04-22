@@ -289,7 +289,7 @@ public class PositionTest extends TestCase {
 	public void testSetUnknownPiece()
 	{
 		String invalidPiece = "k6K/8/8/8/8/8/8/7z";
-		assertInvalid(invalidPiece, "board contains invalid piece 'z'");
+		assertInvalid(invalidPiece, "board contains invalid piece 'z'; allowed piece characters are: KkQqRrBbNnPp");
 	}
 
 	private void assertInvalid(String position, String expectedError) {

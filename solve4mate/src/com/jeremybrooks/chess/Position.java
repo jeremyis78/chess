@@ -327,7 +327,8 @@ public class Position
 		                isKingPlaced[Bitmap.BLACK] = true;
 		                break;
 		            default: //illegal character
-		                throw new IllegalArgumentException("board contains invalid piece '" + c + "'"); 
+		                throw new IllegalArgumentException("board contains invalid "
+		                		+ "piece '" + c + "'; allowed piece characters are: KkQqRrBbNnPp"); 
 		            }
 		            sq++;
 		            //files++;
