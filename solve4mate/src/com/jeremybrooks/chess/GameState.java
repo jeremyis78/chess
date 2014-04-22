@@ -26,6 +26,9 @@ import java.util.Arrays;
  */
 public class GameState {
 
+	private static final String BLACK_TO_MOVE_FLAG = "b";
+	private static final String WHITE_TO_MOVE_FLAG = "w";
+	private static final String UNSET_FLAG = "-";
 	//*******************************************************************
 	//*                                                                 *
 	//* +--------+--------+--------+--------+-------------+             *
@@ -46,38 +49,32 @@ public class GameState {
 	    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
 	public static final int MAX_DEPTH = 150;
-	public static final int CHECKMATE = 0xffff;
-	public static final int CHECK = CHECKMATE / 2;
-	public static final int DRAW = 0;
 
 	final byte CASTLE_START = 
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
 			
-    Position        pos;
-    int           	sideToMove = Bitmap.WHITE; //Color.BLACK		
-    int             depth;			//current depth of search
-    long	    	attacked[] = new long[MAX_DEPTH];
-    int				castle[] = new int[MAX_DEPTH + 1];
-    byte			enPassantSq[] = new byte[MAX_DEPTH + 1];
-    byte			halfMoveClock[] = new byte[MAX_DEPTH + 1];
-    byte			fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
-    int				currentLine[] = new int[MAX_DEPTH]; //line we are searching
-    int				bestLine[] = new int[MAX_DEPTH];    //the best line of play
-    int             numberOfLinesToMate;    //# of lines of play that lead to mate
-    int	            numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
-    int             numberOfLegalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
-    int             moves[] = new int[100];             //legal moves from this state
-    int             movesValue[] = new int[100];        //minimax value of the moves from this state 
-    int             nodes = 0;                  //nodes searched
-    int             best = 0;                   //best value seen in search
-    int             alpha = 0;                  //alpha value during/after search
-    int             beta = 0;                   //beta value during/after search
-    int             movesIndex; 
-    int				currentMove; //TODO:  was a move_t in C++, Is this variable really needed?
-    int             searchDepth;
-    int             phase;   //the phase of the game (opening, middlegame, ending)
-    //TODO: can use this to help the eval function	
-    //      make a better estimate of the position.
+    Position pos;
+    int sideToMove = Bitmap.WHITE; //Color.BLACK		
+    int depth;			//current depth of search
+    long attacked[] = new long[MAX_DEPTH];
+    int	castle[] = new int[MAX_DEPTH + 1];
+    byte enPassantSq[] = new byte[MAX_DEPTH + 1];
+    byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
+    byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
+    int	currentLine[] = new int[MAX_DEPTH]; //line we are searching
+    int	bestLine[] = new int[MAX_DEPTH];    //the best line of play
+    int numberOfLinesToMate;    //# of lines of play that lead to mate
+    int	numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
+    int numberOfLegalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
+    int moves[] = new int[100];             //legal moves from this state
+    int movesValue[] = new int[100];        //minimax value of the moves from this state 
+    int nodes = 0;                  //nodes searched
+    int best = 0;                   //best value seen in search
+    int alpha = 0;                  //alpha value during/after search
+    int beta = 0;                   //beta value during/after search
+    int movesIndex; 
+    int	currentMove; //TODO:  is this variable really needed?
+    int searchDepth;
     
     //TODO: need a variable or something to keep track of 
     //      the number of repeated positions 
@@ -86,9 +83,6 @@ public class GameState {
     // whose key is the current position of the board.
     //
     
-    //static byte CASTLE_START;
-
-	
 	public GameState()
 	{
 		pos = new Position();
@@ -157,8 +151,6 @@ public class GameState {
 	        currentLine[i] = 0;
 	        bestLine[i] = 0;
 	    }
-//	    memset(moves, 0, 100*sizeof(move_t));
-//	    memset(movesValue, 0, 100*sizeof(int));
 	    Arrays.fill(moves, 0);
 	    Arrays.fill(movesValue, 0);
 	    
@@ -168,20 +160,6 @@ public class GameState {
 	void setSearchDepth(int d){
 	    searchDepth = d;
 	}
-
-//	Do I really need this function?
-//	boolean readFen(istream &in){
-//	    char line[100+1];
-//	    bool r = false;
-//	    r = in.getline(line, 100);
-//	    if (r == true && strlen(line) > 10){
-//	        set(line);
-//	        return true;
-//	    } else {
-//	        return false;
-//	    }
-//	}
-
 
 	public void set(final String fen){
 	    final int numFields = 6;
@@ -196,12 +174,12 @@ public class GameState {
               
         //Initialize board, side, castling, en pas, hmc, and fmc.
         //zeroeth index is moves to mate
-        setBoard(fields[0]); //board);
-        setSide(fields[1]); //side);
-        setCastle(fields[2]); //castle);
-        setEnPassant(fields[3]); //ep);
-        setHalfMoveClock(fields[4]); //half);
-        setFullMoveClock(fields[5]); // full);
+        setBoard(fields[0]);
+        setSide(fields[1]);
+        setCastle(fields[2]);
+        setEnPassant(fields[3]);
+        setHalfMoveClock(fields[4]);
+        setFullMoveClock(fields[5]);
 	}
 	
 	public String get()
@@ -220,8 +198,6 @@ public class GameState {
 		fen.append(getFullMoveClock());
 		return fen.toString();
 	}
-	
-	
 
 	void clear(){
 	    pos.clear();
@@ -258,10 +234,10 @@ public class GameState {
 
 	void setSide(final String s)
 	{
-	    if ("w".equals(s)) {
+	    if (WHITE_TO_MOVE_FLAG.equals(s)) {
 	        sideToMove = Bitmap.WHITE;
 	        return;
-	    } else if ("b".equals(s)) {
+	    } else if (BLACK_TO_MOVE_FLAG.equals(s)) {
 	        sideToMove = Bitmap.BLACK;
 	        return;
 	    }
@@ -270,45 +246,40 @@ public class GameState {
 
 	private String getSide()
 	{
-		return (sideToMove == Bitmap.WHITE) ? "w" : "b";
+		return (sideToMove == Bitmap.WHITE) ? WHITE_TO_MOVE_FLAG : BLACK_TO_MOVE_FLAG;
 	}
 
-	void setCastle(final String s)
+	void setCastle(final String castlingFlags)
 	{
-	    if("KQkq".equals(s) || "KQk".equals(s) ||
-	       "KQq".equals(s)  || "KQ".equals(s)  ||
-	       "Kkq".equals(s)  || "Kk".equals(s)  || 
-	       "Kq".equals(s)   || "K".equals(s)   ||
-	       "Qkq".equals(s)  || "Qk".equals(s)  || 
-	       "Qq".equals(s)   || "Q".equals(s)   ||
-	       "kq".equals(s)   || "k".equals(s)   ||
-	       "q".equals(s))
-	    {
-	        for (int i = 0; i < s.length(); i++){
-	            switch (s.charAt(i)) {
-	            case 'K':
-	                castle[0] |= W_SHORT_CASTLE; 			
-	                break;
-	            case 'Q':
-	                castle[0] |= W_LONG_CASTLE; 			
-	                break;
-	            case 'k':
-	                castle[0] |= B_SHORT_CASTLE; 			
-	                break;
-	            case 'q':
-	                castle[0] |= B_LONG_CASTLE; 			
-	                break;
-	            default:
-	                throw new IllegalArgumentException("FEN 3rd field: " +
-	                    "only 'K','Q','k','q' allowed");
-	            }
-	        }
-	    } else if ("-".equals(s)){
-	        castle[0] = 0;
-	    } else { 
-	        throw new IllegalArgumentException("FEN 3rd field: " + 
-	            "castling field '" + s + "' is invalid");
-	    }
+		if(castlingFlags.length() > 4)
+		{
+			throw new IllegalArgumentException("FEN 3rd field: " + 
+		            "castling field '" + castlingFlags + "' is invalid");
+		}
+		if(UNSET_FLAG.equals(castlingFlags))
+		{
+			castle[0] = 0;
+			return;
+		}
+        for (int i = 0; i < castlingFlags.length(); i++){
+        	char flagCharacter = castlingFlags.charAt(i);
+			if("K".equals(flagCharacter))
+			{
+				castle[0] |= W_SHORT_CASTLE;
+			}
+			if("Q".equals(flagCharacter))
+			{
+				castle[0] |= W_LONG_CASTLE;
+			}
+			if("k".equals(flagCharacter))
+			{
+				castle[0] |= B_SHORT_CASTLE;
+			}
+			if("q".equals(flagCharacter))
+			{
+				castle[0] |= B_LONG_CASTLE;
+			}
+        }
 	}
 	
 	/**
@@ -336,7 +307,7 @@ public class GameState {
 		}
 		
 		if(castleFen.length() == 0)
-			return "-";
+			return UNSET_FLAG;
 		else
 			return castleFen.toString();
 	}
@@ -345,7 +316,7 @@ public class GameState {
 	{
 	    int sq; 
 
-	    if ("-".equals(s)){
+	    if (UNSET_FLAG.equals(s)){
 	        enPassantSq[0] = NOSQUARE;
 	        return;
 	    }
@@ -368,18 +339,18 @@ public class GameState {
 	{
 		byte epSquare = enPassantSq[depth];
 		if(epSquare == NOSQUARE)
-			return "-";
+			return UNSET_FLAG;
 		return SqToStr(epSquare);
 	}
 
 	void setHalfMoveClock(final String s)
 	{
 	    byte n = Byte.parseByte(s);
-	    halfMoveClock[depth] = n;
 	    if (n < 0){
-	        throw new IllegalArgumentException("FEN 5th field: " +
-	            "Half move clock must be non-negative");
+	    	throw new IllegalArgumentException("FEN 5th field: " +
+	    			"Half move clock must be greater than 0");
 	    }
+	    halfMoveClock[depth] = n;
 	}
 
 	/**
@@ -394,11 +365,11 @@ public class GameState {
 	void setFullMoveClock(final String s)
 	{
 	    byte n = Byte.parseByte(s);
-	    fullMoveClock[0] = n;
 	    if (n <= 0){
 	        throw new IllegalArgumentException("FEN 6th field: " +
 	            "Full move clock must be greater than zero");
 	    }  
+	    fullMoveClock[0] = n;
 	}
 
 	/**
@@ -417,7 +388,7 @@ public class GameState {
 	}
 
 
-	boolean makeMove(int move, int side){
+	public boolean makeMove(int move, int side){
 	    // makeMove(int move) updates the state of the game by making
 	    // 'move' in the gametree
 	    // Also updates castling status, enPassant, halfmove & fullmove clocks
@@ -502,6 +473,60 @@ public class GameState {
 	        numberOfLegalMovesToDepth[depth] += numberOfLegalMoves[i];
 	    movesIndex = 0;
 	    
+	    return false;
+	}
+
+	public boolean undoMove(int move, int side){
+		// undoMove(int move) updates the state of the game by restoring 
+		// the state of the board before 'move' was made
+	    int from, to;           //squares involved
+	    int moving, captured;
+
+	    from = move & 0x3F;                         //first 6 bits
+	    to = (move >> 6) & 0x3F;                    //next 6
+	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
+	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
+	    
+	    // Undo any moves made here at this depth
+	    // by setting legalMoves to zero.
+	    numberOfLegalMoves[depth] = 0;
+	    halfMoveClock[depth] = 0;
+	    
+	    //Undo the depth
+	    depth--;
+	    
+	    //Undo the moving piece
+	    pos.erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
+	    pos.placePiece(side, moving, from);
+
+	    //Undo a castling move (that is, undo the rook move)
+	    if (moving == KING){
+		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
+			if(rookFrom != NOSQUARE)
+			{
+				if(isOnGFile(to)){
+					moveRook(squareLeftOf(to, side), rookFrom, side);
+				} else if (isOnCFile(to)) {
+					moveRook(squareRightOf(to, side), rookFrom, side);
+				}
+			}
+	    } 
+	    //NOTE: Castling flags are stored on the castle stack (array) so simply
+	    //undoing the depth (i.e. depth--) undoes any castling flag changes.
+	    
+	    //Place captured piece back on the board
+	    if(captured != NONE){
+	        //Put the EnPassant captured pawn back
+	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
+	        {
+	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
+	        } else { //Normal capture
+		        //Put any other captured piece back
+	        	pos.placePiece(opposing(side), captured, to);
+	        }
+	    }
+
+	    sideToMove = side; //we're undoing the move for side so it will still be side's turn to move 
 	    return false;
 	}
 
@@ -596,60 +621,6 @@ public class GameState {
 
 	private void updateEnPassantSquare(int from, int side) {
 		enPassantSq[depth + 1] = (byte)squareAhead(from, side);
-	}
-
-	boolean undoMove(int move, int side){
-		// undoMove(int move) updates the state of the game by restoring 
-		// the state of the board before 'move' was made
-	    int from, to;           //squares involved
-	    int moving, captured, promotion;  //pieces involved
-	    boolean castling = false;
-
-	    from = move & 0x3F;                         //first 6 bits
-	    to = (move >> 6) & 0x3F;                    //next 6
-	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
-	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
-	    promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
-	    
-	    // Undo any moves made here at this depth
-	    // by setting legalMoves to zero.
-	    numberOfLegalMoves[depth] = 0;
-	    halfMoveClock[depth] = 0;
-	    
-	    //Undo the depth
-	    depth--;
-	    
-	    //Undo the moving piece
-	    pos.erasePiece(to);
-	    pos.placePiece(side, moving, from);
-
-	    //Undo a castling move (that is, undo the rook move)
-	    if (moving == KING){
-		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
-			if(rookFrom != NOSQUARE)
-			{
-				if(isOnGFile(to)){
-					moveRook(squareLeftOf(to, side), rookFrom, side);
-				} else if (isOnCFile(to)) {
-					moveRook(squareRightOf(to, side), rookFrom, side);
-				}
-			}
-	    }
-	    
-	    //Place captured piece back on the board
-	    if(captured != NONE){
-	        //Put the EnPassant captured pawn back
-	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
-	        {
-	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
-	        } else { //Normal capture
-		        //Put any other captured piece back
-	        	pos.placePiece(opposing(side), captured, to);
-	        }
-	    }
-
-	    sideToMove = side; //we're undoing the move for side so it will still be side's turn to move 
-	    return false;
 	}
 
 	void display(){

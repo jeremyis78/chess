@@ -57,6 +57,16 @@ public class GameStateTest {
 	}
 
 	@Test
+	public void testMakeAndUndoBlackPawnCapturesEnPassant() {
+		String beforeMove = "4k3/8/8/8/4pP2/8/8/4K3 b - f3 0 23";
+		int pawnOnE4CapturesOnF3 = encodeMove(E4, F3, PIECE[PAWN], PIECE[PAWN]);
+		String afterMove = "4k3/8/8/8/8/5p2/8/4K3 w - - 0 24";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, pawnOnE4CapturesOnF3));
+		assertEquals(beforeMove, undoMove(sideToMove, pawnOnE4CapturesOnF3));
+	}
+	
+	@Test
 	public void testMakeAndUndoWhitePawnPromotes() {
 		String beforeMove = "8/4P3/8/8/8/8/8/k6K w - - 5 30";
 		int movePawnPromotesOnE8 = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
@@ -65,7 +75,17 @@ public class GameStateTest {
 		assertEquals(afterMove, makeMove(sideToMove, movePawnPromotesOnE8));
 		assertEquals(beforeMove, undoMove(sideToMove, movePawnPromotesOnE8));
 	}
-	
+
+	@Test
+	public void testMakeAndUndoBlackPawnPromotes() {
+		String beforeMove = "k6K/8/8/8/8/8/7p/8 b - - 2 30";
+		int pawnPromotesOnH1 = encodeMove(H2, H1, PIECE[PAWN], NONE, PIECE[ROOK]);
+		String afterMove = "k6K/8/8/8/8/8/8/7r w - - 0 31";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, pawnPromotesOnH1));
+		assertEquals(beforeMove, undoMove(sideToMove, pawnPromotesOnH1));
+	}
+
 	@Test
 	public void testMakeAndUndoWhitePawnCapturesAndPromotes() {
 		String beforeMove = "3r4/4P3/8/8/8/8/8/k6K w - - 5 30";
@@ -78,20 +98,21 @@ public class GameStateTest {
 	}
 
 	@Test
+	public void testMakeAndUndoBlackPawnCapturesAndPromotes() {
+		String beforeMove = "kK6/8/8/8/8/8/p7/1Q6 b - - 5 30";
+		int pawnCapturesAndPromotesOnB1 = encodeMove(A2, B1, PIECE[PAWN], PIECE[QUEEN], PIECE[BISHOP]);
+		String afterMove = "kK6/8/8/8/8/8/8/1b6 w - - 0 31";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, pawnCapturesAndPromotesOnB1));
+		assertEquals("captured piece must be put back", 
+				beforeMove, undoMove(sideToMove, pawnCapturesAndPromotesOnB1));
+	}
+
+	@Test
 	public void testMakeAndUndoWhiteShortCastles() {
 		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
 		int move = encodeMove(E1, G1, PIECE[KING]);
 		String afterMove = "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 1 1";
-		int sideToMove = setupState(beforeMove);
-		assertEquals(afterMove, makeMove(sideToMove, move));
-		assertEquals(beforeMove, undoMove(sideToMove, move));
-	}
-
-	@Test
-	public void testMakeAndUndoWhiteLongCastles() {
-		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-		int move = encodeMove(E1, C1, PIECE[KING]);
-		String afterMove = "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1";
 		int sideToMove = setupState(beforeMove);
 		assertEquals(afterMove, makeMove(sideToMove, move));
 		assertEquals(beforeMove, undoMove(sideToMove, move));
@@ -108,10 +129,80 @@ public class GameStateTest {
 	}
 
 	@Test
+	public void testMakeAndUndoWhiteLosesCastlePrivilegeWhenKingMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(E1, F1, PIECE[KING]);
+		String afterMove = "r3k2r/8/8/8/8/8/8/R4K1R b kq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoBlackLosesCastlePrivilegeWhenKingMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		int move = encodeMove(E8, D8, PIECE[KING]);
+		String afterMove = "r2k3r/8/8/8/8/8/8/R3K2R w KQ - 1 2";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoWhiteLosesShortCastlePrivilegeWhenRookMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(H1, G1, PIECE[ROOK]);
+		String afterMove = "r3k2r/8/8/8/8/8/8/R3K1R1 b Qkq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoBlackLosesShortCastlePrivilegeWhenRookMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		int move = encodeMove(H8, F8, PIECE[ROOK]);
+		String afterMove = "r3kr2/8/8/8/8/8/8/R3K2R w KQq - 1 2";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoWhiteLongCastles() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(E1, C1, PIECE[KING]);
+		String afterMove = "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoWhiteLosesLongCastlePrivilegeWhenRookMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
+		int move = encodeMove(A1, A2, PIECE[ROOK]);
+		String afterMove = "r3k2r/8/8/8/8/8/R7/4K2R b Kkq - 1 1";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
 	public void testMakeAndUndoBlackLongCastles() {
 		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
 		int move = encodeMove(E8, C8, PIECE[KING]);
 		String afterMove = "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 1 2";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
+	public void testMakeAndUndoBlackLosesLongCastlePrivilegeWhenRookMoves() {
+		String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		int move = encodeMove(A8, A1, PIECE[ROOK], PIECE[ROOK]);
+		String afterMove = "4k2r/8/8/8/8/8/8/r3K2R w KQk - 0 2";
 		int sideToMove = setupState(beforeMove);
 		assertEquals(afterMove, makeMove(sideToMove, move));
 		assertEquals(beforeMove, undoMove(sideToMove, move));
