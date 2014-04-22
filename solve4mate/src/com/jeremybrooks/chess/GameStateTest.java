@@ -135,6 +135,16 @@ public class GameStateTest {
 	}
 
 	@Test
+	public void testMakeAndUndoWhitePawnCapturesNoEnPassant() {
+		String beforeMove = "4k3/8/4p3/3P4/8/8/8/4K3 w - d6 2 23";
+		int move = encodeMove(D5, E6, PIECE[PAWN], PIECE[PAWN]);
+		String afterMove = "4k3/8/4P3/8/8/8/8/4K3 b - - 0 23";
+		int sideToMove = setupState(beforeMove);
+		assertEquals(afterMove, makeMove(sideToMove, move));
+		assertEquals(beforeMove, undoMove(sideToMove, move));
+	}
+
+	@Test
 	public void testMakeAndUndoWhitePawnCapturesEnPassant() {
 		String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 2 23";
 		int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);

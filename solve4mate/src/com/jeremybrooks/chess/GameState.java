@@ -462,7 +462,7 @@ public class GameState {
 	    //Place captured piece back on the board
 	    if(captured != NONE){
 	        //Put the EnPassant captured pawn back
-	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
+	        if( moving == PAWN && captured == PAWN && to == enPassantSq[depth])
 	        {
 	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
 	        } else { //Normal capture
