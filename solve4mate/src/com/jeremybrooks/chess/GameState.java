@@ -154,9 +154,7 @@ public class GameState {
 	 */
 	private String getBoard()
 	{	
-		//NOTE: depth isn't used here.
-		//As makeMove and undoMove are called the sole position member is updated
-		//
+		//NOTE: the position is always kept in sync with the depth
 		return pos.getFen();
 	}
 
