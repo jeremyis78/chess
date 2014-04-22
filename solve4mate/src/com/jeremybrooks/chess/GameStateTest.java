@@ -149,21 +149,4 @@ public class GameStateTest {
 		return stateAfterUndo;
 	}
 
-	private void assertMoveIsMadeAndUndone(int sideToMove, int moveE4, String beforeMove, String afterMove) {
-		String position = beforeMove;
-		gameState.set(position);
-		
-		String initialState = gameState.get();
-		assertEquals(position, initialState);
-		//Make move
-		gameState.makeMove(moveE4, sideToMove);
-		String afterE5 = gameState.get();
-		assertEquals(afterMove, afterE5);
-		
-		//Undo move
-		gameState.undoMove(moveE4, sideToMove);
-		String afterUndoingE5 = gameState.get();
-		assertEquals(initialState, afterUndoingE5);
-	}
-
 }

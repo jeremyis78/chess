@@ -382,28 +382,6 @@ public class Attacks {
 
 
     void genDiagonal45DegreesRightAttacks(){
-    //These are the starting squares of the diagonals
-    //that are read (from left to right) from a chessboard
-    //rotated 45 degrees right.  Square 7 at the bottom, 56 at the top
-    //The main diagonal is a1 to h8.
-    //  Diagonal #    /\
-//          14       /56\
-//                  /----\
-//          13     /48  57\
-//                /--------\
-//          12   / 40 49 58 \
-//          .   /------------\
-//          .   Middle of  the
-//          .  board  goes here
-//             \---------------/
-//          3   \4  13  22  31/
-//               \-----------/
-//          2     \5  14  23/
-//                 \-------/
-//          1       \6  15/
-//                   \---/
-//          0         \7/
-//                     -
 	  	log.info("generating diagonal attacks 45 deg right (a1-h8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
@@ -426,28 +404,6 @@ public class Attacks {
     }
 
     void genDiagonal45DegreesLeftAttacks(){
-    //These are the starting squares of the diagonals
-    //that are read (from left to right) from a chessboard
-    //rotated 45 degrees left.  Square 0 at the bottom, 63 at the top
-    //The main diagonal is h1 to a8.
-    //  Diagonal #    /\
-//          14       /63\
-//                  /----\
-//          13     /55  62\
-//                /--------\
-//          12   / 47 54 61 \
-//          .   /------------\
-//          .   Middle of  the
-//          .  board  goes here
-//             \---------------/
-//          3   \3  10  17  24/
-//               \-----------/
-//          2     \2   9  16/
-//                 \-------/
-//          1       \1  8 /
-//                   \---/
-//          0         \0/
-//                     -
 	  	log.info("generating diagonal attacks 45 deg left (h1-a8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
         	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);

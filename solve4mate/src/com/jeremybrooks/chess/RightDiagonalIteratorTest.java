@@ -24,6 +24,17 @@ public class RightDiagonalIteratorTest {
 			"a8";
 	
 	@Test
+	public void testInvalidConstructionWithAnInvalidDiagonalIndex()
+	{
+		int invalidDiagonalIndex = Bitmap.A8 + 1;
+		try {
+			DiagonalIterator it = new RightDiagonalIterator(invalidDiagonalIndex);
+		} catch (Exception e) {
+			assertEquals("index '" + invalidDiagonalIndex + "' must be in range 0-14", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testIteration() {
 		StringBuilder sb = new StringBuilder();
 		boolean notFirst = false;
