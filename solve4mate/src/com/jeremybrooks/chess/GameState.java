@@ -7,12 +7,6 @@ package com.jeremybrooks.chess;
 import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.*;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-
 /**
  * 	  This file contains the implementation for the gamestate class.
  *	  A GameState object contains a 'position' object and flags.
@@ -370,7 +364,7 @@ public class GameState {
 	        updateCastlingFlagsWhenRookMoves(from, side);             
 	    } else {
 	        //EnPassant
-	        if( moving == PAWN && captured == PAWN && pos.isEmpty(to))
+	        if( isEnPassantCapture(moving, to, captured))
 	        {
 	        	pos.erasePiece(squareBehind(to, side));
 	        	captured = NONE;
@@ -462,7 +456,7 @@ public class GameState {
 	    //Place captured piece back on the board
 	    if(captured != NONE){
 	        //Put the EnPassant captured pawn back
-	        if( moving == PAWN && captured == PAWN && to == enPassantSq[depth])
+	        if(isEnPassantCapture(moving, to, captured))
 	        {
 	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
 	        } else { //Normal capture
@@ -566,6 +560,10 @@ public class GameState {
 
 	private void updateEnPassantSquare(int from, int side) {
 		enPassantSq[depth + 1] = (byte)squareAhead(from, side);
+	}
+
+	private boolean isEnPassantCapture(int moving, int to, int captured) {
+		return moving == PAWN && captured == PAWN && to == enPassantSq[depth];
 	}
 
 	void display(){
