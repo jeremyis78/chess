@@ -31,17 +31,12 @@ public class SolveForMate {
 
 	public static void main(String[] args) throws IOException{
 	    GameState g = new GameState();
-	    //ifstream fin;
-	    int mateInN = 0;
-
-
 	    if (args.length < 1){
 	    	err.println("Give me a file name (e.g. problems.fen) that " +
 	    			    "has some problems to solve for mate\n");
 	        System.exit(1);
 	    }
-//	    File f = new File(args[0]);
-//	    out.println(f.getAbsolutePath());
+	    int mateInN = 0;
 	    try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) 
 	    {
 	    	while (br.ready()){
@@ -49,16 +44,6 @@ public class SolveForMate {
 	    		if (line.trim().charAt(0) == '#') continue;
 	    		g = new GameState();
 	    		g.set(line);
-	    		
-//	      fin.getline(line, 100);
-//	      try {
-//	    	if('#'==line[0]) continue;
-//	        g.set(line);
-//	      } catch (string &err){
-//	        cerr << err << endl;
-//	        exit(1);
-//	      }
-	    		
 	    		
 	    		//
 	    		// Set the depth for the engine to search for mate 
@@ -72,8 +57,6 @@ public class SolveForMate {
 	    		}
 	    		out.println("to move and force mate in " + mateInN);
 	    		g.display();
-	    		
-	    		
 	    		
 	    		//
 	    		// Search for a line to mate
@@ -127,11 +110,7 @@ public class SolveForMate {
 	    		} else {
 	    			out.println("No mate found");      
 	    		}
-	    		
 	    		out.println("*************************************");
-	    		
-	    		//Clear the board/gamestate
-	    		g.clear();
 	    	}
 	    	
 	    }
