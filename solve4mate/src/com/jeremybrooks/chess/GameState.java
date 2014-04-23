@@ -50,11 +50,10 @@ public class GameState {
     private boolean whiteToMove = true;
     int depth;			//current depth of search
     long attacked[] = new long[MAX_DEPTH];
-    int castle[] = new int[MAX_DEPTH + 1];
-    byte enPassantSq[] = new byte[MAX_DEPTH + 1];
-    byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
-    byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
-    private int searchDepth;
+    private int castle[] = new int[MAX_DEPTH + 1];
+    private byte enPassantSq[] = new byte[MAX_DEPTH + 1];
+    private byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
+    private byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
     
     /*
      * TODO: The following member vars are not related to the state of the game (board or flags)
@@ -256,6 +255,22 @@ public class GameState {
 			return castleFen.toString();
 	}
 
+	public boolean hasShortCastleOption(boolean isWhitesMove, int depth)
+	{
+		if(isWhitesMove) 
+			return bool(castle[depth] & W_SHORT_CASTLE);
+		else
+			return bool(castle[depth] & B_SHORT_CASTLE);
+	}
+
+	public boolean hasLongCastleOption(boolean isWhitesMove, int depth)
+	{
+		if(isWhitesMove) 
+			return bool(castle[depth] & W_LONG_CASTLE);
+		else
+			return bool(castle[depth] & B_LONG_CASTLE);
+	}
+
 	void setEnPassant(final String s)
 	{
 	    if (UNSET_FLAG.equals(s)){
@@ -287,6 +302,11 @@ public class GameState {
 		if(epSquare == NOSQUARE)
 			return UNSET_FLAG;
 		return SqToStr(epSquare);
+	}
+	
+	public int getEnPassantSquare(int depth)
+	{
+		return enPassantSq[depth];
 	}
 
 	void setHalfMoveClock(final String s)

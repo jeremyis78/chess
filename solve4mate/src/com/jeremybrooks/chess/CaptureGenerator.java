@@ -33,11 +33,12 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                pro = isPawnPromotion(side, from);
 
 	                //EnPassant captures
-	                if (g.enPassantSq[depth] != NOSQUARE)
+	                int enPassantSquare = g.getEnPassantSquare(depth);
+					if (enPassantSquare != NOSQUARE)
 	                {
-	                    if (Util.bool(pieceAttacks & (1L << g.enPassantSq[depth])))
+	                    if (Util.bool(pieceAttacks & (1L << enPassantSquare)))
 	                    {
-	                        to = g.enPassantSq[depth];
+	                        to = enPassantSquare;
 	                        cap = PIECE[PAWN];
 	                        moves[n++] = EncodeMove (from, to, PIECE[PAWN], cap, 0);
 	                    }
