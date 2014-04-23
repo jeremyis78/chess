@@ -25,7 +25,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		kingSq = position.getKingSquare(side);
 	    checkers = attackers(g, side, position.getKingSquare(side));
 	    switch (side) {
@@ -201,7 +201,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        //Same reason as above...hafta make sure the king doesn't just
 	        //move away from the sliding checking piece.
 	        //
-	        if (position.isNotEmpty(to)) { //g.pos.getBoard(to) != BOARD_EMPTY_SQUARE){
+	        if (position.isNotEmpty(to)) {
 	            cap = Math.abs(position.getBoard(to));
 	        } else {
 	            cap = 0;

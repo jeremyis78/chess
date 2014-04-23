@@ -71,7 +71,7 @@ public class Search {
 	    // Generate the initial moves from state 'g'
 	    // Note: g.moves is being filled with moves here
 	    int depth = 0;
-	    if (!mg.isAttacked(g, side, g.pos.getKingSquare(side))){
+	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        mg.GenerateCaptures(g, g.moves, side, depth);
 	        mg.GenerateNonCaptures(g, g.moves, side, depth);
 	    } else {
@@ -108,7 +108,7 @@ public class Search {
 	    }
 
 	    // Generate legal moves from this position
-	    if (!mg.isAttacked(g, side, g.pos.getKingSquare(side))){
+	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        mg.GenerateCaptures(g, moves, side, depth);
 	        mg.GenerateNonCaptures(g, moves, side, depth);
 	    } else {
@@ -198,7 +198,7 @@ public class Search {
 	    }
 	    
 	    // Generate legal moves from this position
-	    if (!mg.isAttacked(g, side, g.pos.getKingSquare(side))){
+	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        mg.GenerateCaptures(g, moves, side, depth);
 	        mg.GenerateNonCaptures(g, moves, side, depth);
 	    } else {

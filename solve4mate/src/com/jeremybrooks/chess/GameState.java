@@ -46,7 +46,7 @@ public class GameState {
 	final byte CASTLE_START = 
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
 			
-    Position pos;
+    private Position pos;
     private boolean whiteToMove = true;
     int depth;			//current depth of search
     long attacked[] = new long[MAX_DEPTH];
@@ -153,6 +153,11 @@ public class GameState {
 	{	
 		//NOTE: the position is always kept in sync with the depth
 		return pos.getFen();
+	}
+	
+	public Position getPosition()
+	{
+		return pos;
 	}
 
 	public boolean isWhiteToMove()

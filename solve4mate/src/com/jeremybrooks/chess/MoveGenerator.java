@@ -284,7 +284,7 @@ public class MoveGenerator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		long allPiecesByRank = position.getAllPieces(0);
 		empty = ~allPiecesByRank;
 
@@ -443,7 +443,7 @@ public class MoveGenerator {
 	    long rooksQueens, bishopsQueens;
 
 
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		switch (sideUnderAttack) {
 	         case Bitmap.WHITE:
 	             attackers |= att.whitepawn[squareUnderAttack] & position.getOpponentPawns(sideUnderAttack);
@@ -540,7 +540,7 @@ public class MoveGenerator {
 
 
 	protected boolean canWhiteShortCastle(GameState g, int side, int depth){
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
 	    	&& position.isEmpty(F1)
 	        && position.isEmpty(G1) 
@@ -554,7 +554,7 @@ public class MoveGenerator {
 	}
 
 	protected boolean canWhiteLongCastle(GameState g, int side, int depth){
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		if (g.hasLongCastleOption(side==WHITE?true:false, depth) &&
 	        position.isEmpty(D1)
 	        && position.isEmpty(C1)
@@ -570,7 +570,7 @@ public class MoveGenerator {
 	}
 
 	protected boolean canBlackShortCastle(GameState g, int side, int depth){
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
 	        && position.isEmpty(F8)
 	        && position.isEmpty(G8) 
@@ -584,7 +584,7 @@ public class MoveGenerator {
 	}
 
 	protected boolean canBlackLongCastle(GameState g, int side, int depth){
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
 	        && position.isEmpty(D8)
 	        && position.isEmpty(C8)
@@ -649,7 +649,7 @@ public class MoveGenerator {
 	    //Save the king square in case the king is the moving piece
 	    //int kingSq = g.pos.kingSq[side];
 	    g.makeMove(move, side);
-	    legal = !isAttacked(g, side, g.pos.getKingSquare(side));  //use the saved king square
+	    legal = !isAttacked(g, side, g.getPosition().getKingSquare(side));  //use the saved king square
 	    g.undoMove(move, side);
 	    System.err.println("Is "+Util.displayMoveStr(move, false, false)+" legal? "+legal);
 	    return legal;
@@ -660,7 +660,7 @@ public class MoveGenerator {
 		long advOne = 0;
 	    long empty;
 
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		empty = ~position.getAllPieces(0);
 
 	    switch (side) {
@@ -681,7 +681,7 @@ public class MoveGenerator {
 		long advTwo = 0;
 		long empty;
 
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		empty = ~position.getAllPieces(0);// all[ALL];
 
 	    switch (side) {
@@ -704,7 +704,7 @@ public class MoveGenerator {
 		long prom = 0;
 		long empty;
 
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		empty = ~position.getAllPieces(0);
 
 	    switch (side) {

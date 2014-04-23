@@ -38,7 +38,7 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    //***************************************************************************
 
 	    n = g.numberOfLegalMoves[depth];
-	    Position position = g.pos;
+	    Position position = g.getPosition();
 		long allPiecesByRank = position.getAllPieces(0);
 		empty = ~allPiecesByRank;
 

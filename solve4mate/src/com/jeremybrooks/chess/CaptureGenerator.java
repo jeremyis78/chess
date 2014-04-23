@@ -22,7 +22,7 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 
 	    for (int p = PAWN; p <= KING; p++) {
 	        mover = PIECE[p];
-	        Position position = g.pos;
+	        Position position = g.getPosition();
 			pieces = position.getPieces (side, p);
 	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
