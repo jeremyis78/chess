@@ -35,6 +35,17 @@ public class RightDiagonalIteratorTest {
 	}
 
 	@Test
+	public void testRemoveMethodIsUnsupported()
+	{
+		try {
+			DiagonalIterator it = new RightDiagonalIterator(6);
+			it.remove();
+		} catch (UnsupportedOperationException expected) {
+			//expected
+		}
+	}
+
+	@Test
 	public void testIteration() {
 		StringBuilder sb = new StringBuilder();
 		boolean notFirst = false;
