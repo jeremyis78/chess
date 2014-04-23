@@ -22,7 +22,8 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 
 	    for (int p = PAWN; p <= KING; p++) {
 	        mover = PIECE[p];
-	        pieces = g.pos.getPieces (side, p);
+	        Position position = g.pos;
+			pieces = position.getPieces (side, p);
 	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
 	            pro = 0;
@@ -51,10 +52,10 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	            case ROOK:     //fall through
 	            case QUEEN:
 	                if (Util.bool(mover & ROOK_OR_QUEEN)) {
-	                    pieceAttacks |= rookAttacks (from, g.pos.getAllPieces(0), g.pos.getAllPieces(90));
+	                    pieceAttacks |= rookAttacks (from, position.getAllPieces(0), position.getAllPieces(90));
 	                }
 	                if (Util.bool(mover & BISHOP_OR_QUEEN)) {
-	                    pieceAttacks |= bishopAttacks (from, g.pos.getAllPieces(-45), g.pos.getAllPieces(45));
+	                    pieceAttacks |= bishopAttacks (from, position.getAllPieces(-45), position.getAllPieces(45));
 	                }
 	                break;
 	            case KING:
@@ -66,10 +67,10 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	            //Following line doesn't do anythign right now!
 	            g.attacked[depth] |= pieceAttacks;
 
-	            attackedPieces = pieceAttacks & g.pos.getOpponentPiecesExceptKing(side);
+	            attackedPieces = pieceAttacks & position.getOpponentPiecesExceptKing(side);
 	            while (morePieces(attackedPieces)) {
 	                to = FirstPiece (attackedPieces);
-	                cap = Math.abs(g.pos.getBoard(to));
+	                cap = Math.abs(position.getBoard(to));
 	                if (!Util.bool(pro)) {     //Capture only
 	                	//TODO: make sure king does not move into check!!!!!
 	                	int move = EncodeMove(from, to, PIECE[p], cap, 0);  

@@ -284,7 +284,8 @@ public class MoveGenerator {
 
 	    n = g.numberOfLegalMoves[depth];
 	    //n = 0;
-	    long allPiecesByRank = g.pos.getAllPieces(0);
+	    Position position = g.pos;
+		long allPiecesByRank = position.getAllPieces(0);
 		empty = ~allPiecesByRank;
 
 	    //getPawnMoves(g, side, pMoves, promoters, advanceTwo);
@@ -366,7 +367,7 @@ public class MoveGenerator {
 	    //***************************************************************************
 
 	    for (int p = KNIGHT; p <= QUEEN; p++) {
-	        pieces = g.pos.getPieces (side, p);
+	        pieces = position.getPieces (side, p);
 	        while (morePieces(pieces)) {
 	            from = FirstPiece (pieces);
 	            //now make pMoves only those moves which will interpose
@@ -380,13 +381,13 @@ public class MoveGenerator {
 	                case QUEEN:
 	                    if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
 	                    {
-	                        long allPieces45Left = g.pos.getAllPieces(-45);
-							long allPieces45Right = g.pos.getAllPieces(45);
+	                        long allPieces45Left = position.getAllPieces(-45);
+							long allPieces45Right = position.getAllPieces(45);
 							pMoves |= bishopAttacks (from, allPieces45Left, allPieces45Right) & empty & targets;
 	                    }
 	                    if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
 	                    {
-	                        long allPiecesByFile = g.pos.getAllPieces(90);
+	                        long allPiecesByFile = position.getAllPieces(90);
 							pMoves |= rookAttacks (from, allPiecesByRank, allPiecesByFile) & empty & targets;
 	                    }
 	                    break;
@@ -442,9 +443,10 @@ public class MoveGenerator {
 	    long rooksQueens, bishopsQueens;
 
 
-	    switch (sideUnderAttack) {
+	    Position position = g.pos;
+		switch (sideUnderAttack) {
 	         case Bitmap.WHITE:
-	             attackers |= att.whitepawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
+	             attackers |= att.whitepawn[squareUnderAttack] & position.getOpponentPawns(sideUnderAttack);
 
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  if (/*there's a pawn on either side*/)
@@ -452,36 +454,36 @@ public class MoveGenerator {
 //	                          (1L << g.enPassantSq[depth]);
 
 //	              }
-	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
-	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
+	             attackers |= att.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
+	             attackers |= att.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.getAllPieces(0), squareUnderAttack)] |
-	                 att.file[squareUnderAttack][Status90 (g.pos.getAllPieces(90), squareUnderAttack)];
-	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
+	             rankFileAtt = att.rank[squareUnderAttack][Status (position.getAllPieces(0), squareUnderAttack)] |
+	                 att.file[squareUnderAttack][Status90 (position.getAllPieces(90), squareUnderAttack)];
+	             rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.getAllPieces(-45), squareUnderAttack)] |
-	                 att.R45[squareUnderAttack][Status45R (g.pos.getAllPieces(45), squareUnderAttack)];
-	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
+	             diagAtt = att.L45[squareUnderAttack][Status45L (position.getAllPieces(-45), squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (position.getAllPieces(45), squareUnderAttack)];
+	             bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	        case Bitmap.BLACK:
-	             attackers |= att.blackpawn[squareUnderAttack] & g.pos.getOpponentPawns(sideUnderAttack);
+	             attackers |= att.blackpawn[squareUnderAttack] & position.getOpponentPawns(sideUnderAttack);
 //	              if (g.enPassantSq[depth] != NOSQUARE){
 //	                  attackers |= att.pawn[side][from] &
 //	                      (1L << g.enPassantSq[depth]);
 //	              }
-	             attackers |= att.knight[squareUnderAttack] & g.pos.getOpponentKnights(sideUnderAttack);
-	             attackers |= att.king[squareUnderAttack] & g.pos.getOpponentKing(sideUnderAttack);
+	             attackers |= att.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
+	             attackers |= att.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-	             rankFileAtt = att.rank[squareUnderAttack][Status (g.pos.getAllPieces(0), squareUnderAttack)] | 
-	                 att.file[squareUnderAttack][Status90 (g.pos.getAllPieces(90), squareUnderAttack)];
-	             rooksQueens = g.pos.getOpponentRooks(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
+	             rankFileAtt = att.rank[squareUnderAttack][Status (position.getAllPieces(0), squareUnderAttack)] | 
+	                 att.file[squareUnderAttack][Status90 (position.getAllPieces(90), squareUnderAttack)];
+	             rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
 	             attackers |= rankFileAtt & rooksQueens;
 
-	             diagAtt = att.L45[squareUnderAttack][Status45L (g.pos.getAllPieces(-45), squareUnderAttack)] |
-	                 att.R45[squareUnderAttack][Status45R (g.pos.getAllPieces(45), squareUnderAttack)];
-	             bishopsQueens = g.pos.getOpponentBishops(sideUnderAttack) | g.pos.getOpponentQueens(sideUnderAttack);
+	             diagAtt = att.L45[squareUnderAttack][Status45L (position.getAllPieces(-45), squareUnderAttack)] |
+	                 att.R45[squareUnderAttack][Status45R (position.getAllPieces(45), squareUnderAttack)];
+	             bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
 	             attackers |= diagAtt & bishopsQueens;
 	             break;
 	    }
@@ -538,9 +540,10 @@ public class MoveGenerator {
 
 
 	protected boolean canWhiteShortCastle(GameState g, int side, int depth){
-	    if (g.hasShortCastleOption(side==WHITE?true:false, depth)
-	    	&& g.pos.isEmpty(F1)
-	        && g.pos.isEmpty(G1) 
+	    Position position = g.pos;
+		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
+	    	&& position.isEmpty(F1)
+	        && position.isEmpty(G1) 
 	        && !isAttacked (g, side, E1)
 	        && !isAttacked (g, side, F1)
 	        && !isAttacked (g, side, G1)
@@ -551,10 +554,11 @@ public class MoveGenerator {
 	}
 
 	protected boolean canWhiteLongCastle(GameState g, int side, int depth){
-	    if (g.hasLongCastleOption(side==WHITE?true:false, depth) &&
-	        g.pos.isEmpty(D1)
-	        && g.pos.isEmpty(C1)
-	        && g.pos.isEmpty(B1) 
+	    Position position = g.pos;
+		if (g.hasLongCastleOption(side==WHITE?true:false, depth) &&
+	        position.isEmpty(D1)
+	        && position.isEmpty(C1)
+	        && position.isEmpty(B1) 
 	        && !isAttacked (g, side, E1)
 	        && !isAttacked (g, side, D1)
 	        && !isAttacked (g, side, C1)
@@ -566,9 +570,10 @@ public class MoveGenerator {
 	}
 
 	protected boolean canBlackShortCastle(GameState g, int side, int depth){
-	    if (g.hasShortCastleOption(side==WHITE?true:false, depth)
-	        && g.pos.isEmpty(F8)
-	        && g.pos.isEmpty(G8) 
+	    Position position = g.pos;
+		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
+	        && position.isEmpty(F8)
+	        && position.isEmpty(G8) 
 	        && !isAttacked (g, side, E8)
 	        && !isAttacked (g, side, F8)
 	        && !isAttacked (g, side, G8)
@@ -579,10 +584,11 @@ public class MoveGenerator {
 	}
 
 	protected boolean canBlackLongCastle(GameState g, int side, int depth){
-	    if (g.hasShortCastleOption(side==WHITE?true:false, depth)
-	        && g.pos.isEmpty(D8)
-	        && g.pos.isEmpty(C8)
-	        && g.pos.isEmpty(B8) 
+	    Position position = g.pos;
+		if (g.hasShortCastleOption(side==WHITE?true:false, depth)
+	        && position.isEmpty(D8)
+	        && position.isEmpty(C8)
+	        && position.isEmpty(B8) 
 	        && !isAttacked (g, side, E8)
 	        && !isAttacked (g, side, D8)
 	        && !isAttacked (g, side, C8)
@@ -654,15 +660,16 @@ public class MoveGenerator {
 		long advOne = 0;
 	    long empty;
 
-	    empty = ~g.pos.getAllPieces(0);
+	    Position position = g.pos;
+		empty = ~position.getAllPieces(0);
 
 	    switch (side) {
 	    case Bitmap.WHITE:
-	        advOne = (g.pos.getPawns(side) << 8) & empty & ~EIGHTHRANK;
+	        advOne = (position.getPawns(side) << 8) & empty & ~EIGHTHRANK;
 	        // 'advOne' is all moves except those to the eighth rank
 	        break;
 	    case Bitmap.BLACK:
-	        advOne = (g.pos.getPawns(side) >> 8) & empty & ~FIRSTRANK;
+	        advOne = (position.getPawns(side) >> 8) & empty & ~FIRSTRANK;
 	        // 'advOne' is all moves except those to the first rank
 	        break;
 	    }
@@ -674,16 +681,17 @@ public class MoveGenerator {
 		long advTwo = 0;
 		long empty;
 
-	    empty = ~g.pos.getAllPieces(0);// all[ALL];
+	    Position position = g.pos;
+		empty = ~position.getAllPieces(0);// all[ALL];
 
 	    switch (side) {
 	    case Bitmap.WHITE:
-	        advTwo = g.pos.getPawns(side) & SECONDRANK;
+	        advTwo = position.getPawns(side) & SECONDRANK;
 	        advTwo = (advTwo << 8) & empty;
 	        advTwo = (advTwo << 8) & empty;
 	        break;
 	    case Bitmap.BLACK:
-	        advTwo = g.pos.getPawns(side) & SEVENTHRANK;
+	        advTwo = position.getPawns(side) & SEVENTHRANK;
 	        advTwo = (advTwo >> 8) & empty;
 	        advTwo = (advTwo >> 8) & empty;
 	        break;
@@ -696,15 +704,16 @@ public class MoveGenerator {
 		long prom = 0;
 		long empty;
 
-	    empty = ~g.pos.getAllPieces(0);
+	    Position position = g.pos;
+		empty = ~position.getAllPieces(0);
 
 	    switch (side) {
 	    case Bitmap.WHITE:
-	        prom = (g.pos.getPawns(side) << 8) & empty & EIGHTHRANK;
+	        prom = (position.getPawns(side) << 8) & empty & EIGHTHRANK;
 	        // 'prom' is only the moves to the eighth rank
 	        break;
 	    case Bitmap.BLACK:
-	        prom = (g.pos.getPawns(side) >> 8) & empty & FIRSTRANK;
+	        prom = (position.getPawns(side) >> 8) & empty & FIRSTRANK;
 	        // 'prom' is only the moves to the first rank
 	        break;
 	    }

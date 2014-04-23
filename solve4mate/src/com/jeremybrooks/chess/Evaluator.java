@@ -134,8 +134,9 @@ public class Evaluator {
 
 		//Does king have legal moves?
 		numMoves = mg.GenerateKingEscapes(g, moves, side, depth);
+		Position position = g.pos;
 		if (numMoves == 0){
-			if (mg.isAttacked(g, side, g.pos.getKingSquare(side))){
+			if (mg.isAttacked(g, side, position.getKingSquare(side))){
 				// Mate
 				mate = true;
 
@@ -162,16 +163,16 @@ public class Evaluator {
 		// Compute material value
 		for (int i = PAWN; i <= QUEEN; i++){
 			wScore += whitePieceValue[i] * 
-					Util.bitCount(g.pos.getPieces(Bitmap.WHITE,i));
+					Util.bitCount(position.getPieces(Bitmap.WHITE,i));
 
 			bScore += blackPieceValue[i] * 
-					Util.bitCount(g.pos.getPieces(Bitmap.BLACK,i));
+					Util.bitCount(position.getPieces(Bitmap.BLACK,i));
 		}
 
 		// Estimate positional value
 		for(int i = 0; i<2; i++){
 			// For knights
-			pieces = g.pos.getPieces(i, KNIGHT);
+			pieces = position.getPieces(i, KNIGHT);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
@@ -182,7 +183,7 @@ public class Evaluator {
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
 			// For bishops
-			pieces = g.pos.getPieces(i, BISHOP);
+			pieces = position.getPieces(i, BISHOP);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
@@ -193,7 +194,7 @@ public class Evaluator {
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
 			// For rooks
-			pieces = g.pos.getPieces(i, ROOK);
+			pieces = position.getPieces(i, ROOK);
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
