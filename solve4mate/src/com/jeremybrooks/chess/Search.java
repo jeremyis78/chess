@@ -29,6 +29,7 @@ public class Search {
 	public static final int DRAW = 0;              //value for draw
 
 	MoveGenerator mg = new MoveGenerator();
+	int maxSearchDepth = 0;
 
 	int getBestMove(GameState g, int side){
 	    int best = 0;
@@ -42,7 +43,7 @@ public class Search {
 	    //
 	    //
 	    //
-	    for(g.searchDepth = 1; g.searchDepth<5; g.searchDepth++){
+	    for(maxSearchDepth = 1; maxSearchDepth<5; maxSearchDepth++){
 	      best = alphabeta(g, side);
 	      if (g.numberOfLinesToMate > 0)
 	    	  break;
@@ -102,7 +103,7 @@ public class Search {
 	    int moves[] = new int[100];
 	    int val;
 
-	    if(depth == g.searchDepth){
+	    if(depth == maxSearchDepth){
 	        return evaluate(g, side, depth);
 	    }
 
@@ -192,7 +193,7 @@ public class Search {
 	    int moves[] = new int[100];
 	    int val;
 	    
-	    if(depth == g.searchDepth){
+	    if(depth == maxSearchDepth){
 	        return evaluate(g, side, depth);
 	    }
 	    

@@ -49,13 +49,11 @@ public class SolveForMate {
 	    		// Set the depth for the engine to search for mate 
 	    		// Display the board to solve for mate
 	    		//
-	    		g.setSearchDepth(getDepthToMate(mateInN));
-	    		if(g.sideToMove == Bitmap.WHITE){
-	    			out.print("White ");
-	    		} else {
-	    			out.print("Black ");
-	    		}
-	    		out.println("to move and force mate in " + mateInN);
+	    		// TODO: commented out when removing searchDepth from GameState
+	    		// This limit on depth can be refactored into Search or this class and set there instead.
+	    		//g.setSearchDepth(getDepthToMate(mateInN));
+    			out.print(g.isWhiteToMove()?"White":"Black");
+	    		out.println(" to move and force mate in " + mateInN);
 	    		g.display();
 	    		
 	    		//
@@ -71,7 +69,7 @@ public class SolveForMate {
 	    		//      situations i'm using it to just solve for mate
 	    		//      since it puts the mating line in g.bestLine if it
 	    		//      finds mate.
-	    		int move = search.getBestMove(g, g.sideToMove);
+	    		int move = search.getBestMove(g, g.isWhiteToMove()?0:1);
 	    		stop = System.currentTimeMillis();
 	    		elapsedMs = stop - start;
 	    		
@@ -102,7 +100,7 @@ public class SolveForMate {
 	    		// Display the line to mate (if any)
 	    		if (g.numberOfLinesToMate > 0){
 	    			out.println("Mate found");
-	    			for(int i=0; i<g.searchDepth; i++){
+	    			for(int i=0; i<search.maxSearchDepth; i++){
 	    				Util.displayMove(g.bestLine[i], false, false);
 	    				out.print("  ");
 	    			}

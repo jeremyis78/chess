@@ -121,6 +121,31 @@ public class UtilTest extends TestCase {
 		assertTrue(Util.notOnSixthRank(Bitmap.D2));
 		assertTrue(Util.notOnSixthRank(Bitmap.F1));
 	}
+	
+	public void testSquareLeftOf()
+	{
+		assertEquals("left of A1 would be an index 'off the bitboard'",
+				-1, Util.squareLeftOf(Bitmap.A1));
+		assertEquals(Bitmap.A1, Util.squareLeftOf(Bitmap.B1));
+		assertEquals(Bitmap.B1, Util.squareLeftOf(Bitmap.C1));
+		assertEquals(Bitmap.C1, Util.squareLeftOf(Bitmap.D1));
+		assertEquals(Bitmap.D1, Util.squareLeftOf(Bitmap.E1));
+		assertEquals(Bitmap.E1, Util.squareLeftOf(Bitmap.F1));
+		assertEquals(Bitmap.F1, Util.squareLeftOf(Bitmap.G1));
+		assertEquals(Bitmap.G1, Util.squareLeftOf(Bitmap.H1));
+		assertEquals(Bitmap.H1, Util.squareLeftOf(Bitmap.A2));
+		assertEquals(Bitmap.G8, Util.squareLeftOf(Bitmap.H8));
+	}
+
+	public void testSquareRightOf()
+	{
+		assertEquals("right of H8 would be an index 'off the bitboard'",
+				64, Util.squareRightOf(Bitmap.H8));
+		assertEquals(Bitmap.H8, Util.squareRightOf(Bitmap.G8));
+		assertEquals(Bitmap.C8, Util.squareRightOf(Bitmap.B8));
+		assertEquals("right of h-file wraps to square on next rank", Bitmap.A8, Util.squareRightOf(Bitmap.H7));
+		assertEquals(Bitmap.B1, Util.squareRightOf(Bitmap.A1));
+	}
 
 	public void testDisplaySquares() {
 		long wking = getBitboard(Bitmap.E1);

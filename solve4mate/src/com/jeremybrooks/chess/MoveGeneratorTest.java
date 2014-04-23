@@ -365,11 +365,10 @@ public class MoveGeneratorTest {
 		for(String position: positions)
 		{
 			g.set(position);
-			System.out.println(new Displayer().formatBoard(g.pos));
-			System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+			displayBoardAndSideToMove();
 			int depth = 0;
-			mg.GenerateCaptures(g, g.moves, g.sideToMove, depth);
-			mg.GenerateNonCaptures(g, g.moves, g.sideToMove, depth);
+			mg.GenerateCaptures(g, g.moves, g.isWhiteToMove()?0:1, depth);
+			mg.GenerateNonCaptures(g, g.moves, g.isWhiteToMove()?0:1, depth);
 			Set<String> generatedMoves = formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 			
 			String allMoves = "blah"; 
@@ -379,39 +378,44 @@ public class MoveGeneratorTest {
 
 	private Set<String> generateMoves(String positionFen) {
 		g.set(positionFen);
-		System.out.println(new Displayer().formatBoard(g.pos));
-		System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+		int side = g.isWhiteToMove()?0:1;
+		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateCaptures(g, g.moves, g.sideToMove, depth);
-		mg.GenerateNonCaptures(g, g.moves, g.sideToMove, depth);
+		mg.GenerateCaptures(g, g.moves, side, depth);
+		mg.GenerateNonCaptures(g, g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 
 	private Set<String> generateCaptures(String positionFen) {
 		g.set(positionFen);
-		System.out.println(new Displayer().formatBoard(g.pos));
-		System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+		int side = g.isWhiteToMove()?0:1;
+		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateCaptures(g, g.moves, g.sideToMove, depth);
+		mg.GenerateCaptures(g, g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 	
 	private Set<String> generateNonCaptures(String positionFen) {
 		g.set(positionFen);
-		System.out.println(new Displayer().formatBoard(g.pos));
-		System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+		int side = g.isWhiteToMove()?0:1;
+		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateNonCaptures(g, g.moves, g.sideToMove, depth);
+		mg.GenerateNonCaptures(g, g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 	
 	private Set<String> generateKingEscapes(String positionFen) {
 		g.set(positionFen);
-		System.out.println(new Displayer().formatBoard(g.pos));
-		System.out.println("To Move: " + (g.sideToMove == 0 ? "White" : "Black") + "\n");
+		int side = g.isWhiteToMove()?0:1;
+		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateKingEscapes(g, g.moves, g.sideToMove, depth);
+		mg.GenerateKingEscapes(g, g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+	}
+
+	private void displayBoardAndSideToMove() {
+		System.out.println(new Displayer().formatBoard(g.pos));
+		System.out.println("To Move: " + (g.isWhiteToMove() ? "White" : "Black") + "\n");
 	}
 
 //	private Set<String> generateInterpositions(String positionFen) {

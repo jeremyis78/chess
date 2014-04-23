@@ -8,21 +8,16 @@ import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.*;
 
 /**
- * 	  This file contains the implementation for the gamestate class.
- *	  A GameState object contains a 'position' object and flags.
- *	  The flags are castling status, En Passant target squares,
- *	  the halfmove clock and full move number.  All these taken
- *	  together represent the entire state of the chess game at any
- *	  given point in the game
+ * GameState contains a board representation and flags or metadata.
+ * 
+ * The flags are castling status, en passant target squares,
+ * the halfmove clock and full move number.
  *
  * @author jeremy
  *
  */
 public class GameState {
 
-	private static final String BLACK_TO_MOVE_FLAG = "b";
-	private static final String WHITE_TO_MOVE_FLAG = "w";
-	private static final String UNSET_FLAG = "-";
 	//*******************************************************************
 	//*                                                                 *
 	//* +--------+--------+--------+--------+-------------+             *
@@ -39,6 +34,9 @@ public class GameState {
 	public static final int B_SHORT_CASTLE = 4;
 	public static final int B_LONG_CASTLE  = 8;
 
+	private static final String BLACK_TO_MOVE_FLAG = "b";
+	private static final String WHITE_TO_MOVE_FLAG = "w";
+	private static final String UNSET_FLAG = "-";
 	public static final String FEN_START = new String(
 	    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
@@ -49,13 +47,19 @@ public class GameState {
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
 			
     Position pos;
-    int sideToMove = Bitmap.WHITE; //Color.BLACK		
+    private boolean whiteToMove = true;
     int depth;			//current depth of search
     long attacked[] = new long[MAX_DEPTH];
     int castle[] = new int[MAX_DEPTH + 1];
     byte enPassantSq[] = new byte[MAX_DEPTH + 1];
     byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
     byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
+    private int searchDepth;
+    
+    /*
+     * TODO: The following member vars are not related to the state of the game (board or flags)
+     * So they should be refactored into Search or a search context object
+     */
     int currentLine[] = new int[MAX_DEPTH]; //line we are searching
     int bestLine[] = new int[MAX_DEPTH];    //the best line of play
     int numberOfLinesToMate;    //# of lines of play that lead to mate
@@ -65,11 +69,7 @@ public class GameState {
     int movesValue[] = new int[100];        //minimax value of the moves from this state 
     int nodes = 0;                  //nodes searched
     int best = 0;                   //best value seen in search
-    int alpha = 0;                  //alpha value during/after search
-    int beta = 0;                   //beta value during/after search
     int movesIndex; 
-    int currentMove; //TODO:  is this variable really needed?
-    int searchDepth;
     
     //TODO: need a variable or something to keep track of 
     //      the number of repeated positions 
@@ -83,7 +83,6 @@ public class GameState {
 		pos = new Position();
 	    //TODO: fix this so it gets all the array indices 
 	    //filled (MAXDEPTH +1) see definitions.h for gamestate
-	    searchDepth = 3;
 	    numberOfLinesToMate = 0;
 	    for (int i = 0; i < MAX_DEPTH; i++){
 	        castle[i] = 0;
@@ -96,12 +95,9 @@ public class GameState {
 	        bestLine[i] = 0;
 	    }             
 	    castle[0] = CASTLE_START;
-	    fullMoveClock[0] = 1;
 	    movesIndex = 0;
-	}
-
-	void setSearchDepth(int d){
-	    searchDepth = d;
+	    fullMoveClock[0] = 1;
+	    whiteToMove = true;
 	}
 
 	public void set(final String fen){
@@ -112,7 +108,9 @@ public class GameState {
 	    // character is a comment so ignore it.
 	    String[] fields = fen.split(" ");
         if (fields.length < numFields){
-        	throw new IllegalArgumentException("FEN: found fewer than 6 fields\n");
+        	throw new IllegalArgumentException("The FEN string '"+fen+"' "
+        			+ "needs six space-delimited fields: "
+        			+ "board onMove castlingFlags enPassantSquare halfMoveClock moveNumber");
         }
               
         //Initialize board, side, castling, en pas, hmc, and fmc.
@@ -158,13 +156,23 @@ public class GameState {
 		return pos.getFen();
 	}
 
+	public boolean isWhiteToMove()
+	{
+		return whiteToMove;
+	}
+
+	public void setWhiteToMove(boolean isWhitesMove)
+	{
+		whiteToMove = isWhitesMove;
+	}
+	
 	void setSide(final String s)
 	{
 	    if (WHITE_TO_MOVE_FLAG.equals(s)) {
-	        sideToMove = Bitmap.WHITE;
+	        setWhiteToMove(true);
 	        return;
 	    } else if (BLACK_TO_MOVE_FLAG.equals(s)) {
-	        sideToMove = Bitmap.BLACK;
+	        setWhiteToMove(false);
 	        return;
 	    }
         throw new IllegalArgumentException("Side to move '"+s+"' is invalid; use 'w' for white or 'b' for black");
@@ -172,7 +180,7 @@ public class GameState {
 
 	private String getSide()
 	{
-		return (sideToMove == Bitmap.WHITE) ? WHITE_TO_MOVE_FLAG : BLACK_TO_MOVE_FLAG;
+		return (whiteToMove) ? WHITE_TO_MOVE_FLAG : BLACK_TO_MOVE_FLAG;
 	}
 
 	void setCastle(final String castlingFlags)
@@ -255,12 +263,12 @@ public class GameState {
 	        return;
 	    }
 	    int sq = StrToSq(s);
-	    if(sideToMove == WHITE && Util.notOnSixthRank(sq))
+	    if(whiteToMove && Util.notOnSixthRank(sq))
 	    {
 	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 6th rank");	    	
 	    }
-	    if(sideToMove == BLACK && Util.notOnThirdRank(sq))
+	    if(!whiteToMove && Util.notOnThirdRank(sq))
 	    {
 	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 3rd rank");
@@ -324,13 +332,24 @@ public class GameState {
 		return false;
 	}
 
-
+	@Deprecated
 	public boolean makeMove(int move, int side){
-	    // makeMove(int move) updates the state of the game by making
-	    // 'move' in the gametree
-	    // Also updates castling status, enPassant, halfmove & fullmove clocks
-	    // Changes sideToMove flag
-	    
+		boolean isWhitesMove = (WHITE == side);
+		return makeMove(move, isWhitesMove);
+	}
+
+	/**
+	 * Makes the given move and updates the board's state accordingly.
+	 * 
+	 * After calling this method you can expect the current depth will be
+	 * incremented by 1 and {@code g.isWhiteToMove() == !isWhitesMove}.  The move number, 
+	 * castling flags, enPassant square, and half move clock are also updated.
+	 * 
+	 * @param move the encoded move to make
+	 * @param isWhitesMove flag indicating which side is making the move
+	 * @return
+	 */
+	public boolean makeMove(int move, boolean isWhitesMove){
 	    int from, to;           //squares involved
 	    int moving, captured, promotion;  //pieces involved
 
@@ -346,29 +365,29 @@ public class GameState {
 	    // or advancing two squares
 
 	    if (moving == KING){
-		    updateCastlingFlagsWhenKingMoves(side);
-		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
+		    updateCastlingFlagsWhenKingMoves(isWhitesMove);
+		    int rookFrom = correspondingRookIfKingCastled(from, to, isWhitesMove);
 			if(rookFrom != NOSQUARE)
 			{
 				if(isOnGFile(to)){
-					moveRook(rookFrom, squareLeftOf(to, side), side);
+					moveRook(rookFrom, squareLeftOf(to), isWhitesMove);
 				} else if (isOnCFile(to)) {
-					moveRook(rookFrom, squareRightOf(to, side), side);
+					moveRook(rookFrom, squareRightOf(to), isWhitesMove);
 				}
 			}
 	    }
 	    else if (moving == ROOK)
 	    {
-	        updateCastlingFlagsWhenRookMoves(from, side);             
+	        updateCastlingFlagsWhenRookMoves(from, isWhitesMove);             
 	    } else {
 	        //EnPassant
 	        if( isEnPassantCapture(moving, to, captured))
 	        {
-	        	pos.erasePiece(squareBehind(to, side));
+	        	pos.erasePiece(squareBehind(to, isWhitesMove?0:1));
 	        	captured = NONE;
-	        } else if (moving == PAWN && twoSquaresBehind(to, side) == from) {
+	        } else if (moving == PAWN && twoSquaresBehind(to, isWhitesMove?0:1) == from) {
 	            //Pawn advances two squares
-	        	updateEnPassantSquare(from, side);
+	        	updateEnPassantSquare(from, isWhitesMove);
 	        }
 	        duplicateCastlingFlags();
 	    }
@@ -379,29 +398,23 @@ public class GameState {
 	    }
 	    pos.erasePiece(from);
 	    if(promotion != NONE) {
-	    	pos.placePiece(side, promotion, to);
+	    	placePiece(promotion, to, isWhitesMove);
 	    } else {
-	    	pos.placePiece(side, moving, to);
+	    	placePiece(moving, to, isWhitesMove);
 	    }
 
-	    //Update the halfmove clock 
-	    //  Reset it for a pawn or capture move (irreversible move)
-	    //  Otherwise, increment it from its previous value
-	    if (captured != NONE || moving == PAWN){
+	    if (isIrreversibleMove(moving, captured)){
 	        resetHalfMoveClock();
 	    } else {
 	    	incrementHalfMoveClock();
 	    }
 
-	    switch(side){
-	    case Bitmap.WHITE:
-	        duplicateFullMoveClock();
-	        break;
-	    case Bitmap.BLACK:
-	        incrementFullMoveClock();
-	        break;
-	    }
-	    sideToMove = opposing(side);
+	    if(isWhitesMove)
+	    	duplicateFullMoveClock();
+	    else
+	    	incrementFullMoveClock();
+
+	    whiteToMove = !isWhitesMove;
 	    depth++;
 	    
 	    //Compute the number of moves that come before
@@ -413,9 +426,30 @@ public class GameState {
 	    return false;
 	}
 
+	private boolean isIrreversibleMove(int moving, int captured) {
+		return captured != NONE || moving == PAWN;
+	}
+
+	@Deprecated
 	public boolean undoMove(int move, int side){
-		// undoMove(int move) updates the state of the game by restoring 
-		// the state of the board before 'move' was made
+		boolean isWhitesMove = (WHITE == side);
+		return undoMove(move, isWhitesMove);
+	}
+
+	/**
+	 * Undoes the given move by the given side on move.
+	 * 
+	 * After calling this method you can expect the current depth will be
+	 * decremented by 1 and {@code g.isWhiteToMove() == isWhitesMove}.  
+     *
+	 * All of the flags should (I think) remain untouched because undoing a move
+	 * is simply decrementing the depth (ie, popping the stack)
+	 * 
+	 * @param move the encoded move to undo
+	 * @param isWhitesMove flag indicating which side is having their move undone
+	 * @return
+	 */
+	public boolean undoMove(int move, boolean isWhitesMove){
 	    int from, to;           //squares involved
 	    int moving, captured;
 
@@ -434,17 +468,17 @@ public class GameState {
 	    
 	    //Undo the moving piece
 	    pos.erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
-	    pos.placePiece(side, moving, from);
+	    placePiece(moving, from, isWhitesMove);
 
 	    //Undo a castling move (that is, undo the rook move)
 	    if (moving == KING){
-		    int rookFrom = correspondingRookIfKingCastled(from, to, side);
+		    int rookFrom = correspondingRookIfKingCastled(from, to, isWhitesMove);
 			if(rookFrom != NOSQUARE)
 			{
 				if(isOnGFile(to)){
-					moveRook(squareLeftOf(to, side), rookFrom, side);
+					moveRook(squareLeftOf(to), rookFrom, isWhitesMove);
 				} else if (isOnCFile(to)) {
-					moveRook(squareRightOf(to, side), rookFrom, side);
+					moveRook(squareRightOf(to), rookFrom, isWhitesMove);
 				}
 			}
 	    } 
@@ -453,36 +487,40 @@ public class GameState {
 	    
 	    //Place captured piece back on the board
 	    if(captured != NONE){
-	        //Put the EnPassant captured pawn back
 	        if(isEnPassantCapture(moving, to, captured))
 	        {
-	        	pos.placePiece(opposing(side), PAWN, squareBehind(to, side));
+	        	placeOpposingPiece(PAWN, squareBehind(to, isWhitesMove?0:1), isWhitesMove);
 	        } else { //Normal capture
-		        //Put any other captured piece back
-	        	pos.placePiece(opposing(side), captured, to);
+	        	placeOpposingPiece(captured, to, isWhitesMove);
 	        }
 	    }
-
-	    sideToMove = side; //we're undoing the move for side so it will still be side's turn to move 
+	    whiteToMove = isWhitesMove; //we're undoing the move for side so it will still be side's turn to move
 	    return false;
 	}
 
-	private int correspondingRookIfKingCastled(int from, int to, int side) {
+	private void placePiece(int piece, int to, boolean isWhitesMove)
+	{
+		int side = (isWhitesMove ? 0 : 1);
+    	pos.placePiece(side, piece, to);
+	}
+
+	private void placeOpposingPiece(int piece, int to, boolean isWhitesMove)
+	{
+		int side = (isWhitesMove ? 0 : 1);
+    	pos.placePiece(opposing(side), piece, to);
+	}
+	
+	private int correspondingRookIfKingCastled(int from, int to, boolean isWhitesMove) {
 		int rookSquare = NOSQUARE;
-		switch(side){
-        case Bitmap.WHITE:
-            if (isWhiteShortCastle(from, to)){
-	        	rookSquare = H1; //moveRook(H1, F1, side);
-            } else if (isWhiteLongCastle(from, to)){
-	        	rookSquare =  A1; //moveRook(A1, D1, side);
-            }
-        case Bitmap.BLACK:
-            if (isBlackShortCastle(from, to)){
-	        	rookSquare =  H8; //moveRook(H8, F8, side);
-            } else if (isBlackLongCastle(from, to)){
-	        	rookSquare =  A8; //moveRook(A8, D8, side);
-            }
-        }
+		if (isWhitesMove && isWhiteShortCastle(from, to)){
+			rookSquare = H1;
+		} else if (isWhitesMove && isWhiteLongCastle(from, to)){
+			rookSquare =  A1;
+		} else if (!isWhitesMove && isBlackShortCastle(from, to)){
+			rookSquare =  H8;
+		} else if (!isWhitesMove && isBlackLongCastle(from, to)){
+			rookSquare =  A8;
+		}
 		return rookSquare;
 	}
 
@@ -508,26 +546,24 @@ public class GameState {
 		halfMoveClock[depth + 1] = 0;
 	}
 
-	private void moveRook(int rookFrom, int rookTo, int side) {
+	private void moveRook(int rookFrom, int rookTo, boolean isWhitesMove) {
+		int side = (isWhitesMove ? 0 : 1);
 		pos.erasePiece(rookFrom);
 		pos.placePiece(side, ROOK, rookTo);
 	}
 
-	private void updateCastlingFlagsWhenKingMoves(int side) {
-		switch(side) {
-		case WHITE:
+	private void updateCastlingFlagsWhenKingMoves(boolean isWhitesMove) {
+		if(isWhitesMove){
 			//white king moved; castling is no longer legal for him
 			castle[depth + 1] = castle[depth] & (B_SHORT_CASTLE | B_LONG_CASTLE);
-			break;
-		case BLACK:
+		} else {
 			//black king moved; castling is no longer legal for him
 			castle[depth + 1] = castle[depth] & (W_SHORT_CASTLE | W_LONG_CASTLE);
-			break;
 		}
 	}
 
-	private void updateCastlingFlagsWhenRookMoves(int rookFromSquare, int side) {
-		if (side == Bitmap.WHITE){
+	private void updateCastlingFlagsWhenRookMoves(int rookFromSquare, boolean isWhitesMove) {
+		if (isWhitesMove){
 			if (bool(castle[depth] & W_LONG_CASTLE) && rookFromSquare == A1)
 				castle[depth + 1] = castle[depth] & ~W_LONG_CASTLE;
 			else if (bool(castle[depth] & W_SHORT_CASTLE) && rookFromSquare == H1)
@@ -541,23 +577,23 @@ public class GameState {
 	}
 
 	private boolean isBlackLongCastle(int from, int to) {
-		return to == C8 && from == E8;
+		return from == E8 && to == C8;
 	}
 
 	private boolean isBlackShortCastle(int from, int to) {
-		return to == G8 && from == E8;
+		return from == E8 && to == G8;
 	}
 
 	private boolean isWhiteLongCastle(int from, int to) {
-		return to == C1 && from == E1;
+		return from == E1 && to == C1;
 	}
 
 	private boolean isWhiteShortCastle(int from, int to) {
-		return to == G1 && from == E1;
+		return from == E1 && to == G1;
 	}
 
-	private void updateEnPassantSquare(int from, int side) {
-		enPassantSq[depth + 1] = (byte)squareAhead(from, side);
+	private void updateEnPassantSquare(int from, boolean isWhitesMove) {
+		enPassantSq[depth + 1] = (byte)squareAhead(from, isWhitesMove?0:1);
 	}
 
 	private boolean isEnPassantCapture(int moving, int to, int captured) {

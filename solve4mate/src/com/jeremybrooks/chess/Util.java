@@ -697,6 +697,7 @@ public class Util {
 	protected static int squareBehind(int currentSquare, int side){
 	    return (side == WHITE) ? (currentSquare - 8) : (currentSquare + 8);
 	}
+	
 	// minusTwoRank
 	//
 	// Returns the from square given the square
@@ -710,10 +711,20 @@ public class Util {
 	    return (side == WHITE) ? (currentSquare + 8) : (currentSquare - 8);
 	}
 
+	protected static int squareLeftOf(int currentSquare){
+	    return squareLeftOf(currentSquare, 0);
+	}
+
+	@Deprecated
 	protected static int squareLeftOf(int currentSquare, int side){
 	    return (currentSquare - 1);
 	}
 
+	protected static int squareRightOf(int currentSquare){
+	    return squareRightOf(currentSquare, 0);
+	}
+	
+	@Deprecated
 	protected static int squareRightOf(int currentSquare, int side){
 	    return (currentSquare + 1);
 	}
