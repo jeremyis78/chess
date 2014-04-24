@@ -211,136 +211,76 @@ public class Position
 	    }
 	}
 	
-	static void validateFiles(String rankFen)
-	{
-		int len = rankFen.length();
-		if (len == 0 || len > 8)
-		{
-			throw new IllegalArgumentException("fen must contain eight squares on a rank, found " + rankFen);
-		}
-		
-		int filesRead = 0;
-		for(int i=0; i < len; i++)
-		{
-			char c = rankFen.charAt(i);
-			if (Character.isDigit(c))
-			{
-				filesRead += c - '0'; //represents multiple files
-				continue;
-			}
-			filesRead++; //represents a single file
-		}
-		if(filesRead != 8)
-		{
-			throw new IllegalArgumentException("pieces and empty squares on rank do not fit on eight files");
-		}
-	}
-	
 	public boolean set(final String fen)
 	{
-		boolean[] isKingPlaced = new boolean[] {false, false};
-				
-		String[] ranks = fen.split("/");
-		if (ranks.length != 8)
+		FenParser parser = new FenParser();
+		parser.parseBoard(fen);
+		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
 		{
-			throw new IllegalArgumentException("fen must contain eight ranks");
-		}
-		//Start with the first rank
-		int sq = Bitmap.A1; //keep track of the square we're on
-		for(int m = ranks.length - 1; m >= 0; m--)
-		{
-			String rank = ranks[m];
-			validateFiles(rank);
-			for (int n = 0; n < rank.length(); n++)
+            long sqMask = 1L << square;
+            long sqMask90 = 1L << SQ2BIT90R[square];
+            long sqMask45L = 1L << SQ2BIT45L[square];
+            long sqMask45R = 1L << SQ2BIT45R[square];
+			char boardCharacter = parser.getBoardCharacter(square);
+			switch(boardCharacter)
 			{
-				char c = rank.charAt(n);
-				if (Character.isDigit(c))
-				{
-					int emptysq = sq;
-		            //add digit's value to sq
-		            sq += c - '0'; 
-	            
-		            //initialize those squares to empty
-		            while (emptysq < sq)
-		                board[emptysq++] = BOARD_EMPTY_SQUARE;
-				}
-				else
-				{
-		            long sqMask = 1L << sq;
-		            long sqMask90 = 1L << SQ2BIT90R[sq];
-		            long sqMask45L = 1L << SQ2BIT45L[sq];
-		            long sqMask45R = 1L << SQ2BIT45R[sq];
-		            
-		            switch(c){
-		            case 'P':
-		                placePiece(Bitmap.WHITE, PAWN, sq);
-		                break;
-		            case 'N':
-		                placePiece(Bitmap.WHITE, KNIGHT, sq);
-		                break;
-		            case 'B':
-		                placePiece(Bitmap.WHITE, BISHOP, sq);
-		                break;
-		            case 'R':
-		                placePiece(Bitmap.WHITE, ROOK, sq);
-		                break;
-		            case 'Q':
-		                placePiece(Bitmap.WHITE, QUEEN, sq);
-		                break;
-		            case 'K':
-		                if(isKingPlaced[Bitmap.WHITE])
-		                {
-		                    throw new IllegalArgumentException("board has too many white kings");
-		                }
-		                all[ALL] |= sqMask;
-		                all[ALL90] |= sqMask90;
-		                all[ALL45L] |= sqMask45L;
-		                all[ALL45R] |= sqMask45R;
-		                board[sq] = PIECE[Bitmap.KING];
-		                kingSq[Bitmap.WHITE] = sq;
-		                isKingPlaced[Bitmap.WHITE] = true;
-		                break;
-		            case 'p':
-		                placePiece(Bitmap.BLACK, PAWN, sq);
-		                break;
-		            case 'n':
-		                placePiece(Bitmap.BLACK, KNIGHT, sq);
-		                break;
-		            case 'b':
-		                placePiece(Bitmap.BLACK, BISHOP, sq);
-		                break;
-		            case 'r':
-		                placePiece(Bitmap.BLACK, ROOK, sq);
-		                break;
-		            case 'q':
-		                placePiece(Bitmap.BLACK, QUEEN, sq);
-		                break;
-		            case 'k':
-		                if(isKingPlaced[Bitmap.BLACK])
-		                {
-		                    throw new IllegalArgumentException("board has too many black kings");
-		                }
-		                all[ALL] |= sqMask;
-		                all[ALL90] |= sqMask90;
-		                all[ALL45L] |= sqMask45L;
-		                all[ALL45R] |= sqMask45R;
-		                board[sq] = -PIECE[Bitmap.KING];
-		                kingSq[Bitmap.BLACK] = sq;
-		                isKingPlaced[Bitmap.BLACK] = true;
-		                break;
-		            default: //illegal character
-		                throw new IllegalArgumentException("board contains invalid "
-		                		+ "piece '" + c + "'; allowed piece characters are: KkQqRrBbNnPp"); 
-		            }
-		            sq++;
-		            //files++;
-				}
-				
-			}
+			case 'P':
+	            placePiece(Bitmap.WHITE, PAWN, square);
+	            break;
+	        case 'N':
+	            placePiece(Bitmap.WHITE, KNIGHT, square);
+	            break;
+	        case 'B':
+	            placePiece(Bitmap.WHITE, BISHOP, square);
+	            break;
+	        case 'R':
+	            placePiece(Bitmap.WHITE, ROOK, square);
+	            break;
+	        case 'Q':
+	            placePiece(Bitmap.WHITE, QUEEN, square);
+	            break;
+	        case 'K':
+	            all[ALL] |= sqMask;
+	            all[ALL90] |= sqMask90;
+	            all[ALL45L] |= sqMask45L;
+	            all[ALL45R] |= sqMask45R;
+	            board[square] = PIECE[Bitmap.KING];
+	            kingSq[Bitmap.WHITE] = square;
+	            break;
+	        case 'p':
+	            placePiece(Bitmap.BLACK, PAWN, square);
+	            break;
+	        case 'n':
+	            placePiece(Bitmap.BLACK, KNIGHT, square);
+	            break;
+	        case 'b':
+	            placePiece(Bitmap.BLACK, BISHOP, square);
+	            break;
+	        case 'r':
+	            placePiece(Bitmap.BLACK, ROOK, square);
+	            break;
+	        case 'q':
+	            placePiece(Bitmap.BLACK, QUEEN, square);
+	            break;
+	        case 'k':
+	            all[ALL] |= sqMask;
+	            all[ALL90] |= sqMask90;
+	            all[ALL45L] |= sqMask45L;
+	            all[ALL45R] |= sqMask45R;
+	            board[square] = -PIECE[Bitmap.KING];
+	            kingSq[Bitmap.BLACK] = square;
+	            break;
+	        case BOARD_EMPTY_SQUARE:
+	        	board[square] = boardCharacter;
+	        	break;
+	        default: //illegal character
+	            throw new IllegalArgumentException("board contains invalid "
+	            		+ "piece '" + boardCharacter + "'; allowed piece characters are: KkQqRrBbNnPp"); 
+	        }
 		}
 		return true;
 	}
-
+	
 	void Display(){
 		DisplayBoard();
 		DisplayBitboardBoard();
@@ -540,11 +480,6 @@ public class Position
 	        pieces[color][piece] ^= mask;
 	        pieces[color][ALLPIECES] ^= mask;
 	    } 
-	}
-
-	@Deprecated
-	public void erasePiece(int color, int piece, int square){
-		erasePiece(square);
 	}
 
 	public static boolean isSameColor(int c, int p)

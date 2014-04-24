@@ -4,10 +4,10 @@
  */
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.*;
-
-import java.io.PrintStream;
-import java.util.Iterator;
+import static com.jeremybrooks.chess.Bitmap.A1;
+import static com.jeremybrooks.chess.Bitmap.H8;
+import static com.jeremybrooks.chess.Bitmap.fileNumber;
+import static com.jeremybrooks.chess.Bitmap.rankNumber;
 
 import org.apache.log4j.Logger;
 
@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 public class Attacks {
 	
 	private static Logger log = Logger.getLogger(Attacks.class);
-	private static PrintStream out = System.out;
 
 	//This is a constant for the diagonal length
 	//To access the length of the main diagonal use dlen[7]
@@ -109,7 +108,6 @@ public class Attacks {
 	}
   
 	void genMask90() {
-		long m = 1;
 		int squareIndex = 0;  //runs from 0 to 63 inclusive
 		for(int lastSquareOnFile=Bitmap.A8; 
 				lastSquareOnFile <= Bitmap.H8;
@@ -247,7 +245,6 @@ public class Attacks {
         //We use int's because shifting in java always upcasts to an int anyway
         int piece = 0x01; //originally an unsigned char in C++
         int occupied = 0;      //originally an unsigned char in C++
-        int p = 0;        //originally an unsigned char in C++
         //occ is the occupied squares on the rank BITWISE-ANDed with 01111110b
         
         for (int square=0; piece != 0x100; piece <<= 1, ++square){

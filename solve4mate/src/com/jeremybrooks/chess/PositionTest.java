@@ -277,13 +277,13 @@ public class PositionTest extends TestCase {
 	public void testSetTooManyRanks()
 	{
 		String tooManyRanks = "8/8/8/8/8/8/8/8/8";
-		assertInvalid(tooManyRanks, "fen must contain eight ranks");
+		assertInvalid(tooManyRanks, "board must contain eight ranks");
 	}
 
 	public void testSetTooManyFiles()
 	{
 		String tooManyFiles = "k8/8/8/8/8/8/8/8";
-		assertInvalid(tooManyFiles, "pieces and empty squares on rank do not fit on eight files");
+		assertInvalid(tooManyFiles, "board pieces and empty squares on rank #8 do not fit on eight files: k8");
 	}
 	
 	public void testSetUnknownPiece()
@@ -304,48 +304,6 @@ public class PositionTest extends TestCase {
 	private void setupPosition(String FENString) {
 		Position p = new Position();
 		p.set(FENString);
-	}
-
-	public void testIsValidRankFen(){
-		String[] good = 
-			new String[]
-			           {
-						//"8",
-						"1p1p1p1p",
-						"p1p1p1p1",
-						"RNBQKBNR",
-						"2P5",
-			           };
-		for(int i=0; i<good.length; i++)
-		{
-			try
-			{
-				Position.validateFiles(good[i]);
-			} catch (IllegalArgumentException e){
-				fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
-			}
-		}
-
-	
-		String[] bad = 
-			new String[]
-			           {
-						"7",
-						"p1p1p1p1p1p",
-						"1p1p1p1",
-						"RNB3BNR",
-						"2P4",
-			           };
-		for(int i=0; i<good.length; i++)
-		{
-			try
-			{
-				Position.validateFiles(bad[i]);
-				fail("should throw, invalid rank fen " + bad[i]);
-			} catch (IllegalArgumentException e){
-			}
-		}
-
 	}
 
 	public void testErasePieceSucceedsEvenWhenSquareIsAlreadyEmpty() {

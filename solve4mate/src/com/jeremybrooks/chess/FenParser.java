@@ -41,7 +41,7 @@ public class FenParser {
 		parseMoveNumber(fields[5]);
 	}
 
-	private void parseBoard(String field) {
+	public void parseBoard(String field) {
 		String[] ranks = field.split("/");
 		if (ranks.length != 8)
 		{
@@ -72,7 +72,7 @@ public class FenParser {
 		}
 	}
 
-	private static void validateFiles(String rankFen, int rankNumber)
+	public static void validateFiles(String rankFen, int rankNumber)
 	{
 		int len = rankFen.length();
 		if (len == 0 || len > 8)

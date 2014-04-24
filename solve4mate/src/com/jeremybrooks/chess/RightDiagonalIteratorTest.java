@@ -28,6 +28,7 @@ public class RightDiagonalIteratorTest {
 	{
 		int invalidDiagonalIndex = Bitmap.A8 + 1;
 		try {
+			@SuppressWarnings("unused")
 			DiagonalIterator it = new RightDiagonalIterator(invalidDiagonalIndex);
 		} catch (Exception e) {
 			assertEquals("index '" + invalidDiagonalIndex + "' must be in range 0-14", e.getMessage());

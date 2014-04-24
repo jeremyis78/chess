@@ -4,7 +4,6 @@ import static com.jeremybrooks.chess.Bitmap.*;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class GameStateTest {

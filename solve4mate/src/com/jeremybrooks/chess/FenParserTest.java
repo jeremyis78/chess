@@ -182,6 +182,48 @@ public class FenParserTest {
 		assertInvalid(badFen, expectedError);
 	}
 
+	public void testIsValidRankFen(){
+		String[] good = 
+			new String[]
+			           {
+						//"8",
+						"1p1p1p1p",
+						"p1p1p1p1",
+						"RNBQKBNR",
+						"2P5",
+			           };
+		for(int i=0; i<good.length; i++)
+		{
+			try
+			{
+				FenParser.validateFiles(good[i], 1);
+			} catch (IllegalArgumentException e){
+				fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
+			}
+		}
+
+	
+		String[] bad = 
+			new String[]
+			           {
+						"7",
+						"p1p1p1p1p1p",
+						"1p1p1p1",
+						"RNB3BNR",
+						"2P4",
+			           };
+		for(int i=0; i<good.length; i++)
+		{
+			try
+			{
+				FenParser.validateFiles(bad[i], 1);
+				fail("should throw, invalid rank fen " + bad[i]);
+			} catch (IllegalArgumentException e){
+			}
+		}
+
+	}
+
 	private void assertInvalid(String position, String expectedError) {
 		try {
 			parser.parse(position);
