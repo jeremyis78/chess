@@ -102,7 +102,7 @@ public class Util {
 	    	sb.append(String.format("%c", '1' + (sq / 8))); //int division
 	    	return sb.toString();
 	    } 
-	    throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
+	    return ""; //throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
 	}
 
     public static void displaySquares(long b){

@@ -72,6 +72,7 @@ public class UtilTest extends TestCase {
 	}
 
 	public void testSqToStr() {
+		assertEquals("", Util.SqToStr(Bitmap.A1-1));
 		assertEquals("a1", Util.SqToStr(Bitmap.A1));
 		assertEquals("b2", Util.SqToStr(Bitmap.B2));
 		assertEquals("c3", Util.SqToStr(Bitmap.C3));
@@ -80,16 +81,7 @@ public class UtilTest extends TestCase {
 		assertEquals("f6", Util.SqToStr(Bitmap.F6));
 		assertEquals("g7", Util.SqToStr(Bitmap.G7));
 		assertEquals("h8", Util.SqToStr(Bitmap.H8));
-		try{
-			Util.SqToStr(64);
-			fail("64 is invalid index into bitboard");
-		} catch (IllegalArgumentException e){
-		}
-		try{
-			Util.SqToStr(-1);
-			fail("-1 is invalid index into bitboard");
-		} catch (IllegalArgumentException e){
-		}
+		assertEquals("", Util.SqToStr(Bitmap.H8+1));
 	}
 
 	public void testNotOnThirdRank()
