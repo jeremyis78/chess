@@ -34,9 +34,9 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                pro = isPawnPromotion(side, from);
 
 	                //EnPassant captures
-	                int enPassantSquare = g.getEnPassantSquare(depth);
-					if (enPassantSquare != NOSQUARE)
+					if (g.hasEnPassantOption())
 	                {
+						int enPassantSquare = g.getEnPassantSquare();
 	                    if (Util.bool(pieceAttacks & (1L << enPassantSquare)))
 	                    {
 	                        to = enPassantSquare;

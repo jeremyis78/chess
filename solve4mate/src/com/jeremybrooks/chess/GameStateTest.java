@@ -131,7 +131,11 @@ public class GameStateTest {
 		String afterMove = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
 		boolean isWhitesMove = setupState(beforeMove);
 		assertEquals(afterMove, makeMove(isWhitesMove, moveE4));
+		assertEquals(1, gameState.getNumberOfMovesMade());
+		assertEquals(1, gameState.getMoveNumber());
 		assertEquals(beforeMove, undoMove(isWhitesMove, moveE4));
+		assertEquals(0, gameState.getNumberOfMovesMade());
+		assertEquals(1, gameState.getMoveNumber());
 	}
 
 	@Test
@@ -150,8 +154,10 @@ public class GameStateTest {
 		int move = encodeMove(D5, E6, PIECE[PAWN], PIECE[PAWN]);
 		String afterMove = "4k3/8/4P3/8/8/8/8/4K3 b - - 0 23";
 		boolean isWhitesMove = setupState(beforeMove);
+		assertTrue(gameState.hasEnPassantOption());
 		assertEquals(afterMove, makeMove(isWhitesMove, move));
 		assertEquals(beforeMove, undoMove(isWhitesMove, move));
+		assertTrue(gameState.hasEnPassantOption());
 	}
 
 	@Test
@@ -160,7 +166,10 @@ public class GameStateTest {
 		int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
 		String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";
 		boolean isWhitesMove = setupState(beforeMove);
+		assertTrue(gameState.hasEnPassantOption());
+		assertEquals(D6, gameState.getEnPassantSquare());
 		assertEquals(afterMove, makeMove(isWhitesMove, movePawnOnE5CapturesOnD6));
+		assertFalse(gameState.hasEnPassantOption());
 		assertEquals(beforeMove, undoMove(isWhitesMove, movePawnOnE5CapturesOnD6));
 	}
 

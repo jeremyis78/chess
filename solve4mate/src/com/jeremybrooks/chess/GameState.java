@@ -13,22 +13,14 @@ import static com.jeremybrooks.chess.Util.*;
  * The flags are castling status, en passant target squares,
  * the halfmove clock and full move number.
  *
+ *  TODO: Board!!!!! (that's the best name for this class which would
+ *  contain a Pieces (formerly Position) class
+ *
  * @author jeremy
  *
  */
 public class GameState {
 
-	//*******************************************************************
-	//*                                                                 *
-	//* +--------+--------+--------+--------+-------------+             *
-	//* |  bit 0 |  bit 1 |  bit 2 |  bit 3 | bits 4 - 7  |             *
-	//* +--------+--------+--------+--------+-------------+             *
-	//* |      WHITE      |      BLACK      |             |             *
-	//* | short  | long   | short  | long   |   unused    |             *
-	//* | castle | castle | castle | castle |             |             *
-	//* +--------+--------+--------+--------+-------------+             *
-	//*                                                                 *
-	//*******************************************************************
 	public static final int W_SHORT_CASTLE = 1;
 	public static final int W_LONG_CASTLE  = 2;
 	public static final int B_SHORT_CASTLE = 4;
@@ -42,18 +34,29 @@ public class GameState {
 
 	public static final int MAX_DEPTH = 150;
 	private static final int NO_CASTLING_ALLOWED = 0;
+	private static final int INITIAL_DEPTH = 0;
 
 	final byte CASTLE_START = 
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
 			
     private Position pos;
+    
+    /**
+     *  Represents the number of moves (i.e. black moves a pawn) applied to
+     *  this game state.  For example, after
+     *     MoveNumber    Move   numberOfMovesMade	halfMoveNumber  
+     *     1.			e4			1					0
+     *     1. 			... e5		2					0
+     *     2. 			Nc3			3					1
+     *     2. 			... Nf6		4					2
+     */
+    private int numberOfMovesMade = INITIAL_DEPTH; // N2 !! choose names at appropriate abstraction level
     private boolean whiteToMove = true;
-    int depth;			//current depth of search
-    long attacked[] = new long[MAX_DEPTH];
     private int castle[] = new int[MAX_DEPTH + 1];
     private byte enPassantSq[] = new byte[MAX_DEPTH + 1];
     private byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
-    private byte fullMoveClock[] = new byte[MAX_DEPTH];//dont' think this needs to be an array
+    private byte fullMoveClock[] = new byte[MAX_DEPTH]; //dont' think this needs to be an array
+    long attacked[] = new long[MAX_DEPTH];
     
     /*
      * TODO: The following member vars are not related to the state of the game (board or flags)
@@ -93,7 +96,7 @@ public class GameState {
 	        currentLine[i] = 0;
 	        bestLine[i] = 0;
 	    }             
-	    castle[0] = CASTLE_START;
+	    castle[INITIAL_DEPTH] = CASTLE_START;
 	    movesIndex = 0;
 	    fullMoveClock[0] = 1;
 	    whiteToMove = true;
@@ -114,32 +117,32 @@ public class GameState {
               
         //Initialize board, side, castling, en pas, hmc, and fmc.
         //zeroeth index is moves to mate
-        setBoard(fields[0]);
-        setSide(fields[1]);
-        setCastle(fields[2]);
-        setEnPassant(fields[3]);
-        setHalfMoveClock(fields[4]);
-        setFullMoveClock(fields[5]);
+        parseBoardFEN(fields[0]);
+        parseSideFEN(fields[1]);
+        parseCastleFEN(fields[2]);
+        parseEnPassantFEN(fields[3]);
+        parseHalfMoveNumber(fields[4]);
+        parseMoveNumber(fields[5]);
 	}
 	
 	public String get()
 	{
 		StringBuilder fen = new StringBuilder();
-		fen.append(getBoard());
+		fen.append(getBoardFEN());
 		fen.append(" ");
-		fen.append(getSide());
+		fen.append(getSideFEN());
 		fen.append(" ");
-		fen.append(getCastle());
+		fen.append(getCastleFEN());
 		fen.append(" ");
-		fen.append(getEnPassant());
+		fen.append(getEnPassantFEN());
 		fen.append(" ");
-		fen.append(getHalfMoveClock());
+		fen.append(getHalfMoveNumber());
 		fen.append(" ");
-		fen.append(getFullMoveClock());
+		fen.append(getMoveNumber());
 		return fen.toString();
 	}
 
-	void setBoard(final String s)
+	private void parseBoardFEN(final String s)
 	{
 	    pos.set(s);  //throws error if any
 	}
@@ -149,7 +152,7 @@ public class GameState {
 	 * 
 	 * @return
 	 */
-	private String getBoard()
+	private String getBoardFEN()
 	{	
 		//NOTE: the position is always kept in sync with the depth
 		return pos.getFen();
@@ -170,7 +173,7 @@ public class GameState {
 		whiteToMove = isWhitesMove;
 	}
 	
-	void setSide(final String s)
+	private void parseSideFEN(final String s)
 	{
 	    if (WHITE_TO_MOVE_FLAG.equals(s)) {
 	        setWhiteToMove(true);
@@ -182,12 +185,12 @@ public class GameState {
         throw new IllegalArgumentException("Side to move '"+s+"' is invalid; use 'w' for white or 'b' for black");
 	}
 
-	private String getSide()
+	private String getSideFEN()
 	{
 		return (whiteToMove) ? WHITE_TO_MOVE_FLAG : BLACK_TO_MOVE_FLAG;
 	}
 
-	void setCastle(final String castlingFlags)
+	private void parseCastleFEN(final String castlingFlags)
 	{
 		if(castlingFlags.length() > 4)
 		{
@@ -203,40 +206,50 @@ public class GameState {
         {
 			if('K' == flagChar)
 			{
-				appendCastlingFlag(W_SHORT_CASTLE);
+				addCastlingOption(W_SHORT_CASTLE);
 			}
 			if('Q' == flagChar)
 			{
-				appendCastlingFlag(W_LONG_CASTLE);
+				addCastlingOption(W_LONG_CASTLE);
 			}
 			if('k' == flagChar)
 			{
-				appendCastlingFlag(B_SHORT_CASTLE);
+				addCastlingOption(B_SHORT_CASTLE);
 			}
 			if('q' == flagChar)
 			{
-				appendCastlingFlag(B_LONG_CASTLE);
+				addCastlingOption(B_LONG_CASTLE);
 			}
         }
 	}
 	
-	private void appendCastlingFlag(int castlingFlag)
+	/**
+	 * Adds the castling option at the current depth
+	 * 
+	 * @param castlingFlag
+	 */
+	private void addCastlingOption(int castlingFlag)
 	{
-		castle[0] |= castlingFlag; 
+		castle[numberOfMovesMade] |= castlingFlag; 
 	}
-	
+
+	/**
+	 * Overwrites the castling flags with the given flags
+	 * 
+	 * @param castlingFlags
+	 */
 	private void overwriteCastlingFlags(int castlingFlags)
 	{
-		castle[0] = castlingFlags;
+		castle[numberOfMovesMade] = castlingFlags;
 	}
-	
+
 	/**
 	 * Get the castling FEN field at the current state (ie, at current depth)
 	 */
-	private String getCastle()
+	private String getCastleFEN()
 	{
 		StringBuilder castleFen = new StringBuilder();
-		int castleBitmap = castle[depth];
+		int castleBitmap = castle[numberOfMovesMade];
 		if(bool(castleBitmap & W_SHORT_CASTLE))
 		{
 			castleFen.append("K");
@@ -260,40 +273,40 @@ public class GameState {
 			return castleFen.toString();
 	}
 
-	public boolean hasShortCastleOption(boolean isWhitesMove, int depth)
+	public boolean hasShortCastleOption(boolean isWhitesMove)
 	{
 		if(isWhitesMove) 
-			return bool(castle[depth] & W_SHORT_CASTLE);
+			return bool(castle[numberOfMovesMade] & W_SHORT_CASTLE);
 		else
-			return bool(castle[depth] & B_SHORT_CASTLE);
+			return bool(castle[numberOfMovesMade] & B_SHORT_CASTLE);
 	}
 
-	public boolean hasLongCastleOption(boolean isWhitesMove, int depth)
+	public boolean hasLongCastleOption(boolean isWhitesMove)
 	{
 		if(isWhitesMove) 
-			return bool(castle[depth] & W_LONG_CASTLE);
+			return bool(castle[numberOfMovesMade] & W_LONG_CASTLE);
 		else
-			return bool(castle[depth] & B_LONG_CASTLE);
+			return bool(castle[numberOfMovesMade] & B_LONG_CASTLE);
 	}
 
-	void setEnPassant(final String s)
+	private void parseEnPassantFEN(final String s)
 	{
 	    if (UNSET_FLAG.equals(s)){
-	        enPassantSq[0] = NOSQUARE;
+	        enPassantSq[numberOfMovesMade] = NOSQUARE;
 	        return;
 	    }
 	    int sq = StrToSq(s);
 	    if(whiteToMove && Util.notOnSixthRank(sq))
 	    {
-	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
+	        throw new IllegalArgumentException("Given '"+getSideFEN()+"' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 6th rank");	    	
 	    }
 	    if(!whiteToMove && Util.notOnThirdRank(sq))
 	    {
-	        throw new IllegalArgumentException("Given '"+getSide()+"' to move, the "
+	        throw new IllegalArgumentException("Given '"+getSideFEN()+"' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 3rd rank");
 	    }
-        enPassantSq[0] = (byte) sq;
+        enPassantSq[numberOfMovesMade] = (byte) sq;
 	}
 
 	/**
@@ -301,27 +314,31 @@ public class GameState {
 	 * The returned value should be on the 3rd or 6th rank (the only valid values)
 	 * @return square where capture via en passant can occur
 	 */
-	String getEnPassant()
+	private String getEnPassantFEN()
 	{
-		byte epSquare = enPassantSq[depth];
-		if(epSquare == NOSQUARE)
-			return UNSET_FLAG;
-		return SqToStr(epSquare);
+		if(hasEnPassantOption())
+			return SqToStr(getEnPassantSquare());
+		return UNSET_FLAG;
 	}
 	
-	public int getEnPassantSquare(int depth)
+	public boolean hasEnPassantOption()
 	{
-		return enPassantSq[depth];
+		return getEnPassantSquare() != NOSQUARE;
 	}
 
-	void setHalfMoveClock(final String s)
+	public int getEnPassantSquare()
+	{
+		return enPassantSq[numberOfMovesMade];
+	}
+
+	private void parseHalfMoveNumber(final String s)
 	{
 	    byte n = Byte.parseByte(s);
 	    if (n < 0){
 	    	throw new IllegalArgumentException("Half move clock '"+s+"' "
 	    			+ "must be zero or greater");
 	    }
-	    halfMoveClock[depth] = n;
+	    halfMoveClock[numberOfMovesMade] = n;
 	}
 
 	/**
@@ -329,29 +346,34 @@ public class GameState {
 	 * move (any capture or pawn move) at the current depth.
 	 * @return the halfMoveClock
 	 */
-	private byte getHalfMoveClock() {
-		return halfMoveClock[depth];
+	public byte getHalfMoveNumber() {
+		return halfMoveClock[numberOfMovesMade];
 	}
 
-	void setFullMoveClock(final String s)
+	void parseMoveNumber(final String s)
 	{
 	    byte n = Byte.parseByte(s);
 	    if (n <= 0){
 	    	throw new IllegalArgumentException("Move number '"+s+"' must be greater than zero");
 	    }  
-	    fullMoveClock[0] = n;
+	    fullMoveClock[numberOfMovesMade] = n;
 	}
 
 	/**
 	 * Gets the current move number at the current depth
 	 * @return the fullMoveClock
 	 */
-	private byte getFullMoveClock() {
-		return fullMoveClock[depth];
+	public byte getMoveNumber() {
+		return fullMoveClock[numberOfMovesMade];
 	}
 
+	public int getNumberOfMovesMade()
+	{
+		return numberOfMovesMade;
+	}
+	
 	boolean movesLeft(){
-	  if (movesIndex < (numberOfLegalMovesToDepth[depth] + numberOfLegalMoves[depth]))
+	  if (movesIndex < (numberOfLegalMovesToDepth[numberOfMovesMade] + numberOfLegalMoves[numberOfMovesMade]))
 		return true;
 	  else 
 		return false;
@@ -412,7 +434,7 @@ public class GameState {
 	        	captured = NONE;
 	        } else if (moving == PAWN && twoSquaresBehind(to, isWhitesMove?0:1) == from) {
 	            //Pawn advances two squares
-	        	updateEnPassantSquare(from, isWhitesMove);
+	        	updateEnPassantSquareForNextMove(from, isWhitesMove);
 	        }
 	        duplicateCastlingFlags();
 	    }
@@ -440,12 +462,12 @@ public class GameState {
 	    	incrementFullMoveClock();
 
 	    whiteToMove = !isWhitesMove;
-	    depth++;
+	    numberOfMovesMade++;
 	    
 	    //Compute the number of moves that come before
 	    //this depth in the moves[] array
-	    for(int i = 0; i < depth; i++)
-	        numberOfLegalMovesToDepth[depth] += numberOfLegalMoves[i];
+	    for(int i = 0; i < numberOfMovesMade; i++)
+	        numberOfLegalMovesToDepth[numberOfMovesMade] += numberOfLegalMoves[i];
 	    movesIndex = 0;
 	    
 	    return false;
@@ -485,11 +507,11 @@ public class GameState {
 	    
 	    // Undo any moves made here at this depth
 	    // by setting legalMoves to zero.
-	    numberOfLegalMoves[depth] = 0;
-	    halfMoveClock[depth] = 0;
+	    numberOfLegalMoves[numberOfMovesMade] = 0;
+	    halfMoveClock[numberOfMovesMade] = 0;
 	    
 	    //Undo the depth
-	    depth--;
+	    numberOfMovesMade--;
 	    
 	    //Undo the moving piece
 	    pos.erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
@@ -552,23 +574,23 @@ public class GameState {
 	private void duplicateCastlingFlags() {
 		// Castle status remains constant since king and
 		// rook did not move
-		castle[depth + 1] = castle[depth];
+		castle[numberOfMovesMade + 1] = castle[numberOfMovesMade];
 	}
 
 	private void incrementFullMoveClock() {
-		fullMoveClock[depth + 1] = (byte)(fullMoveClock[depth] + 1);
+		fullMoveClock[numberOfMovesMade + 1] = (byte)(fullMoveClock[numberOfMovesMade] + 1);
 	}
 
 	private void duplicateFullMoveClock() {
-		fullMoveClock[depth + 1] = fullMoveClock[depth];
+		fullMoveClock[numberOfMovesMade + 1] = fullMoveClock[numberOfMovesMade];
 	}
 
 	private void incrementHalfMoveClock() {
-		halfMoveClock[depth + 1] = (byte)(halfMoveClock[depth] + 1);
+		halfMoveClock[numberOfMovesMade + 1] = (byte)(halfMoveClock[numberOfMovesMade] + 1);
 	}
 
 	private void resetHalfMoveClock() {
-		halfMoveClock[depth + 1] = 0;
+		halfMoveClock[numberOfMovesMade + 1] = 0;
 	}
 
 	private void moveRook(int rookFrom, int rookTo, boolean isWhitesMove) {
@@ -579,26 +601,29 @@ public class GameState {
 
 	private void updateCastlingFlagsWhenKingMoves(boolean isWhitesMove) {
 		if(isWhitesMove){
-			//white king moved; castling is no longer legal for him
-			castle[depth + 1] = castle[depth] & (B_SHORT_CASTLE | B_LONG_CASTLE);
+			removeCastlingOptionForNextMove(W_SHORT_CASTLE | W_LONG_CASTLE);
 		} else {
-			//black king moved; castling is no longer legal for him
-			castle[depth + 1] = castle[depth] & (W_SHORT_CASTLE | W_LONG_CASTLE);
+			removeCastlingOptionForNextMove(B_SHORT_CASTLE | B_LONG_CASTLE);
 		}
 	}
 
 	private void updateCastlingFlagsWhenRookMoves(int rookFromSquare, boolean isWhitesMove) {
 		if (isWhitesMove){
-			if (bool(castle[depth] & W_LONG_CASTLE) && rookFromSquare == A1)
-				castle[depth + 1] = castle[depth] & ~W_LONG_CASTLE;
-			else if (bool(castle[depth] & W_SHORT_CASTLE) && rookFromSquare == H1)
-				castle[depth + 1] = castle[depth] & ~W_SHORT_CASTLE;
+			if (hasLongCastleOption(isWhitesMove) && rookFromSquare == A1)
+				removeCastlingOptionForNextMove(W_LONG_CASTLE);
+			else if (hasShortCastleOption(isWhitesMove) && rookFromSquare == H1)
+				removeCastlingOptionForNextMove(W_SHORT_CASTLE);
 		} else {
-			if (bool(castle[depth] & B_LONG_CASTLE) && rookFromSquare == A8)
-				castle[depth + 1] = castle[depth] & ~B_LONG_CASTLE;
-			else if (bool(castle[depth] & B_SHORT_CASTLE) && rookFromSquare == H8)
-				castle[depth + 1] = castle[depth] & ~B_SHORT_CASTLE;
+			if (hasLongCastleOption(isWhitesMove) && rookFromSquare == A8)
+				removeCastlingOptionForNextMove(B_LONG_CASTLE);
+			else if (hasShortCastleOption(isWhitesMove) && rookFromSquare == H8)
+				removeCastlingOptionForNextMove(B_SHORT_CASTLE);
 		}
+	}
+
+	private void removeCastlingOptionForNextMove(int castlingFlag)
+	{
+		castle[numberOfMovesMade + 1] = castle[numberOfMovesMade] & ~castlingFlag;
 	}
 
 	private boolean isBlackLongCastle(int from, int to) {
@@ -617,12 +642,12 @@ public class GameState {
 		return from == E1 && to == G1;
 	}
 
-	private void updateEnPassantSquare(int from, boolean isWhitesMove) {
-		enPassantSq[depth + 1] = (byte)squareAhead(from, isWhitesMove?0:1);
+	private void updateEnPassantSquareForNextMove(int from, boolean isWhitesMove) {
+		enPassantSq[numberOfMovesMade + 1] = (byte)squareAhead(from, isWhitesMove?0:1);
 	}
 
 	private boolean isEnPassantCapture(int moving, int to, int captured) {
-		return moving == PAWN && captured == PAWN && to == enPassantSq[depth];
+		return moving == PAWN && captured == PAWN && to == getEnPassantSquare();
 	}
 
 	void display(){

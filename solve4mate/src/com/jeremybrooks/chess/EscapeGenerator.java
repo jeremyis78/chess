@@ -63,8 +63,8 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        capturers = attackers (g, Util.opposing(side), checker);
 
 	        //Add to 'capturers' pawns that would capture enpassant
-	        int enPassantSquare = g.getEnPassantSquare(depth);
-			if(TO_PIECE[cap] == PAWN && enPassantSquare != NOSQUARE){
+	        int enPassantSquare = g.getEnPassantSquare();
+			if(TO_PIECE[cap] == PAWN && g.hasEnPassantOption()){
 	            attackers = position.getPieces(side, PAWN);
 	            if (Util.bool((attackers & enPassantRank) & att.mask[checker-1]))
 	            {
@@ -92,8 +92,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	                        //g.legalMoves[depth]++;
 	                    }
 	                }
-	            } else if (TO_PIECE[mover] == PAWN &&
-	                       enPassantSquare != NOSQUARE){
+	            } else if (TO_PIECE[mover] == PAWN && g.hasEnPassantOption()){
 	                attackers = att.pawn[side][from];
 	                if (Util.bool(attackers & (1L << enPassantSquare))){
 	                    // Pawn captures en Passant

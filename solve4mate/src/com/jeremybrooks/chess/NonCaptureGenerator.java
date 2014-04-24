@@ -156,18 +156,18 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    //***************************************************************************
 	    switch (side) {
 	    case Bitmap.WHITE:
-	        if(canWhiteShortCastle(g, side, depth)){
+	        if(canWhiteShortCastle(g, side)){
 	            moves[n++] = EncodeMove(E1,G1,PIECE[KING],0,0);
 	        }
-	        if(canWhiteLongCastle(g, side, depth)){
+	        if(canWhiteLongCastle(g, side)){
 	            moves[n++] = EncodeMove(E1,C1,PIECE[KING],0,0);
 	        }
 	        break;
 	    case Bitmap.BLACK:
-	        if(canBlackShortCastle(g, side, depth)){
+	        if(canBlackShortCastle(g, side)){
 	            moves[n++] = EncodeMove(E8,G8,PIECE[KING],0,0);
 	        }
-	        if(canBlackLongCastle(g, side, depth)){
+	        if(canBlackLongCastle(g, side)){
 	            moves[n++] = EncodeMove(E8,C8,PIECE[KING],0,0);
 	        }
 	        break;

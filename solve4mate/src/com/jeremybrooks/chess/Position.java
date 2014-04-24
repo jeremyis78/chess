@@ -7,7 +7,9 @@ import java.io.PrintStream;
 /**                                                                 
  *  A position represents the physical locations of all pieces on
  *  the chessboard.
- * 
+ *
+ *  TODO: Pieces!!!!! (that's the best name for this class which would
+ *  be used within a Board (formerly GameState) class
  * @author jeremy
  *
  */
