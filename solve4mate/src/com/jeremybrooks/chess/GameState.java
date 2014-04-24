@@ -32,9 +32,8 @@ public class GameState {
 	public static final String FEN_START = new String(
 	    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
-	public static final int MAX_DEPTH = 150;
+	public static final int MAX_NUM_MOVES_MADE = 150; //N2: far better than 'max depth' in this context
 	private static final int NO_CASTLING_ALLOWED = 0;
-	private static final int INITIAL_DEPTH = 0;
 
 	final byte CASTLE_START = 
 		W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
@@ -50,25 +49,26 @@ public class GameState {
      *     2. 			Nc3			3					1
      *     2. 			... Nf6		4					2
      */
-    private int numberOfMovesMade = INITIAL_DEPTH; // N2 !! choose names at appropriate abstraction level
+    private int numberOfMovesMade = 0; // N2 !! choose names at appropriate abstraction level
+    private int maxNumberOfMovesMade;
     private boolean whiteToMove = true;
-    private int castle[] = new int[MAX_DEPTH + 1];
-    private byte enPassantSq[] = new byte[MAX_DEPTH + 1];
-    private byte halfMoveClock[] = new byte[MAX_DEPTH + 1];
-    private byte fullMoveClock[] = new byte[MAX_DEPTH]; //dont' think this needs to be an array
-    long attacked[] = new long[MAX_DEPTH];
+    private int castle[];
+    private byte enPassantSq[];
+    private byte halfMoveClock[];
+    private byte fullMoveClock[];
+    long attacked[];
     
     /*
      * TODO: The following member vars are not related to the state of the game (board or flags)
      * So they should be refactored into Search or a search context object
      */
-    int currentLine[] = new int[MAX_DEPTH]; //line we are searching
-    int bestLine[] = new int[MAX_DEPTH];    //the best line of play
+    int currentLine[]; //line we are searching
+    int bestLine[]; //the best line of play
     int numberOfLinesToMate;    //# of lines of play that lead to mate
-    int numberOfLegalMoves[] = new int[MAX_DEPTH];  //no. of moves at this depth
-    int numberOfLegalMovesToDepth[] = new int[MAX_DEPTH]; //no of moves UP to current depth
-    int moves[] = new int[100];             //legal moves from this state
-    int movesValue[] = new int[100];        //minimax value of the moves from this state 
+    int numberOfLegalMoves[];  //no. of moves at this depth
+    int numberOfLegalMovesToDepth[]; //no of moves UP to current depth
+    int moves[];             //legal moves from this state
+    int movesValue[];        //minimax value of the moves from this state 
     int nodes = 0;                  //nodes searched
     int best = 0;                   //best value seen in search
     int movesIndex; 
@@ -80,23 +80,43 @@ public class GameState {
     // whose key is the current position of the board.
     //
     
-	public GameState()
+	public GameState(int maxNumberOfMovesToSupport)
 	{
 		pos = new Position();
+		maxNumberOfMovesMade = maxNumberOfMovesToSupport;
+		int maxMoves = maxNumberOfMovesToSupport + 1;
+		castle = new int[maxMoves];
+		enPassantSq = new byte[maxMoves];
+		halfMoveClock = new byte[maxMoves];
+		fullMoveClock = new byte[maxMoves];
+
+		attacked = new long[maxMoves];
+	    currentLine = new int[maxMoves];
+	    bestLine = new int[maxMoves];
+	    numberOfLegalMoves = new int[maxMoves];
+	    numberOfLegalMovesToDepth = new int[maxMoves];
+	    moves = new int[100];
+	    movesValue = new int[100]; 
+	    nodes = 0;
+	    best = 0;
+
 	    //TODO: fix this so it gets all the array indices 
 	    //filled (MAXDEPTH +1) see definitions.h for gamestate
 	    numberOfLinesToMate = 0;
-	    for (int i = 0; i < MAX_DEPTH; i++){
-	        castle[i] = 0;
-	        enPassantSq[i] = NOSQUARE;	//No En Passant Target Square at start
-	        halfMoveClock[i] = 0;
-	        attacked[i] = 0;		
-	        numberOfLegalMoves[i] = 0;
-	        numberOfLegalMovesToDepth[i] = 0;
-	        currentLine[i] = 0;
-	        bestLine[i] = 0;
+	    for (int moveNumber = 0;
+	    		moveNumber < maxMoves;
+	    		moveNumber++){
+	        castle[moveNumber] = 0;
+	        enPassantSq[moveNumber] = NOSQUARE;
+	        halfMoveClock[moveNumber] = 0;
+	        fullMoveClock[moveNumber] = 0;
+	        attacked[moveNumber] = 0;		
+	        numberOfLegalMoves[moveNumber] = 0;
+	        numberOfLegalMovesToDepth[moveNumber] = 0;
+	        currentLine[moveNumber] = 0;
+	        bestLine[moveNumber] = 0;
 	    }             
-	    castle[INITIAL_DEPTH] = CASTLE_START;
+	    castle[numberOfMovesMade] = CASTLE_START;
 	    movesIndex = 0;
 	    fullMoveClock[0] = 1;
 	    whiteToMove = true;
@@ -273,17 +293,17 @@ public class GameState {
 			return castleFen.toString();
 	}
 
-	public boolean hasShortCastleOption(boolean isWhitesMove)
+	public boolean hasShortCastleOption()
 	{
-		if(isWhitesMove) 
+		if(whiteToMove) 
 			return bool(castle[numberOfMovesMade] & W_SHORT_CASTLE);
 		else
 			return bool(castle[numberOfMovesMade] & B_SHORT_CASTLE);
 	}
 
-	public boolean hasLongCastleOption(boolean isWhitesMove)
+	public boolean hasLongCastleOption()
 	{
-		if(isWhitesMove) 
+		if(whiteToMove) 
 			return bool(castle[numberOfMovesMade] & W_LONG_CASTLE);
 		else
 			return bool(castle[numberOfMovesMade] & B_LONG_CASTLE);
@@ -397,44 +417,42 @@ public class GameState {
 	 * @return
 	 */
 	public boolean makeMove(int move, boolean isWhitesMove){
-	    int from, to;           //squares involved
-	    int moving, captured, promotion;  //pieces involved
-
-	    from = move & 0x3F;                         //first 6 bits
-	    to = (move >> 6) & 0x3F;                    //next 6
-	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
-	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
-	    promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
-
-	    // If it's a king moving, check for castling
-	    // If it's a rook moving, remove castling for that side if still available
-	    // If it's a pawn capture check for en passant capture 
-	    // or advancing two squares
-
+		if(numberOfMovesMade == maxNumberOfMovesMade)
+		{
+			throw new IllegalStateException("max number of moves have been made: " + maxNumberOfMovesMade);
+		}
+		if(isWhitesMove != whiteToMove)
+		{
+			throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
+		}
+		whiteToMove = isWhitesMove;						//cache whose move it is
+	    int from = move & 0x3F;                         //first 6 bits
+	    int to = (move >> 6) & 0x3F;                    //next 6
+	    int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
+	    int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
+	    int promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
 	    if (moving == KING){
-		    updateCastlingFlagsWhenKingMoves(isWhitesMove);
-		    int rookFrom = correspondingRookIfKingCastled(from, to, isWhitesMove);
+		    updateCastlingOptionsWhenKingMoves();
+		    int rookFrom = correspondingRookIfKingCastled(from, to);
 			if(rookFrom != NOSQUARE)
 			{
 				if(isOnGFile(to)){
-					moveRook(rookFrom, squareLeftOf(to), isWhitesMove);
+					moveRook(rookFrom, squareLeftOf(to));
 				} else if (isOnCFile(to)) {
-					moveRook(rookFrom, squareRightOf(to), isWhitesMove);
+					moveRook(rookFrom, squareRightOf(to));
 				}
 			}
 	    }
 	    else if (moving == ROOK)
 	    {
-	        updateCastlingFlagsWhenRookMoves(from, isWhitesMove);             
+	        updateCastlingOptionsWhenRookMoves(from);             
 	    } else {
-	        //EnPassant
 	        if( isEnPassantCapture(moving, to, captured))
 	        {
 	        	pos.erasePiece(squareBehind(to, isWhitesMove?0:1));
 	        	captured = NONE;
-	        } else if (moving == PAWN && twoSquaresBehind(to, isWhitesMove?0:1) == from) {
-	            //Pawn advances two squares
-	        	updateEnPassantSquareForNextMove(from, isWhitesMove);
+	        } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
+	        	updateEnPassantSquareForNextMove(from);
 	        }
 	        duplicateCastlingFlags();
 	    }
@@ -445,9 +463,9 @@ public class GameState {
 	    }
 	    pos.erasePiece(from);
 	    if(promotion != NONE) {
-	    	placePiece(promotion, to, isWhitesMove);
+	    	placePiece(promotion, to);
 	    } else {
-	    	placePiece(moving, to, isWhitesMove);
+	    	placePiece(moving, to);
 	    }
 
 	    if (isIrreversibleMove(moving, captured)){
@@ -469,8 +487,11 @@ public class GameState {
 	    for(int i = 0; i < numberOfMovesMade; i++)
 	        numberOfLegalMovesToDepth[numberOfMovesMade] += numberOfLegalMoves[i];
 	    movesIndex = 0;
-	    
 	    return false;
+	}
+
+	private boolean isPawnAdvancingTwoSquares(int moving, int from, int to) {
+		return moving == PAWN && from == twoSquaresBehind(to, whiteToMove?0:1);
 	}
 
 	private boolean isIrreversibleMove(int moving, int captured) {
@@ -497,13 +518,15 @@ public class GameState {
 	 * @return
 	 */
 	public boolean undoMove(int move, boolean isWhitesMove){
-	    int from, to;           //squares involved
-	    int moving, captured;
-
-	    from = move & 0x3F;                         //first 6 bits
-	    to = (move >> 6) & 0x3F;                    //next 6
-	    moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
-	    captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
+		if(numberOfMovesMade == 0)
+		{
+			throw new IllegalStateException("no moves to undo; call makeMove() first");
+		}
+		whiteToMove = isWhitesMove;
+	    int from = move & 0x3F;                         //first 6 bits
+	    int to = (move >> 6) & 0x3F;                    //next 6
+	    int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
+	    int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
 	    
 	    // Undo any moves made here at this depth
 	    // by setting legalMoves to zero.
@@ -515,58 +538,56 @@ public class GameState {
 	    
 	    //Undo the moving piece
 	    pos.erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
-	    placePiece(moving, from, isWhitesMove);
+	    placePiece(moving, from);
 
 	    //Undo a castling move (that is, undo the rook move)
 	    if (moving == KING){
-		    int rookFrom = correspondingRookIfKingCastled(from, to, isWhitesMove);
+		    int rookFrom = correspondingRookIfKingCastled(from, to);
 			if(rookFrom != NOSQUARE)
 			{
 				if(isOnGFile(to)){
-					moveRook(squareLeftOf(to), rookFrom, isWhitesMove);
+					moveRook(squareLeftOf(to), rookFrom);
 				} else if (isOnCFile(to)) {
-					moveRook(squareRightOf(to), rookFrom, isWhitesMove);
+					moveRook(squareRightOf(to), rookFrom);
 				}
 			}
 	    } 
 	    //NOTE: Castling flags are stored on the castle stack (array) so simply
-	    //undoing the depth (i.e. depth--) undoes any castling flag changes.
+	    //decrementing the numberOfMovesMade undoes any castling flag changes.
 	    
 	    //Place captured piece back on the board
-	    if(captured != NONE){
-	        if(isEnPassantCapture(moving, to, captured))
-	        {
-	        	placeOpposingPiece(PAWN, squareBehind(to, isWhitesMove?0:1), isWhitesMove);
-	        } else { //Normal capture
-	        	placeOpposingPiece(captured, to, isWhitesMove);
-	        }
+	    if(isEnPassantCapture(moving, to, captured))
+	    {
+	    	placeOpposingPiece(PAWN, squareBehind(to, whiteToMove?0:1));
+	    } else if (captured != NONE) { //Normal capture
+	    	placeOpposingPiece(captured, to);
 	    }
-	    whiteToMove = isWhitesMove; //we're undoing the move for side so it will still be side's turn to move
 	    return false;
 	}
 
-	private void placePiece(int piece, int to, boolean isWhitesMove)
+	private void placePiece(int piece, int to)
 	{
-		int side = (isWhitesMove ? 0 : 1);
+		int side = (whiteToMove?0:1);
     	pos.placePiece(side, piece, to);
 	}
 
-	private void placeOpposingPiece(int piece, int to, boolean isWhitesMove)
+	private void placeOpposingPiece(int piece, int to)
 	{
-		int side = (isWhitesMove ? 0 : 1);
+		int side = (whiteToMove?0:1);
     	pos.placePiece(opposing(side), piece, to);
 	}
 	
-	private int correspondingRookIfKingCastled(int from, int to, boolean isWhitesMove) {
+	private int correspondingRookIfKingCastled(int from, int to) {
 		int rookSquare = NOSQUARE;
-		if (isWhitesMove && isWhiteShortCastle(from, to)){
-			rookSquare = H1;
-		} else if (isWhitesMove && isWhiteLongCastle(from, to)){
-			rookSquare =  A1;
-		} else if (!isWhitesMove && isBlackShortCastle(from, to)){
-			rookSquare =  H8;
-		} else if (!isWhitesMove && isBlackLongCastle(from, to)){
-			rookSquare =  A8;
+		if (whiteToMove)
+		{
+			if(isWhiteShortCastle(from, to)) rookSquare = H1;
+			else
+			if (isWhiteLongCastle(from, to)) rookSquare =  A1;
+		} else {
+			if(isBlackShortCastle(from, to)) rookSquare =  H8;
+			else
+			if (isBlackLongCastle(from, to)) rookSquare =  A8;
 		}
 		return rookSquare;
 	}
@@ -593,37 +614,37 @@ public class GameState {
 		halfMoveClock[numberOfMovesMade + 1] = 0;
 	}
 
-	private void moveRook(int rookFrom, int rookTo, boolean isWhitesMove) {
-		int side = (isWhitesMove ? 0 : 1);
+	private void moveRook(int rookFrom, int rookTo) {
+		int side = (whiteToMove?0:1);
 		pos.erasePiece(rookFrom);
 		pos.placePiece(side, ROOK, rookTo);
 	}
 
-	private void updateCastlingFlagsWhenKingMoves(boolean isWhitesMove) {
-		if(isWhitesMove){
+	private void updateCastlingOptionsWhenKingMoves() {
+		if(whiteToMove){
 			removeCastlingOptionForNextMove(W_SHORT_CASTLE | W_LONG_CASTLE);
 		} else {
 			removeCastlingOptionForNextMove(B_SHORT_CASTLE | B_LONG_CASTLE);
 		}
 	}
 
-	private void updateCastlingFlagsWhenRookMoves(int rookFromSquare, boolean isWhitesMove) {
-		if (isWhitesMove){
-			if (hasLongCastleOption(isWhitesMove) && rookFromSquare == A1)
-				removeCastlingOptionForNextMove(W_LONG_CASTLE);
-			else if (hasShortCastleOption(isWhitesMove) && rookFromSquare == H1)
+	private void updateCastlingOptionsWhenRookMoves(int rookFromSquare) {
+		if (whiteToMove){
+			if (hasShortCastleOption() && rookFromSquare == H1)
 				removeCastlingOptionForNextMove(W_SHORT_CASTLE);
+			else if (hasLongCastleOption() && rookFromSquare == A1)
+				removeCastlingOptionForNextMove(W_LONG_CASTLE);
 		} else {
-			if (hasLongCastleOption(isWhitesMove) && rookFromSquare == A8)
-				removeCastlingOptionForNextMove(B_LONG_CASTLE);
-			else if (hasShortCastleOption(isWhitesMove) && rookFromSquare == H8)
+			if (hasShortCastleOption() && rookFromSquare == H8)
 				removeCastlingOptionForNextMove(B_SHORT_CASTLE);
+			else if (hasLongCastleOption() && rookFromSquare == A8)
+				removeCastlingOptionForNextMove(B_LONG_CASTLE);
 		}
 	}
 
-	private void removeCastlingOptionForNextMove(int castlingFlag)
+	private void removeCastlingOptionForNextMove(int castlingOption)
 	{
-		castle[numberOfMovesMade + 1] = castle[numberOfMovesMade] & ~castlingFlag;
+		castle[numberOfMovesMade + 1] = castle[numberOfMovesMade] & ~castlingOption;
 	}
 
 	private boolean isBlackLongCastle(int from, int to) {
@@ -642,8 +663,8 @@ public class GameState {
 		return from == E1 && to == G1;
 	}
 
-	private void updateEnPassantSquareForNextMove(int from, boolean isWhitesMove) {
-		enPassantSq[numberOfMovesMade + 1] = (byte)squareAhead(from, isWhitesMove?0:1);
+	private void updateEnPassantSquareForNextMove(int from) {
+		enPassantSq[numberOfMovesMade + 1] = (byte)squareAhead(from, whiteToMove?0:1);
 	}
 
 	private boolean isEnPassantCapture(int moving, int to, int captured) {

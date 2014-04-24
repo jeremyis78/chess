@@ -15,7 +15,7 @@ public class GameStateTest {
 	@Before
 	public void setup()
 	{
-		gameState = new GameState();
+		gameState = new GameState(GameState.MAX_NUM_MOVES_MADE);
 	}
 	
 	@Test
@@ -24,6 +24,55 @@ public class GameStateTest {
 		String expectedState = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
 		String actualState = gameState.get();
 		assertEquals(expectedState, actualState);
+	}
+	
+	@Test
+	public void testConstructionWithTwoMoveLimit()
+	{
+		int maxNumberOfMovesToSupport = 2;
+		gameState = new GameState(maxNumberOfMovesToSupport);
+		String beforeMove = "8/4P3/8/8/8/8/4P3/k6K w - - 5 30";
+		int firstMove = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
+		String afterFirstMove = "4Q3/8/8/8/8/8/4P3/k6K b - - 0 30";
+		boolean isWhitesMove = setupState(beforeMove);
+		assertEquals(afterFirstMove, makeMove(isWhitesMove, firstMove));
+		assertEquals(1, gameState.getNumberOfMovesMade());
+		
+		int secondMove  = encodeMove(A1, A2, PIECE[KING]);
+		String afterSecondMove = "4Q3/8/8/8/8/8/k3P3/7K w - - 1 31";
+		assertEquals(afterSecondMove , makeMove(!isWhitesMove, secondMove));
+		assertEquals(maxNumberOfMovesToSupport, gameState.getNumberOfMovesMade());
+		assertEquals(afterFirstMove, undoMove(!isWhitesMove, secondMove));
+		assertEquals(1, gameState.getNumberOfMovesMade());
+		assertEquals(afterSecondMove , makeMove(!isWhitesMove, secondMove));
+		
+		int thirdMove  = encodeMove(E2, E3, PIECE[PAWN]);
+		try {
+			makeMove(isWhitesMove, thirdMove);
+		} catch (IllegalStateException e) {
+			assertEquals("max number of moves have been made: 2", e.getMessage());
+		}
+		undoMove(isWhitesMove, secondMove);
+		undoMove(!isWhitesMove, firstMove);
+		assertEquals(0, gameState.getNumberOfMovesMade());
+		try {
+			undoMove(isWhitesMove, thirdMove);
+		} catch (IllegalStateException e) {
+			assertEquals("no moves to undo; call makeMove() first", e.getMessage());
+		}
+		assertEquals(0, gameState.getNumberOfMovesMade());
+	}
+
+	@Test
+	public void testUndoMoveWithNoMovesToUndo()
+	{
+		int move  = encodeMove(E2, E3, PIECE[PAWN]);
+		boolean isWhitesMove = setupState("8/4P3/8/8/8/8/4P3/k6K w - - 5 30");
+		try {
+			undoMove(isWhitesMove, move);
+		} catch (IllegalStateException e) {
+			assertEquals("no moves to undo; call makeMove() first", e.getMessage());
+		}
 	}
 
 	@Test

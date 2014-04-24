@@ -19,7 +19,7 @@ public class MoveGeneratorTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		g = new GameState();
+		g = new GameState(GameState.MAX_NUM_MOVES_MADE);
 	}
 
 	@Test

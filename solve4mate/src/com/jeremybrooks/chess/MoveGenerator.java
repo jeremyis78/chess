@@ -541,7 +541,7 @@ public class MoveGenerator {
 
 	protected boolean canWhiteShortCastle(GameState g, int side){
 	    Position position = g.getPosition();
-		if (g.hasShortCastleOption(side==WHITE?true:false)
+		if (g.hasShortCastleOption()
 	    	&& position.isEmpty(F1)
 	        && position.isEmpty(G1) 
 	        && !isAttacked (g, side, E1)
@@ -555,7 +555,7 @@ public class MoveGenerator {
 
 	protected boolean canWhiteLongCastle(GameState g, int side){
 	    Position position = g.getPosition();
-		if (g.hasLongCastleOption(side==WHITE?true:false) &&
+		if (g.hasLongCastleOption() &&
 	        position.isEmpty(D1)
 	        && position.isEmpty(C1)
 	        && position.isEmpty(B1) 
@@ -571,7 +571,7 @@ public class MoveGenerator {
 
 	protected boolean canBlackShortCastle(GameState g, int side){
 	    Position position = g.getPosition();
-		if (g.hasShortCastleOption(side==WHITE?true:false)
+		if (g.hasShortCastleOption()
 	        && position.isEmpty(F8)
 	        && position.isEmpty(G8) 
 	        && !isAttacked (g, side, E8)
@@ -585,7 +585,7 @@ public class MoveGenerator {
 
 	protected boolean canBlackLongCastle(GameState g, int side){
 	    Position position = g.getPosition();
-		if (g.hasShortCastleOption(side==WHITE?true:false)
+		if (g.hasShortCastleOption()
 	        && position.isEmpty(D8)
 	        && position.isEmpty(C8)
 	        && position.isEmpty(B8) 

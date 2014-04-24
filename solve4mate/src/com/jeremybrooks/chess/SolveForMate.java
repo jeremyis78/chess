@@ -30,7 +30,7 @@ public class SolveForMate {
 
 
 	public static void main(String[] args) throws IOException{
-	    GameState g = new GameState();
+	    GameState g = new GameState(GameState.MAX_NUM_MOVES_MADE);
 	    if (args.length < 1){
 	    	err.println("Give me a file name (e.g. problems.fen) that " +
 	    			    "has some problems to solve for mate\n");
@@ -42,7 +42,7 @@ public class SolveForMate {
 	    	while (br.ready()){
 	    		String line = br.readLine();
 	    		if (line.trim().charAt(0) == '#') continue;
-	    		g = new GameState();
+	    		g = new GameState(getDepthToMate(mateInN));
 	    		g.set(line);
 	    		
 	    		//

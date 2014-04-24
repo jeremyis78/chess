@@ -8,7 +8,7 @@ public class EvaluatorTest {
 
 	@Test
 	public void testStartPositionEvaluationHasNoAdvantageForEitherSide() {
-		GameState g = new GameState();
+		GameState g = new GameState(GameState.MAX_NUM_MOVES_MADE);
 		Evaluator evaluator = new Evaluator();
 		MoveGenerator moveGenerator = new MoveGenerator();
 		evaluator.setMoveGenerator(moveGenerator);
