@@ -241,6 +241,16 @@ public class PositionTest extends TestCase {
 		p.setPieces(Bitmap.WHITE, PAWN, bitmap);
 	}
 	
+	public void testGettingAnInvalidAllPiecesBitboard()
+	{
+		Position p = new Position();
+		try {
+			p.getAllPieces(37);
+		} catch (IllegalArgumentException expected) {
+			assertEquals("invalid rotation 37; rotation must be -45, 0, 45 or 90", expected.getMessage());
+		}
+	}
+	
 	public void testNewStartingPosition()
 	{
 		Position p = createStartingPosition();

@@ -146,7 +146,7 @@ public class Position
     	case 90:
     		return all[ALL90];
     	default:
-    		throw new IllegalArgumentException("rotation can only be -45, 0, 45 and 90. '"+rotationInDegrees+"' was passed in");
+    		throw new IllegalArgumentException("invalid rotation "+rotationInDegrees+"; rotation must be -45, 0, 45 or 90");
     	}
     }
 
@@ -315,10 +315,7 @@ public class Position
 	 * @return
 	 */
 	private char toChar(int i) {
-		if (i < 0 || i > 9)
-		{
-			throw new IllegalArgumentException("i should be in range [0..9], found " + i);
-		}
+//		assume i is in range 1 to 9 inclusive
 		return new Integer(i).toString().charAt(0);
 	}
 	
