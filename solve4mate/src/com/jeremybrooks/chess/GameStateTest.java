@@ -51,8 +51,8 @@ public class GameStateTest {
 		} catch (IllegalStateException e) {
 			assertEquals("max number of moves have been made: 2", e.getMessage());
 		}
-		undoMove(isWhitesMove, secondMove);
-		undoMove(!isWhitesMove, firstMove);
+		undoMove(!isWhitesMove, secondMove);
+		undoMove(isWhitesMove, firstMove);
 		assertEquals(0, gameState.getNumberOfMovesMade());
 		try {
 			undoMove(isWhitesMove, thirdMove);

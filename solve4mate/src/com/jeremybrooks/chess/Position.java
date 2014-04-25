@@ -330,10 +330,17 @@ public class Position
 	 * @param sq the square to place the piece on
 	 */
 	public void placePiece(int c, int p, int sq){
-		//TODO: test this for placing multiple kings
-		//Doesn't look like the "all" bitboards will erase the previous king
-		//so you will keep filling up the bit boards with bits but the king
-		//square will be "last one wins"
+		if(p == KING && kingSq[c] != KING_NOT_PLACED)
+		{
+			throw new IllegalStateException("cannot place " + (c==WHITE?"white":"black") +
+					" king on "+ Util.SqToStr(sq)+"; already placed on " +
+					Util.SqToStr(kingSq[c])+ "; use erasePiece()");
+		}
+		if(isNotEmpty(sq))
+		{
+			throw new IllegalStateException(Util.SqToStr(sq)+ " is already occupied");
+		}
+//		System.out.println("placing "+(c==WHITE?"white":"black")+" "+p+" on " +Util.SqToStr(sq));
 	    long mask = 1L << sq;
 	    all[ALL] |= mask;
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];
@@ -366,6 +373,7 @@ public class Position
 		}
 		int color = (boardPiece > 0) ? WHITE : BLACK;
 		int piece = TO_PIECE[Math.abs(boardPiece)];
+//		System.out.println("erasing "+(color==WHITE?"white":"black")+" piece on " + Util.SqToStr(square));
 	    long mask = 1L << square;
 	    all[Bitmap.ALL] ^= mask;
 	    all[ALL90] ^= 1L << SQ2BIT90R[square];

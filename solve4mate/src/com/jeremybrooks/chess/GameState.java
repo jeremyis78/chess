@@ -440,6 +440,7 @@ public class GameState {
 		{
 			throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
 		}
+//		System.out.println("*** make "+(isWhitesMove?"white":"black")+" move "+Util.displayMoveStr(move, false, false));
 		whiteToMove = isWhitesMove;						//cache whose move it is
 	    int from = move & 0x3F;                         //first 6 bits
 	    int to = (move >> 6) & 0x3F;                    //next 6
@@ -537,6 +538,7 @@ public class GameState {
 		{
 			throw new IllegalStateException("no moves to undo; call makeMove() first");
 		}
+//		System.out.println("*** undo "+(isWhitesMove?"white":"black")+" move "+Util.displayMoveStr(move, false, false));
 		whiteToMove = isWhitesMove;
 	    int from = move & 0x3F;                         //first 6 bits
 	    int to = (move >> 6) & 0x3F;                    //next 6
