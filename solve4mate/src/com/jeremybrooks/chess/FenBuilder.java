@@ -1,19 +1,19 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.A1;
-import static com.jeremybrooks.chess.Bitmap.A8;
-import static com.jeremybrooks.chess.Bitmap.BOARD_PIECE;
-import static com.jeremybrooks.chess.Util.StrToSq;
+import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.bool;
 
 public class FenBuilder {
 
-	private static final char WHITE_SHORT_CASTLE_OPTION = 'K';
-	private static final char WHITE_LONG_CASTLE_OPTION = 'Q';
-	private static final char BLACK_SHORT_CASTLE_OPTION = 'k';
-	private static final char BLACK_LONG_CASTLE_OPTION = 'q';
-	private static final char FIELD_DELIMITER = ' ';
-	private static final char UNSET_FIELD = '-';
+	public static final String RANK_DELIMITER = "/";
+	public static final char WHITE_ON_MOVE = 'w';
+	public static final char BLACK_ON_MOVE = 'b';
+	public static final char WHITE_SHORT_CASTLE_OPTION = 'K';
+	public static final char WHITE_LONG_CASTLE_OPTION = 'Q';
+	public static final char BLACK_SHORT_CASTLE_OPTION = 'k';
+	public static final char BLACK_LONG_CASTLE_OPTION = 'q';
+	public static final char FIELD_DELIMITER = ' ';
+	public static final char UNSET = '-';
 	
 	private StringBuilder builder;
 	private String pieceBoard;
@@ -41,7 +41,7 @@ public class FenBuilder {
 	public String toString()
 	{
 		appendField(pieceBoard);
-		appendField(whiteToMove?"w":"b");
+		appendField(""+(whiteToMove?WHITE_ON_MOVE:BLACK_ON_MOVE));
 		appendField(castlingOptions);
 		appendField(Util.SqToStr(enPassantSquare));
 		appendField(""+halfMovesSinceCaptureOrPawnAdvance);
@@ -51,7 +51,7 @@ public class FenBuilder {
 	}
 
 	private void appendField(String field) {
-		if(field.isEmpty())	builder.append(UNSET_FIELD);
+		if(field.isEmpty())	builder.append(UNSET);
 		else builder.append(field);
 		builder.append(FIELD_DELIMITER);
 	}
@@ -67,7 +67,7 @@ public class FenBuilder {
 	    int contEmptySquares = 0;
 	    for (int i = A8; i >= A1; i-=8){
 	        if (i < A8){
-	            fen[fenIndex++] = '/'; //Rank separator only on first 7..not the last one
+	            fen[fenIndex++] = RANK_DELIMITER.charAt(0); //Rank separator only on first 7..not the last one
 	        }
 	        for (int j = i; j < i+8; j++){
 	            switch(position.getBoard(j)){
@@ -196,31 +196,46 @@ public class FenBuilder {
 		if(bool(castlingOptions & GameState.W_LONG_CASTLE)) options += WHITE_LONG_CASTLE_OPTION;
 		if(bool(castlingOptions & GameState.B_SHORT_CASTLE)) options += BLACK_SHORT_CASTLE_OPTION;
 		if(bool(castlingOptions & GameState.B_LONG_CASTLE)) options += BLACK_LONG_CASTLE_OPTION;
-		if(options.isEmpty()) options += UNSET_FIELD;
+		if(options.isEmpty()) options += UNSET;
 		this.castlingOptions = options;
 		return this;
 	}
 
 	public FenBuilder appendEnPassantSquare(int square)
 	{
-	    if(whiteToMove)
+		enPassantSquare = validEnPassantSquare(whiteToMove, square);
+		return this;
+	}
+
+	/**
+	 * Gets the validated en passant square by ensuring compatibility with who's
+	 * on move.
+	 * 
+	 * Will return {@code Bitmap.NOSQUARE} if either of the following are true:
+	 *     white's turn and the square is not on the sixth rank
+	 *     black's turn and the square is not on the third rank
+	 * @param isWhitesMove is white on the move
+	 * @param enPassantSquare the en passant square
+	 * @return
+	 */
+	public static int validEnPassantSquare(boolean isWhitesMove, int enPassantSquare)
+	{
+	    if(isWhitesMove)
 	    {
-	    	if(Util.notOnSixthRank(square))
+	    	if(Util.notOnSixthRank(enPassantSquare))
 	    	{
-//	    		throw new IllegalArgumentException("with 'w' to move, enPassant on '"+Util.SqToStr(square)+"' "
-//	    				+ "is invalid; change to a square on the 6th rank");
-	    		square = Bitmap.NOSQUARE;
+	    		// with 'w' to move, enPassant on a square other than the 6th rank is invalid
+	    		enPassantSquare = Bitmap.NOSQUARE;
 	    	}
 	    } else {
-	    	if(Util.notOnThirdRank(square))
+	    	if(Util.notOnThirdRank(enPassantSquare))
 	    	{
-//	    		throw new IllegalArgumentException("with 'b' to move, enPassant on '"+Util.SqToStr(square)+"' "
-//	    				+ "is invalid; change to a square on the 3rd rank");
-	    		square = Bitmap.NOSQUARE;
+	    		// with 'b' to move, enPassant on a square other than 3rd rank is invalid
+	    		enPassantSquare = Bitmap.NOSQUARE;
 	    	}
 	    }
-		enPassantSquare = square;
-		return this;
+		return enPassantSquare;
+
 	}
 	
 	public FenBuilder appendHalfMoveNumber(int halfMoveNumber)

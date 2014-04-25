@@ -1,15 +1,27 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class FenParserTest {
 
+	//use these to compare to what is returned from Position.getBoard(int)
+	private static final int WHITE_PAWN = PIECE[PAWN];
+	private static final int WHITE_KNIGHT = PIECE[KNIGHT];
+	private static final int WHITE_BISHOP = PIECE[BISHOP];
+	private static final int WHITE_ROOK = PIECE[ROOK];
+	private static final int WHITE_QUEEN = PIECE[QUEEN];
+	private static final int WHITE_KING = PIECE[KING];
+	private static final int BLACK_PAWN = -WHITE_PAWN;
+	private static final int BLACK_KNIGHT = -WHITE_KNIGHT;
+	private static final int BLACK_BISHOP = -WHITE_BISHOP;
+	private static final int BLACK_ROOK = -WHITE_ROOK;
+	private static final int BLACK_QUEEN = -WHITE_QUEEN;
+	private static final int BLACK_KING = -WHITE_KING;
+	
 	private FenParser parser;
 	
 	@Before
@@ -17,88 +29,217 @@ public class FenParserTest {
 	{
 		parser = new FenParser();
 	}
-	
-	@Test
-	public void testParseWhiteToMove() {
-		String fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 5 30";
-		parser.parse(fen);
-		assertEquals('r', parser.getBoardCharacter(Bitmap.A8));
-		assertEquals('n', parser.getBoardCharacter(Bitmap.B8));
-		assertEquals('b', parser.getBoardCharacter(Bitmap.C8));
-		assertEquals('q', parser.getBoardCharacter(Bitmap.D8));
-		assertEquals('k', parser.getBoardCharacter(Bitmap.E8));
-		assertEquals('b', parser.getBoardCharacter(Bitmap.F8));
-		assertEquals('n', parser.getBoardCharacter(Bitmap.G8));
-		assertEquals('r', parser.getBoardCharacter(Bitmap.H8));
-		for(int square = Bitmap.A7; square >= Bitmap.H7; square--)
-		{
-			assertEquals('p', parser.getBoardCharacter(square));
-		}
-		for(int square = Bitmap.A6; square >= Bitmap.H3; square--)
-		{
-			assertEquals(Bitmap.BOARD_EMPTY_SQUARE, parser.getBoardCharacter(square));
-		}
-		for(int square = Bitmap.A2; square >= Bitmap.H2; square--)
-		{
-			assertEquals('P', parser.getBoardCharacter(square));
-		}
-		assertEquals('R', parser.getBoardCharacter(Bitmap.A1));
-		assertEquals('N', parser.getBoardCharacter(Bitmap.B1));
-		assertEquals('B', parser.getBoardCharacter(Bitmap.C1));
-		assertEquals('Q', parser.getBoardCharacter(Bitmap.D1));
-		assertEquals('K', parser.getBoardCharacter(Bitmap.E1));
-		assertEquals('B', parser.getBoardCharacter(Bitmap.F1));
-		assertEquals('N', parser.getBoardCharacter(Bitmap.G1));
-		assertEquals('R', parser.getBoardCharacter(Bitmap.H1));
 
+	@Test
+	public void givenNothingToParse() {
+		String pieceBoard = "";
+		parser.init(pieceBoard);
+		try {
+			parser.parse();
+		} catch (IllegalStateException expected) {
+			assertEquals("need something to parse; call init(String) or use constructor before calling parse()",
+					expected.getMessage());
+		}
+	}
+
+	@Test
+	public void givenNothingToParseForStaticParse() {
+		String pieceBoard = "";
+		try {
+			FenParser.parsePieceBoard(pieceBoard);
+		} catch (IllegalStateException expected) {
+			assertEquals("need something to parse; call init(String) or use constructor before calling parse()",
+					expected.getMessage());
+		}
+	}
+
+	@Test
+	public void givenBadBoardToParse() {
+		String pieceBoard = "-";
+		parser.init(pieceBoard);
+		try {
+			parser.parse();
+		} catch (IllegalArgumentException expected) {
+			assertEquals("board must contain eight ranks",
+					expected.getMessage());
+		}
+	}
+
+	@Test
+	public void givenNineSquaresOnARank() {
+		String pieceBoard = "8/8/8/PPPPPPPPPPPP/8/8/8/8 w - - 0 1";
+		parser.init(pieceBoard);
+		try {
+			parser.parse();
+		} catch (IllegalArgumentException expected) {
+			assertEquals("board pieces and empty squares on rank #5 do not "
+					+ "fit on eight files: PPPPPPPPPPPP",
+					expected.getMessage());
+		}
+	}
+
+	@Test
+	public void givenAllSixFenFields() {
+		String pieceBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 20";
+		parser.init(pieceBoard);
+		parser.parse();
+		Position position = parser.getPosition();
+		assertNotNull(position);
+		assertEquals(BLACK_ROOK, position.getBoard(A8));
+		assertEquals(BLACK_KNIGHT, position.getBoard(B8));
+		assertEquals(BLACK_BISHOP, position.getBoard(C8));
+		assertEquals(BLACK_QUEEN, position.getBoard(D8));
+		assertEquals(BLACK_KING, position.getBoard(E8));
+		assertEquals(BLACK_BISHOP, position.getBoard(F8));
+		assertEquals(BLACK_KNIGHT, position.getBoard(G8));
+		assertEquals(BLACK_ROOK, position.getBoard(H8));
+		for(int square = A7; square >= H7; square--)
+		{
+			assertEquals(BLACK_PAWN, position.getBoard(square));
+		}
+		for(int square = A6; square >= H3; square--)
+		{
+			assertEquals(BOARD_EMPTY_SQUARE, position.getBoard(square));
+		}
+		for(int square = A2; square >= H2; square--)
+		{
+			assertEquals(WHITE_PAWN, position.getBoard(square));
+		}
+		assertEquals(WHITE_ROOK, position.getBoard(A1));
+		assertEquals(WHITE_KNIGHT, position.getBoard(B1));
+		assertEquals(WHITE_BISHOP, position.getBoard(C1));
+		assertEquals(WHITE_QUEEN, position.getBoard(D1));
+		assertEquals(WHITE_KING, position.getBoard(E1));
+		assertEquals(WHITE_BISHOP, position.getBoard(F1));
+		assertEquals(WHITE_KNIGHT, position.getBoard(G1));
+		assertEquals(WHITE_ROOK, position.getBoard(H1));
+
+		assertTrue(parser.isWhiteToMove());
+		assertTrue(parser.hasWhiteShortCastleOption());
+		assertTrue(parser.hasWhiteLongCastleOption());
+		assertTrue(parser.hasBlackShortCastleOption());
+		assertTrue(parser.hasBlackLongCastleOption());
+		assertEquals(NOSQUARE, parser.getEnPassantSquare());
+		assertEquals(5, parser.getHalfMoveNumber());
+		assertEquals(20, parser.getCurrentMoveNumber());
+	}
+
+	@Test
+	public void givenBlackCastlingEnPassant() {
+		String fen = "8/4B3/8/8/8/8/4P3/k6K b KQq d3 3 22";
+		parser.init(fen);
+		parser.parse();
+		Position position = parser.getPosition();
+		assertEquals(WHITE_BISHOP, position.getBoard(E7));
+		assertEquals(WHITE_PAWN, position.getBoard(E2)); // 1
+		assertEquals(BLACK_KING, position.getBoard(A1)); // -3
+		assertEquals(WHITE_KING, position.getBoard(H1)); //  3
+		assertFalse(parser.isWhiteToMove());
+		assertTrue(parser.hasWhiteShortCastleOption());
+		assertTrue(parser.hasWhiteLongCastleOption());
+		assertFalse(parser.hasBlackShortCastleOption());
+		assertTrue(parser.hasBlackLongCastleOption());
+		assertEquals(D3, parser.getEnPassantSquare());
+		assertEquals(3, parser.getHalfMoveNumber());
+		assertEquals(22, parser.getCurrentMoveNumber());
+	}
+
+	@Test
+	public void testParsePieceBoard() {
+		String pieceBoard = "8/4P3/8/8/8/8/4P3/k6K";
+		Position position = FenParser.parsePieceBoard(pieceBoard);
+		assertEquals(WHITE_PAWN, position.getBoard(E7));
+		assertEquals(WHITE_PAWN, position.getBoard(E2));
+		assertEquals(BLACK_KING, position.getBoard(A1));
+		assertEquals(WHITE_KING, position.getBoard(H1));
+	}
+
+	@Test
+	public void givenFirstFieldBoard()
+	{
+		String first = "k6K/8/8/8/8/8/8/8";
+		parser.init(first);
+		parser.parse();
+		Position position = parser.getPosition();
+		assertNotNull(position);
+		assertEquals(BLACK_KING, position.getBoard(A8));
+		assertEquals(WHITE_KING, position.getBoard(H8));
+		
+		//Defaults from here on
 		assertTrue(parser.isWhiteToMove());
 		assertFalse(parser.hasWhiteShortCastleOption());
 		assertFalse(parser.hasWhiteLongCastleOption());
 		assertFalse(parser.hasBlackShortCastleOption());
 		assertFalse(parser.hasBlackLongCastleOption());
-		assertEquals(Bitmap.NOSQUARE, parser.getEnPassantSquare());
-		assertEquals(5, parser.getHalfMoveNumber());
-		assertEquals(30, parser.getMoveNumber());
+		assertEquals(NOSQUARE, parser.getEnPassantSquare());
+		assertEquals(0, parser.getHalfMoveNumber());
+		assertEquals(1, parser.getCurrentMoveNumber());
 	}
 
 	@Test
-	public void testParseWithBlackCastlingEnPassant() {
-		String fen = "8/4P3/8/8/8/8/4P3/k6K b KQkq d3 3 22";
-		parser.parse(fen);
-		assertEquals('P', parser.getBoardCharacter(Bitmap.E7));
-		assertEquals('P', parser.getBoardCharacter(Bitmap.E2));
-		assertEquals('k', parser.getBoardCharacter(Bitmap.A1));
-		assertEquals('K', parser.getBoardCharacter(Bitmap.H1));
+	public void givenSecondFieldOnMove()
+	{
+		String first = "k6K/8/8/8/8/8/8/8 b";
+		parser.init(first);
+		parser.parse();
+		Position position = parser.getPosition();
+		assertNotNull(position);
+		assertEquals(BLACK_KING, position.getBoard(A8));
+		assertEquals(WHITE_KING, position.getBoard(H8));
+		assertFalse(parser.isWhiteToMove());
+		
+		//Defaults from here on
+		assertFalse(parser.hasWhiteShortCastleOption());
+		assertFalse(parser.hasWhiteLongCastleOption());
+		assertFalse(parser.hasBlackShortCastleOption());
+		assertFalse(parser.hasBlackLongCastleOption());
+		assertEquals(NOSQUARE, parser.getEnPassantSquare());
+		assertEquals(0, parser.getHalfMoveNumber());
+		assertEquals(1, parser.getCurrentMoveNumber());
+	}
+
+	@Test
+	public void givenThirdFieldOnMove()
+	{
+		String first = "k6K/8/8/8/8/8/8/8 b KQkq";
+		parser.init(first);
+		parser.parse();
+		Position position = parser.getPosition();
+		assertNotNull(position);
+		assertEquals(BLACK_KING, position.getBoard(A8));
+		assertEquals(WHITE_KING, position.getBoard(H8));
 		assertFalse(parser.isWhiteToMove());
 		assertTrue(parser.hasWhiteShortCastleOption());
 		assertTrue(parser.hasWhiteLongCastleOption());
 		assertTrue(parser.hasBlackShortCastleOption());
 		assertTrue(parser.hasBlackLongCastleOption());
-		assertEquals(Bitmap.D3, parser.getEnPassantSquare());
-		assertEquals(3, parser.getHalfMoveNumber());
-		assertEquals(22, parser.getMoveNumber());
+		
+		//Defaults from here on
+		assertEquals(NOSQUARE, parser.getEnPassantSquare());
+		assertEquals(0, parser.getHalfMoveNumber());
+		assertEquals(1, parser.getCurrentMoveNumber());
 	}
 
 	@Test
-	public void testSetNotEnoughFields()
+	public void givenTooManyCastlingOptions()
 	{
-		String notEnoughFields = "k6K/8/8/8/8/8/8/8 w KQkq";
-		String expectedError = "FEN string 'k6K/8/8/8/8/8/8/8 w KQkq' needs six space-delimited fields: board onMove castlingOptions enPassantSquare halfMoveNumber moveNumber";
-		assertInvalid(notEnoughFields, expectedError);
+		String invalidPiece = "k6K/8/8/8/8/8/8/7q w KQkqabc - 0 1";
+		assertInvalid(invalidPiece, "castling options 'KQkqabc' must not be empty or "
+				+ "exceed four characters; use only characters from KQkq");
 	}
-	
+
 	@Test
 	public void testSetTooManyWhiteKings()
 	{
 		String tooManyWhiteKingsOnDifferentRanks = "2K5/8/8/8/8/8/8/7K w - - 0 1";
-		assertInvalid(tooManyWhiteKingsOnDifferentRanks, "board has too many white kings");
+		assertInvalid(tooManyWhiteKingsOnDifferentRanks, "board has too many white kings; wking='K'");
 	}
 
 	@Test
 	public void testSetTooManyBlackKings()
 	{
 		String tooManyBlackKingsOnSameRank = "8/k6k/8/8/8/8/8/8 w - - 0 1";
-		assertInvalid(tooManyBlackKingsOnSameRank, "board has too many black kings");
+		assertInvalid(tooManyBlackKingsOnSameRank, "board has too many black kings; bking='k'");
 	}
 
 	@Test
@@ -112,7 +253,12 @@ public class FenParserTest {
 	public void testSetTooManyFilesOnBoard()
 	{
 		String tooManyFiles = "k8/8/8/8/8/8/8/8 w - - 0 1";
-		assertInvalid(tooManyFiles, "board pieces and empty squares on rank #8 do not fit on eight files: k8");
+		assertInvalid(tooManyFiles, "board pieces and empty squares on rank #8 "
+				+ "do not fit on eight files: k8");
+		
+		String tooManyPawnsOnRank= "k7/8/8/PPPPPPPPP/8/8/8/8 w - - 0 1";
+		assertInvalid(tooManyPawnsOnRank, "board pieces and empty squares on rank #5 "
+				+ "do not fit on eight files: PPPPPPPPP");
 	}
 	
 	@Test
@@ -134,7 +280,7 @@ public class FenParserTest {
 	public void testInvalidCastlingCharacters()
 	{
 		String badFen = "k6K/8/8/8/8/8/8/8 b KQxx - 0 2";
-		String expectedError = "castling options 'KQxx' are invalid; use only characters from KQkq";
+		String expectedError = "castling options 'KQxx' are invalid; use only characters from KQkq or - for none";
 		assertInvalid(badFen, expectedError);
 	}
 
@@ -155,38 +301,65 @@ public class FenParserTest {
 	}
 
 	@Test
-	public void testInvalidEnPassant()
+	public void testEnPassantSquareConflictsWithPlayerOnMove()
 	{
 		String badFen = "k6K/8/8/8/8/8/8/8 w - e3 0 1";
-		String expectedError = "given 'w' to move, the en passant square 'e3' ought to be on the 6th rank";
-		assertInvalid(badFen, expectedError);
+		//expected    = "k6K/8/8/8/8/8/8/8 w - - 0 1";;
+		parser.init(badFen);
+		parser.parse();
+		assertEquals("en passant square e3 is invalid when white is moving",
+				NOSQUARE, parser.getEnPassantSquare());
 		
-		badFen = "k6K/8/8/8/8/8/8/8 b - h6 0 1";
-		expectedError = "given 'b' to move, the en passant square 'h6' ought to be on the 3rd rank";
-		assertInvalid(badFen, expectedError);
+		badFen   = "k6K/8/8/8/8/8/8/8 b - h6 0 1";
+		//expect = "k6K/8/8/8/8/8/8/8 b - - 0 1";
+		parser.init(badFen);
+		parser.parse();
+		assertEquals("en passant square h6 is invalid when black is moving",
+				NOSQUARE, parser.getEnPassantSquare());
+	}
+
+	@Test
+	public void givenEnPassantSquareNotOnThirdOrSixthRank()
+	{
+		String badFen = "k6K/8/8/8/8/8/8/8 w - d7 0 1";
+		//expected    = "k6K/8/8/8/8/8/8/8 w - - 0 1";;
+		parser.init(badFen);
+		parser.parse();
+		assertEquals("en passant square d7 is not on 3rd or sixth rank",
+				NOSQUARE, parser.getEnPassantSquare());
 	}
 
 	@Test
 	public void testHalfMoveNumberIsNotNegative()
 	{
 		String badFen = "k6K/8/8/8/8/8/8/8 b KQkq - -1 2";
-		String expectedError = "halfMoveNumber '-1' must be zero or greater";
-		assertInvalid(badFen, expectedError);
+		//expected    = "k6K/8/8/8/8/8/8/8 b KQkq - 0 2";
+		parser.init(badFen);
+		parser.parse();
+		assertEquals(0, parser.getHalfMoveNumber());
 	}
 
 	@Test
-	public void testMoveNumberIsAboveZero()
+	public void testMoveNumberIsZero()
 	{
 		String badFen = "k6K/8/8/8/8/8/8/8 b KQkq - 1 0";
-		String expectedError = "moveNumber '0' must be greater than zero";
-		assertInvalid(badFen, expectedError);
+		//expected    = "k6K/8/8/8/8/8/8/8 b KQkq - 1 1";
+		parser.init(badFen);
+		parser.parse();
+		assertEquals(1, parser.getCurrentMoveNumber());
+
+		String badFen2 = "k6K/8/8/8/8/8/8/8 b KQkq - 1 -9";
+		//expected     = "k6K/8/8/8/8/8/8/8 b KQkq - 1 1";
+		parser.init(badFen2);
+		parser.parse();
+		assertEquals(1, parser.getCurrentMoveNumber());
 	}
 
 	public void testIsValidRankFen(){
 		String[] good = 
 			new String[]
 			           {
-						//"8",
+						"8",
 						"1p1p1p1p",
 						"p1p1p1p1",
 						"RNBQKBNR",
@@ -226,7 +399,8 @@ public class FenParserTest {
 
 	private void assertInvalid(String position, String expectedError) {
 		try {
-			parser.parse(position);
+			parser.init(position);
+			parser.parse();
 			fail(position+" did not throw '"+expectedError+"'");
 		} catch (IllegalArgumentException e) {
 			assertEquals(expectedError, e.getMessage());

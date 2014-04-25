@@ -4,6 +4,8 @@
  */
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
+
 /**
  * A Bitboard is some representation of the chessboard where each bit represents
  * some binary state.
@@ -226,6 +228,7 @@ public class Bitmap {
 	    ROOK,       // 6
 	    QUEEN       // 7
 	};
+
 
 	//********************************************************************
 	//*	Given a square (A1-H8) the following SQ2BIT??? arrays will       *

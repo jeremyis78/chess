@@ -88,11 +88,11 @@ public class Util {
 	            //Compute linear index
 	            return (y * 8) + x;		
 	        } else
-	            //return -1;
-	        	throw new IllegalArgumentException(s + " is an invalid square");
+	            return NOSQUARE;
+//	        	throw new IllegalArgumentException(s + " is an invalid square");
 	    } else
-	        //return -1;
-	    	throw new IllegalArgumentException(s + " is an invalid square");
+	        return NOSQUARE;
+//	    	throw new IllegalArgumentException(s + " is an invalid square");
 	}
 	
     public static String SqToStr(int sq){
@@ -143,6 +143,21 @@ public class Util {
 	    throw new IllegalArgumentException("expecting color that's one of {0|1), found: " + color);
 	}
 
+    private static String toFenBoard(Position position)
+	{
+		FenBuilder builder = new FenBuilder();
+		builder.appendPieceBoard(position);
+		return builder.toString().split(" ")[0];
+	}
+
+    private static Position toPosition(String fen)
+    {
+    	FenParser parser = FenParser.INSTANCE;
+    	parser.init(fen);
+    	parser.parse();
+    	return parser.getPosition();
+    }
+    
     public static void DisplayBitbrd(long board){
 		out.printf("0x%016X", board);
 	}

@@ -162,9 +162,9 @@ public class GameState {
 		return fen.toString();
 	}
 
-	private void parseBoardFEN(final String s)
+	private void parseBoardFEN(final String board)
 	{
-	    pos.set(s);  //throws error if any
+		pos = FenParser.parsePieceBoard(board);
 	}
 
 	/**
@@ -351,6 +351,11 @@ public class GameState {
 		return enPassantSq[numberOfMovesMade];
 	}
 
+	public void setEnPassantSquare(int enPassantSquare)
+	{
+		enPassantSq[numberOfMovesMade] = (byte) enPassantSquare;
+	}
+
 	private void parseHalfMoveNumber(final String s)
 	{
 	    byte n = Byte.parseByte(s);
@@ -370,6 +375,11 @@ public class GameState {
 		return halfMoveClock[numberOfMovesMade];
 	}
 
+	public void setHalfMoveNumber(int halfMoves)
+	{
+		halfMoveClock[numberOfMovesMade] = (byte) halfMoves;
+	}
+	
 	void parseMoveNumber(final String s)
 	{
 	    byte n = Byte.parseByte(s);
@@ -385,6 +395,11 @@ public class GameState {
 	 */
 	public byte getMoveNumber() {
 		return fullMoveClock[numberOfMovesMade];
+	}
+	
+	public void setMoveNumber(int moveNumber)
+	{
+		fullMoveClock[numberOfMovesMade] = (byte) moveNumber;
 	}
 
 	public int getNumberOfMovesMade()

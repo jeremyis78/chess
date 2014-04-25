@@ -32,17 +32,22 @@ public class DefaultPositionValidatorTest {
 
 	@Test
 	public void testOnlyOneKingMissingIsInvalid() {
-		Position whiteKingOnly = new Position("8/8/8/8/8/8/6K1/8");
+		Position whiteKingOnly = parsePosition("8/8/8/8/8/8/6K1/8");
 		assertValidationThrows("board is missing one or both kings", whiteKingOnly);
 		
-		Position blackKingOnly = new Position("8/8/8/8/8/8/6k1/8");
+		Position blackKingOnly = parsePosition("8/8/8/8/8/8/6k1/8");
 		assertValidationThrows("board is missing one or both kings", blackKingOnly);
 	}
 
 	@Test
 	public void testAdjacentKingsIsInvalid() {
-		Position adjacentKings = new Position("8/8/8/8/8/8/6K1/7k");
+		Position adjacentKings = parsePosition("8/8/8/8/8/8/6K1/7k");
 		assertValidationThrows("board cannot have adjacent kings", adjacentKings);
+	}
+
+	private static Position parsePosition(String pieceBoard)
+	{
+		return FenParser.parsePieceBoard(pieceBoard);
 	}
 	
 	private void assertValidationThrows(String expectedErrorMessage, Position empty) {

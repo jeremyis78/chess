@@ -248,7 +248,7 @@ public class AttacksTest {
 		if(!expectedMoves.equals(actualMoves))
 		{
 			Displayer displayer = new Displayer();
-			Position position = new Position(associatedFEN);
+			Position position = FenParser.parsePieceBoard(associatedFEN); //new Position(associatedFEN);
 			StringBuilder msgBuilder = new StringBuilder();
 			msgBuilder.append("Given this position:\n");
 			msgBuilder.append(displayer.formatBoard(position));

@@ -2,52 +2,169 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.StrToSq;
+import static com.jeremybrooks.chess.FenBuilder.*;
 
+/**
+ * <pre>
+ *  FenParser is used for extracting the fields found
+ *  in a Forsythe-Edwards Notation string which can represent
+ *  the state of the chess game at any point.
+ *  
+ *  For example, the following FEN represents the beginning
+ *  of a chess game:
+ *  
+ *  rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+ *  
+ *  It has six fields
+ *  
+ *  1) board               Represents pieces on the chessboard
+ *           Upper case letters are white pieces.
+ *           
+ *           The board is read from top left to lower
+ *           right A8, B8, C8, ..., G1, H1.  Encountering
+ *           a / indicates the end of the rank; the next
+ *           character read will be on the rank below it.
+ *           
+ *           A digit denotes a consecutive number of empty squares
+ *                               
+ *  2) onMove              Whose turn is it?  
+ *             w = white
+ *             b = black
+ *                               
+ *  3) castlingOptions     What castling options are still available?
+ *         
+ *         The presence of one of these letters indicates
+ *         that option is available. 
+ *           K = white short castle
+ *           Q = white long castle
+ *           k = black short castle
+ *           q = black queen castle
+ *           - = no castling available for white or black
+ *         Examples:  KQk, Kq, kq, q
+ *                                                            
+ *  4) enPassantSquare     the square where an en passant capture could occur
+ *         
+ *         Examples:  d3, h6 or - if en passant is not valid
+ *  
+ *  5) halfMoveNumber      the number of moves since a capture or pawn was moved
+ *      
+ *  6) currentMoveNumber   the current move number in the game
+ *  
+ *         in the example the 1 corresponds to what the next
+ *         move played would be recorded as (ie, 1. e4)
+ *  
+ *  NOTE: there can be FENs that are invalid such as having the white short castle 
+ *        option available but the king is not on his home square or the rook has
+ *        moved.  The parser does no validation between the state of the pieces
+ *        on the board (first field) and the castlingOptions (third field).
+ *  
+ *  The parser attempts to parse as many of the six FEN fields as it finds.
+ *  You can call it like so,
+ *  
+ *      FenParser p = new FenParser();
+ *      p.init(fenString);
+ *      p.parse();
+ *      Position pos = p.getPosition();
+ *      boolean whiteToMove = p.isWhiteToMove();
+ *  
+ *  After calling parse(), retrieve the values of the parsed
+ *  fields by calling the getters: isWhiteToMove(), getCurrentMoveNumber(), etc.
+ *  For fields that are not found during parsing the default will be used.
+ *  
+ *  If you were to provide only the first field (the board), then
+ *  the parser assumes 
+ *      white is to move ('w')
+ *      no castling options are available (ie '-'),
+ *      no en passant option (ie '-')
+ *      number of half moves since last capture or pawn move is 0
+ *      current move number is 1
+ *  </pre>  
+ */
 public class FenParser {
-	private static final char WHITE_ON_MOVE = 'w';
-	private static final char BLACK_ON_MOVE = 'b';
-	private static final String UNSET_FIELD = "-";
-	private static final int NUMBER_OF_FIELDS = 6;
-	private String originalFen;
-	private char[] board;
-	private boolean whiteToMove;
-	private boolean whiteShortCastle;
-	private boolean whiteLongCastle;
-	private boolean blackShortCastle;
-	private boolean blackLongCastle;
-	private int enPassantSquare;
-	private int halfMoveNumber;
-	private int moveNumber;
-	
+    private static final int PIECE_BOARD_FIELD         = 0;
+	private static final int ON_MOVE_FIELD             = 1;
+	private static final int CASTLING_OPTIONS_FIELD    = 2;
+	private static final int EN_PASSANT_SQUARE_FIELD   = 3;
+	private static final int HALF_MOVE_NUMBER_FIELD    = 4;
+	private static final int CURRENT_MOVE_NUMBER_FIELD = 5;
 
-	public FenParser(){
-		board = new char[64];
+	private boolean nothingToParse = true;
+	private int numberOfFieldsFound = 0;
+	private String originalFen;
+	private String[] field;
+	/* provide reasonable defaults, empty board, white to move, no castling, first move */
+	private Position position = new Position();
+	private int playerOnMove = WHITE;
+	private boolean whiteShortCastle = false;
+	private boolean whiteLongCastle = false;
+	private boolean blackShortCastle = false;
+	private boolean blackLongCastle = false;
+	private int enPassantSquare = NOSQUARE;
+	private int halfMovesSinceCaptureOrPawnAdvance = 0;
+	private int currentMoveNumber = 1;
+	
+	public static FenParser INSTANCE = new FenParser();
+
+	public FenParser(){}
+
+	public FenParser(String fen)
+	{
+		init(fen);
 	}
-		
-	public void parse(String fen)
+
+	public void init(String fen)
 	{
 		originalFen = fen;
-		String[] fields = originalFen.split(" ");
-        if (fields.length < NUMBER_OF_FIELDS){
-        	throw new IllegalArgumentException("FEN string '"+originalFen+"' "
-        			+ "needs six space-delimited fields: "
-        			+ "board onMove castlingOptions enPassantSquare halfMoveNumber moveNumber");
-        }
-        parseBoard(fields[0]);
-		parseOnMove(fields[1]);
-		parseCastleOptions(fields[2]);
-		parseEnPassantSquare(fields[3]);
-		parseHalfMoveNumber(fields[4]);
-		parseMoveNumber(fields[5]);
+		if(!fen.trim().isEmpty())
+		{
+			field = fen.split(""+FIELD_DELIMITER);
+			numberOfFieldsFound = field.length;
+		}
+        if(numberOfFieldsFound > 0)
+        	nothingToParse = false;
+	}
+	
+	
+	public void parse()
+	{
+		if(PIECE_BOARD_FIELD < numberOfFieldsFound) parsePieceBoard();
+		if(ON_MOVE_FIELD < numberOfFieldsFound)	parseOnMove();
+		if(CASTLING_OPTIONS_FIELD < numberOfFieldsFound) parseCastlingOptions();
+		if(EN_PASSANT_SQUARE_FIELD < numberOfFieldsFound) parseEnPassantSquare();
+		if(HALF_MOVE_NUMBER_FIELD < numberOfFieldsFound) parseHalfMoveNumber();
+		if(CURRENT_MOVE_NUMBER_FIELD < numberOfFieldsFound) parseCurrentMoveNumber();
 	}
 
-	public void parseBoard(String field) {
-		String[] ranks = field.split("/");
+	/**
+	 * Parses pieceBoard and returns a Position.
+	 * 
+	 * Throws IllegalArgumentException if 
+	 *    1) the board does not have eight ranks or
+	 *    2) the board has too few or too many pieces or empty squares on a rank
+	 *    3) there is more than one white or black king on the board
+	 * @return the Position representing the parsed pieceBoard
+	 */
+	public static Position parsePieceBoard(String pieceBoard)
+	{
+		FenParser parser = new FenParser(pieceBoard);
+		return parser.parsePieceBoard();
+	}
+
+	private Position parsePieceBoard()
+	{
+		if(nothingToParse)
+			throw new IllegalStateException("need something to parse; "
+					+ "call init(String) or use constructor before calling parse()");
+
+		String toParse = field[PIECE_BOARD_FIELD];
+		String[] ranks = toParse.split(""+RANK_DELIMITER);
 		if (ranks.length != 8)
 		{
 			throw new IllegalArgumentException("board must contain eight ranks");
 		}
-		boolean isKingPlaced[] = new boolean[2];
+		position = new Position();
+		int numWhiteKingsPlaced = 0;
+		int numBlackKingsPlaced = 0;
 		
 		//Start with the first rank
 		int currentSquare = Bitmap.A1; //keep track of the square we're on
@@ -60,36 +177,36 @@ public class FenParser {
 				char boardCharacter = rank.charAt(n);
 				if (Character.isDigit(boardCharacter))
 				{
-					currentSquare = fillWithEmptySquares(currentSquare, boardCharacter);
-				}
-				else
-				{
-		            placePiece(isKingPlaced, currentSquare, boardCharacter);
+					//Skip those empty squares by adding the digit's value
+					currentSquare += (boardCharacter - '0'); 
+				} else {
+					int color = (Character.isUpperCase(boardCharacter)) ? WHITE : BLACK;
+					int piece = NONE;
+					piece = getPieceFromBoardCharacter(boardCharacter);
+					if(piece == KING && color == WHITE) numWhiteKingsPlaced++;
+					if(piece == KING && color == BLACK) numBlackKingsPlaced++;
+					validateOneKingPerColorOrThrow(numWhiteKingsPlaced, numBlackKingsPlaced);
+					position.placePiece(color, piece, currentSquare);
 		            currentSquare++;
-		            //files++;
 				}
-			}
+			}	
 		}
+		return position;
 	}
 
 	public static void validateFiles(String rankFen, int rankNumber)
 	{
 		int len = rankFen.length();
-		if (len == 0 || len > 8)
-		{
-			throw new IllegalArgumentException("board must contain eight squares on a rank, found: "+ rankFen);
-		}
-		
 		int filesRead = 0;
 		for(int i=0; i < len; i++)
 		{
 			char c = rankFen.charAt(i);
 			if (Character.isDigit(c))
 			{
-				filesRead += c - '0'; //represents multiple files
+				filesRead += c - '0'; //found empty squares (represents multiple files)
 				continue;
 			}
-			filesRead++; //represents a single file
+			filesRead++; //found a piece (represents a single file)
 		}
 		if(filesRead != 8)
 		{
@@ -98,144 +215,125 @@ public class FenParser {
 		}
 	}
 
-	private void placePiece(boolean[] isKingPlaced, int sq, char c) {
-		switch(c){
-		case 'P':
-		case 'N':
-		case 'B':
-		case 'R':
-		case 'Q':
-		    board[sq] = c;
-		    break;
-		case 'K':
-		    if(isKingPlaced[Bitmap.WHITE])
-		    {
-		        throw new IllegalArgumentException("board has too many white kings");
-		    }
-		    board[sq] = c;
-		    isKingPlaced[Bitmap.WHITE] = true;
-		    break;
-		case 'p':
-		case 'n':
-		case 'b':
-		case 'r':
-		case 'q':
-			board[sq] = c;
-			break;
-		case 'k':
-		    if(isKingPlaced[Bitmap.BLACK])
-		    {
-		        throw new IllegalArgumentException("board has too many black kings");
-		    }
-		    board[sq] = c;
-		    isKingPlaced[Bitmap.BLACK] = true;
-		    break;
-		default: //illegal character
-		    throw new IllegalArgumentException("board contains invalid "
-		    		+ "piece '" + c + "'; allowed piece characters are: KkQqRrBbNnPp"); 
-		}
+	private void validateOneKingPerColorOrThrow(int numWhiteKingsPlaced, 
+			int numBlackKingsPlaced) {
+		if(numWhiteKingsPlaced > 1)
+			throw new IllegalArgumentException("board has too many white kings; wking='K'");
+		if(numBlackKingsPlaced > 1)
+			throw new IllegalArgumentException("board has too many black kings; bking='k'");
 	}
 
-	private int fillWithEmptySquares(int currentSquare, char numberOfEmptySquares) {
-		int emptysq = currentSquare;
-		//add digit's value to sq
-		currentSquare += numberOfEmptySquares - '0'; 
-         
-		//initialize those squares to empty
-		while (emptysq < currentSquare)
-		    board[emptysq++] = BOARD_EMPTY_SQUARE;
-		return currentSquare;
+	private int getPieceFromBoardCharacter(char pieceChar) {
+		int piece = NONE;
+		char upperPieceChar = Character.toUpperCase(pieceChar);
+		if(upperPieceChar == 'P') piece = PAWN;
+		if(upperPieceChar == 'N') piece = KNIGHT;
+		if(upperPieceChar == 'B') piece = BISHOP;
+		if(upperPieceChar == 'R') piece = ROOK;
+		if(upperPieceChar == 'Q') piece = QUEEN;
+		if(upperPieceChar == 'K') piece = KING;
+		if(piece == NONE)
+			throw new IllegalArgumentException("board contains invalid "
+					+ "piece '"+pieceChar+"'; allowed piece characters are: KkQqRrBbNnPp");
+		return piece;
+	}
+	
+
+	private void parseOnMove() {
+		String toParse = field[ON_MOVE_FIELD].trim();
+		char onMove = toParse.charAt(0);
+	    if (WHITE_ON_MOVE == onMove) playerOnMove = WHITE;
+	    else if (BLACK_ON_MOVE == onMove) playerOnMove = BLACK;
+	    else 
+	    	throw new IllegalArgumentException("onMove '"+toParse+"' is invalid; "
+	    		+ "use 'w' for white or 'b' for black");
+	    
 	}
 
-	private void parseOnMove(String field) {
-		char onMove = field.trim().charAt(0);
-	    if (WHITE_ON_MOVE == onMove) {
-	        whiteToMove = true;
-	    } else if (BLACK_ON_MOVE == onMove) {
-	        whiteToMove = false;
-	    } else {
-	    	throw new IllegalArgumentException("onMove '"+field+"' is invalid; use 'w' for white or 'b' for black");
-	    }
-	}
-
-	private void parseCastleOptions(String field) {
-		if(field.length() > 4 || field.trim().isEmpty())
+	private void parseCastlingOptions() {
+		String toParse = field[CASTLING_OPTIONS_FIELD];
+		if(toParse.length() > 4 || toParse.trim().isEmpty())
 		{
-			throw new IllegalArgumentException("castling options '" + field + "' "
+			throw new IllegalArgumentException("castling options '" + toParse + "' "
 					+ "must not be empty or exceed four characters; use only characters from KQkq");
 		}
-        for (char option: field.toCharArray())
+        for (char option: toParse.toCharArray())
         {
         	switch(option)
         	{
-        	case '-':
+        	case UNSET:
         		whiteShortCastle = false;
         		whiteLongCastle = false;
         		blackShortCastle = false;
         		blackLongCastle = false;
         		break;
-        	case 'K':
+        	case WHITE_SHORT_CASTLE_OPTION:
         		whiteShortCastle = true;
         		break;
-        	case 'Q':
+        	case WHITE_LONG_CASTLE_OPTION:
         		whiteLongCastle = true;
         		break;
-        	case 'k':
+        	case BLACK_SHORT_CASTLE_OPTION:
         		blackShortCastle = true;
         		break;
-        	case 'q':
+        	case BLACK_LONG_CASTLE_OPTION:
         		blackLongCastle = true;
         		break;
         	default:
-    			throw new IllegalArgumentException("castling options '" + field + "' "
-    					+ "are invalid; use only characters from KQkq");
+    			throw new IllegalArgumentException("castling options '" + toParse + "' "
+    					+ "are invalid; use only characters from KQkq or - for none");
         	}
         }
 	}
 
-	private void parseEnPassantSquare(String field) {
-	    if (UNSET_FIELD.equals(field)){
+	/*
+	 * Parses and returns the square (number) where an en passant capture can occur.
+	 * If no square is specified {@code NOSQUARE} is returned.
+	 * @return an int representing the parsed en passant square
+	 */
+	private void parseEnPassantSquare() {
+		String toParse = field[EN_PASSANT_SQUARE_FIELD];
+	    if (UNSET == toParse.charAt(0)){
 	        enPassantSquare = NOSQUARE;
-	        return;
+	    } else {
+	    	int unvalidatedSquare = StrToSq(toParse);
+	    	enPassantSquare = validEnPassantSquare(isWhiteToMove(), unvalidatedSquare);
 	    }
-	    int square = StrToSq(field);
-	    String onMove = whiteToMove?"w":"b";
-	    if(whiteToMove && Util.notOnSixthRank(square))
-	    {
-			throw new IllegalArgumentException("given '"+onMove+"' to move, the "
-	        		+ "en passant square '"+field+"' ought to be on the 6th rank");	    	
-	    }
-	    if(!whiteToMove && Util.notOnThirdRank(square))
-	    {
-	        throw new IllegalArgumentException("given '"+onMove+"' to move, the "
-	        		+ "en passant square '"+field+"' ought to be on the 3rd rank");
-	    }
-        enPassantSquare = square;
 	}
 
-	private void parseHalfMoveNumber(String field) {
-	    int n = Integer.parseInt(field);
-	    if (n < 0){
-	    	throw new IllegalArgumentException("halfMoveNumber '"+field+"' "
-	    			+ "must be zero or greater");
+	/*
+	 * Parses the number of half moves since the last irreversible
+	 * move--a capture or pawn advance.
+	 * If the parsed value is negative the default value is used.
+	 */
+	private void parseHalfMoveNumber() {
+		String toParse = field[HALF_MOVE_NUMBER_FIELD];
+		int n = Integer.parseInt(toParse);
+		halfMovesSinceCaptureOrPawnAdvance = 0;
+	    if (n > 0){
+	    	halfMovesSinceCaptureOrPawnAdvance = n;
 	    }
-	    halfMoveNumber = n;		
 	}
 
-	private void parseMoveNumber(String field) {
-	    int n = Integer.parseInt(field);
-	    if (n <= 0){
-	    	throw new IllegalArgumentException("moveNumber '"+field+"' must be greater than zero");
+	/*
+	 * Parses the current move number. If the parsed value
+	 * is less than or equal to zero the default value is used.
+	 */
+	private void parseCurrentMoveNumber() {
+		String toParse = field[CURRENT_MOVE_NUMBER_FIELD];
+	    int n = Integer.parseInt(toParse);
+	    if (n > 0){
+	    	currentMoveNumber = n;
 	    }  
-	    moveNumber = n;
 	}
-
-	public char getBoardCharacter(int onSquare) {
-		return board[onSquare];
+	
+	public Position getPosition()
+	{
+		return position;
 	}
 
 	public boolean isWhiteToMove() {
-		return whiteToMove;
+		return playerOnMove == WHITE;
 	}
 
 	public boolean hasWhiteShortCastleOption() {
@@ -259,10 +357,10 @@ public class FenParser {
 	}
 
 	public int getHalfMoveNumber() {
-		return halfMoveNumber;
+		return halfMovesSinceCaptureOrPawnAdvance;
 	}
 
-	public int getMoveNumber() {
-		return moveNumber;
+	public int getCurrentMoveNumber() {
+		return currentMoveNumber;
 	}
 }

@@ -49,8 +49,7 @@ public class FenBuilderTest {
 	public void givenTestPieceBoards() {
 		for(String pieceBoard: TEST_PIECE_BOARD)
 		{
-			Position position = new Position();
-			position.set(pieceBoard);
+			Position position = FenParser.parsePieceBoard(pieceBoard);
 			builder.appendPieceBoard(position);
 			String expected = pieceBoard+" w - - 0 1";
 			assertEquals(expected, builder.toString());

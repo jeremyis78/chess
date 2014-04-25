@@ -34,11 +34,7 @@ public class Position
     private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
 	public Position(){
-		set(EMPTY_BOARD);
-	}
-	
-	public Position(final String FEN_Board){
-		set(FEN_Board);
+		clear();
 	}
 	
 	public long getPawns(int side)
@@ -177,18 +173,6 @@ public class Position
 		return (board[square] == BOARD_EMPTY_SQUARE);
 	}
 
-	/*******************************************************************/
-	/*              The bits of an EncodedMove                         */
-	/*******************************************************************/
-	/* +--------+--------+---------+----------+-----------+---------+  */
-	/* | 0 - 5  | 6 - 11 | 12 - 14 | 15 - 17  |  18 - 20  | 21 - 31 |  */
-	/* +--------+--------+---------+----------+-----------+---------+  */
-	/* |  from  |   to   | moving  | captured | promotion | unused  |  */
-	/* | square | square | piece   | piece    |   piece   |         |  */
-	/* +--------+--------+---------+----------+-----------+---------+  */
-	/*                                                                 */
-	/*******************************************************************/
-		
 	public void clear(){
 	    kingSq[Bitmap.WHITE] = KING_NOT_PLACED;
 	    kingSq[Bitmap.BLACK] = KING_NOT_PLACED;
@@ -209,86 +193,7 @@ public class Position
 	    {
 	    	board[i] = BOARD_EMPTY_SQUARE; 
 	    }
-	}
-	
-	public boolean set(final String fen)
-	{
-		FenParser parser = new FenParser();
-		parser.parseBoard(fen);
-		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
-		{
-            long sqMask = 1L << square;
-            long sqMask90 = 1L << SQ2BIT90R[square];
-            long sqMask45L = 1L << SQ2BIT45L[square];
-            long sqMask45R = 1L << SQ2BIT45R[square];
-			char boardCharacter = parser.getBoardCharacter(square);
-			switch(boardCharacter)
-			{
-			case 'P':
-	            placePiece(Bitmap.WHITE, PAWN, square);
-	            break;
-	        case 'N':
-	            placePiece(Bitmap.WHITE, KNIGHT, square);
-	            break;
-	        case 'B':
-	            placePiece(Bitmap.WHITE, BISHOP, square);
-	            break;
-	        case 'R':
-	            placePiece(Bitmap.WHITE, ROOK, square);
-	            break;
-	        case 'Q':
-	            placePiece(Bitmap.WHITE, QUEEN, square);
-	            break;
-	        case 'K':
-	            all[ALL] |= sqMask;
-	            all[ALL90] |= sqMask90;
-	            all[ALL45L] |= sqMask45L;
-	            all[ALL45R] |= sqMask45R;
-	            board[square] = PIECE[Bitmap.KING];
-	            kingSq[Bitmap.WHITE] = square;
-	            break;
-	        case 'p':
-	            placePiece(Bitmap.BLACK, PAWN, square);
-	            break;
-	        case 'n':
-	            placePiece(Bitmap.BLACK, KNIGHT, square);
-	            break;
-	        case 'b':
-	            placePiece(Bitmap.BLACK, BISHOP, square);
-	            break;
-	        case 'r':
-	            placePiece(Bitmap.BLACK, ROOK, square);
-	            break;
-	        case 'q':
-	            placePiece(Bitmap.BLACK, QUEEN, square);
-	            break;
-	        case 'k':
-	            all[ALL] |= sqMask;
-	            all[ALL90] |= sqMask90;
-	            all[ALL45L] |= sqMask45L;
-	            all[ALL45R] |= sqMask45R;
-	            board[square] = -PIECE[Bitmap.KING];
-	            kingSq[Bitmap.BLACK] = square;
-	            break;
-	        case BOARD_EMPTY_SQUARE:
-	        	board[square] = boardCharacter;
-	        	break;
-	        default: //illegal character
-	            throw new IllegalArgumentException("board contains invalid "
-	            		+ "piece '" + boardCharacter + "'; allowed piece characters are: KkQqRrBbNnPp"); 
-	        }
-		}
-		return true;
-	}
-	
-	void Display(){
-		DisplayBoard();
-		DisplayBitboardBoard();
-	}
-	
-	void displayFEN(){
-	    System.out.print(getFen());
-	}
+	}	
 	
 	public String getFen()
 	{
@@ -417,16 +322,6 @@ public class Position
 		return new Integer(i).toString().charAt(0);
 	}
 	
-	public void DisplayBoard()
-	{
-		out.print(new Displayer().formatBoard(this));
-	}
-	
-	void DisplayBitboardBoard()
-	{
-		out.print(new BitboardDisplayer().formatBoard(this));
-	}
-	
 	/**
 	 * Places a piece on the board and in the bitmaps
 	 * 
@@ -435,6 +330,10 @@ public class Position
 	 * @param sq the square to place the piece on
 	 */
 	public void placePiece(int c, int p, int sq){
+		//TODO: test this for placing multiple kings
+		//Doesn't look like the "all" bitboards will erase the previous king
+		//so you will keep filling up the bit boards with bits but the king
+		//square will be "last one wins"
 	    long mask = 1L << sq;
 	    all[ALL] |= mask;
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];

@@ -59,16 +59,9 @@ public class UtilTest extends TestCase {
 		assertEquals(Bitmap.F6, Util.StrToSq("F6"));
 		assertEquals(Bitmap.G7, Util.StrToSq("G7"));
 		assertEquals(Bitmap.H8, Util.StrToSq("H8"));
-		try{
-			Util.StrToSq("I4");
-			fail("I4 is invalid");
-		} catch (IllegalArgumentException e){
-		}
-		try{
-			Util.StrToSq("A9");
-			fail("A9 is invalid");
-		} catch (IllegalArgumentException e){
-		}
+		assertEquals(Bitmap.NOSQUARE, Util.StrToSq("-"));
+		assertEquals(Bitmap.NOSQUARE, Util.StrToSq("I4"));
+		assertEquals(Bitmap.NOSQUARE, Util.StrToSq("A9"));
 	}
 
 	public void testSqToStr() {

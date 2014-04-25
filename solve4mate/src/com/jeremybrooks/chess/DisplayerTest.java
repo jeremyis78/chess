@@ -18,7 +18,8 @@ public class DisplayerTest {
 	@Test
 	public void testStartingPosition()
 	{
-		Position p = createStartingPosition();
+		String initialBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+		Position p = FenParser.parsePieceBoard(initialBoard);
 		String expectedBoard = 
                         "   -----------------\n" +
 						"8 | r n b q k b n r |\n" +
@@ -34,15 +35,11 @@ public class DisplayerTest {
 		assertEquals(expectedBoard, displayer.formatBoard(p));
 	}
 
-	private Position createStartingPosition() {
-		return new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-	}
-
 	@Test
 	public void testQueensGambitAccepted()
 	{
-		Position p = new Position();
-		p.set("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR");
+		String pieceBoard = "rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR";
+		Position p = FenParser.parsePieceBoard(pieceBoard);
 
 		String expectedBoard = 
                 "   -----------------\n" +
@@ -62,8 +59,9 @@ public class DisplayerTest {
 	@Test
 	public void testEndgamePosition()
 	{
-		Position position = new Position();
-		position.set("q1n5/1P3p2/2P5/8/1K6/5b2/k6P/7R");
+		String pieceBoard = "q1n5/1P3p2/2P5/8/1K6/5b2/k6P/7R";
+		Position position = FenParser.parsePieceBoard(pieceBoard);
+
 		String expectedBoard = 
                 "   -----------------\n" +
 				"8 | q - n - - - - - |\n" +
@@ -78,5 +76,4 @@ public class DisplayerTest {
 				"    a b c d e f g h\n";
 		Assert.assertEquals(expectedBoard, displayer.formatBoard(position));
 	}
-
 }

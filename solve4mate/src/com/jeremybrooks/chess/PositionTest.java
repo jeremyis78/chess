@@ -107,15 +107,20 @@ public class PositionTest extends TestCase {
 		assertEquals(-1, p.getKingSquare(WHITE));
 		assertEquals(-1, p.getKingSquare(BLACK));
 		assertEquals(0x0L, p.getAllPieces(0));
-		
+		assertEquals(0x0L, p.getAllPieces(90));
+		assertEquals(0x0L, p.getAllPieces(45));
+		assertEquals(0x0L, p.getAllPieces(-45));
 	}
 
 	public void testSetAndGetFen()
 	{
-		Position p = new Position();
+		FenParser parser = new FenParser();
+		Position p;
 		for(int i=0; i<FEN.length; i++)
 		{
-			p.set(FEN[i]);
+			parser.init(FEN[i]);
+			parser.parse();
+			p = parser.getPosition();
 			assertEquals(FEN[i], p.getFen());
 			p.clear();
 		}
@@ -166,7 +171,7 @@ public class PositionTest extends TestCase {
 	}
 
 	private Position createStartingPosition() {
-		return new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+		return FenParser.parsePieceBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 	}
 
 	public void testMovingPiecesQueensGambitAccepted()
@@ -223,7 +228,7 @@ public class PositionTest extends TestCase {
 		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
 
 	}
-
+	
 	private void assertStartingPosition(Position p) {
 		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Bitmap.WHITE, PAWN));
 		assertEquals("a1 h1 ", toSquares(p, Bitmap.WHITE, ROOK));
@@ -262,50 +267,6 @@ public class PositionTest extends TestCase {
 		assertEquals(PIECE[Bitmap.QUEEN], p.getBoard(squareOfWhiteQueen));
 	}
 	
-	public void testSetTooManyWhiteKings()
-	{
-		String tooManyWhiteKingsOnDifferentRanks = "2K5/8/8/8/8/8/8/7K";
-		assertInvalid(tooManyWhiteKingsOnDifferentRanks, "board has too many white kings");
-	}
-
-	public void testSetTooManyBlackKings()
-	{
-		String tooManyBlackKingsOnSameRank = "8/k6k/8/8/8/8/8/8";
-		assertInvalid(tooManyBlackKingsOnSameRank, "board has too many black kings");
-	}
-
-	public void testSetTooManyRanks()
-	{
-		String tooManyRanks = "8/8/8/8/8/8/8/8/8";
-		assertInvalid(tooManyRanks, "board must contain eight ranks");
-	}
-
-	public void testSetTooManyFiles()
-	{
-		String tooManyFiles = "k8/8/8/8/8/8/8/8";
-		assertInvalid(tooManyFiles, "board pieces and empty squares on rank #8 do not fit on eight files: k8");
-	}
-	
-	public void testSetUnknownPiece()
-	{
-		String invalidPiece = "k6K/8/8/8/8/8/8/7z";
-		assertInvalid(invalidPiece, "board contains invalid piece 'z'; allowed piece characters are: KkQqRrBbNnPp");
-	}
-
-	private void assertInvalid(String position, String expectedError) {
-		try {
-			setupPosition(position);
-			fail(position+" did not throw '"+expectedError+"'");
-		} catch (IllegalArgumentException e) {
-			assertEquals(expectedError, e.getMessage());
-		}	
-	}
-
-	private void setupPosition(String FENString) {
-		Position p = new Position();
-		p.set(FENString);
-	}
-
 	public void testErasePieceSucceedsEvenWhenSquareIsAlreadyEmpty() {
 		Position p = new Position();
 		try {
