@@ -3,6 +3,9 @@ package com.jeremybrooks.chess;
 import static com.jeremybrooks.chess.Bitmap.*;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+
+import com.jeremybrooks.chess.Piece.Color;
 
 /**                                                                 
  *  A position represents the physical locations of all pieces on
@@ -30,7 +33,7 @@ public class Position
 
     private long pieces[][] = new long[2][6];
     private long all[] = new long[MAXALL];
-    private int board[] = new int[64];
+    private Square board[] = new Square[64];
     private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
 	public Position(){
@@ -160,7 +163,7 @@ public class Position
 	
 	public int getBoard(int square)
 	{
-		return board[square];
+		return board[square].getPiece().encodedByColor();
 	}
 
 	public boolean isNotEmpty(int square)
@@ -170,7 +173,7 @@ public class Position
 	
 	public boolean isEmpty(int square)
 	{
-		return (board[square] == BOARD_EMPTY_SQUARE);
+		return !(board[square].isOccupied()); // == BOARD_EMPTY_SQUARE);
 	}
 
 	public void clear(){
@@ -191,21 +194,10 @@ public class Position
 	    
 	    for (int i = A1; i <= H8; i++)
 	    {
-	    	board[i] = BOARD_EMPTY_SQUARE; 
+	    	board[i] = new Square(); 
 	    }
 	}	
 
-	/**
-	 * Converts the integer i to a char
-	 * 
-	 * @param i
-	 * @return
-	 */
-	private char toChar(int i) {
-//		assume i is in range 1 to 9 inclusive
-		return new Integer(i).toString().charAt(0);
-	}
-	
 	/**
 	 * Places a piece on the board and in the bitmaps
 	 * 
@@ -231,9 +223,9 @@ public class Position
 	    all[ALL45L] |= 1L << SQ2BIT45L[sq];
 	    all[ALL45R] |= 1L << SQ2BIT45R[sq];
 	    if (c == Bitmap.WHITE){
-	      board[sq] = PIECE[p];
+	      board[sq].setPiece(Piece.fromConstant(Color.W, p));   // = PIECE[p]; //white piece
 	    } else {
-	      board[sq] = -PIECE[p];
+	    	board[sq].setPiece(Piece.fromConstant(Color.B, p)); // = -PIECE[p];
 	    }
 	
 	    if (p == KING){
@@ -263,7 +255,7 @@ public class Position
 	    all[ALL90] ^= 1L << SQ2BIT90R[square];
 	    all[ALL45L] ^= 1L << SQ2BIT45L[square];
 	    all[ALL45R] ^= 1L << SQ2BIT45R[square];
-	    board[square] = BOARD_EMPTY_SQUARE;
+	    board[square].clear();
 	    if (piece == KING)
 	    {
 	    	kingSq[color] = KING_NOT_PLACED;

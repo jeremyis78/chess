@@ -31,7 +31,7 @@ import static com.jeremybrooks.chess.Bitmap.*;
  *
  */
 public class Piece {
-	private static enum Color{W, B}
+	public static enum Color{W, B}
 	
 	/* initialize these only once, we only need one copy */
 	private static final Piece factory = new Piece();
@@ -83,17 +83,51 @@ public class Piece {
 		}
 	}
 
+	public static Piece absent()
+	{
+		return absent;
+	}
+
 	protected Color color;
 	public String toString() { return ""+toChar(); }
 	public char toChar() { return '?'; }
 	
 	/**
-	 * @return the piece as it is or will be encoded into a 'move' int
+	 * Gets the piece encoded for or retrieved from a 'move' int.
+	 * The encoded value only represents the type of piece; the color is not encoded.
+	 * 
+	 * @return the encoded piece
 	 */
-	public int moveEncoded() { return PIECE[constant()]; }
+	public int encoded() { return PIECE[constant()]; }
+	
+	/**
+	 * Gets the piece as would be returned from {@link #encoded()} but 
+	 * if the piece is Black it will return {@code -1 * moveEncoded()}
+	 * If the piece has no color or there is no piece then 
+	 * {@code Absent.toChar()} is returned.
+	 * @return the piece's color encoded value or Absent.toChar()
+	 */
+	public int encodedByColor() 
+	{
+		if(!exists())
+			return toChar();
+		return (color == Color.W ? encoded() : -encoded());
+	}
+
+	/**
+	 * Get the value used for indexing into the bitboard arrays in 
+	 * Position.getPieces(int color, int piece)
+	 * @return the index of this piece 
+	 */
 	public int constant() { return NONE; }
+	
+	/**
+	 * Should return false ONLY when this piece represents
+	 * an absent piece (ie, no piece at all)
+	 * 
+	 * @return true if this refers to a piece, false if empty/absent
+	 */
 	public boolean exists() { return (NONE != constant()); }
-	public Piece getPiece(){ return new Pawn(Color.W); }
 	
 	private class Absent extends Piece {
 		public Absent() { }
