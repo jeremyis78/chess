@@ -147,19 +147,14 @@ public class GameState {
 	
 	public String get()
 	{
-		StringBuilder fen = new StringBuilder();
-		fen.append(getBoardFEN());
-		fen.append(" ");
-		fen.append(getSideFEN());
-		fen.append(" ");
-		fen.append(getCastleFEN());
-		fen.append(" ");
-		fen.append(getEnPassantFEN());
-		fen.append(" ");
-		fen.append(getHalfMoveNumber());
-		fen.append(" ");
-		fen.append(getMoveNumber());
-		return fen.toString();
+		FenBuilder fb = new FenBuilder();
+		fb.appendPieceBoard(pos);
+		fb.appendOnMove(isWhiteToMove());
+		fb.appendCastlingOptions(castle[numberOfMovesMade]);
+		fb.appendEnPassantSquare(enPassantSq[numberOfMovesMade]);
+		fb.appendHalfMoveNumber(halfMoveClock[numberOfMovesMade]);
+		fb.appendCurrentMoveNumber(fullMoveClock[numberOfMovesMade]);
+		return fb.toString();
 	}
 
 	private void parseBoardFEN(final String board)
@@ -167,20 +162,6 @@ public class GameState {
 		pos = FenParser.parsePieceBoard(board);
 	}
 
-	/**
-	 * Gets the pieces on the board at the current depth.
-	 * 
-	 * @return
-	 */
-	private String getBoardFEN()
-	{	
-		//NOTE: the position is always kept in sync with the depth
-		FenBuilder fb = new FenBuilder();
-		fb.appendPieceBoard(pos);
-		String thisFen = fb.toString().split(" ")[0];
-		return thisFen;
-	}
-	
 	public Position getPosition()
 	{
 		return pos;
@@ -206,11 +187,6 @@ public class GameState {
 	        return;
 	    }
         throw new IllegalArgumentException("Side to move '"+s+"' is invalid; use 'w' for white or 'b' for black");
-	}
-
-	private String getSideFEN()
-	{
-		return (whiteToMove) ? WHITE_TO_MOVE_FLAG : BLACK_TO_MOVE_FLAG;
 	}
 
 	private void parseCastleFEN(final String castlingFlags)
@@ -266,36 +242,6 @@ public class GameState {
 		castle[numberOfMovesMade] = castlingFlags;
 	}
 
-	/**
-	 * Get the castling FEN field at the current state (ie, at current depth)
-	 */
-	private String getCastleFEN()
-	{
-		StringBuilder castleFen = new StringBuilder();
-		int castleBitmap = castle[numberOfMovesMade];
-		if(bool(castleBitmap & W_SHORT_CASTLE))
-		{
-			castleFen.append("K");
-		}
-		if(bool(castleBitmap & W_LONG_CASTLE))
-		{
-			castleFen.append("Q");
-		}
-		if(bool(castleBitmap & B_SHORT_CASTLE))
-		{
-			castleFen.append("k");
-		}
-		if(bool(castleBitmap & B_LONG_CASTLE))
-		{
-			castleFen.append("q");
-		}
-		
-		if(castleFen.length() == 0)
-			return UNSET_FLAG;
-		else
-			return castleFen.toString();
-	}
-
 	public boolean hasShortCastleOption()
 	{
 		if(whiteToMove) 
@@ -321,29 +267,17 @@ public class GameState {
 	    int sq = StrToSq(s);
 	    if(whiteToMove && Util.notOnSixthRank(sq))
 	    {
-	        throw new IllegalArgumentException("Given '"+getSideFEN()+"' to move, the "
+	        throw new IllegalArgumentException("Given 'w' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 6th rank");	    	
 	    }
 	    if(!whiteToMove && Util.notOnThirdRank(sq))
 	    {
-	        throw new IllegalArgumentException("Given '"+getSideFEN()+"' to move, the "
+	        throw new IllegalArgumentException("Given 'b' to move, the "
 	        		+ "en passant square '"+s+"' ought to be on the 3rd rank");
 	    }
         enPassantSq[numberOfMovesMade] = (byte) sq;
 	}
 
-	/**
-	 * Get the en-passant FEN field at the current state (ie, at current depth)
-	 * The returned value should be on the 3rd or 6th rank (the only valid values)
-	 * @return square where capture via en passant can occur
-	 */
-	private String getEnPassantFEN()
-	{
-		if(hasEnPassantOption())
-			return SqToStr(getEnPassantSquare());
-		return UNSET_FLAG;
-	}
-	
 	public boolean hasEnPassantOption()
 	{
 		return getEnPassantSquare() != NOSQUARE;
