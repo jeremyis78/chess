@@ -134,15 +134,23 @@ public class GameState {
         			+ "needs six space-delimited fields: "
         			+ "board onMove castlingFlags enPassantSquare halfMoveClock moveNumber");
         }
-              
-        //Initialize board, side, castling, en pas, hmc, and fmc.
-        //zeroeth index is moves to mate
-        parseBoardFEN(fields[0]);
-        parseSideFEN(fields[1]);
-        parseCastleFEN(fields[2]);
-        parseEnPassantFEN(fields[3]);
-        parseHalfMoveNumber(fields[4]);
-        parseMoveNumber(fields[5]);
+
+        FenParser parser = new FenParser(fen);
+        parser.parse();
+        pos = parser.getPosition();
+        setWhiteToMove(parser.isWhiteToMove());
+        setEnPassantSquare(parser.getEnPassantSquare());
+        setHalfMoveNumber(parser.getHalfMoveNumber());
+        setMoveNumber(parser.getCurrentMoveNumber());
+        overwriteCastlingFlags(NO_CASTLING_ALLOWED);
+		if(parser.hasWhiteShortCastleOption())
+			addCastlingOption(W_SHORT_CASTLE);
+		if(parser.hasWhiteLongCastleOption())
+			addCastlingOption(W_LONG_CASTLE);
+		if(parser.hasBlackShortCastleOption())
+			addCastlingOption(B_SHORT_CASTLE);
+		if(parser.hasBlackLongCastleOption())
+			addCastlingOption(B_LONG_CASTLE);
 	}
 	
 	public String get()
@@ -155,11 +163,6 @@ public class GameState {
 		fb.appendHalfMoveNumber(halfMoveClock[numberOfMovesMade]);
 		fb.appendCurrentMoveNumber(fullMoveClock[numberOfMovesMade]);
 		return fb.toString();
-	}
-
-	private void parseBoardFEN(final String board)
-	{
-		pos = FenParser.parsePieceBoard(board);
 	}
 
 	public Position getPosition()
@@ -175,51 +178,6 @@ public class GameState {
 	public void setWhiteToMove(boolean isWhitesMove)
 	{
 		whiteToMove = isWhitesMove;
-	}
-	
-	private void parseSideFEN(final String s)
-	{
-	    if (WHITE_TO_MOVE_FLAG.equals(s)) {
-	        setWhiteToMove(true);
-	        return;
-	    } else if (BLACK_TO_MOVE_FLAG.equals(s)) {
-	        setWhiteToMove(false);
-	        return;
-	    }
-        throw new IllegalArgumentException("Side to move '"+s+"' is invalid; use 'w' for white or 'b' for black");
-	}
-
-	private void parseCastleFEN(final String castlingFlags)
-	{
-		if(castlingFlags.length() > 4)
-		{
-			throw new IllegalArgumentException("Castling flags '" + castlingFlags + "' "
-					+ "are invalid; use only characters from KQkq");
-		}
-		if(UNSET_FLAG.equals(castlingFlags))
-		{
-			overwriteCastlingFlags(NO_CASTLING_ALLOWED);
-			return;
-		}
-        for (char flagChar: castlingFlags.toCharArray())  //int i = 0; i < castlingFlags.length(); i++){
-        {
-			if('K' == flagChar)
-			{
-				addCastlingOption(W_SHORT_CASTLE);
-			}
-			if('Q' == flagChar)
-			{
-				addCastlingOption(W_LONG_CASTLE);
-			}
-			if('k' == flagChar)
-			{
-				addCastlingOption(B_SHORT_CASTLE);
-			}
-			if('q' == flagChar)
-			{
-				addCastlingOption(B_LONG_CASTLE);
-			}
-        }
 	}
 	
 	/**
@@ -258,26 +216,6 @@ public class GameState {
 			return bool(castle[numberOfMovesMade] & B_LONG_CASTLE);
 	}
 
-	private void parseEnPassantFEN(final String s)
-	{
-	    if (UNSET_FLAG.equals(s)){
-	        enPassantSq[numberOfMovesMade] = NOSQUARE;
-	        return;
-	    }
-	    int sq = StrToSq(s);
-	    if(whiteToMove && Util.notOnSixthRank(sq))
-	    {
-	        throw new IllegalArgumentException("Given 'w' to move, the "
-	        		+ "en passant square '"+s+"' ought to be on the 6th rank");	    	
-	    }
-	    if(!whiteToMove && Util.notOnThirdRank(sq))
-	    {
-	        throw new IllegalArgumentException("Given 'b' to move, the "
-	        		+ "en passant square '"+s+"' ought to be on the 3rd rank");
-	    }
-        enPassantSq[numberOfMovesMade] = (byte) sq;
-	}
-
 	public boolean hasEnPassantOption()
 	{
 		return getEnPassantSquare() != NOSQUARE;
@@ -291,16 +229,6 @@ public class GameState {
 	public void setEnPassantSquare(int enPassantSquare)
 	{
 		enPassantSq[numberOfMovesMade] = (byte) enPassantSquare;
-	}
-
-	private void parseHalfMoveNumber(final String s)
-	{
-	    byte n = Byte.parseByte(s);
-	    if (n < 0){
-	    	throw new IllegalArgumentException("Half move clock '"+s+"' "
-	    			+ "must be zero or greater");
-	    }
-	    halfMoveClock[numberOfMovesMade] = n;
 	}
 
 	/**
@@ -317,15 +245,6 @@ public class GameState {
 		halfMoveClock[numberOfMovesMade] = (byte) halfMoves;
 	}
 	
-	void parseMoveNumber(final String s)
-	{
-	    byte n = Byte.parseByte(s);
-	    if (n <= 0){
-	    	throw new IllegalArgumentException("Move number '"+s+"' must be greater than zero");
-	    }  
-	    fullMoveClock[numberOfMovesMade] = n;
-	}
-
 	/**
 	 * Gets the current move number at the current depth
 	 * @return the fullMoveClock

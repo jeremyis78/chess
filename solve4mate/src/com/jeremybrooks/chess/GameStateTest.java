@@ -85,51 +85,6 @@ public class GameStateTest {
 	}
 
 	@Test
-	public void testConstructorWithInvalidSideToMove()
-	{
-		String invalidFEN = "k6K/8/8/8/8/8/8/8 xx - - 0 1";;
-		String errorMessage = "Side to move 'xx' is invalid; "
-				+ "use 'w' for white or 'b' for black";
-		assertConstructionFailsWith(errorMessage, invalidFEN);
-	}
-
-	@Test
-	public void testConstructorWithInvalidCastlingFlags()
-	{
-		String invalidFEN = "k6K/8/8/8/8/8/8/8 b KQxx - 0 2";;
-		String errorMessage = "Castling flags 'KQxx' is invalid; "
-				+ "use only characters from KQkq";
-		assertConstructionFailsWith(errorMessage, invalidFEN);
-	}
-
-	@Test
-	public void testConstructorWithNoValidCastlingFlags()
-	{
-		String invalidFEN = "k6K/8/8/8/8/8/8/8 b ZZ - 0 2";;
-		String errorMessage = "Castling flags 'ZZ' is invalid; "
-				+ "use only characters from KQkq";
-		assertConstructionFailsWith(errorMessage, invalidFEN);
-	}
-
-	@Test
-	public void testConstructorWithTooManyCastlingFlags()
-	{
-		String invalidFEN = "k6K/8/8/8/8/8/8/8 b KQkqK - 0 2";;
-		String errorMessage = "Castling flags 'KQkqK' are invalid; "
-				+ "use only characters from KQkq";
-		assertConstructionFailsWith(errorMessage, invalidFEN);
-	}
-
-	@Test
-	public void testConstructorWithNoCastlingFlags()
-	{
-		String invalidFEN = "k6K/8/8/8/8/8/8/8 b  - 0 2";;
-		String errorMessage = "Castling flags '' is invalid; "
-				+ "use only characters from KQkq";
-		assertConstructionFailsWith(errorMessage, invalidFEN);
-	}
-
-	@Test
 	public void testConstructorWithWhiteToMoveEnPassantSquareIsInvalid()
 	{
 		String invalidFEN = "k6K/8/8/8/8/8/8/8 w - e3 0 1";;
