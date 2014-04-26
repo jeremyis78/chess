@@ -49,13 +49,21 @@ public class DefaultPositionValidatorTest {
 	{
 		return FenParser.parsePieceBoard(pieceBoard);
 	}
-	
+
+	private static String buildFen(Position pos)
+	{
+		FenBuilder fb = new FenBuilder();
+		fb.appendPieceBoard(pos);
+		String thisFen = fb.toString().split(" ")[0];
+		return thisFen;
+	}
+
 	private void assertValidationThrows(String expectedErrorMessage, Position empty) {
 		
 		try
 		{
 			validator.validateOrThrow(empty);
-			fail("The position [" + empty.getFen() + "] should have thrown exception" );
+			fail("The position [" + buildFen(empty) + "] should have thrown exception" );
 		} catch (IllegalArgumentException e)
 		{
 			assertEquals(expectedErrorMessage, e.getMessage());
