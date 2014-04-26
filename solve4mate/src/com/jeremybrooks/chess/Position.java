@@ -194,14 +194,6 @@ public class Position
 	    	board[i] = BOARD_EMPTY_SQUARE; 
 	    }
 	}	
-	
-	public String getFen()
-	{
-		FenBuilder fb = new FenBuilder();
-		fb.appendPieceBoard(this);
-		String thisFen = fb.toString().split(" ")[0];
-		return thisFen;
-	}
 
 	/**
 	 * Converts the integer i to a char
