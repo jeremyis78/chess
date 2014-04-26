@@ -6,22 +6,7 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 
 public class PositionTest extends TestCase {
-
-	
-	public static final String[] FEN;
 	private static final long EMPTY_BITBOARD = 0L;
-	static
-	{
-		FEN = new String[]{
-			"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR",
-			"k1K1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p",
-			"8/8/8/8/8/8/8/k1K5",
-			"1k1K1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1/1p1p1p1p/p1p1p1p1",
-			"q1n5/1P3P2/2P5/8/K7/8/k6P/8",
-            "1K1Q1R1B/1N4P1/8/8/8/8/1k1q1r1b/1n4p1"
-			};
-	}
-	
 //	Position p;
 	
 	protected void setUp() throws Exception {
@@ -80,20 +65,6 @@ public class PositionTest extends TestCase {
 		//now clear them
 		p.clear();
 		assertEmptyPosition(p);
-	}
-
-	public void testSetAndGetFen()
-	{
-		FenParser parser = new FenParser();
-		Position p;
-		for(int i=0; i<FEN.length; i++)
-		{
-			parser.init(FEN[i]);
-			parser.parse();
-			p = parser.getPosition();
-			assertEquals(FEN[i], p.getFen());
-			p.clear();
-		}
 	}
 
 	public void testPlacingTwoWhiteKings()
@@ -197,7 +168,6 @@ public class PositionTest extends TestCase {
 
 		p.erasePiece(sq);
 
-
 		//Set the black king
 		sq = Bitmap.G6;  //Change the placement
 		p.placePiece(Bitmap.BLACK, KING, sq);
@@ -251,45 +221,6 @@ public class PositionTest extends TestCase {
 		}
 	}
 	
-	public void testNewStartingPosition()
-	{
-		Position p = createStartingPosition();
-		assertStartingPosition(p);
-		String expectedBoard = 
-                        "   -----------------\n" +
-						"8 | r n b q k b n r |\n" +
-						"7 | p p p p p p p p |\n" +
-						"6 | - - - - - - - - |\n" +
-						"5 | - - - - - - - - |\n" +
-						"4 | - - - - - - - - |\n" +
-						"3 | - - - - - - - - |\n" +
-						"2 | P P P P P P P P |\n" +
-						"1 | R N B Q K B N R |\n" +
-						"   -----------------\n" +
-						"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBoard, new Displayer().formatBoard(p));
-
-		String expectedBitboard =
-                        "   -----------------\n" +
-						"8 | r n b q - b n r |\n" +
-						"7 | p p p p p p p p |\n" +
-						"6 | - - - - - - - - |\n" +
-						"5 | - - - - - - - - |\n" +
-						"4 | - - - - - - - - |\n" +
-						"3 | - - - - - - - - |\n" +
-						"2 | P P P P P P P P |\n" +
-						"1 | R N B Q - B N R |\n" +
-						"   -----------------\n" +
-						"    a b c d e f g h\n";
-		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
-		
-		assertEquals(1L<<Bitmap.E1, p.getKing(Bitmap.WHITE));
-		assertEquals(1L<<Bitmap.E8, p.getOpponentKing(Bitmap.WHITE));
-	}
-
-	private Position createStartingPosition() {
-		return FenParser.parsePieceBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-	}
 
 	public void testMovingPiecesQueensGambitAccepted()
 	{
@@ -297,24 +228,24 @@ public class PositionTest extends TestCase {
 		assertStartingPosition(p);
 		
 		// 1. e4
-		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.E4);
-		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPPPPPP/RNBQKBNR", p.getFen());
+		p.placePiece(WHITE, PAWN, E4);
+		assertPlaced(p, WHITE, PAWN, E4);
 		p.erasePiece(Bitmap.E2);
-		assertEquals("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		assertErased(p, WHITE, PAWN, E2);
 		
 		// 1. ... d5
-		p.placePiece(Bitmap.BLACK, PAWN, Bitmap.D5);
-		assertEquals("rnbqkbnr/pppppppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		p.placePiece(BLACK, PAWN, D5);
+		assertPlaced(p, BLACK, PAWN, D5);
 		p.erasePiece(Bitmap.D7);
-		assertEquals("rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		assertErased(p, BLACK, PAWN, D7);
 		
 		// 2. e4xd5
-		p.erasePiece(Bitmap.D5);
-		assertEquals("rnbqkbnr/ppp1pppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.erasePiece(Bitmap.E4);
-		assertEquals("rnbqkbnr/ppp1pppp/8/8/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
-		p.placePiece(Bitmap.WHITE, PAWN, Bitmap.D5);
-		assertEquals("rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR", p.getFen());
+		p.erasePiece(D5);
+		assertErased(p, BLACK, PAWN, D5);
+		p.erasePiece(E4);
+		assertErased(p, WHITE, PAWN, E4);
+		p.placePiece(WHITE, PAWN, D5);
+		assertPlaced(p, WHITE, PAWN, D5);
 
 		String expectedBoard = 
                 "   -----------------\n" +
@@ -343,29 +274,8 @@ public class PositionTest extends TestCase {
 				"   -----------------\n" +
 				"    a b c d e f g h\n";
 		Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
-
 	}
 	
-	private void assertStartingPosition(Position p) {
-		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Bitmap.WHITE, PAWN));
-		assertEquals("a1 h1 ", toSquares(p, Bitmap.WHITE, ROOK));
-		assertEquals("b1 g1 ", toSquares(p, Bitmap.WHITE, KNIGHT));
-		assertEquals("c1 f1 ", toSquares(p, Bitmap.WHITE, BISHOP));
-		assertEquals("d1 ", toSquares(p, Bitmap.WHITE, QUEEN));
-		assertEquals("e1 ", toSquares(p, Bitmap.WHITE, KING));
-
-		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", toSquares(p, Bitmap.BLACK, PAWN));
-		assertEquals("a8 h8 ", toSquares(p, Bitmap.BLACK, ROOK));
-		assertEquals("b8 g8 ", toSquares(p, Bitmap.BLACK, KNIGHT));
-		assertEquals("c8 f8 ", toSquares(p, Bitmap.BLACK, BISHOP));
-		assertEquals("d8 ", toSquares(p, Bitmap.BLACK, QUEEN));
-		assertEquals("e8 ", toSquares(p, Bitmap.BLACK, KING));
-	}
-
-	private String toSquares(Position p, int colorIndex, int piecesIndex) {
-		return Util.displaySquaresStr(p.getPieces(colorIndex, piecesIndex));
-	}
-
 	public void testIsSameColor() {
 		int whitePiece = 1;
 		int blackPiece = -1;
@@ -490,4 +400,29 @@ public class PositionTest extends TestCase {
 			assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getKing(color) & sqMask);
 		}
 	}
+	
+	private void assertStartingPosition(Position p) {
+		assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", toSquares(p, Bitmap.WHITE, PAWN));
+		assertEquals("a1 h1 ", toSquares(p, Bitmap.WHITE, ROOK));
+		assertEquals("b1 g1 ", toSquares(p, Bitmap.WHITE, KNIGHT));
+		assertEquals("c1 f1 ", toSquares(p, Bitmap.WHITE, BISHOP));
+		assertEquals("d1 ", toSquares(p, Bitmap.WHITE, QUEEN));
+		assertEquals("e1 ", toSquares(p, Bitmap.WHITE, KING));
+
+		assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", toSquares(p, Bitmap.BLACK, PAWN));
+		assertEquals("a8 h8 ", toSquares(p, Bitmap.BLACK, ROOK));
+		assertEquals("b8 g8 ", toSquares(p, Bitmap.BLACK, KNIGHT));
+		assertEquals("c8 f8 ", toSquares(p, Bitmap.BLACK, BISHOP));
+		assertEquals("d8 ", toSquares(p, Bitmap.BLACK, QUEEN));
+		assertEquals("e8 ", toSquares(p, Bitmap.BLACK, KING));
+	}
+
+	private String toSquares(Position p, int colorIndex, int piecesIndex) {
+		return Util.displaySquaresStr(p.getPieces(colorIndex, piecesIndex));
+	}
+
+	private static Position createStartingPosition() {
+		return FenParser.parsePieceBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+	}
+
 }
