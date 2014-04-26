@@ -90,7 +90,6 @@ public class FenParser {
 
 	private boolean nothingToParse = true;
 	private int numberOfFieldsFound = 0;
-	private String originalFen;
 	private String[] field;
 	/* provide reasonable defaults, empty board, white to move, no castling, first move */
 	private Position position = new Position();
@@ -114,7 +113,6 @@ public class FenParser {
 
 	public void init(String fen)
 	{
-		originalFen = fen;
 		if(!fen.trim().isEmpty())
 		{
 			field = fen.split(""+FIELD_DELIMITER);
@@ -152,13 +150,36 @@ public class FenParser {
 
 	private Position parsePieceBoard()
 	{
+		/*
+		 * Algorithm parses the board as the characters are read from left to
+		 * right as found in the FENs board representation.
+		 *     
+		 *  For example,
+		 *  
+		 *      k6K/8/5P2/8/8/8/8/8
+		 *      
+		 *  will be read in starting from the upper left corner of the chess board (at a8).
+		 *  From left to right the algorithm parses the string as follows:
+		 *  
+		 *  	k = blackKing put on a8
+		 *      6 = 6 empty squares (b8 to g8)
+		 *      K = whiteKing put on h8
+		 *      / = move to 7th rank
+		 *      8 = eight empty squares (a7 to h7)
+		 *      / = move to 6th rank
+		 *      5 = five empty squares (a6 to e6)
+		 *      P = whitePawn put on f6
+		 *      2 = two empty squares (g6 to h6)
+		 *      / = move to 5th rank
+		 *      and so on.  
+		 */
 		if(nothingToParse)
 			throw new IllegalStateException("need something to parse; "
 					+ "call init(String) or use constructor before calling parse()");
 
 		String toParse = field[PIECE_BOARD_FIELD];
-		String[] ranks = toParse.split(""+RANK_DELIMITER);
-		if (ranks.length != 8)
+		String[] fenRow = toParse.split(""+RANK_DELIMITER);
+		if (fenRow.length != 8)
 		{
 			throw new IllegalArgumentException("board must contain eight ranks");
 		}
@@ -166,35 +187,44 @@ public class FenParser {
 		int numWhiteKingsPlaced = 0;
 		int numBlackKingsPlaced = 0;
 		
-		//Start with the first rank
-		int currentSquare = Bitmap.A1; //keep track of the square we're on
-		for(int m = ranks.length - 1; m >= 0; m--)
+		int currentSquare = Bitmap.A8;
+		for(int index = 0; index < 8; index++)
 		{
-			String rank = ranks[m];
-			validateFiles(rank, m-8);
-			for (int n = 0; n < rank.length(); n++)
+			String charsOnRow = fenRow[index]; 
+			int rankNumber = Math.abs(index - 8); //actual rank on chess board
+			if(doNotFitOnRank(charsOnRow))
 			{
-				char boardCharacter = rank.charAt(n);
+				throw new IllegalArgumentException("board pieces and empty squares on rank #"+
+						rankNumber+" do not fit on eight files: "+charsOnRow);
+			}
+			for (int charIndex = 0; charIndex < charsOnRow.length(); charIndex++)
+			{
+				char boardCharacter = charsOnRow.charAt(charIndex);
 				if (Character.isDigit(boardCharacter))
 				{
 					//Skip those empty squares by adding the digit's value
-					currentSquare += (boardCharacter - '0'); 
+					currentSquare += (boardCharacter - '0');
+					//System.out.println("  " + boardCharacter + " empty squares");
 				} else {
 					int color = (Character.isUpperCase(boardCharacter)) ? WHITE : BLACK;
-					int piece = NONE;
-					piece = getPieceFromBoardCharacter(boardCharacter);
+					int piece = getPieceFromBoardCharacter(boardCharacter);
 					if(piece == KING && color == WHITE) numWhiteKingsPlaced++;
 					if(piece == KING && color == BLACK) numBlackKingsPlaced++;
 					validateOneKingPerColorOrThrow(numWhiteKingsPlaced, numBlackKingsPlaced);
 					position.placePiece(color, piece, currentSquare);
+					//System.out.println("  " + boardCharacter + " add at " + Util.SqToStr(currentSquare));
 		            currentSquare++;
 				}
 			}	
+			//System.out.println("put "+charsOnRow+" on rank #" + rankNumber);
+			//move down the board to first square of the rank beneath
+			//the current one (a7, a6, a5 ...)
+			currentSquare = ((rankNumber - 1) * 8) - 8;
 		}
 		return position;
 	}
 
-	public static void validateFiles(String rankFen, int rankNumber)
+	private boolean doNotFitOnRank(String rankFen)
 	{
 		int len = rankFen.length();
 		int filesRead = 0;
@@ -210,9 +240,9 @@ public class FenParser {
 		}
 		if(filesRead != 8)
 		{
-			throw new IllegalArgumentException("board pieces and empty squares on rank #"+
-					Math.abs(rankNumber)+" do not fit on eight files: "+rankFen);
+			return true; //error!
 		}
+		return false;
 	}
 
 	private void validateOneKingPerColorOrThrow(int numWhiteKingsPlaced, 

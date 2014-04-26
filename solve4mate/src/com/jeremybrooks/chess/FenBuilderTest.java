@@ -56,7 +56,7 @@ public class FenBuilderTest {
 			builder.reset();
 		}
 	}
-
+	
 	@Test
 	public void givenBlackToMove() {
 		builder.appendOnMove(false);

@@ -66,6 +66,18 @@ public class FenParserTest {
 	}
 
 	@Test
+	public void givenBoardWithZeroesOnRanks() {
+		String pieceBoard = "0/0/0/0/0/0/0/0";
+		parser.init(pieceBoard);
+		try {
+			parser.parse();
+		} catch (IllegalArgumentException expected) {
+			assertEquals("board pieces and empty squares on rank #8 do not fit on eight files: 0",
+					expected.getMessage());
+		}
+	}
+
+	@Test
 	public void givenNineSquaresOnARank() {
 		String pieceBoard = "8/8/8/PPPPPPPPPPPP/8/8/8/8 w - - 0 1";
 		parser.init(pieceBoard);
@@ -148,12 +160,26 @@ public class FenParserTest {
 	public void testParsePieceBoard() {
 		String pieceBoard = "8/4P3/8/8/8/8/4P3/k6K";
 		Position position = FenParser.parsePieceBoard(pieceBoard);
+		FenBuilder builder = new FenBuilder();
+		builder.appendPieceBoard(position);
+		assertEquals(pieceBoard, builder.toString().split(" ")[0]);
+		
 		assertEquals(WHITE_PAWN, position.getBoard(E7));
 		assertEquals(WHITE_PAWN, position.getBoard(E2));
 		assertEquals(BLACK_KING, position.getBoard(A1));
 		assertEquals(WHITE_KING, position.getBoard(H1));
 	}
 
+	@Test
+	public void givenIntConvertToCharEquivalent()
+	{ 
+		int number = 6;
+//		Character c = '0' + number;
+		assertEquals('6', Character.forDigit(number, 10));
+		assertEquals('6', (char)('0' + number));
+		
+	}
+	
 	@Test
 	public void givenFirstFieldBoard()
 	{
@@ -355,47 +381,47 @@ public class FenParserTest {
 		assertEquals(1, parser.getCurrentMoveNumber());
 	}
 
-	public void testIsValidRankFen(){
-		String[] good = 
-			new String[]
-			           {
-						"8",
-						"1p1p1p1p",
-						"p1p1p1p1",
-						"RNBQKBNR",
-						"2P5",
-			           };
-		for(int i=0; i<good.length; i++)
-		{
-			try
-			{
-				FenParser.validateFiles(good[i], 1);
-			} catch (IllegalArgumentException e){
-				fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
-			}
-		}
-
-	
-		String[] bad = 
-			new String[]
-			           {
-						"7",
-						"p1p1p1p1p1p",
-						"1p1p1p1",
-						"RNB3BNR",
-						"2P4",
-			           };
-		for(int i=0; i<good.length; i++)
-		{
-			try
-			{
-				FenParser.validateFiles(bad[i], 1);
-				fail("should throw, invalid rank fen " + bad[i]);
-			} catch (IllegalArgumentException e){
-			}
-		}
-
-	}
+//	public void testIsValidRankFen(){
+//		String[] good = 
+//			new String[]
+//			           {
+//						"8",
+//						"1p1p1p1p",
+//						"p1p1p1p1",
+//						"RNBQKBNR",
+//						"2P5",
+//			           };
+//		for(int i=0; i<good.length; i++)
+//		{
+//			try
+//			{
+//				FenParser.validateFiles(good[i], 1);
+//			} catch (IllegalArgumentException e){
+//				fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
+//			}
+//		}
+//
+//	
+//		String[] bad = 
+//			new String[]
+//			           {
+//						"7",
+//						"p1p1p1p1p1p",
+//						"1p1p1p1",
+//						"RNB3BNR",
+//						"2P4",
+//			           };
+//		for(int i=0; i<good.length; i++)
+//		{
+//			try
+//			{
+//				FenParser.validateFiles(bad[i], 1);
+//				fail("should throw, invalid rank fen " + bad[i]);
+//			} catch (IllegalArgumentException e){
+//			}
+//		}
+//
+//	}
 
 	private void assertInvalid(String position, String expectedError) {
 		try {

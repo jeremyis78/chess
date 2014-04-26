@@ -5,6 +5,7 @@ import static com.jeremybrooks.chess.Util.bool;
 
 public class FenBuilder {
 
+
 	public static final String RANK_DELIMITER = "/";
 	public static final char WHITE_ON_MOVE = 'w';
 	public static final char BLACK_ON_MOVE = 'b';
@@ -22,6 +23,11 @@ public class FenBuilder {
 	private int enPassantSquare;
 	private int halfMovesSinceCaptureOrPawnAdvance;
 	private int currentMoveNumber;
+	
+	/* temporary fields to assist when building the piece board */
+	private char fen[];
+	private int fenIndex;
+	private int contiguousEmptySquares;
 	
 	public FenBuilder(){
 		reset();
@@ -62,127 +68,98 @@ public class FenBuilder {
 	
 	public FenBuilder appendPieceBoard(Position position)
 	{
-	    char fen[] = new char[100];
-	    int fenIndex = 0;
-	    int contEmptySquares = 0;
+	    fen = new char[100];
+	    fenIndex = 0;
+	    contiguousEmptySquares = 0;
 	    for (int i = A8; i >= A1; i-=8){
 	        if (i < A8){
-	            fen[fenIndex++] = RANK_DELIMITER.charAt(0); //Rank separator only on first 7..not the last one
+	            addCharacter(RANK_DELIMITER.charAt(0)); //Rank separator only on first 7..not the last one
 	        }
 	        for (int j = i; j < i+8; j++){
 	            switch(position.getBoard(j)){
 	            //white pieces: pawns, knights, bishops, rooks, queens, king
 	            case 1:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[0];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[0]);
 	                break;
 	            case 2:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares);
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[1];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[1]);
 	                break;
 	            case 5:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[2];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[2]);
 	                break;
 	            case 6:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-					fen[fenIndex++] = BOARD_PIECE[3];
+	            	addEmptySquaresIfAny();
+					addCharacter(BOARD_PIECE[3]);
 					break;
 	            case 7:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[4];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[4]);
 	                break;
 	            case 3:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[5];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[5]);
 	                break;
 	                
 	            //black pieces: pawns, knights, bishops, rooks, queens, king
 	            case -1:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-					fen[fenIndex++] = BOARD_PIECE[6];
+	            	addEmptySquaresIfAny();
+					addCharacter(BOARD_PIECE[6]);
 					break;
 	            case -2:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[7];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[7]);
 	                break;
 	            case -5:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[8];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[8]);
 	                break;
 	            case -6:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[9];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[9]);
 	                break;
 	            case -7:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[10];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[10]);
 	                break;
 	            case -3:
-	                if (contEmptySquares > 0){
-	                    fen[fenIndex++] = toChar(contEmptySquares); 
-	                    contEmptySquares = 0;
-	                }
-	                fen[fenIndex++] = BOARD_PIECE[11];
+	            	addEmptySquaresIfAny();
+	                addCharacter(BOARD_PIECE[11]);
 	                break;
 	            default:
 	                //increment a counter for contiguous empty squares
-	                contEmptySquares++;
+	                contiguousEmptySquares++;
 	                break;
 	            }
 	        }
 	        //tack on any empty squares at the end
-	        if (contEmptySquares > 0 && i >= A1){
-	            fen[fenIndex++] = toChar(contEmptySquares);
-	            contEmptySquares = 0;
-	        }	
+	        addEmptySquaresIfAny();
 	    }
 	    pieceBoard = new String(fen).trim();
 		return this;
 	}
 	
-	private char toChar(int i) {
-		if (i < 0 || i > 9)
+	private void addEmptySquaresIfAny()
+	{
+		if(contiguousEmptySquares > 0)
 		{
-			throw new IllegalArgumentException("i should be in range [0..9], found " + i);
+			fen[fenIndex++] = charForDigit(contiguousEmptySquares);
+			contiguousEmptySquares = 0;
 		}
-		return new Integer(i).toString().charAt(0);
 	}
 
-	
+	private void addCharacter(char c)
+	{
+		fen[fenIndex++] = c;
+	}
+
+	private char charForDigit(int i) {
+		//assert (i > 0 && i <= 9);
+		return (char)('0' + i); //Character.forDigit(i, 10);
+	}
+
 	public FenBuilder appendOnMove(boolean isWhiteToMove)
 	{
 		whiteToMove = isWhiteToMove;
