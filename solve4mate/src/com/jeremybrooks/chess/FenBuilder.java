@@ -76,72 +76,25 @@ public class FenBuilder {
 	            addCharacter(RANK_DELIMITER.charAt(0)); //Rank separator only on first 7..not the last one
 	        }
 	        for (int j = i; j < i+8; j++){
-	            switch(position.getBoard(j)){
-	            //white pieces: pawns, knights, bishops, rooks, queens, king
-	            case 1:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[0]);
-	                break;
-	            case 2:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[1]);
-	                break;
-	            case 5:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[2]);
-	                break;
-	            case 6:
-	            	addEmptySquaresIfAny();
-					addCharacter(BOARD_PIECE[3]);
-					break;
-	            case 7:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[4]);
-	                break;
-	            case 3:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[5]);
-	                break;
-	                
-	            //black pieces: pawns, knights, bishops, rooks, queens, king
-	            case -1:
-	            	addEmptySquaresIfAny();
-					addCharacter(BOARD_PIECE[6]);
-					break;
-	            case -2:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[7]);
-	                break;
-	            case -5:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[8]);
-	                break;
-	            case -6:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[9]);
-	                break;
-	            case -7:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[10]);
-	                break;
-	            case -3:
-	            	addEmptySquaresIfAny();
-	                addCharacter(BOARD_PIECE[11]);
-	                break;
-	            default:
-	                //increment a counter for contiguous empty squares
-	                contiguousEmptySquares++;
-	                break;
-	            }
+	            int boardPiece = position.getBoard(j);
+	    		Piece piece = Piece.fromBoardPiece(boardPiece);
+	    		if(piece.exists())
+	    		{
+	    			addDigitForAnyEmptySquares();
+	    			addCharacter(piece.toChar());
+	    		} else {
+	    			//increment a counter for contiguous empty squares
+	    			contiguousEmptySquares++;
+	    		}
 	        }
 	        //tack on any empty squares at the end
-	        addEmptySquaresIfAny();
+	        addDigitForAnyEmptySquares();
 	    }
 	    pieceBoard = new String(fen).trim();
 		return this;
 	}
 	
-	private void addEmptySquaresIfAny()
+	private void addDigitForAnyEmptySquares()
 	{
 		if(contiguousEmptySquares > 0)
 		{
