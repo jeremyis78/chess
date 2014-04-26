@@ -175,7 +175,10 @@ public class GameState {
 	private String getBoardFEN()
 	{	
 		//NOTE: the position is always kept in sync with the depth
-		return pos.getFen();
+		FenBuilder fb = new FenBuilder();
+		fb.appendPieceBoard(pos);
+		String thisFen = fb.toString().split(" ")[0];
+		return thisFen;
 	}
 	
 	public Position getPosition()
