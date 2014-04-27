@@ -77,7 +77,7 @@ public class FenBuilder {
 	        }
 	        for (int j = i; j < i+8; j++){
 	            int boardPiece = position.getBoard(j);
-	    		Piece piece = Piece.fromBoardPiece(boardPiece);
+	    		Piece piece = PieceFactory.fromBoardPiece(boardPiece);
 	    		if(piece.exists())
 	    		{
 	    			addDigitForAnyEmptySquares();

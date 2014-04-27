@@ -163,7 +163,12 @@ public class Position
 	
 	public int getBoard(int square)
 	{
-		return board[square].getPiece().encodedByColor();
+		return get(square).encodedByColor();
+	}
+	
+	public Piece get(int square)
+	{
+		return board[square].get();
 	}
 
 	public boolean isNotEmpty(int square)
@@ -173,7 +178,7 @@ public class Position
 	
 	public boolean isEmpty(int square)
 	{
-		return !(board[square].isOccupied()); // == BOARD_EMPTY_SQUARE);
+		return !(board[square].isOccupied());
 	}
 
 	public void clear(){
@@ -222,11 +227,8 @@ public class Position
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];
 	    all[ALL45L] |= 1L << SQ2BIT45L[sq];
 	    all[ALL45R] |= 1L << SQ2BIT45R[sq];
-	    if (c == Bitmap.WHITE){
-	      board[sq].setPiece(Piece.fromConstant(Color.W, p));   // = PIECE[p]; //white piece
-	    } else {
-	    	board[sq].setPiece(Piece.fromConstant(Color.B, p)); // = -PIECE[p];
-	    }
+	    Color color = c==Bitmap.WHITE?Color.W:Color.B;
+		board[sq].set(PieceFactory.fromIndex(color, p));
 	
 	    if (p == KING){
 	            kingSq[c] = sq;

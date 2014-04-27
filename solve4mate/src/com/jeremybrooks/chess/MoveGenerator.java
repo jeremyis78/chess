@@ -494,7 +494,7 @@ public class MoveGenerator {
 	// RookAttacks() returns a bitboard of the squares that 
 	// a rook on "from" would attack, including captures.
 
-	long rookAttacks (int rookSquare, long allPiecesByRank, long allPiecesByFile)
+	static long rookAttacks (int rookSquare, long allPiecesByRank, long allPiecesByFile)
 	{
 	    long attacks;
 	    int stat1, stat2;
@@ -510,7 +510,7 @@ public class MoveGenerator {
 	// BishopAttacks() returns a bitboard of the squares that 
 	// a bishop on "from" would attack, including captures.
 
-	long bishopAttacks (int bishopSquare, long allPieces45Left, long allPieces45Right)
+	static long bishopAttacks (int bishopSquare, long allPieces45Left, long allPieces45Right)
 	{
 	    long attacks;
 	    int stat1, stat2;

@@ -7,9 +7,9 @@ package com.jeremybrooks.chess;
  * 
  * A Square has one of two states: 
  *      1) empty/unoccupied, 
- *              {@code square.isOccupied() == true}
- *      2) occupied by a piece,
  *              {@code square.isOccupied() == false}
+ *      2) occupied by a piece,
+ *              {@code square.isOccupied() == true}
  * </pre>
  * @author jeremy
  *
@@ -24,6 +24,7 @@ public class Square {
 	 */
 	public Square() {
 		super();
+		set(null);
 	}
 	
 	/**
@@ -33,49 +34,45 @@ public class Square {
 	 */
 	public Square(Piece piece) {
 		super();
-		this.piece = piece;
+		set(piece);
 	}
 
 	public boolean isOccupied()
 	{
-		return (piece != null);
+		if (piece != null && piece.exists()) 
+			return true;
+		return false;
 	}
 
 	public void clear()
 	{
-		piece = null;
+		set(null);
 	}
 
-	public Piece getPiece()
+	public Piece get()
 	{
-		if (piece == null)
-			return Piece.absent();
+		if (piece == null) return new Empty();
 		return piece;
 	}
 
-	public void setPiece(Piece piece)
+	public void set(Piece piece)
 	{
 		this.piece = piece;
 	}
 	
-	public static Square with(Piece piece)
-	{
-		return new Square(piece);
-	}
-
 	public static Square unoccupied()
 	{
 		return EMPTY_SQUARE;
 	}
 
-	public static Square fromBoard(int boardPiece)
-	{
-		Piece piece = Piece.fromBoardPiece(boardPiece);
-		if(piece.exists())
-		{
-			return Square.with(piece);
-		}
-		return Square.unoccupied();
-	}
+//	public static Square fromBoard(int boardPiece)
+//	{
+//		Piece piece = Piece.fromBoardPiece(boardPiece);
+//		if(piece.exists())
+//		{
+//			return Square.with(piece);
+//		}
+//		return Square.unoccupied();
+//	}
 
 }

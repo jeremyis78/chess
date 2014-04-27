@@ -59,6 +59,7 @@ public class PositionTest extends TestCase {
 		//Test that there are some pieces set
 		assertTrue(0 != p.getKingSquare(WHITE));
 		assertTrue(0 != p.getKingSquare(BLACK));
+		assertEquals(ROOK, p.get(A1).index());
 		assertTrue(PIECE[Bitmap.ROOK] == p.getBoard(Bitmap.A1));
 		assertEquals(0xFFFF00000000FFFFL, p.getAllPieces(0));// .all[ALL]);
 		
@@ -362,6 +363,7 @@ public class PositionTest extends TestCase {
 	{
 		int multiplier = (color == 0 ? 1 : -1);
 		assertEquals(multiplier * PIECE[piece], p.getBoard(sq));
+		assertEquals(multiplier * PIECE[piece], p.get(sq).encodedByColor());
 		//Get the appropriate bitboard masks
         long sqMask = 1L << sq;
         long sqMask90 = 1L << SQ2BIT90R[sq];
@@ -383,6 +385,7 @@ public class PositionTest extends TestCase {
 	private static void assertErased(Position p, int color, int piece, int sq)
 	{
 		assertEquals(Bitmap.BOARD_EMPTY_SQUARE, p.getBoard(sq));
+		assertEquals(NONE, p.get(sq).index());
 		//Get the appropriate bitboard masks
         long sqMask = 1L << sq;
         long sqMask90 = 1L << SQ2BIT90R[sq];
