@@ -7,6 +7,8 @@ package com.jeremybrooks.chess;
 import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.*;
 
+import org.apache.log4j.Logger;
+
 /**
  * GameState contains a board representation and flags or metadata.
  * 
@@ -20,15 +22,13 @@ import static com.jeremybrooks.chess.Util.*;
  *
  */
 public class GameState {
+	private static final Logger log = Logger.getLogger(GameState.class); 
 
 	public static final int W_SHORT_CASTLE = 1;
 	public static final int W_LONG_CASTLE  = 2;
 	public static final int B_SHORT_CASTLE = 4;
 	public static final int B_LONG_CASTLE  = 8;
 
-	private static final String BLACK_TO_MOVE_FLAG = "b";
-	private static final String WHITE_TO_MOVE_FLAG = "w";
-	private static final String UNSET_FLAG = "-";
 	public static final String FEN_START = new String(
 	    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
@@ -71,7 +71,7 @@ public class GameState {
     int movesValue[];        //minimax value of the moves from this state 
     int nodes = 0;                  //nodes searched
     int best = 0;                   //best value seen in search
-    int movesIndex; 
+    int movesIndex;
     
     //TODO: need a variable or something to keep track of 
     //      the number of repeated positions 
@@ -83,6 +83,7 @@ public class GameState {
 	public GameState(int maxNumberOfMovesToSupport)
 	{
 		pos = new Position();
+		log.trace("initializing stack to depth " + maxNumberOfMovesToSupport);
 		maxNumberOfMovesMade = maxNumberOfMovesToSupport;
 		int maxMoves = maxNumberOfMovesToSupport + 1;
 		castle = new int[maxMoves];
@@ -288,6 +289,7 @@ public class GameState {
 	 * @return
 	 */
 	public boolean makeMove(int move, boolean isWhitesMove){
+		log.trace(indent() + formatCurrentLine());
 		if(numberOfMovesMade == maxNumberOfMovesMade)
 		{
 			throw new IllegalStateException("max number of moves have been made: " + maxNumberOfMovesMade);
@@ -296,7 +298,6 @@ public class GameState {
 		{
 			throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
 		}
-//		System.out.println("*** make "+(isWhitesMove?"white":"black")+" move "+Util.displayMoveStr(move, false, false));
 		whiteToMove = isWhitesMove;						//cache whose move it is
 	    int from = move & 0x3F;                         //first 6 bits
 	    int to = (move >> 6) & 0x3F;                    //next 6
@@ -324,7 +325,7 @@ public class GameState {
 	        	pos.erasePiece(squareBehind(to, isWhitesMove?0:1));
 	        	captured = NONE;
 	        } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
-	        	updateEnPassantSquareForNextMove(from);
+	        	updateEnPassantSquareForNextMove(squareAhead(from, whiteToMove?0:1));
 	        }
 	        duplicateCastlingFlags();
 	    }
@@ -359,7 +360,17 @@ public class GameState {
 	    for(int i = 0; i < numberOfMovesMade; i++)
 	        numberOfLegalMovesToDepth[numberOfMovesMade] += numberOfLegalMoves[i];
 	    movesIndex = 0;
+	    log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
 	    return false;
+	}
+
+	private String formatCurrentLine() {
+		StringBuilder current = new StringBuilder();
+		for(int i=0; i<numberOfMovesMade; i++){
+			String moveNo = (i%2==0) ? ((i+2)/2) + ". " : "";
+			current.append(moveNo+Util.displayMoveStr(currentLine[i], false, false)+ " ");
+		}
+		return current.toString();
 	}
 
 	private boolean isPawnAdvancingTwoSquares(int moving, int from, int to) {
@@ -394,7 +405,6 @@ public class GameState {
 		{
 			throw new IllegalStateException("no moves to undo; call makeMove() first");
 		}
-//		System.out.println("*** undo "+(isWhitesMove?"white":"black")+" move "+Util.displayMoveStr(move, false, false));
 		whiteToMove = isWhitesMove;
 	    int from = move & 0x3F;                         //first 6 bits
 	    int to = (move >> 6) & 0x3F;                    //next 6
@@ -428,6 +438,9 @@ public class GameState {
 	    //NOTE: Castling flags are stored on the castle stack (array) so simply
 	    //decrementing the numberOfMovesMade undoes any castling flag changes.
 	    
+	    if(isPawnAdvancingTwoSquares(moving, from, to)){
+	    	updateEnPassantSquareForNextMove(NOSQUARE);
+	    }
 	    //Place captured piece back on the board
 	    if(isEnPassantCapture(moving, to, captured))
 	    {
@@ -435,7 +448,15 @@ public class GameState {
 	    } else if (captured != NONE) { //Normal capture
 	    	placeOpposingPiece(captured, to);
 	    }
+	    log.trace(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
 	    return false;
+	}
+
+	private String indent() {
+		String indent = "";
+		int depth = numberOfMovesMade;
+		while(depth-- > 0) indent += " ";
+		return indent;
 	}
 
 	private void placePiece(int piece, int to)
@@ -537,7 +558,7 @@ public class GameState {
 	}
 
 	private void updateEnPassantSquareForNextMove(int from) {
-		enPassantSq[numberOfMovesMade + 1] = (byte)squareAhead(from, whiteToMove?0:1);
+		enPassantSq[numberOfMovesMade + 1] = (byte)from;
 	}
 
 	private boolean isEnPassantCapture(int moving, int to, int captured) {

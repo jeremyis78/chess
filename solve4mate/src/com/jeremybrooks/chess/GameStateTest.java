@@ -164,33 +164,36 @@ public class GameStateTest {
 	}
 
 	/*
-	 * solving this fails with illegal state exception "h5 already exists" when placing a piece there
-	 * "mate in 5" for this position: 1rqn3k/6pp/1pn5/4P3/1P2bNP1/1Q2N3/4BR1P/6K1 w - - 0 1
-	 * 
-	 * TODO: This test should be fixed to exactly simulate what went wrong:
-	 * 
-	 * adding the following prior to replacing the capture piece in UndoMove got around the above bug
-	 * but the test below doesn't fail so need to do more to figure out how duplicate the above bug
-	 * 
-	 *  //undo castling move
-	 *  ...
-	 *  if(isPawnAdvancingTwoSquares(moving, from, to)){
-	 *   	updateEnPassantSquareForNextMove(NOSQUARE);
-	 *   }
-	 *   //replace captured piece
-	 *   ...
+	 * Test to ensure en-passant square is properly reset
+	 * Found bug when searching for mate in 5 with the position below;
+	 * Extracted out the moves to duplicate the failure
 	 */
 	@Test
 	public void testMakeAndUndoBlackPawnAdvanceTwoUndoesEnpassantSquare() {
-		String beforeMove = "4k3/3p4/8/4P3/8/8/8/4K3 b - - 2 23";  //d6 will become enpassant square
-		int movePawnAdvancesTwo = encodeMove(D7, D5, PIECE[PAWN]);
-		String afterMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 24";
-		boolean isWhitesMove = setupState(beforeMove);
-		assertFalse(gameState.hasEnPassantOption());
-		assertEquals(afterMove, makeMove(isWhitesMove, movePawnAdvancesTwo));
-		assertTrue(gameState.hasEnPassantOption());
-		assertEquals(beforeMove, undoMove(isWhitesMove, movePawnAdvancesTwo));
-		assertFalse(gameState.hasEnPassantOption());
+		String mateIn5 = "1rqn3k/6pp/1pn5/4P3/1P2bNP1/1Q2N3/4BR1P/6K1 w - - 0 1";
+		boolean isWhitesMove = setupState(mateIn5);
+		int whiteMove = encodeMove(H2, H4, PIECE[PAWN]);
+		int blackG5 = encodeMove(G7, G5, PIECE[PAWN]);
+		int blackH5 = encodeMove(H7, H5, PIECE[PAWN]);
+		int blackB5 = encodeMove(B6, B5, PIECE[PAWN]);
+
+		makeMove(isWhitesMove, whiteMove);
+		assertEquals(H3, gameState.getEnPassantSquare());
+		
+		makeMove(!isWhitesMove, blackG5);
+		assertEquals(G6, gameState.getEnPassantSquare());
+		undoMove(!isWhitesMove, blackG5);
+		assertEquals(H3, gameState.getEnPassantSquare());
+
+		makeMove(!isWhitesMove, blackH5);
+		assertEquals(H6, gameState.getEnPassantSquare());
+		undoMove(!isWhitesMove, blackH5);
+		assertEquals(H3, gameState.getEnPassantSquare());
+
+		makeMove(!isWhitesMove, blackB5);
+		assertEquals(NOSQUARE, gameState.getEnPassantSquare());
+		undoMove(!isWhitesMove, blackB5);
+		assertEquals(H3, gameState.getEnPassantSquare());
 	}
 	
 	@Test
