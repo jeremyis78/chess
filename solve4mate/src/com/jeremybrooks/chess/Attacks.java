@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class Attacks {
 	
-	private static Logger log = Logger.getLogger(Attacks.class);
+	private static final Logger log = Logger.getLogger(Attacks.class);
 
 	//This is a constant for the diagonal length
 	//To access the length of the main diagonal use dlen[7]
@@ -38,22 +38,31 @@ public class Attacks {
 
 	//Masks have a one bit set corresponding to the square on the board.
 	//The array index is the square number on the board, an element of {0,1,...,63}
-	//If it's a 2D array, the first index is the square number and
-	//the second is the status of the ray the piece is aligned on
 	
-	 //TODO: should these be statically initialized instead?????
-	long mask[] = new long[64];    //TODO: do we need these?  (see SQ2BIT??[] in defs.h)
-    long mask90[] = new long[64];  //TODO: do we need these?     "
-	long mask45R[] = new long[64]; //TODO: do we need these?     "
-	long mask45L[] = new long[64]; //TODO: do we need these?     "
-	long king[] = new long[64];    //king attacks/moves for all squares 
-	long knight[] = new long[64];  //knight attacks/moves for all squares
-	long rank[][] = new long[64][64];//*rank[64];//rank[64][64],  //rank attacks/moves for all squares
-	long file[][] = new long[64][64];//*file[64];//file[64][64],  //file attacks/moves for all squares
-	long R45[][] = new long[64][64];//*R45[64];//R45[64][64],   //45D RIGHT attacks/moves for all squares
-	long L45[][] = new long[64][64];//*L45[64];//L45[64][64],   //45D LEFT attacks/moves for all squares
-	long pawn[][] = new long[2][64];//*pawn[2];//pawn[2][64],   //pawn[0][sq] = attacks for white pawn on sq
-                                         //pawn[1][sq] = attacks for black pawn on sq
+	//TODO: These should be statically initialized (or at least constructed only once
+	//and injected on the object that needs it.
+	//When I can use spring to wire this all together I then won't have
+	//to instantiate an instance more than once (ie in Position and MoveGenerator),
+	//Then I can make just make static references to these wherever I need them.
+	//The current usage of Bitmap.SQ2BIT?? for constructing these on the fly requires 
+	//     1) a memory lookup
+	//     2) plus a shift operation
+	// so it's cheaper (just a memory lookup) to use these precomputed
+	// (mask, mask90, mask45L mask45R) masks instead
+	long mask[] = new long[64];
+    long mask90[] = new long[64];  
+	long mask45R[] = new long[64];
+	long mask45L[] = new long[64];
+	long king[] = new long[64];
+	long knight[] = new long[64];
+
+	//The first index is the square number and
+	//the second is the status of the ray the piece is aligned on
+	long rank[][] = new long[64][64];
+	long file[][] = new long[64][64];
+	long R45[][] = new long[64][64];
+	long L45[][] = new long[64][64];
+	long pawn[][] = new long[2][64];
 	long whitepawn[] = new long[64];
 	long blackpawn[] = new long[64];		
 
