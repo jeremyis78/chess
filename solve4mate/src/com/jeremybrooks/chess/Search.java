@@ -21,7 +21,7 @@ public class Search {
 	/*  This file contains the search algorithm (alphabeta).           */
 	/*******************************************************************/
 
-	public static final boolean SEARCH_DEBUG = true; //SEARCH_DB 
+	public static final boolean SEARCH_DEBUG = false; //SEARCH_DB 
 	public static final boolean DEBUG = false; //DB
 	public static final boolean EVAL = false;
 	public static final int MAXWINDOW = 1000000;   //To pass to alpha beta for initial window (+inf, -inf)
@@ -29,11 +29,12 @@ public class Search {
 	public static final int DRAW = 0;              //value for draw
 
 	MoveGenerator mg = new MoveGenerator();
+	Evaluator eval = new Evaluator();
 	int maxSearchDepth = 0;
 
 	int getBestMove(GameState g, int side){
 	    int best = 0;
-
+	    eval.setMoveGenerator(mg);
 	    //TODO
 	    //Run alphabeta with Iterative Deepening
 	    //by calling it with larger and larger values for g.searchDepth
@@ -278,7 +279,7 @@ public class Search {
 	// A more positive number is better for white.
 	// A more negative number is better for black.
 	int evaluate(GameState g, int side, int depth){
-		return new Evaluator().evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
+		return eval.evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
 	}
 
 	private static void indent(int d){
