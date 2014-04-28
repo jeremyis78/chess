@@ -263,7 +263,6 @@ public class MoveGenerator {
 	    //      GenerateInCheckMoves() where appropriate.
 		if(!Util.bool(targets))
 		{
-			System.out.println("There's no interposing squares (or targets); no interposition moves");
 			return 0;
 		}
 	    long pieces;
@@ -651,7 +650,6 @@ public class MoveGenerator {
 	    g.makeMove(move, side);
 	    legal = !isAttacked(g, side, g.getPosition().getKingSquare(side));  //use the saved king square
 	    g.undoMove(move, side);
-	    System.err.println("Is "+Util.displayMoveStr(move, false, false)+" legal? "+legal);
 	    return legal;
 	}
 	
