@@ -77,12 +77,6 @@ public class Search {
 	    // Generate the initial moves from state 'g'
 	    // Note: g.moves is being filled with moves here
 	    int depth = 0;
-	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
-	        mg.GenerateCaptures(g, g.moves, side, depth);
-	        mg.GenerateNonCaptures(g, g.moves, side, depth);
-	    } else {
-	        mg.GenerateKingEscapes(g, g.moves, side, depth);
-	    }
 	    //Now reset the legal moves to zero so everything
 	    //works correctly for the search.
 	    g.numberOfLegalMoves[depth] = 0;
