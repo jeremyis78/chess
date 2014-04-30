@@ -109,7 +109,7 @@ public class Search {
 //	    log.debug("moves: " + g.numberOfLegalMoves[depth]);
 	    for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 	        g.nodes++;
-	        logMove(depth, moves[i], i, best, alpha, beta);
+//	        logMove(g, depth, moves[i], i, best, alpha, beta);
 	        g.makeMove(moves[i], side==WHITE);
 	        g.currentLine[depth] = moves[i];
 	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
@@ -118,10 +118,10 @@ public class Search {
 	        	g.movesValue[i] = val;
 	        }
 	        g.undoMove(moves[i], side==WHITE);
-			logMove(depth, moves[i], i, best, alpha, beta);
+			logMove(g, depth, moves[i], i, best, alpha, beta);
 	        if (best >= beta){
 	        	if(DEBUG){
-	        		log.debug(indent(depth) + "return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
 	        	}
 	        	return best;
 	        }
@@ -151,7 +151,7 @@ public class Search {
 //		log.debug("moves: " + g.numberOfLegalMoves[depth]);
 		for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 			g.nodes++;
-			logMove(depth, moves[i], i, best, alpha, beta);
+//			logMove(g, depth, moves[i], i, best, alpha, beta);
 			g.makeMove(moves[i], side==WHITE);
 			g.currentLine[depth] = moves[i];
 			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
@@ -160,11 +160,11 @@ public class Search {
 				g.movesValue[i] = val;
 			}
 			g.undoMove(moves[i], side==WHITE);
-			logMove(depth, moves[i], i, best, alpha, beta);
+			logMove(g, depth, moves[i], i, best, alpha, beta);
 			if (best <= alpha){   //Found a cutoff
-				if(DEBUG){
-					log.debug(indent(depth) + "return min's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
-				}
+	        	if(DEBUG){
+	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+	        	}
 				return best;
 			}
 			beta = Math.min(beta, best);
@@ -201,11 +201,16 @@ public class Search {
 		return eval.evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
 	}
 
-	private void logMove(int depth, int move, int i, int best, int alpha, int beta) {
+	private void logMove(GameState g, int depth, int move, int i, int best, int alpha, int beta) {
 		if(SEARCH_DEBUG){
-		        out.println();
-		        indent(depth);
-		        log.debug(indent(depth) + Util.displayMoveStr(move, false, false));
+			String line = "";
+			for(int j=0; j<depth; j++){
+				line += Util.displayMoveStr(g.currentLine[j], false, false)+ " ";
+			}
+
+		        log.debug(indent(depth) + "@" + depth + "  " + line + " " + 
+		        		Util.displayMoveStr(move, false, false) + 
+		        		String.format("  best=%d  alpha=%d  beta=%d", best, alpha, beta));
 		}
 		if(DEBUG) log.debug(String.format("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta));
 	}
