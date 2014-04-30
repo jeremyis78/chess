@@ -143,12 +143,12 @@ public class Evaluator {
 				//Copy the line of play to checkmate to bestLine
 				if (g.numberOfLinesToMate == 0){
 					System.arraycopy(g.currentLine, 0, g.bestLine, 0, g.currentLine.length);
-					String line = "";
-					for(int i=0; i<g.currentLine.length; i++)
-					{
-						line += Util.displayMoveStr(g.bestLine[i], false, false) + " ";
-					}
-					log.debug("mate line: " + line);
+//					String line = "";
+//					for(int i=0; i<g.currentLine.length; i++)
+//					{
+//						line += Util.displayMoveStr(g.bestLine[i], false, false) + " ";
+//					}
+//					log.debug("mate line: " + line);
 					g.numberOfLinesToMate++;
 				} else {
 					g.numberOfLinesToMate++;
