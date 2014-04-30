@@ -1,11 +1,11 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
-import java.io.PrintStream;
+
+import org.apache.log4j.Logger;
 
 public class Evaluator {
-
-	private static final PrintStream out = System.out; 
+	private static final Logger log = Logger.getLogger(Evaluator.class);
 	static final int CHECKMATE = 100000;    //value for checkmate
 	private static final int whitePieceValue[] = 
 		{
@@ -130,27 +130,25 @@ public class Evaluator {
 		int score = 0;
 		int pieceSq = -1;
 		long pieces = 0;
-		boolean draw;
-		boolean mate;
+		boolean draw = false;
+		boolean mate = false;
 
-		draw = false;
-		mate = false;
-
-		//Does king have legal moves?
 		Position position = g.getPosition();
 		if (isCheckMated(g, side, depth))
 		{
-				// Mate
 				mate = true;
-
 				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
 				score = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
 
 				//Copy the line of play to checkmate to bestLine
 				if (g.numberOfLinesToMate == 0){
 					System.arraycopy(g.currentLine, 0, g.bestLine, 0, g.currentLine.length);
-					//for(int i=0; i<g.searchDepth; i++){
-					//  displayMove(g.bestLine
+					String line = "";
+					for(int i=0; i<g.currentLine.length; i++)
+					{
+						line += Util.displayMoveStr(g.bestLine[i], false, false) + " ";
+					}
+					log.debug("mate line: " + line);
 					g.numberOfLinesToMate++;
 				} else {
 					g.numberOfLinesToMate++;
@@ -207,23 +205,19 @@ public class Evaluator {
 		if(mate){
 
 			if(isSearchDebug){
-				out.print("   " + score + " mate!");
+				log.debug("   " + score + " mate!");
 			}
-			//cout << "\nmate\n";
-			//g.display();
 			return score;
 		} else if (draw) {
-			out.println("draw:");
+			log.debug("draw:");
 			g.display();
-			out.println("finds draw");
+			log.debug("finds draw");
 			return 0;
 		} else {
-
 			if(isEval){
-				out.println("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
-				out.println("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
+				log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
+				log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
 			}
-
 			return wTotalScore - bTotalScore;
 		}
 	}
