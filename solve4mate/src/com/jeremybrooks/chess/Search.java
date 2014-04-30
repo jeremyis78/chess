@@ -109,16 +109,16 @@ public class Search {
 //	    log.debug("moves: " + g.numberOfLegalMoves[depth]);
 	    for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 	        g.nodes++;
+	        g.currentLine[depth] = moves[i];
 //	        logMove(g, depth, moves[i], i, best, alpha, beta);
 	        g.makeMove(moves[i], side==WHITE);
-	        g.currentLine[depth] = moves[i];
 	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
+	        g.undoMove(moves[i], side==WHITE);
 	        best = Math.max(best, val);
 	        if(depth==0){
 	        	g.moves[i] = moves[i];
 	        	g.movesValue[i] = val;
 	        }
-	        g.undoMove(moves[i], side==WHITE);
 			logMove(g, depth, moves[i], i, best, alpha, beta);
 	        if (best >= beta){
 	        	if(DEBUG){
@@ -152,16 +152,16 @@ public class Search {
 //		log.debug("moves: " + g.numberOfLegalMoves[depth]);
 		for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 			g.nodes++;
+			g.currentLine[depth] = moves[i];
 //			logMove(g, depth, moves[i], i, best, alpha, beta);
 			g.makeMove(moves[i], side==WHITE);
-			g.currentLine[depth] = moves[i];
 			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
+			g.undoMove(moves[i], side==WHITE);
 			best = Math.min(best, val);
 			if(depth==0){
 				g.moves[i] = moves[i];
 				g.movesValue[i] = val;
 			}
-			g.undoMove(moves[i], side==WHITE);
 			logMove(g, depth, moves[i], i, best, alpha, beta);
 			if (best <= alpha){   //Found a cutoff
 	        	if(DEBUG){
