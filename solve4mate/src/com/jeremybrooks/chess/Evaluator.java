@@ -6,7 +6,7 @@ import java.io.PrintStream;
 public class Evaluator {
 
 	private static final PrintStream out = System.out; 
-	private static final int CHECKMATE = 100000;    //value for checkmate
+	static final int CHECKMATE = 100000;    //value for checkmate
 	private static final int whitePieceValue[] = 
 		{
 		100, // White Pawn
@@ -116,13 +116,17 @@ public class Evaluator {
 	/**
 	 * 
 	 * Returns an evaluation score for the side to move 'side'
+	 * Scores advantageous for white are positive.
+	 * Scores advantageous for black are negative.
+	 * Zero indicates no advantage for either side
+	 * TODO: there's no code or score for a draw yet.
+	 * 
 	 * A more positive number is better for white.
 	 * A more negative number is better for black.
 	 */
 	public int evaluate(GameState g, int side, int depth, boolean isSearchDebug, boolean isEval){
-		int wScore = 0, bScore = 0;  //score for white and black
-		int numMoves = 0;
-		int moves[] = new int[70]; //to pass to GenKingEscapes..not used otherwise
+		int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
+		int wPositionalScore = 0, bPositionalScore = 0;
 		int score = 0;
 		int pieceSq = -1;
 		long pieces = 0;
@@ -133,15 +137,14 @@ public class Evaluator {
 		mate = false;
 
 		//Does king have legal moves?
-		numMoves = mg.GenerateKingEscapes(g, moves, side, depth);
 		Position position = g.getPosition();
-		if (numMoves == 0){
-			if (mg.isAttacked(g, side, position.getKingSquare(side))){
+		if (isCheckMated(g, side, depth))
+		{
 				// Mate
 				mate = true;
 
-				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc
-				score = CHECKMATE - depth;  
+				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
+				score = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
 
 				//Copy the line of play to checkmate to bestLine
 				if (g.numberOfLinesToMate == 0){
@@ -152,20 +155,14 @@ public class Evaluator {
 				} else {
 					g.numberOfLinesToMate++;
 				}
-
-			} else {
-				// Draw
-				//draw = true;
-				//score = DRAW;
-			}
 		}
 
 		// Compute material value
 		for (int i = PAWN; i <= QUEEN; i++){
-			wScore += whitePieceValue[i] * 
+			wMaterialScore += whitePieceValue[i] * 
 					Util.bitCount(position.getPieces(Bitmap.WHITE,i));
 
-			bScore += blackPieceValue[i] * 
+			bMaterialScore += blackPieceValue[i] * 
 					Util.bitCount(position.getPieces(Bitmap.BLACK,i));
 		}
 
@@ -176,9 +173,9 @@ public class Evaluator {
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
-					wScore += knightPV[i][pieceSq];
+					wPositionalScore += knightPV[i][pieceSq];
 				} else {
-					bScore += knightPV[i][pieceSq];
+					bPositionalScore += knightPV[i][pieceSq];
 				} 
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
@@ -187,9 +184,9 @@ public class Evaluator {
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
-					wScore += bishopPV[i][pieceSq];
+					wPositionalScore += bishopPV[i][pieceSq];
 				} else {
-					bScore += bishopPV[i][pieceSq];
+					bPositionalScore += bishopPV[i][pieceSq];
 				} 
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
@@ -198,13 +195,15 @@ public class Evaluator {
 			while(pieces != 0){
 				pieceSq = squareOfFirstPiece(pieces);
 				if (i == Bitmap.WHITE){
-					wScore += rookPV[i][pieceSq];
+					wPositionalScore += rookPV[i][pieceSq];
 				} else {
-					bScore += rookPV[i][pieceSq];
+					bPositionalScore += rookPV[i][pieceSq];
 				} 
 				pieces = clearPieceOnSquare(pieces, pieceSq);
 			}
 		}
+		int wTotalScore = wMaterialScore + wPositionalScore;
+		int bTotalScore = bMaterialScore + wPositionalScore;
 		if(mate){
 
 			if(isSearchDebug){
@@ -221,14 +220,29 @@ public class Evaluator {
 		} else {
 
 			if(isEval){
-				out.println("white score: "+ wScore);
-				out.println("black score: "+ bScore);
+				out.println("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
+				out.println("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
 			}
 
-			return wScore - bScore;
+			return wTotalScore - bTotalScore;
 		}
 	}
 
+	boolean isCheckMated(GameState g, int side, int depth)
+	{
+		//Does king have legal moves?
+		int moves[] = new int[70];
+		int numMoves = mg.GenerateKingEscapes(g, moves, side, depth);
+		//number of moves may be helpful for evaluation tuning because 1 or 2 moves
+		//limits the branching factor so that could be use to feed into the overall evaluation score
+		Position position = g.getPosition();
+		if (numMoves == 0 &&   mg.isAttacked(g, side, position.getKingSquare(side)))
+		{
+			return true;
+		}
+		return false;
+	}
+	
 	private long clearPieceOnSquare(long pieces, int pieceSq) {
 		return Bitmap.clearBit(pieces, pieceSq);
 	}

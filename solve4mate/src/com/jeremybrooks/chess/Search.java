@@ -6,12 +6,17 @@ package com.jeremybrooks.chess;
 
 import java.io.PrintStream;
 
+import org.apache.log4j.Logger;
+
+import static com.jeremybrooks.chess.Bitmap.*;
+
 /**
  * @author jeremy
  *
  */
 public class Search {
 
+	private static final Logger log = Logger.getLogger(Search.class);
 	private static final PrintStream out = System.out;
 	
 	/*******************************************************************/
@@ -100,80 +105,33 @@ public class Search {
 	// alpha - value of best alternative for MAX along path to state 'g'
 	// beta  - value of best alternative for MIN along path to state 'g'
 	int max(GameState g, int alpha, int beta, int side, int depth){
-	    int best, numMoves;
-	    int moves[] = new int[100];
+	    int best;
 	    int val;
-
-	    if(depth == maxSearchDepth){
-	        return evaluate(g, side, depth);
+	    int[] moves = generateMoves(g, side, depth);
+	    if(isMaxDepthOrHasNoMoves(depth, moves.length)){
+	    	return evaluate(g, side, depth);
 	    }
-
-	    // Generate legal moves from this position
-	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
-	        mg.GenerateCaptures(g, moves, side, depth);
-	        mg.GenerateNonCaptures(g, moves, side, depth);
-	    } else {
-	        mg.GenerateKingEscapes(g, moves, side, depth);
-	        if (g.numberOfLegalMoves[depth] == 0){ //checkmate
-	            return evaluate(g, side, depth);
-	        }
-	    }
-	    numMoves = g.numberOfLegalMoves[depth];
-
-	    // Try each move
 	    best = -MAXWINDOW;
-	    //cerr << numMoves << endl;
-	    for(int i=0; i<numMoves; i++){
+//	    log.debug("moves: " + g.numberOfLegalMoves[depth]);
+	    for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 	        g.nodes++;
-
-	if(SEARCH_DEBUG){
-	        out.println();
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false);
-	}
-
-
-	if(DEBUG){
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false);
-	        out.printf("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta);
-	}
-
-
-
-	        //*****************************************
-	        //*                                       *
-	        //* Make move, recurse, undo move         *
-	        //*                                       *
-	        //*****************************************
-	        g.makeMove(moves[i], side);
+	        logMove(depth, moves[i], i, best, alpha, beta);
+	        g.makeMove(moves[i], side==WHITE);
 	        g.currentLine[depth] = moves[i];
-	        val = min(g,alpha,beta,Util.opposing(side),depth+1);
+	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
 	        best = Math.max(best, val);
-		if(depth==0){
-		  g.movesValue[i] = val;
-		}
-	        g.undoMove(moves[i], side);
-
-	if(DEBUG){
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false);
-	        out.printf("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta);
-	}
-
-
-	          if (best >= beta){
-	if(DEBUG){
-		    out.println();
-		    indent(depth);
-		    out.print("ret. max's best (cutoff) = " + best + " with move ");
-		    Util.displayMove(moves[i], false, false);
-		    out.println();
-	}
-		    return best;
-		  }
-		  alpha = Math.max(alpha, best);
-
+	        if(depth==0){
+	        	g.movesValue[i] = val;
+	        }
+	        g.undoMove(moves[i], side==WHITE);
+			logMove(depth, moves[i], i, best, alpha, beta);
+	        if (best >= beta){
+	        	if(DEBUG){
+	        		log.debug(indent(depth) + "return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+	        	}
+	        	return best;
+	        }
+	        alpha = Math.max(alpha, best);
 	        //Store the minimax (alpha) value for the moves that branch off from 
 	        //the initial root position we started searching from.
 	        //if(depth == 0){
@@ -183,95 +141,62 @@ public class Search {
 	    return best;
 	}
 
-
 	// min   - returns minimum value from state 'g'
 	//
 	// alpha - value of best alternative for MAX along path to state 'g'
 	// beta  - value of best alternative for MIN along path to state 'g'
 	//
 	int min(GameState g, int alpha, int beta, int side, int depth){
-	    int best, numMoves;
-	    int moves[] = new int[100];
-	    int val;
-	    
-	    if(depth == maxSearchDepth){
-	        return evaluate(g, side, depth);
-	    }
-	    
-	    // Generate legal moves from this position
+		int best;
+		int val;
+		int[] moves = generateMoves(g, side, depth);
+		if(isMaxDepthOrHasNoMoves(depth, moves.length)){
+			return evaluate(g, side, depth);
+		}
+		best = +MAXWINDOW;
+//		log.debug("moves: " + g.numberOfLegalMoves[depth]);
+		for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
+			g.nodes++;
+			logMove(depth, moves[i], i, best, alpha, beta);
+			g.makeMove(moves[i], side==WHITE);
+			g.currentLine[depth] = moves[i];
+			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
+			best = Math.min(best, val);
+			if(depth==0){
+				g.movesValue[i] = val;
+			}
+			g.undoMove(moves[i], side==WHITE);
+			logMove(depth, moves[i], i, best, alpha, beta);
+			if (best <= alpha){   //Found a cutoff
+				if(DEBUG){
+					log.debug(indent(depth) + "return min's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+				}
+				return best;
+			}
+			beta = Math.min(beta, best);
+			//Store the minimax (beta) value for the moves that branch off from 
+			//the initial root position we started searching from.
+			//if (depth == 0){
+			//    g.movesValue[i] = beta;
+			//}
+		}
+		return best;
+	}
+
+	private boolean isMaxDepthOrHasNoMoves(int depth, int numMoves) {
+		return depth == maxSearchDepth || numMoves == 0;
+	}
+
+	private int[] generateMoves(GameState g, int side, int depth) {
+		// Generate legal moves from this position
+		int[] moves = new int[70]; //how many moves are there actually?
 	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        mg.GenerateCaptures(g, moves, side, depth);
 	        mg.GenerateNonCaptures(g, moves, side, depth);
 	    } else {
 	        mg.GenerateKingEscapes(g, moves, side, depth);
-	        if (g.numberOfLegalMoves[depth] == 0){ //checkmate
-	            return evaluate(g, side, depth);
-	        }
 	    }
-	    numMoves = g.numberOfLegalMoves[depth];
-
-	    // Try each move
-	    best = +MAXWINDOW;
-	    //cerr << numMoves << endl;
-	    for(int i=0; i<numMoves; i++){
-	        g.nodes++;
-
-	if(SEARCH_DEBUG){
-	        out.println();
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false); //cout << endl;
-	}
-
-	if(DEBUG){
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false);
-	        out.printf("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta);
-	}
-
-	        //*****************************************
-	        //*                                       *
-	        //* Make move, recurse, undo move         *
-	        //*                                       *
-	        //*****************************************
-	        g.makeMove(moves[i], side);
-	        g.currentLine[depth] = moves[i];
-		val = max(g,alpha,beta,Util.opposing(side), depth+1);
-	        best = Math.min(best, val);
-		if(depth==0){
-		  g.movesValue[i] = val;
-		}
-	        g.undoMove(moves[i], side);
-
-
-
-
-	if(DEBUG){
-	        indent(depth);
-	        Util.displayMove(moves[i], false, false);
-	        out.printf("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta);
-	}
-
-
-
-	        if (best <= alpha){   //Found a cutoff
-	if(DEBUG){
-		  out.println();
-		  indent(depth);
-		  out.print("ret. min's best (cutoff) = " + best + " with move ");
-		  Util.displayMove(moves[i], false, false);
-		  out.println();
-	}
-		  return best;
-	        }
-		beta = Math.min(beta, best);
-
-	        //Store the minimax (beta) value for the moves that branch off from 
-	        //the initial root position we started searching from.
-	        //if (depth == 0){
-	        //    g.movesValue[i] = beta;
-	        //}
-	    }
-	    return best;
+	    return moves;
 	}
 
 	//
@@ -282,9 +207,20 @@ public class Search {
 		return eval.evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
 	}
 
-	private static void indent(int d){
+	private void logMove(int depth, int move, int i, int best, int alpha, int beta) {
+		if(SEARCH_DEBUG){
+		        out.println();
+		        indent(depth);
+		        log.debug(indent(depth) + Util.displayMoveStr(move, false, false));
+		}
+		if(DEBUG) log.debug(String.format("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta));
+	}
+
+	private static String indent(int d){
+	  String indent = "";
 	  for (int i=0;i<d;i++)
-		System.out.print("  ");
+		indent += "  ";
+	  return indent;
 	}
 	
 }

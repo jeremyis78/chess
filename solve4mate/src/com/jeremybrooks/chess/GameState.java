@@ -360,7 +360,7 @@ public class GameState {
 	    for(int i = 0; i < numberOfMovesMade; i++)
 	        numberOfLegalMovesToDepth[numberOfMovesMade] += numberOfLegalMoves[i];
 	    movesIndex = 0;
-	    log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
+	    if(log.isTraceEnabled()) log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
 	    return false;
 	}
 
@@ -448,7 +448,7 @@ public class GameState {
 	    } else if (captured != NONE) { //Normal capture
 	    	placeOpposingPiece(captured, to);
 	    }
-	    log.trace(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
+	    if(log.isTraceEnabled()) log.debug(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
 	    return false;
 	}
 
