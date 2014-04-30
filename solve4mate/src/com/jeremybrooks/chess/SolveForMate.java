@@ -84,14 +84,8 @@ public class SolveForMate {
 	    		String fen = line.substring(firstSpaceIndex +1);
 	    		GameState g = new GameState(getDepthToMate(mateInN));
 	    		g.set(fen);
-	    		
-	    		//
-	    		// Set the depth for the engine to search for mate 
-	    		// Display the board to solve for mate
-	    		//
-	    		// TODO: commented out when removing searchDepth from GameState
-	    		// This limit on depth can be refactored into Search or this class and set there instead.
-	    		//g.setSearchDepth(getDepthToMate(mateInN));
+	    		search.setMaxSearchDepth(getDepthToMate(mateInN)-1);
+	    		out.println("max search depth: " + search.getMaxSearchDepth());
     			displayHeader(mateInN, g.isWhiteToMove(), g.getPosition());
 	    		out.println("Searching for mate in "+mateInN+"...");
 	    		long start;
@@ -116,6 +110,7 @@ public class SolveForMate {
 		StringBuilder header = new StringBuilder();
 		header.append(EOL);
 		header.append((isWhiteToMove?"White":"Black") + " to move and force mate in " + mateInN);
+		header.append(" (search depth "+search.getMaxSearchDepth()+")");
 		header.append(EOL);
 	    AbstractDisplayer displayer = new Displayer();
 	    header.append(displayer.formatBoard(position));
@@ -126,12 +121,12 @@ public class SolveForMate {
 		StringBuilder result = new StringBuilder();
 		if (g.numberOfLinesToMate > 0){
 			result.append("Mate found: ");
-			for(int i=0; i<search.maxSearchDepth; i++){
+			for(int i=0; i<search.getMaxSearchDepth(); i++){
 				result.append(Util.displayMoveStr(g.bestLine[i], false, false)+ " ");
 			}
 		} else {
 			result.append("No mate found (best line: ");
-			for(int i=0; i<search.maxSearchDepth; i++){
+			for(int i=0; i<search.getMaxSearchDepth(); i++){
 				result.append(Util.displayMoveStr(g.bestLine[i], false, false)+ " ");
 			}
 			result.append(")");

@@ -4,11 +4,13 @@
  */
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.WHITE;
+
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
-
-import static com.jeremybrooks.chess.Bitmap.*;
 
 /**
  * @author jeremy
@@ -17,8 +19,6 @@ import static com.jeremybrooks.chess.Bitmap.*;
 public class Search {
 
 	private static final Logger log = Logger.getLogger(Search.class);
-	private static final PrintStream out = System.out;
-	
 	/*******************************************************************/
 	/*	                       alphabeta.cpp                       */
 	/*******************************************************************/
@@ -35,7 +35,58 @@ public class Search {
 
 	MoveGenerator mg = new MoveGenerator();
 	Evaluator eval = new Evaluator();
-	int maxSearchDepth = 0;
+	private int maxSearchDepth = 0;
+	
+	/**
+	 * Maps (depth -> a move on the principle variation)
+	 * Iterating over this in increasing order of key 0-maxDepth will yield the best line found.
+	 */
+	private Map<Integer,PVNode> pvNodeMap = new HashMap<>();
+	
+	/**
+	 * Holds a move and score (hopefully) on the principal variation (best line found)
+	 * @author jeremy
+	 *
+	 */
+	public class PVNode {
+		private int move;
+		private int score;
+
+		public PVNode(int move, int score) {
+			super();
+			this.move = move;
+			this.score = score;
+		}
+		public int getMove() { return move; }
+		public void setMove(int move) { this.move = move; }
+		public int getScore() {	return score; }
+		public void setScore(int score) { this.score = score; }
+		public String toString(){
+			return Util.displayMoveStr(move, false, false) + "("+score+")";
+		}
+	}
+
+	
+	public int getMaxSearchDepth() {
+		return maxSearchDepth;
+	}
+
+	public void setMaxSearchDepth(int maxSearchDepth) {
+		this.maxSearchDepth = maxSearchDepth;
+	}
+	
+	public String getPVMoveLine()
+	{
+		StringBuilder line = new StringBuilder();
+		for(int nodeIndex = 0;
+				nodeIndex < maxSearchDepth;
+				nodeIndex++)
+		{
+			PVNode node = pvNodeMap.get(nodeIndex);
+			line.append(node).append(" ");
+		}
+		return line.toString();
+	}
 
 	int getBestMove(GameState g, int side){
 	    int best = 0;
@@ -49,11 +100,11 @@ public class Search {
 	    //
 	    //
 	    //
-	    for(maxSearchDepth = 1; maxSearchDepth<5; maxSearchDepth++){
+//	    for(maxSearchDepth = 1; maxSearchDepth<5; maxSearchDepth++){
 	      best = alphabeta(g, side);
-	      if (g.numberOfLinesToMate > 0)
-	    	  break;
-	    }
+//	      if (g.numberOfLinesToMate > 0)
+//	    	  break;
+//	    }
 
 	    //Find the best move by its minimax value
 	    int bestMove = 0;
@@ -109,24 +160,29 @@ public class Search {
 //	    log.debug("moves: " + g.numberOfLegalMoves[depth]);
 	    for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 	        g.nodes++;
-	        g.currentLine[depth] = moves[i];
-//	        logMove(g, depth, moves[i], i, best, alpha, beta);
-	        g.makeMove(moves[i], side==WHITE);
-	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
-	        g.undoMove(moves[i], side==WHITE);
+	        int move = moves[i];
+	        g.currentLine[depth] = move;
+//	        logMove(g, depth, move, i, best, alpha, beta);
+	        g.makeMove(move, side==WHITE);
+	        val = min(g,-beta,-alpha,Util.opposing(side),depth+1); //recurse!
+	        g.undoMove(move, side==WHITE);
 	        best = Math.max(best, val);
 	        if(depth==0){
-	        	g.moves[i] = moves[i];
+	        	g.moves[i] = move;
 	        	g.movesValue[i] = val;
 	        }
-			logMove(g, depth, moves[i], i, best, alpha, beta);
+			logMove(g, depth, move, i, best, alpha, beta);
 	        if (best >= beta){
 	        	if(DEBUG){
-	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
 	        	return best;
 	        }
 	        alpha = Math.max(alpha, best);
+//	        if(best > alpha && best < beta)
+//	        {   
+//	        	storeOrReplacePVNode(depth, best, move);
+//	        }
 	        //Store the minimax (alpha) value for the moves that branch off from 
 	        //the initial root position we started searching from.
 	        //if(depth == 0){
@@ -134,6 +190,18 @@ public class Search {
 	        //}
 	    }
 	    return best;
+	}
+
+	private void storeOrReplacePVNode(int depth, int best, int move) {
+		PVNode existingNode = pvNodeMap.get(depth);
+		PVNode newNode = new PVNode(move, best);
+		if(existingNode != null)
+		{
+			log.debug("replacing PV node "+existingNode+" with "+newNode);
+		} else {
+			log.debug("adding PV node "+newNode);
+		}
+		pvNodeMap.put(depth, newNode);
 	}
 
 	// min   - returns minimum value from state 'g'
@@ -152,24 +220,29 @@ public class Search {
 //		log.debug("moves: " + g.numberOfLegalMoves[depth]);
 		for(int i=0; i<g.numberOfLegalMoves[depth]; i++){
 			g.nodes++;
-			g.currentLine[depth] = moves[i];
-//			logMove(g, depth, moves[i], i, best, alpha, beta);
-			g.makeMove(moves[i], side==WHITE);
-			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
-			g.undoMove(moves[i], side==WHITE);
+			int move = moves[i];
+			g.currentLine[depth] = move;
+//			logMove(g, depth, move, i, best, alpha, beta);
+			g.makeMove(move, side==WHITE);
+			val = max(g,-beta,-alpha,Util.opposing(side), depth+1);  //recurse!
+			g.undoMove(move, side==WHITE);
 			best = Math.min(best, val);
 			if(depth==0){
-				g.moves[i] = moves[i];
+				g.moves[i] = move;
 				g.movesValue[i] = val;
 			}
-			logMove(g, depth, moves[i], i, best, alpha, beta);
+			logMove(g, depth, move, i, best, alpha, beta);
 			if (best <= alpha){   //Found a cutoff
 	        	if(DEBUG){
-	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(moves[i], false, false));
+	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
 				return best;
 			}
 			beta = Math.min(beta, best);
+//	        if(best > alpha && best < beta)
+//	        {   
+//	        	storeOrReplacePVNode(depth, best, move);
+//	        }
 			//Store the minimax (beta) value for the moves that branch off from 
 			//the initial root position we started searching from.
 			//if (depth == 0){
@@ -180,7 +253,9 @@ public class Search {
 	}
 
 	private boolean isMaxDepthOrHasNoMoves(int depth, int numMoves) {
-		return depth == maxSearchDepth || numMoves == 0;
+		boolean isMaxDepth = depth == maxSearchDepth;
+//		if(isMaxDepth) log.debug("max depth reached: " + depth);
+		return isMaxDepth || numMoves == 0;
 	}
 
 	private int[] generateMoves(GameState g, int side, int depth) {
