@@ -115,6 +115,7 @@ public class Search {
 	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
 	        best = Math.max(best, val);
 	        if(depth==0){
+	        	g.moves[i] = moves[i];
 	        	g.movesValue[i] = val;
 	        }
 	        g.undoMove(moves[i], side==WHITE);
@@ -157,6 +158,7 @@ public class Search {
 			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
 			best = Math.min(best, val);
 			if(depth==0){
+				g.moves[i] = moves[i];
 				g.movesValue[i] = val;
 			}
 			g.undoMove(moves[i], side==WHITE);

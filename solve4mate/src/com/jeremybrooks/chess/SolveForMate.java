@@ -138,18 +138,18 @@ public class SolveForMate {
 		}
 		result.append(EOL);
 		result.append("nodes     : " + g.nodes + EOL);
-		result.append("elapsed   : " + elapsedMs + EOL); 
-		result.append("nodes/sec : " + ((elapsedMs > 0) ? g.nodes/elapsedMs : "--") + EOL);
-		result.append("best move : " + Util.displayMoveStr(bestMove, false, false));
+//		result.append("elapsed   : " + elapsedMs + EOL); 
+//		result.append("nodes/sec : " + ((elapsedMs > 0) ? g.nodes/elapsedMs : "--") + EOL);
+//		result.append("best move : " + Util.displayMoveStr(bestMove, false, false));
 		result.append(EOL);
 		
 		// Display the root moves and the best value seen so far in the tree
-//		result.append("Root-Move  Best-Value"+EOL);
-//		for(int i=0; i<g.numberOfLegalMoves[0]; i++){
-//			result.append(Util.displayMoveStr(g.moves[i], false, false));
-//			result.append("       " + g.movesValue[i] + EOL);
-//		}
-//		result.append(EOL);
+		result.append("Root-Move  Best-Value"+EOL);
+		for(int i=0; i<g.numberOfLegalMoves[0]; i++){
+			result.append(Util.displayMoveStr(g.moves[i], false, false));
+			result.append("       " + g.movesValue[i] + EOL);
+		}
+		result.append(EOL);
 		result.append("*************************************");
 		System.out.println(result.toString());
 	}
