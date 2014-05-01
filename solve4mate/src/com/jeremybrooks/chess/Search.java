@@ -66,6 +66,9 @@ public class Search {
 		}
 	}
 
+	public void reset(){
+		pvNodeMap.clear();
+	}
 	
 	public int getMaxSearchDepth() {
 		return maxSearchDepth;
@@ -172,22 +175,18 @@ public class Search {
 	        	g.movesValue[i] = val;
 	        }
 			logMove(g, depth, move, i, best, alpha, beta);
-	        if (best >= beta){
+	        if (val >= beta){
 	        	if(DEBUG){
-	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(move, false, false));
+	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + val + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
-	        	return best;
+	        	break;
 	        }
-	        alpha = Math.max(alpha, best);
-//	        if(best > alpha && best < beta)
-//	        {   
-//	        	storeOrReplacePVNode(depth, best, move);
-//	        }
-	        //Store the minimax (alpha) value for the moves that branch off from 
-	        //the initial root position we started searching from.
-	        //if(depth == 0){
-	        //    g.movesValue[i] = alpha;
-	        //}
+	        if(val > alpha)
+	        {    
+	        	alpha = val;
+	        	storeOrReplacePVNode(depth, best, move);
+	        }
+	        alpha = Math.max(alpha, val);
 	    }
 	    return best;
 	}
@@ -197,9 +196,9 @@ public class Search {
 		PVNode newNode = new PVNode(move, best);
 		if(existingNode != null)
 		{
-			log.debug("replacing PV node "+existingNode+" with "+newNode);
+			log.debug("@"+depth+" replacing PV node "+existingNode+" with "+newNode);
 		} else {
-			log.debug("adding PV node "+newNode);
+			log.debug("@"+depth+" adding PV node "+newNode);
 		}
 		pvNodeMap.put(depth, newNode);
 	}
@@ -232,22 +231,18 @@ public class Search {
 				g.movesValue[i] = val;
 			}
 			logMove(g, depth, move, i, best, alpha, beta);
-			if (best <= alpha){   //Found a cutoff
+			if (val >= beta){   //Found a cutoff
 	        	if(DEBUG){
-	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + best + " with move " + Util.displayMoveStr(move, false, false));
+	        		log.debug(indent(depth) + "@" + depth + "  return min's best (cutoff) = " + val + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
-				return best;
+				break;
 			}
-			beta = Math.min(beta, best);
-//	        if(best > alpha && best < beta)
-//	        {   
-//	        	storeOrReplacePVNode(depth, best, move);
-//	        }
-			//Store the minimax (beta) value for the moves that branch off from 
-			//the initial root position we started searching from.
-			//if (depth == 0){
-			//    g.movesValue[i] = beta;
-			//}
+			beta = Math.min(beta, val);
+	        if(val > alpha)
+	        {   
+	        	alpha = val;
+	        	storeOrReplacePVNode(depth, best, move);
+	        }
 		}
 		return best;
 	}

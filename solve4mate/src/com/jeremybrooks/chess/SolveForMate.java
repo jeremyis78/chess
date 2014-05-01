@@ -85,7 +85,6 @@ public class SolveForMate {
 	    		GameState g = new GameState(getDepthToMate(mateInN));
 	    		g.set(fen);
 	    		search.setMaxSearchDepth(getDepthToMate(mateInN)-1);
-	    		out.println("max search depth: " + search.getMaxSearchDepth());
     			displayHeader(mateInN, g.isWhiteToMove(), g.getPosition());
 	    		out.println("Searching for mate in "+mateInN+"...");
 	    		long start;
@@ -101,6 +100,7 @@ public class SolveForMate {
 	    		stop = System.currentTimeMillis();
 	    		elapsedMs = stop - start;
 	    		displayResults(g, move, elapsedMs);
+	    		search.reset();
 	    	}
 	    	
 	    }
@@ -132,10 +132,12 @@ public class SolveForMate {
 			result.append(")");
 		}
 		result.append(EOL);
+		result.append("PV: ").append(search.getPVMoveLine());
+		result.append(EOL);
 		result.append("nodes     : " + g.nodes + EOL);
 //		result.append("elapsed   : " + elapsedMs + EOL); 
 //		result.append("nodes/sec : " + ((elapsedMs > 0) ? g.nodes/elapsedMs : "--") + EOL);
-//		result.append("best move : " + Util.displayMoveStr(bestMove, false, false));
+		result.append("best move : " + Util.displayMoveStr(bestMove, false, false));
 		result.append(EOL);
 		
 		// Display the root moves and the best value seen so far in the tree
