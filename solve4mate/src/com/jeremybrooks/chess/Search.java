@@ -6,10 +6,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.WHITE;
 
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 /**
@@ -33,18 +29,17 @@ public class Search {
 	public static final int CHECKMATE = 100000;    //value for checkmate
 	public static final int DRAW = 0;              //value for draw
 
-	MoveGenerator mg = new MoveGenerator();
-	Evaluator eval = new Evaluator();
+	private MoveGenerator moveGenerator = new MoveGenerator();
+	private Evaluator evaluator = new Evaluator();
 	private int maxSearchDepth = 0;
 	
 	/**
-	 * Maps (depth -> a move on the principle variation)
-	 * Iterating over this in increasing order of key 0-maxDepth will yield the best line found.
+	 * Holds the best moves found (that is, moves on the principle variation) in ascending order of depth
 	 */
-	private Map<Integer,PVNode> pvNodeMap = new HashMap<>();
+	private PVNode[] pvLine;
 	
 	/**
-	 * Holds a move and score (hopefully) on the principal variation (best line found)
+	 * Holds a move and score (hopefully) on the Principal Variation (best line found)
 	 * @author jeremy
 	 *
 	 */
@@ -67,7 +62,7 @@ public class Search {
 	}
 
 	public void reset(){
-		pvNodeMap.clear();
+		pvLine = null;
 	}
 	
 	public int getMaxSearchDepth() {
@@ -76,8 +71,17 @@ public class Search {
 
 	public void setMaxSearchDepth(int maxSearchDepth) {
 		this.maxSearchDepth = maxSearchDepth;
+		pvLine = new PVNode[this.maxSearchDepth];
 	}
 	
+	public void setMoveGenerator(MoveGenerator moveGenerator) {
+		this.moveGenerator = moveGenerator;
+	}
+
+	public void setEvaluator(Evaluator evaluator) {
+		this.evaluator = evaluator;
+	}
+
 	public String getPVMoveLine()
 	{
 		StringBuilder line = new StringBuilder();
@@ -85,7 +89,7 @@ public class Search {
 				nodeIndex < maxSearchDepth;
 				nodeIndex++)
 		{
-			PVNode node = pvNodeMap.get(nodeIndex);
+			PVNode node = pvLine[nodeIndex];
 			line.append(node).append(" ");
 		}
 		return line.toString();
@@ -93,7 +97,7 @@ public class Search {
 
 	int getBestMove(GameState g, int side){
 	    int best = 0;
-	    eval.setMoveGenerator(mg);
+	    evaluator.setMoveGenerator(moveGenerator);
 	    //TODO
 	    //Run alphabeta with Iterative Deepening
 	    //by calling it with larger and larger values for g.searchDepth
@@ -148,10 +152,22 @@ public class Search {
 
 
 	// max  - returns max value from state 'g' 
-//	     
+	//	     
 	//
 	// alpha - value of best alternative for MAX along path to state 'g'
 	// beta  - value of best alternative for MIN along path to state 'g'
+	//
+//	int alphaBetaMax( int alpha, int beta, int depthleft ) {
+//		   if ( depthleft == 0 ) return evaluate();
+//		   for ( all moves) {
+//		      score = alphaBetaMin( alpha, beta, depthleft - 1 );
+//		      if( score >= beta )
+//		         return beta;   // fail hard beta-cutoff
+//		      if( score > alpha )
+//		         alpha = score; // alpha acts like max in MiniMax
+//		   }
+//		   return alpha;
+//		}
 	int max(GameState g, int alpha, int beta, int side, int depth){
 	    int best;
 	    int val;
@@ -167,40 +183,48 @@ public class Search {
 	        g.currentLine[depth] = move;
 //	        logMove(g, depth, move, i, best, alpha, beta);
 	        g.makeMove(move, side==WHITE);
-	        val = min(g,-beta,-alpha,Util.opposing(side),depth+1); //recurse!
+	        val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
 	        g.undoMove(move, side==WHITE);
-	        best = Math.max(best, val);
 	        if(depth==0){
 	        	g.moves[i] = move;
 	        	g.movesValue[i] = val;
 	        }
+//	        log.debug(indent(depth) + "@" + depth + "  " + Util.displayMoveStr(move,false,false)+"(" + val+")");
 			logMove(g, depth, move, i, best, alpha, beta);
 	        if (val >= beta){
 	        	if(DEBUG){
 	        		log.debug(indent(depth) + "@" + depth + "  return max's best (cutoff) = " + val + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
-	        	break;
+	        	return beta;
 	        }
 	        if(val > alpha)
 	        {    
-	        	alpha = val;
-	        	storeOrReplacePVNode(depth, best, move);
+	        	alpha = val; // alpha acts like max in MiniMax  (shrinks the window up from -Infinity)
+	        	updatePrincipalVariationLine(g, depth, best, move);
 	        }
-	        alpha = Math.max(alpha, val);
 	    }
-	    return best;
+	    return alpha;
 	}
 
-	private void storeOrReplacePVNode(int depth, int best, int move) {
-		PVNode existingNode = pvNodeMap.get(depth);
-		PVNode newNode = new PVNode(move, best);
-		if(existingNode != null)
+	protected void updatePrincipalVariationLine(GameState g, int depth, int best, int move) {
+		PVNode existingNode = pvLine[depth];
+		int moveDepth = depth;
+		int currentLineMove=g.currentLine[moveDepth];
+		for(int i=0; i<=depth; i++)
 		{
-			log.debug("@"+depth+" replacing PV node "+existingNode+" with "+newNode);
-		} else {
-			log.debug("@"+depth+" adding PV node "+newNode);
+			currentLineMove = g.currentLine[i]; //next move to copy to PV
+			PVNode newNode = new PVNode(currentLineMove, best);
+			if(SEARCH_DEBUG)
+			{
+				if(existingNode != null)
+				{
+					log.debug("@"+i+" replacing PV node "+existingNode+" with "+newNode);
+				} else {
+					log.debug("@"+i+" adding PV node "+newNode);
+				}
+			}
+			pvLine[i] = newNode;
 		}
-		pvNodeMap.put(depth, newNode);
 	}
 
 	// min   - returns minimum value from state 'g'
@@ -208,6 +232,17 @@ public class Search {
 	// alpha - value of best alternative for MAX along path to state 'g'
 	// beta  - value of best alternative for MIN along path to state 'g'
 	//
+//	int alphaBetaMin( int alpha, int beta, int depthleft ) {
+//		   if ( depthleft == 0 ) return -evaluate();
+//		   for ( all moves) {
+//		      score = alphaBetaMax( alpha, beta, depthleft - 1 );
+//		      if( score <= alpha )
+//		         return alpha; // fail hard alpha-cutoff
+//		      if( score < beta )
+//		         beta = score; // beta acts like min in MiniMax
+//		   }
+//		   return beta;
+//		}
 	int min(GameState g, int alpha, int beta, int side, int depth){
 		int best;
 		int val;
@@ -223,44 +258,42 @@ public class Search {
 			g.currentLine[depth] = move;
 //			logMove(g, depth, move, i, best, alpha, beta);
 			g.makeMove(move, side==WHITE);
-			val = max(g,-beta,-alpha,Util.opposing(side), depth+1);  //recurse!
+			val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
 			g.undoMove(move, side==WHITE);
-			best = Math.min(best, val);
 			if(depth==0){
 				g.moves[i] = move;
 				g.movesValue[i] = val;
 			}
 			logMove(g, depth, move, i, best, alpha, beta);
-			if (val >= beta){   //Found a cutoff
+			if (val <= alpha){   //Found a cutoff
 	        	if(DEBUG){
 	        		log.debug(indent(depth) + "@" + depth + "  return min's best (cutoff) = " + val + " with move " + Util.displayMoveStr(move, false, false));
 	        	}
-				break;
+				return alpha; //fail hard alpha cutoff
 			}
-			beta = Math.min(beta, val);
-	        if(val > alpha)
+	        if(val < beta)
 	        {   
-	        	alpha = val;
-	        	storeOrReplacePVNode(depth, best, move);
+	        	beta = val; // beta acts like min in MiniMax (shrinks the window down from +Infinity)
+	        	updatePrincipalVariationLine(g, depth, best, move);
 	        }
 		}
-		return best;
+		return beta;
 	}
 
-	private boolean isMaxDepthOrHasNoMoves(int depth, int numMoves) {
+	protected boolean isMaxDepthOrHasNoMoves(int depth, int numMoves) {
 		boolean isMaxDepth = depth == maxSearchDepth;
 //		if(isMaxDepth) log.debug("max depth reached: " + depth);
 		return isMaxDepth || numMoves == 0;
 	}
 
-	private int[] generateMoves(GameState g, int side, int depth) {
+	protected int[] generateMoves(GameState g, int side, int depth) {
 		// Generate legal moves from this position
-		int[] moves = new int[70]; //how many moves are there actually?
-	    if (!mg.isAttacked(g, side, g.getPosition().getKingSquare(side))){
-	        mg.GenerateCaptures(g, moves, side, depth);
-	        mg.GenerateNonCaptures(g, moves, side, depth);
+		int[] moves = new int[70]; //how many moves are there actually? fails with 50
+	    if (!moveGenerator.isAttacked(g, side, g.getPosition().getKingSquare(side))){
+	        moveGenerator.GenerateCaptures(g, moves, side, depth);
+	        moveGenerator.GenerateNonCaptures(g, moves, side, depth);
 	    } else {
-	        mg.GenerateKingEscapes(g, moves, side, depth);
+	        moveGenerator.GenerateKingEscapes(g, moves, side, depth);
 	    }
 	    return moves;
 	}
@@ -270,21 +303,22 @@ public class Search {
 	// A more positive number is better for white.
 	// A more negative number is better for black.
 	int evaluate(GameState g, int side, int depth){
-		return eval.evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
+		return evaluator.evaluate(g, side, depth, SEARCH_DEBUG, EVAL);
 	}
 
-	private void logMove(GameState g, int depth, int move, int i, int best, int alpha, int beta) {
+	protected void logMove(GameState g, int depth, int move, int i, int best, int alpha, int beta) {
 		if(SEARCH_DEBUG){
 			String line = "";
 			for(int j=0; j<depth; j++){
 				line += Util.displayMoveStr(g.currentLine[j], false, false)+ " ";
 			}
 
-		        log.debug(indent(depth) + "@" + depth + "  " + line + " " + 
+		        log.debug(indent(depth) + "@" + depth + " " + line + " " + 
 		        		Util.displayMoveStr(move, false, false) + 
 		        		String.format("  best=%d  alpha=%d  beta=%d", best, alpha, beta));
 		}
-		if(DEBUG) log.debug(String.format("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta));
+//		if(DEBUG) 
+//			log.debug(String.format("  best=%d  alpha=%d  beta=%d\n", best, alpha, beta));
 	}
 
 	private static String indent(int d){

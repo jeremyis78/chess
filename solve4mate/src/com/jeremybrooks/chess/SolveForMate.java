@@ -74,6 +74,12 @@ public class SolveForMate {
 	        System.exit(1);
 	    }
 	    int mateInN = 4;
+	    Evaluator eval = new Evaluator();
+	    MoveGenerator mg = new MoveGenerator();
+	    eval.setMoveGenerator(mg);
+	    search.setMoveGenerator(mg);
+	    search.setEvaluator(eval);
+	    
 	    try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) 
 	    {
 	    	while (br.ready()){
@@ -102,7 +108,6 @@ public class SolveForMate {
 	    		displayResults(g, move, elapsedMs);
 	    		search.reset();
 	    	}
-	    	
 	    }
 	}
 
