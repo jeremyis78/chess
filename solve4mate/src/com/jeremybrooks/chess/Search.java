@@ -57,14 +57,10 @@ public class Search {
 		public int getScore() {	return score; }
 		public void setScore(int score) { this.score = score; }
 		public String toString(){
-			return Util.displayMoveStr(move, false, false) + "("+score+")";
+			return Util.displayMoveStr(move, false, false);// + "("+score+")";
 		}
 	}
 
-	public void reset(){
-		pvLine = null;
-	}
-	
 	public int getMaxSearchDepth() {
 		return maxSearchDepth;
 	}

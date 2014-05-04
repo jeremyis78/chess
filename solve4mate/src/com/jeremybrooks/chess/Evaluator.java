@@ -204,9 +204,13 @@ public class Evaluator {
 		int bTotalScore = bMaterialScore + wPositionalScore;
 		if(mate){
 
-			if(isSearchDebug){
-				log.debug("   " + score + " mate!");
-			}
+//			if(isSearchDebug)
+				String mateLine = "";
+				for(int i=0;i<depth;i++){mateLine += Util.displayMoveStr(g.currentLine[i], false, false)+" ";}
+				FenBuilder fb = new FenBuilder();
+				fb.appendPieceBoard(g.getPosition());
+				log.debug("mate("+score+"): " + mateLine + "  " +fb.toString());
+//			}
 			return score;
 		} else if (draw) {
 			log.debug("draw:");
