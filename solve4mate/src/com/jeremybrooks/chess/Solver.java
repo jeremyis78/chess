@@ -75,7 +75,7 @@ public class Solver {
 		log.debug("Searching for mate in "+movesToMate+"...");
 		long start = System.nanoTime();
 		search.getBestMove(g, g.isWhiteToMove()?0:1);
-		double solveTimeMillis = (System.nanoTime() - start)/1000.0;
+		double solveTimeMillis = (System.nanoTime() - start)/1000000.0;
 		int totalNodes = g.nodes;
 		boolean mate = g.numberOfLinesToMate > 0;
 		String solutionMoves = search.getPVMoveLine();
