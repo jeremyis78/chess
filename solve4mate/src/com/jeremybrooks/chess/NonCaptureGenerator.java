@@ -1,23 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.ALL;
-import static com.jeremybrooks.chess.Bitmap.BISHOP;
-import static com.jeremybrooks.chess.Bitmap.C1;
-import static com.jeremybrooks.chess.Bitmap.C8;
-import static com.jeremybrooks.chess.Bitmap.E1;
-import static com.jeremybrooks.chess.Bitmap.E8;
-import static com.jeremybrooks.chess.Bitmap.EIGHTHRANK;
-import static com.jeremybrooks.chess.Bitmap.FIRSTRANK;
-import static com.jeremybrooks.chess.Bitmap.G1;
-import static com.jeremybrooks.chess.Bitmap.G8;
-import static com.jeremybrooks.chess.Bitmap.KING;
-import static com.jeremybrooks.chess.Bitmap.KNIGHT;
-import static com.jeremybrooks.chess.Bitmap.PAWN;
-import static com.jeremybrooks.chess.Bitmap.PIECE;
-import static com.jeremybrooks.chess.Bitmap.QUEEN;
-import static com.jeremybrooks.chess.Bitmap.ROOK;
-import static com.jeremybrooks.chess.Bitmap.SECONDRANK;
-import static com.jeremybrooks.chess.Bitmap.SEVENTHRANK;
+import static com.jeremybrooks.chess.Bitmap.*;
 
 public class NonCaptureGenerator extends MoveGenerator implements Generator {
 
