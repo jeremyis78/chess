@@ -21,36 +21,7 @@ public class PositionTest extends TestCase {
 
 	public void testPositionEmpty() {
 		Position p = new Position();
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, PAWN));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, KNIGHT));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, BISHOP));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, ROOK));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, QUEEN));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, KING));
-		assertEquals(0L, p.getPawns(Bitmap.WHITE));
-		assertEquals(0L, p.getKnights(Bitmap.WHITE));
-		assertEquals(0L, p.getBishops(Bitmap.WHITE));
-		assertEquals(0L, p.getRooks(Bitmap.WHITE));
-		assertEquals(0L, p.getQueens(Bitmap.WHITE));
-		assertEquals(0L, p.getKing(Bitmap.WHITE));
-
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, PAWN));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, KNIGHT));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, BISHOP));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, ROOK));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, QUEEN));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, KING));
-		assertEquals(0L, p.getOpponentPawns(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentKnights(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentBishops(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentRooks(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentQueens(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentKing(Bitmap.WHITE));
-		
-		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
-		{
-			assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(square));
-		}
+		assertEmptyPosition(p);
 	}
 
 	public void testClear() {
@@ -210,6 +181,8 @@ public class PositionTest extends TestCase {
 		long bitmap = 6L;
 		Position p = new Position();
 		p.setPieces(Bitmap.WHITE, PAWN, bitmap);
+		assertEquals(bitmap, p.getPawns(WHITE));
+		assertEquals(bitmap, p.getPieces(WHITE));
 	}
 	
 	public void testGettingAnInvalidAllPiecesBitboard()
@@ -320,38 +293,42 @@ public class PositionTest extends TestCase {
 	}
 
 	private void assertEmptyPosition(Position p) {
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, PAWN));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, KNIGHT));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, BISHOP));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, ROOK));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, QUEEN));
-		assertEquals(0L, p.getPieces(Bitmap.WHITE, KING));
-		assertEquals(0L, p.getPawns(Bitmap.WHITE));
-		assertEquals(0L, p.getKnights(Bitmap.WHITE));
-		assertEquals(0L, p.getBishops(Bitmap.WHITE));
-		assertEquals(0L, p.getRooks(Bitmap.WHITE));
-		assertEquals(0L, p.getQueens(Bitmap.WHITE));
-		assertEquals(0L, p.getKing(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, PAWN));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, KNIGHT));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, BISHOP));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, ROOK));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, QUEEN));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, KING));
+		assertEquals(EMPTY_BITBOARD, p.getPawns(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getKnights(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getBishops(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getRooks(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getQueens(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getKing(Bitmap.WHITE));
 
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, PAWN));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, KNIGHT));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, BISHOP));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, ROOK));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, QUEEN));
-		assertEquals(0L, p.getPieces(Bitmap.BLACK, KING));
-		assertEquals(0L, p.getOpponentPawns(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentKnights(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentBishops(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentRooks(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentQueens(Bitmap.WHITE));
-		assertEquals(0L, p.getOpponentKing(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(BLACK));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, PAWN));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, KNIGHT));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, BISHOP));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, ROOK));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, QUEEN));
+		assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.BLACK, KING));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentPawns(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentKnights(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentBishops(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentRooks(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentQueens(Bitmap.WHITE));
+		assertEquals(EMPTY_BITBOARD, p.getOpponentKing(Bitmap.WHITE));
         
+		assertFalse(p.isKingPlaced(WHITE));
 		assertEquals(-1, p.getKingSquare(WHITE));
+		assertFalse(p.isKingPlaced(BLACK));
 		assertEquals(-1, p.getKingSquare(BLACK));
-		assertEquals(0x0L, p.getAllPieces(0));
-		assertEquals(0x0L, p.getAllPieces(90));
-		assertEquals(0x0L, p.getAllPieces(45));
-		assertEquals(0x0L, p.getAllPieces(-45));
+		assertEquals(EMPTY_BITBOARD, p.getAllPieces(0));
+		assertEquals(EMPTY_BITBOARD, p.getAllPieces(90));
+		assertEquals(EMPTY_BITBOARD, p.getAllPieces(45));
+		assertEquals(EMPTY_BITBOARD, p.getAllPieces(-45));
 		
 		for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
 		{
@@ -371,6 +348,7 @@ public class PositionTest extends TestCase {
         long sqMask45R = 1L << SQ2BIT45R[sq];
         String bitNotSetMsg = "bit "+sq+" was not set";
 		assertEquals(bitNotSetMsg, sqMask, p.getPieces(color,piece) & sqMask);
+		assertEquals(bitNotSetMsg, sqMask, p.getPieces(color) & sqMask);
         assertEquals(bitNotSetMsg, sqMask, p.getAllPieces(0) & sqMask);
 		assertEquals(bitNotSetMsg, sqMask90, p.getAllPieces(90) & sqMask90);
 		assertEquals(bitNotSetMsg, sqMask45L, p.getAllPieces(-45) & sqMask45L);
@@ -393,6 +371,7 @@ public class PositionTest extends TestCase {
         long sqMask45R = 1L << SQ2BIT45R[sq];
         String bitNotClearedMsg = "bit "+sq+" was not cleared";
 		assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getPieces(color,piece) & sqMask);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getPieces(color) & sqMask);
         assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(0) & sqMask);
 		assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(90) & sqMask90);
 		assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(-45) & sqMask45L);

@@ -5,7 +5,6 @@ import static com.jeremybrooks.chess.Bitmap.KING;
 import com.jeremybrooks.chess.Piece.Color;
 
 public class King extends Piece {
-	private static final Attacks att = MoveGenerator.att;
 
 	public King(Color color) 
 	{ 
@@ -21,16 +20,19 @@ public class King extends Piece {
 	 * opposing king is attacking to be sure we don't move there
 	 */
 	@Override
-	public long nonCaptures(int fromSquare, Position position) {
-		int side = (color==Color.W?0:1);
-		long allPiecesByRank = position.getAllPieces(0);
-		long emptySquares = ~allPiecesByRank;
-
-        long pMoves = att.king[fromSquare] & emptySquares; // & ~att.king[position.getKingSquare(Util.opposing(side))];
+	public long advances(int fromSquare, Position position) {
+		int mySide = (color==Color.W?0:1);
+		long notMyPieces = ~position.getPieces(mySide);
+        long advances = MoveGenerator.att.king[fromSquare] & notMyPieces;
 
         //exclude moves that are attacked by opponent's king
-        pMoves &= ~att.king[position.getKingSquare(Util.opposing(side))];
-        return pMoves;
+        if(position.isKingPlaced(Util.opposing(mySide)))
+        {
+        	int opposingKingSquare = position.getKingSquare(Util.opposing(mySide));
+        	long notAttackedByOpposingKing = ~MoveGenerator.att.king[opposingKingSquare];
+			advances &= notAttackedByOpposingKing;
+        }
+        return advances;
 	}
 
 }

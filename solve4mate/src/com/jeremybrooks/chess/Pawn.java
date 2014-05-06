@@ -16,7 +16,7 @@ public class Pawn extends Piece {
 	}
 
 	@Override
-	public long nonCaptures(int fromSquare, Position position) {
+	public long advances(int fromSquare, Position position) {
 		int side = (color==Color.W?0:1);
 		long allPiecesByRank = position.getAllPieces(0);
 		long emptySquares = ~allPiecesByRank;

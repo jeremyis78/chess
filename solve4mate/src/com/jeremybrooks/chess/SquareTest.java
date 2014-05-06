@@ -22,39 +22,34 @@ public class SquareTest {
 	public void testIsOccupied() {
 		assertFalse(square.isOccupied());
 		square = new Square(new Empty());
-		assertFalse("absent piece for piece is still an unoccupied square",
+		assertFalse("absent/empty piece on a square is still an unoccupied square",
 				square.isOccupied());
 	}
 
-//	@Test
-//	public void testClear() {
-//		Pawn whitePawn = new Pawn(Color.W);
-//		square = new Square(whitePawn);
-//		assertSquareIsOccupiedBy(whitePawn);
-//		
-//		square.clear();
-//		assertSquareIsUnoccupied();
-//		
-//		square.setPiece(Piece.absence());
-//		square.clear();
-//		assertSquareIsUnoccupied();
-//	}
+	@Test
+	public void testClear() {
+		Pawn whitePawn = new Pawn(Color.W);
+		square = new Square(whitePawn);
+		assertSquareIsOccupiedBy(whitePawn);
+		
+		square.clear();
+		assertSquareIsUnoccupied();
+		
+		square.set(new Empty());
+		square.clear();
+		assertSquareIsUnoccupied();
+	}
 
-//	@Test
-//	public void testSetAndGetPiece() {
-//		Bishop blackBishop = new Bishop(Color.B);
-//		square = new Square();
-//
-//		square.setPiece(blackBishop);
-//		assertSquareIsOccupiedBy(blackBishop);
-//		
-//		square.setPiece(null);
-//		assertSquareIsUnoccupied();
-//	}
+	@Test
+	public void testSetAndGetPiece() {
+		Bishop blackBishop = new Bishop(Color.B);
+		square = new Square();
 
-	@Test @Ignore
-	public void testWith() {
-		fail("Not yet implemented");
+		square.set(blackBishop);
+		assertSquareIsOccupiedBy(blackBishop);
+		
+		square.set(null);
+		assertSquareIsUnoccupied();
 	}
 
 	@Test @Ignore
@@ -70,7 +65,6 @@ public class SquareTest {
 	private void assertSquareIsUnoccupied() {
 		assertFalse(square.isOccupied());
 		assertNotNull(square.get());
-		assertSame(new Empty(), square.get());
 	}
 
 	private void assertSquareIsOccupiedBy(Piece piece) {

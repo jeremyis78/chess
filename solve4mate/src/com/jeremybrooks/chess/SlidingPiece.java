@@ -10,24 +10,22 @@ public abstract class SlidingPiece extends Piece {
 	}
 	
 	@Override 
-	public long nonCaptures(int fromSquare, Position position)
+	public long advances(int fromSquare, Position position)
 	{
-		long allPiecesByRank = position.getAllPieces(0);
-		long emptySquares = ~allPiecesByRank;
-
-		long pMoves = 0;
+		long advances = 0;
         if (slidesOnDiagonals())
         {
             long allPieces45Left = position.getAllPieces(-45);
 			long allPieces45Right = position.getAllPieces(45);
-			pMoves |= MoveGenerator.bishopAttacks(fromSquare, allPieces45Left, allPieces45Right) & emptySquares;
+			advances |= MoveGenerator.bishopAttacks(fromSquare, allPieces45Left, allPieces45Right);
         }
         if (slidesLaterally())
         {
+        	long allPiecesByRank = position.getAllPieces(0);
             long allPiecesByFile = position.getAllPieces(90);
-			pMoves |= MoveGenerator.rookAttacks(fromSquare, allPiecesByRank, allPiecesByFile) & emptySquares;
+			advances |= MoveGenerator.rookAttacks(fromSquare, allPiecesByRank, allPiecesByFile);
         }
-        return pMoves;
+        return advances;
 	}
 
 	private boolean slidesLaterally() {

@@ -16,11 +16,11 @@ public class Knight extends Piece {
 	}
 	
 	@Override
-	public long nonCaptures(int fromSquare, Position position)
+	public long advances(int fromSquare, Position position)
 	{
-		long allPiecesByRank = position.getAllPieces(0);
-		long emptySquares = ~allPiecesByRank;
-		return MoveGenerator.att.knight[fromSquare] & emptySquares;
+		int mySide = (color==Color.W?0:1);
+		long notMyPieces = ~position.getPieces(mySide);
+		return MoveGenerator.att.knight[fromSquare] & notMyPieces;
 	}
 
 }

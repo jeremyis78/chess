@@ -100,15 +100,16 @@ public abstract class Piece {
 	public abstract boolean exists();
 	
 	/**
-	 * Returns a bitboard of the squares the piece can "advance" to
-	 * Only moves to squares that do not capture or promote a pawn
-	 * should be returned here.
+	 * Get a bitboard indicating possible captures or moves for the piece.
+	 * All moves that indicate a pseudo legal move for this piece (e.g. pawn 
+	 * advance/capture, en passant capture, promotion, castling, or any other
+	 * piece move or capture).
 	 * 
-	 * @param fromSquare square on which the piece resides 
-	 * @param emptyBitboard - 1 bits represent empty squares on the board, 0 bits are occupied
+	 * @param fromSquare  square on which the piece resides 
+	 * @param position  the current position on the board
 	 * @return
 	 */
-	public abstract long nonCaptures(int fromSquare, Position position);
+	public abstract long advances(int fromSquare, Position position);
 	
 
 //	public abstract long attacks(int fromSquare) { return 0L; }

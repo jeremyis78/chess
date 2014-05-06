@@ -15,7 +15,7 @@ public class Empty extends Piece {
 	}
 
 	@Override
-	public long nonCaptures(int fromSquare, Position position) {
+	public long advances(int fromSquare, Position position) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

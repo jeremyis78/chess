@@ -15,7 +15,6 @@ package com.jeremybrooks.chess;
  *
  */
 public class Square {
-	private static final Square EMPTY_SQUARE = new Square();
 	
 	private Piece piece;
 	
@@ -59,20 +58,4 @@ public class Square {
 	{
 		this.piece = piece;
 	}
-	
-	public static Square unoccupied()
-	{
-		return EMPTY_SQUARE;
-	}
-
-//	public static Square fromBoard(int boardPiece)
-//	{
-//		Piece piece = Piece.fromBoardPiece(boardPiece);
-//		if(piece.exists())
-//		{
-//			return Square.with(piece);
-//		}
-//		return Square.unoccupied();
-//	}
-
 }

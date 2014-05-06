@@ -133,6 +133,18 @@ public class Position
 		}
 	}
 
+	public long getPieces(int side){
+		long oneSidesPieces = 0L;
+		for(int piece=PAWN; piece<=QUEEN; piece++)
+		{
+			oneSidesPieces |= pieces[side][piece];
+		}
+	    if(isKingPlaced(side)) {
+	    	oneSidesPieces |= 1L << kingSq[side];
+	    }
+	    return oneSidesPieces;
+	}
+
 	public long getOpponentPiecesExceptKing(int color)
 	{
 		int opponentColor = (color == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE;
