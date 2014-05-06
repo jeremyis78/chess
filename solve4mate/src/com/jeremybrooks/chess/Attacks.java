@@ -19,17 +19,6 @@ public class Attacks {
 	
 	private static final Logger log = Logger.getLogger(Attacks.class);
 
-	//This is a constant for the diagonal length
-	//To access the length of the main diagonal use dlen[7]
-	//The first diagonal is the zero-th.
-	static final int DLEN[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
-	
-	static final int dstartsqRight45[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-	
-	static final int dstartsqLeft45[] = {0,1,2,3,4,5,6,7,15,23,31,39,47,55,63};  //should be 15 elements
-    //TODO: could replace above with (for clarity maybe??) 
-    // {A1,B1,C1,D1,E1,F1,G1,H1,H2,H3,H4,H5,H6,H7,H8}
-
 	private static final int FILE1 = 0;
 	private static final int FILE8 = 7;
 	private static final int RANK8 = 7;
@@ -328,9 +317,9 @@ public class Attacks {
         int shift;
         for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
             shift = 8 * (sq / 8);   //int division required
-            for (int st = 0; st < 64; ++st){
+            for (int occupationCombination = 0; occupationCombination < 64; ++occupationCombination){
                 //board = base[sq % 8][st];
-                rank[sq][st] = ((long)base[fileNumber(sq)][st]) << shift;
+                rank[sq][occupationCombination] = ((long)base[fileNumber(sq)][occupationCombination]) << shift;
             }
         }
     }
@@ -376,11 +365,11 @@ public class Attacks {
         int rankNumber, maskindex;
         for (int f = A1; f <= H8; ++f){
             rankNumber = rankNumber(f);
-            for (int st=0; st < 64; ++st){
+            for (int occupationCombination=0; occupationCombination < 64; ++occupationCombination){
                 for (int i=0; i < 8; ++i){
                     maskindex = fileNumber(f) + (i * 8);
-                    if((base[rankNumber][st] & (mask << i)) > 0)	//if it's set, set bit
-                        file[f][st] |= 1L << maskindex;
+                    if((base[rankNumber][occupationCombination] & (mask << i)) > 0)	//if it's set, set bit
+                        file[f][occupationCombination] |= 1L << maskindex;
                 }
             }
         } 
@@ -392,13 +381,13 @@ public class Attacks {
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
         	int len = rightDiagIterator.diagonalLength();
-            int maxstatus = getMaxStatus(len);
+            int maxOccupationCombination = getMaxOccupationCombination(len);
             //NOW one loop for each sq in diagonal
             for (int i=0; i < len ; i++){
-                //And finally, one loop for each status
+                //And finally, one loop for each occupation combination
             	int sq = rightDiagIterator.next();
-                for (byte st = 0; st <= maxstatus; st++){
-                    R45[sq][st] = getDiagonalSet(d, base[i][st], new RightDiagonalIterator(d));
+                for (byte occupationCombination = 0; occupationCombination <= maxOccupationCombination; occupationCombination++){
+                    R45[sq][occupationCombination] = getDiagonalSet(base[i][occupationCombination], new RightDiagonalIterator(d));
                 }
             }
         }
@@ -406,7 +395,7 @@ public class Attacks {
 
 
     long getA1H8diag(int diagonal, short bitmap){
-    	return getDiagonalSet(diagonal, bitmap, new RightDiagonalIterator(diagonal));
+    	return getDiagonalSet(bitmap, new RightDiagonalIterator(diagonal));
     }
 
     void genDiagonal45DegreesLeftAttacks(){
@@ -414,15 +403,15 @@ public class Attacks {
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
         	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
         	int len = leftDiagIterator.diagonalLength();
-            int maxstatus = getMaxStatus(len);
+            int maxOccupationCombination = getMaxOccupationCombination(len);
             //NOW one loop for each sq in diagonal
             int i = 0;
             while(leftDiagIterator.hasNext())
             {
             	int currentSquare = leftDiagIterator.next();
-                //And finally, one loop for each status
-                for (byte st = 0; st <= maxstatus; st++){
-                    L45[currentSquare][st] = getDiagonalSet(d, base[i][st], new LeftDiagonalIterator(d));
+                //And finally, one loop for each occupied combination
+                for (byte occupationCombination = 0; occupationCombination <= maxOccupationCombination; occupationCombination++){
+                    L45[currentSquare][occupationCombination] = getDiagonalSet(base[i][occupationCombination], new LeftDiagonalIterator(d));
                 }
                 i++;
             }
@@ -430,10 +419,10 @@ public class Attacks {
     }
 
     long getH1A8diag(int diagonal, short bitmap){
-    	return getDiagonalSet(diagonal, bitmap, new LeftDiagonalIterator(diagonal));
+    	return getDiagonalSet(bitmap, new LeftDiagonalIterator(diagonal));
     }
 
-    long getDiagonalSet(int diagonal, short bitmap, DiagonalIterator iterator){
+    long getDiagonalSet(short bitmap, DiagonalIterator iterator){
     //"diagonal" is the diagonal that we want to set to "b"
     //"diagonal" is in range 0..14 inclusive 
     //"diagonal" corresponds to these diagonals: "diagonal"={diagonal squares)
@@ -441,8 +430,7 @@ public class Attacks {
     	
         //set the bits set in b to the diagonal dnum in a.
         long board = 0;
-        int diagonalLength = DLEN[diagonal];
-        //int bitToCheck=0;
+        int diagonalLength = iterator.diagonalLength();
         for (int bitToCheck=0;
         		bitToCheck < diagonalLength;
         		bitToCheck++)
@@ -457,13 +445,13 @@ public class Attacks {
 
     //get the correct maximum status to count to
     //maxstatus is the diagonal minus the outer bit on each end
-	private static int getMaxStatus(int len) {
-		int maxstatus;
+	private static int getMaxOccupationCombination(int len) {
+		int maxCombinations;
 		if (len < 3)
-		    maxstatus = 0;
+		    maxCombinations = 0;
 		else
-		    maxstatus = (1 << (len-2)) - 1;  //maxstatus = 2^(len-2) - 1
-		return maxstatus;
+		    maxCombinations = (1 << (len-2)) - 1;  //maxstatus = 2^(len-2) - 1
+		return maxCombinations;
 	}
 
 	private static boolean isBitSet(short bitmap, int index) {
@@ -643,13 +631,13 @@ public class Attacks {
     		"current configuration of pieces. A1 is on the left and H1 on the far right.\n" +
     		"An empty square is denoted with a '-' and an occupied or\n" +
     		"attacked square is represented with an 'X'\n\n";
-    	StringBuffer sb = new StringBuffer();
+    	StringBuilder sb = new StringBuilder();
     	sb.append(msg);
         for(int square = 0; square <= 7; square++){
 			int pieceBitmap = 1 << square;
-        	for(int status = 0; status < 64; status++){
-    			int occupiedBitmap = status << 1;
-    			int attacks = base[square][status];
+        	for(int occupationCombination = 0; occupationCombination < 64; occupationCombination++){
+    			int occupiedBitmap = occupationCombination << 1;
+    			int attacks = base[square][occupationCombination];
     			sb.append(Util.formatBaseAttacks(pieceBitmap, occupiedBitmap, attacks) + "\n");
     		}
     	}
