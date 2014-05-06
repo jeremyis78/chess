@@ -361,6 +361,62 @@ public class GameStateTest {
 		assertEquals(beforeMove, undoMove(isWhitesMove, move));
 	}
 
+	@Test
+	public void testForA8AlreadyOccupiedBug()
+	{   // Test attempts to verify a bug found when doing a deep search.
+		// When running the same series of moves however this test
+		// fails to duplicate the issue.  There may have been some
+		// corrupted GameState prior to actually executing this series of
+		// moves and that makes this hard to test/fix.
+		/*
+		 * bug!!!!!
+			When making 13...Qd8-a8 after 
+			 1. Pa2-a4 Pa7-a5 
+			 2. Pb2-b4 Pa5xb4
+			 3. Pc2-c4 Pb4xc3
+			 4. Pd2xc3 Ra8xa4  <-- maybe the rook was never recognized as moving from a8?? 
+			 5. Ra1xa4 Pb7-b5
+			 6. Bf1xb5 Pc7-c5
+			 7. Bb5xd7 Nb8xd7
+			 8. Qd1xd7 Bc8xd7
+			 9. Pf2-f4 Pe5xf4
+			10. Bc1xf4 Bd7xa4
+			11. Pg2-g4 Pf7-f5
+			12. Pe4xf5 Pg7-g5
+			13. Pf5xg6   
+			We get IllegalStateException from Position.placePiece() "a8 is already occupied"
+			final fen: r3kbnr/7p/6P1/2p5/b4BP1/2P5/7P/1N2K1NR  (rook is still on a8?????)
+		 */
+		String beforeMove = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1";
+		//when making 32315 after 
+		boolean isWhiteToMove = setupState(beforeMove);
+		assertTrue("white to move", isWhiteToMove);
+		int[] m = new int[25]; //contains the moves listed above
+		m[0]=5640; m[1]=6192; m[2]=5705; m[3]=38496; m[4]=5770; m[5]=38041; m[6]=38027; m[7]=58936; m[8]=222720; m[9]=6257; m[10]=55365; m[11]=6322; m[12]=56545; m[13]=175353; m[14]=97475; m[15]=253178; m[16]=5965; m[17]=38756; m[18]=55106; m[19]=218675; m[20]=6030; m[21]=6517; m[22]=39260; m[23]=6582; m[24]=39845;  // got a8 is already occupied
+		int i=0;
+		while (i<24) { //right before 13...Qd8-a8
+			makeUndoMakeMove(i%2==0?true:false, m[i]);
+			i++;
+		}
+		FenBuilder fb = new FenBuilder();
+		Displayer d = new Displayer();
+		System.out.println(d.formatBoard(gameState.getPosition()));
+		fb.appendPieceBoard(gameState.getPosition());
+		System.out.println(fb.toString());
+		//Create 13...Qd8-a8
+		int move = 0;
+		move = Bitmap.D8;
+		move |= (Bitmap.A8 << 6);
+		move |= (PIECE[Bitmap.QUEEN] << 12);
+		makeUndoMakeMove(i%2==0?true:false, move);  //doesn't throw, ugggh.
+	}
+
+	private void makeUndoMakeMove(boolean isWhiteToMove, int move) {
+		makeMove(isWhiteToMove, move);
+		undoMove(isWhiteToMove, move);
+		makeMove(isWhiteToMove, move);
+	}
+
 	private boolean setupState(String startState) {
 		String position = startState;
 		gameState.set(startState);
