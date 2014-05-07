@@ -96,11 +96,11 @@ public class Util {
 	}
 	
     public static String SqToStr(int sq){
-	    StringBuffer sb = new StringBuffer();
+	    String s = ""; 
 	    if (sq >= Bitmap.A1 && sq <= Bitmap.H8){
-	    	sb.append(String.format("%c", 'a' + (sq % 8)));
-	    	sb.append(String.format("%c", '1' + (sq / 8))); //int division
-	    	return sb.toString();
+	    	s += (char)('a' + (sq % 8));
+	    	s += (char)('1' + (sq / 8)); //int division
+	    	return s;
 	    } 
 	    return ""; //throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
 	}
