@@ -100,9 +100,8 @@ public class Util {
 	    if (sq >= Bitmap.A1 && sq <= Bitmap.H8){
 	    	s += (char)('a' + (sq % 8));
 	    	s += (char)('1' + (sq / 8)); //int division
-	    	return s;
 	    } 
-	    return ""; //throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
+	    return s; //throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
 	}
 
     public static void displaySquares(long b){
