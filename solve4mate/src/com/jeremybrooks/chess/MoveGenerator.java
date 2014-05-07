@@ -27,26 +27,6 @@ public class MoveGenerator {
 	public MoveGenerator(){
 		
 	}
-	
-	
-	// Return the rank number (zero-based)
-	private int Rank(int sq){ return (sq / 8); } //integer division
-
-	// Return the file number (zero-based)
-	private int File(int sq){ return (sq % 8); }
-
-
-//	void ClearPiece(long &board, int bit){
-//		board &= ~(1L << bit);
-//	}
-
-	protected static long ClearPiece(long board, int bit){
-		return Bitmap.clearBit(board, bit);
-	}
-
-	protected static int FirstPiece(long pieces){
-		return Bitmap.lowestBitNumber(pieces);
-	}
 
 	//These functions return the occupied status (middle six bits)
 	//of a Rank, File or Diagonal.  For a diagonal (R45, L45) whose length
@@ -302,7 +282,7 @@ public class MoveGenerator {
 
 	    //Pawn promotions
 	    while (morePieces(promoters)) {
-	        to = FirstPiece (promoters);
+	        to = lowestBitNumber(promoters);
 	        //Add move ONLY if the move is to 'targets'
 	        if (Util.bool((1L << to) & targets))
 	        {
@@ -321,12 +301,12 @@ public class MoveGenerator {
 	                }
 	            }
 	        }
-	        promoters = ClearPiece (promoters, to);
+	        promoters = clearBit(promoters, to);
 	    }
 	    // Pawns advance two squares
 	    while (morePieces(advanceTwo))
 	    {
-	        to = FirstPiece (advanceTwo);
+	        to = lowestBitNumber(advanceTwo);
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets)){ 
 	            from = Util.twoSquaresBehind(to, side);
@@ -338,11 +318,11 @@ public class MoveGenerator {
 	                numip++;
 	            }
 	        }
-	        advanceTwo = ClearPiece (advanceTwo, to);
+	        advanceTwo = clearBit(advanceTwo, to);
 	    }
 	    // Pawns advance one square
 	    while (morePieces(pMoves)) {
-	        to = FirstPiece (pMoves);
+	        to = lowestBitNumber(pMoves);
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets))
 	        {
@@ -356,7 +336,7 @@ public class MoveGenerator {
 	                numip++;
 	            }
 	        }
-	        pMoves = ClearPiece (pMoves, to);
+	        pMoves = clearBit(pMoves, to);
 	    }
 
 	    //***************************************************************************
@@ -368,7 +348,7 @@ public class MoveGenerator {
 	    for (int p = KNIGHT; p <= QUEEN; p++) {
 	        pieces = position.getPieces (side, p);
 	        while (morePieces(pieces)) {
-	            from = FirstPiece (pieces);
+	            from = lowestBitNumber(pieces);
 	            //now make pMoves only those moves which will interpose
 	            //between the king and the checker (by ANDing with targets).
 	            switch (p) {
@@ -392,7 +372,7 @@ public class MoveGenerator {
 	                    break;
 	            }
 	            while (morePieces(pMoves)) {
-	                to = FirstPiece (pMoves);
+	                to = lowestBitNumber(pMoves);
 	                //Add move ONLY if it is to 'targets'
 	                //if ((1L << to) & targets) {
 
@@ -405,9 +385,9 @@ public class MoveGenerator {
 	                   //g.legalMoves[depth]++;
 	                   //g.addMove (move);
 	                }
-	                pMoves = ClearPiece (pMoves, to);
+	                pMoves = clearBit(pMoves, to);
 	            }
-	            pieces = ClearPiece (pieces, from);
+	            pieces = clearBit(pieces, from);
 	        }
 	    }
 	    //g.legalMoves[depth] = n;

@@ -1,9 +1,12 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
-import org.junit.Test;
+
+import java.security.SecureRandom;
 
 import junit.framework.TestCase;
+
+import org.junit.Test;
 
 public class BitmapTest extends TestCase {
 
@@ -156,7 +159,7 @@ public class BitmapTest extends TestCase {
 		assertEquals(4, leastSignificantBitSet);
 	}
 	
-	public void testGetLSBitOnBoundaries()
+	public void testLowestBitNumberOnBoundaries()
 	{
 		long firstBitSet = 1L << 0;
 		long lastBitSet = 1L << 63;
@@ -180,7 +183,7 @@ public class BitmapTest extends TestCase {
 		assertEquals(0, leastSignificantBitSet);
 	}
 
-	public void testGetMSBitOnBoundaries()
+	public void testHighestBitNumberOnBoundaries()
 	{
 		long firstBitSet = 1L << 0;
 		long lastBitSet = 1L << 63;

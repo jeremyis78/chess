@@ -49,36 +49,36 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	    }
 	    // Pawn promotions
 	    while (morePieces(promoters)) {
-	        to = FirstPiece (promoters);
+	        to = lowestBitNumber(promoters);
 	        from = Util.squareBehind(to, side);
 	        for (int i = QUEEN; i >= KNIGHT; i--) {
 	            moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
 	            //g.legalMoves[depth]++;
 	            //g.addMove (move);
 	        }
-	        promoters = ClearPiece(promoters, to);
+	        promoters = clearBit(promoters, to);
 	    }
 	    // Pawns advance two squares
 	    while (morePieces(advanceTwo)) {
-	        to = FirstPiece (advanceTwo);
+	        to = lowestBitNumber(advanceTwo);
 	        from = Util.twoSquaresBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {
 	        	moves[n++] = move;
 	        }
-	        advanceTwo = ClearPiece(advanceTwo, to);
+	        advanceTwo = clearBit(advanceTwo, to);
 	    }
 	    // Pawns advance one square
 	    while (morePieces(pMoves)) {
-	        to = FirstPiece (pMoves);
+	        to = lowestBitNumber(pMoves);
 	        from = Util.squareBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {
 	        	moves[n++] = move;
 	        }
-	        pMoves = ClearPiece (pMoves, to);
+	        pMoves = clearBit(pMoves, to);
 	    }
 
 	    //***************************************************************************
@@ -89,34 +89,12 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 
 	    for (int p = KNIGHT; p <= KING; p++) {
 	        pieces = position.getPieces (side, p);
+	        Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*PIECE[p]);
 	        while (morePieces(pieces)) {
-	            from = FirstPiece (pieces);
-	            switch (p) {
-	                case KNIGHT:
-	                    pMoves = att.knight[from] & empty;
-	                    break;
-	                case BISHOP:   //fall through
-	                case ROOK:     //fall through
-	                case QUEEN:
-	                    if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
-	                    {
-	                        long allPieces45Left = position.getAllPieces(-45);
-							long allPieces45Right = position.getAllPieces(45);
-							pMoves |= bishopAttacks (from, allPieces45Left, allPieces45Right) & empty;
-	                    }
-	                    if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
-	                    {
-	                        long allPiecesByFile = position.getAllPieces(90);
-							pMoves |= rookAttacks (from, allPiecesByRank, allPiecesByFile) & empty;
-	                    }
-	                    break;
-	                case KING:
-	                	//exclude moves that are attacked by opponent's king 
-	                    pMoves = att.king[from] & empty & ~att.king[position.getKingSquare(Util.opposing(side))];
-	                    break;
-	            }
+	            from = lowestBitNumber(pieces);
+	            pMoves = piece.advances(from, position) & empty;
 	            while (morePieces(pMoves)) {
-	                to = FirstPiece (pMoves);
+	                to = lowestBitNumber(pMoves);
 	                int move = EncodeMove(from,to,PIECE[p],0,0);
 	                if (p == KING){
 	                	if (!isAttacked(g, side, to)){
@@ -126,9 +104,9 @@ public class NonCaptureGenerator extends MoveGenerator implements Generator {
 	                } else {
 	                    moves[n++] = move;
 	                }
-	                pMoves = ClearPiece (pMoves, to);
+	                pMoves = clearBit(pMoves, to);
 	            }
-	            pieces = ClearPiece (pieces, from);
+	            pieces = clearBit(pieces, from);
 	        }
 	    }
 

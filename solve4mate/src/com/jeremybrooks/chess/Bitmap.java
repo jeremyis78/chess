@@ -434,20 +434,12 @@ public class Bitmap {
 		return board;
 	}
 
-	static int lowestBitNumber(long pieces)
+	public static int lowestBitNumber(long pieces)
 	{
-		if (pieces != 0L)
-		{
-			long mask = 1;
-			for(int bit=0; bit < 64; bit++, mask <<= 1)
-			{
-				if(Util.bool(mask & pieces))
-				{
-					return bit;		
-				}
-			}
-		}
-		return -1;
+    	if(pieces == 0) return -1;
+    	//since our bitmaps are zero-indexed numberOfTrailingZeros works
+    	//and uses an efficient implementation.  1.023X as fast as the naive one.
+    	return Long.numberOfTrailingZeros(pieces);
 	}
 
 	static int highestBitNumber(long pieces){

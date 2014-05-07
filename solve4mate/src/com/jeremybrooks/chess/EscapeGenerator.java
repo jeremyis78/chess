@@ -56,7 +56,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 
 
 	    if (Util.bitCount(checkers) == 1) {
-	        checker = FirstPiece (checkers);
+	        checker = lowestBitNumber(checkers);
 	        cap = Math.abs(position.getBoard(checker));
 
 	        //Generate captures to checker's square
@@ -77,7 +77,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	        }
 
 	        while (morePieces(capturers)) {
-	            from = FirstPiece (capturers);
+	            from = lowestBitNumber(capturers);
 	            mover = Math.abs(position.getBoard(from));
 
 	            if (TO_PIECE[mover] == PAWN && Util.bool(checkers & promoteRank)) {
@@ -118,7 +118,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	                    //g.addMove (move);
 	                }
 	            }
-	            capturers = ClearPiece (capturers, from);
+	            capturers = clearBit(capturers, from);
 	        }
 
 	        if(cap != KNIGHT){
@@ -179,7 +179,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 		// Add king moves that would capture either checking piece
 	        kingMoves = att.king[kingSq] & checkers;
 	        while (morePieces(kingMoves)){
-	            to = FirstPiece(kingMoves);
+	            to = lowestBitNumber(kingMoves);
 	            cap = Math.abs(position.getBoard(to));
 	            move = EncodeMove(kingSq, to, PIECE[KING], cap, 0);
 	            if (isLegal (g, move, side)) {
@@ -189,14 +189,14 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 	                moves[n++] = move;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
 	            }
 
-	            kingMoves = ClearPiece(kingMoves, to);
+	            kingMoves = clearBit(kingMoves, to);
 	        }
 	    } 
 
 	    // Add king moves to flight squares (and captures)
 	    kingMoves = att.king[kingSq] & ~position.getAllPieces(0);
 	    while (morePieces(kingMoves)){
-	        to = FirstPiece(kingMoves);
+	        to = lowestBitNumber(kingMoves);
 	        //Same reason as above...hafta make sure the king doesn't just
 	        //move away from the sliding checking piece.
 	        //
@@ -211,7 +211,7 @@ public class EscapeGenerator extends MoveGenerator implements Generator {
 //	        	Util.displayMove(move, false, false);
 	            moves[n++] = move;
 	        }
-	        kingMoves = ClearPiece(kingMoves, to);
+	        kingMoves = clearBit(kingMoves, to);
 	    }
 
 	    //cout << "moves added: " << n << endl;

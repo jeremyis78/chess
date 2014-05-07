@@ -169,35 +169,35 @@ public class Evaluator {
 			// For knights
 			pieces = position.getPieces(i, KNIGHT);
 			while(pieces != 0){
-				pieceSq = squareOfFirstPiece(pieces);
+				pieceSq = lowestBitNumber(pieces);
 				if (i == Bitmap.WHITE){
 					wPositionalScore += knightPV[i][pieceSq];
 				} else {
 					bPositionalScore += knightPV[i][pieceSq];
 				} 
-				pieces = clearPieceOnSquare(pieces, pieceSq);
+				pieces = clearBit(pieces, pieceSq);
 			}
 			// For bishops
 			pieces = position.getPieces(i, BISHOP);
 			while(pieces != 0){
-				pieceSq = squareOfFirstPiece(pieces);
+				pieceSq = lowestBitNumber(pieces);
 				if (i == Bitmap.WHITE){
 					wPositionalScore += bishopPV[i][pieceSq];
 				} else {
 					bPositionalScore += bishopPV[i][pieceSq];
 				} 
-				pieces = clearPieceOnSquare(pieces, pieceSq);
+				pieces = clearBit(pieces, pieceSq);
 			}
 			// For rooks
 			pieces = position.getPieces(i, ROOK);
 			while(pieces != 0){
-				pieceSq = squareOfFirstPiece(pieces);
+				pieceSq = lowestBitNumber(pieces);
 				if (i == Bitmap.WHITE){
 					wPositionalScore += rookPV[i][pieceSq];
 				} else {
 					bPositionalScore += rookPV[i][pieceSq];
 				} 
-				pieces = clearPieceOnSquare(pieces, pieceSq);
+				pieces = clearBit(pieces, pieceSq);
 			}
 		}
 		int wTotalScore = wMaterialScore + wPositionalScore;
@@ -240,13 +240,4 @@ public class Evaluator {
 		}
 		return false;
 	}
-	
-	private long clearPieceOnSquare(long pieces, int pieceSq) {
-		return Bitmap.clearBit(pieces, pieceSq);
-	}
-
-	private int squareOfFirstPiece(long pieces) {
-		return Bitmap.lowestBitNumber(pieces);
-	}
-
 }

@@ -2,6 +2,8 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
+import com.jeremybrooks.chess.Piece.Color;
+
 public class CaptureGenerator extends MoveGenerator implements Generator {
 
 	@Override
@@ -24,8 +26,9 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	        mover = PIECE[p];
 	        Position position = g.getPosition();
 			pieces = position.getPieces (side, p);
+			Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*mover);
 	        while (morePieces(pieces)) {
-	            from = FirstPiece (pieces);
+	            from = lowestBitNumber(pieces);
 	            pro = 0;
 	            pieceAttacks = 0;
 	            switch (p) {
@@ -45,21 +48,12 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 	                    }
 	                }
 	                break;
-	            case KNIGHT:
-	                pieceAttacks = att.knight[from];
-	                break;
+	            case KNIGHT:   //fall through
 	            case BISHOP:   //fall through
 	            case ROOK:     //fall through
-	            case QUEEN:
-	                if (Util.bool(mover & ROOK_OR_QUEEN)) {
-	                    pieceAttacks |= rookAttacks (from, position.getAllPieces(0), position.getAllPieces(90));
-	                }
-	                if (Util.bool(mover & BISHOP_OR_QUEEN)) {
-	                    pieceAttacks |= bishopAttacks (from, position.getAllPieces(-45), position.getAllPieces(45));
-	                }
-	                break;
+	            case QUEEN:   //fall through
 	            case KING:
-	                pieceAttacks = att.king[from];
+	                pieceAttacks = piece.advances(from, position);
 	                break;
 	            }
 
@@ -69,7 +63,7 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
 
 	            attackedPieces = pieceAttacks & position.getOpponentPiecesExceptKing(side);
 	            while (morePieces(attackedPieces)) {
-	                to = FirstPiece (attackedPieces);
+	                to = lowestBitNumber(attackedPieces);
 	                cap = Math.abs(position.getBoard(to));
 	                if (!Util.bool(pro)) {     //Capture only
 	                	//TODO: make sure king does not move into check!!!!!
@@ -94,9 +88,9 @@ public class CaptureGenerator extends MoveGenerator implements Generator {
     	                	}
                 		}
 	                }
-	                attackedPieces = ClearPiece (attackedPieces, to);
+	                attackedPieces = clearBit(attackedPieces, to);
 	            }
-	            pieces = ClearPiece (pieces, from);
+	            pieces = clearBit(pieces, from);
 	        }
 	    }
 	    g.numberOfLegalMoves[depth] = n;
