@@ -236,7 +236,8 @@ public class Position
 		{
 			throw new IllegalStateException(Util.SqToStr(sq)+ " is already occupied");
 		}
-		log.trace("placing "+(c==WHITE?"white":"black")+" "+p+" on " +Util.SqToStr(sq));
+		if(log.isTraceEnabled()) 
+			log.trace("placing "+(c==WHITE?"white":"black")+" "+p+" on " +Util.SqToStr(sq));
 	    long mask = 1L << sq;
 	    all[ALL] |= mask;
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];
@@ -266,7 +267,8 @@ public class Position
 		}
 		int color = (boardPiece > 0) ? WHITE : BLACK;
 		int piece = TO_PIECE[Math.abs(boardPiece)];
-		log.trace("erasing "+(color==WHITE?"white":"black")+" piece on " + Util.SqToStr(square));
+		if(log.isTraceEnabled()) 
+			log.trace("erasing "+(color==WHITE?"white":"black")+" piece on " + Util.SqToStr(square));
 	    long mask = 1L << square;
 	    all[Bitmap.ALL] ^= mask;
 	    all[ALL90] ^= 1L << SQ2BIT90R[square];

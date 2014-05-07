@@ -289,7 +289,7 @@ public class GameState {
 	 * @return
 	 */
 	public boolean makeMove(int move, boolean isWhitesMove){
-		log.trace(indent() + formatCurrentLine());
+		if(log.isTraceEnabled()) log.trace(indent() + formatCurrentLine());
 		if(numberOfMovesMade == maxNumberOfMovesMade)
 		{
 			throw new IllegalStateException("max number of moves have been made: " + maxNumberOfMovesMade);

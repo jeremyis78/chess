@@ -139,20 +139,6 @@ public class Evaluator {
 				mate = true;
 				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
 				score = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
-
-				//Copy the line of play to checkmate to bestLine
-				if (g.numberOfLinesToMate == 0){
-					System.arraycopy(g.currentLine, 0, g.bestLine, 0, g.currentLine.length);
-//					String line = "";
-//					for(int i=0; i<g.currentLine.length; i++)
-//					{
-//						line += Util.displayMoveStr(g.bestLine[i], false, false) + " ";
-//					}
-//					log.debug("mate line: " + line);
-					g.numberOfLinesToMate++;
-				} else {
-					g.numberOfLinesToMate++;
-				}
 		}
 
 		// Compute material value
@@ -205,11 +191,11 @@ public class Evaluator {
 		if(mate){
 
 //			if(isSearchDebug)
-				String mateLine = "";
-				for(int i=0;i<depth;i++){mateLine += Util.displayMoveStr(g.currentLine[i], false, false)+" ";}
-				FenBuilder fb = new FenBuilder();
-				fb.appendPieceBoard(g.getPosition());
-				log.debug("mate("+score+"): " + mateLine + "  " +fb.toString());
+//				String mateLine = "";
+//				for(int i=0;i<depth;i++){mateLine += Util.displayMoveStr(g.currentLine[i], false, false)+" ";}
+//				FenBuilder fb = new FenBuilder();
+//				fb.appendPieceBoard(g.getPosition());
+//				log.debug("mate("+score+"): " + mateLine + "  " +fb.toString());
 //			}
 			return score;
 		} else if (draw) {
