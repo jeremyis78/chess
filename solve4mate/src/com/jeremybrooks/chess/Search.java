@@ -35,6 +35,11 @@ public class Search {
 	private Evaluator evaluator = new Evaluator();
 
 		
+	/*
+	 * Current state of the chess game 
+	 */
+	private GameState g;
+	
 	/* 
 	 * Initialize search's stack depth to this value
 	 */
@@ -109,6 +114,14 @@ public class Search {
 		return nodeCount;
 	}
 
+	public GameState getGameState() {
+		return g;
+	}
+
+	public void setGameState(GameState gameState) {
+		this.g = gameState;
+	}
+
 	public int getStackSize()
 	{
 		return stackSize;
@@ -161,26 +174,24 @@ public class Search {
 
 	/**
 	 * Search for the minimax value of the given GameState.
-	 * 
-	 * @param g  state of the chess game
 	 * @param side  side to move
+	 * 
 	 * @return the minimax value of the search
 	 */
-	public int search(GameState g, int side){
-	    return search(g, side, stackSize);
+	public int search(int side){
+	    return search(side, stackSize);
 	}
 
 	/**
 	 * Search, up to the depth limit, for the minimax value of the given GameState
-     *
-	 * @param g  state of the chess game
 	 * @param side  side to move
 	 * @param depthLimit  stop the search when this depth is reached
+     *
 	 * @return the minimax value of the search
 	 */
-	public int search(GameState g, int side, int depthLimit){
+	public int search(int side, int depthLimit){
 		setDepthLimit(depthLimit);
-	    return alphabetaMaxWindow(g, side);
+	    return alphabetaMaxWindow(side);
 	}
 
 	/**
@@ -189,13 +200,12 @@ public class Search {
 	 * A full window search means:
 	 * alpha = -Infinity
 	 * beta = +Infinity
-	 * 
-	 * @param g  state of the chess game
 	 * @param side  side to move
+	 * 
 	 * @return the minimax value of the search
 	 */
-	protected int alphabetaMaxWindow(GameState g, int side) {
-		return alphabeta(g, side, -MAXWINDOW, +MAXWINDOW);
+	protected int alphabetaMaxWindow(int side) {
+		return alphabeta(side, -MAXWINDOW, +MAXWINDOW);
 	}
 
 	/**
@@ -212,14 +222,13 @@ public class Search {
 	 *    
 	 *    <li>FAIL HIGH: when the value is greater than beta (beta is returned)
 	 *    </ul>
-	 * 
-	 * @param g  state of the chess game
 	 * @param side  side to move
 	 * @param alpha  represents the lower bound of the target window
 	 * @param beta  represents the upper bound of the target window
+	 * 
 	 * @return the minimax value of the search
 	 */
-	protected int alphabeta(GameState g, int side, int alpha, int beta){
+	protected int alphabeta(int side, int alpha, int beta){
 	    int minimaxValue;
 	    int depth = 0;
 	    //Now reset the legal moves to zero so everything
@@ -227,9 +236,9 @@ public class Search {
 	    g.numberOfLegalMoves[depth] = 0;
 	    moveGenerator.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
 	    if(side == Bitmap.WHITE){
-	      minimaxValue = max(g, alpha, beta, side, depth);
+	      minimaxValue = max(alpha, beta, side, depth);
 	    } else {
-	      minimaxValue = min(g, alpha, beta, side, depth);
+	      minimaxValue = min(alpha, beta, side, depth);
 	    }
 	    return minimaxValue;
 	}
@@ -252,10 +261,10 @@ public class Search {
 	//		   }
 	//		   return alpha;
 	//		}
-	private int max(GameState g, int alpha, int beta, int side, int depth){
-	    int[] moves = generateMoves(g, side, depth);
+	private int max(int alpha, int beta, int side, int depth){
+	    int[] moves = generateMoves(side, depth);
 	    if(isMaxDepthOrHasNoMoves(depth, moves.length)){
-	    	return evaluate(g, side, depth);
+	    	return evaluate(side, depth);
 	    }
 	    int numMoves = g.numberOfLegalMoves[depth];
 	    if(isTrace)
@@ -270,14 +279,14 @@ public class Search {
 			}
 	        currentMove[depth] = move;
 	        g.makeMove(move, side==WHITE);
-	        int val = min(g,alpha,beta,Util.opposing(side),depth+1); //recurse!
+	        int val = min(alpha,beta,Util.opposing(side),depth+1); //recurse!
 	        g.undoMove(move, side==WHITE);
 	        if(depth==0){
 	        	g.moves[i] = move;
 	        	g.movesValue[i] = val;
 	        }
 			if(isTrace) 
-				logMove(g, depth, move, val, alpha, beta);
+				logMove(depth, move, val, alpha, beta);
 	        if (val >= beta){
 	        	if(isTrace){
 	        		log.trace(indent(depth) + "@" + depth + " " + val + ">=" + beta + 
@@ -329,10 +338,10 @@ public class Search {
 	//		   }
 	//		   return beta;
 	//		}
-	private int min(GameState g, int alpha, int beta, int side, int depth){
-		int[] moves = generateMoves(g, side, depth);
+	private int min(int alpha, int beta, int side, int depth){
+		int[] moves = generateMoves(side, depth);
 		if(isMaxDepthOrHasNoMoves(depth, moves.length)){
-			return evaluate(g, side, depth);
+			return evaluate(side, depth);
 		}
 	    int numMoves = g.numberOfLegalMoves[depth];
 	    if(isTrace)
@@ -347,14 +356,14 @@ public class Search {
 			}
 			currentMove[depth] = move;
 			g.makeMove(move, side==WHITE);
-			int val = max(g,alpha,beta,Util.opposing(side), depth+1);  //recurse!
+			int val = max(alpha,beta,Util.opposing(side),depth+1);  //recurse!
 			g.undoMove(move, side==WHITE);
 			if(depth==0){
 				g.moves[i] = move;
 				g.movesValue[i] = val;
 			}
 			if(isTrace) 
-				logMove(g, depth, move, val, alpha, beta);
+				logMove(depth, move, val, alpha, beta);
 			if (val <= alpha){   //Found a cutoff
 	        	if(isTrace){
 	        		log.trace(indent(depth) + "@" + depth + " " + val + "<=" + alpha + 
@@ -377,7 +386,7 @@ public class Search {
 		return isMaxDepth || numMoves == 0;
 	}
 
-	protected int[] generateMoves(GameState g, int side, int depth) {
+	protected int[] generateMoves(int side, int depth) {
 		// Generate legal moves from this position
 		int[] moves = new int[MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
 	    if (!moveGenerator.isAttacked(g, side, g.getPosition().getKingSquare(side))){
@@ -393,11 +402,11 @@ public class Search {
 	// Returns an evaluation score for the side to move 'side'
 	// A more positive number is better for white.
 	// A more negative number is better for black.
-	int evaluate(GameState g, int side, int depth){
+	int evaluate(int side, int depth){
 		return evaluator.evaluate(g, side, depth, currentMove, SEARCH_DEBUG, EVAL);
 	}
 
-	protected void logMove(GameState g, int depth, int move, int moveScore, int alpha, int beta) {
+	protected void logMove(int depth, int move, int moveScore, int alpha, int beta) {
 			String line = "";
 			for(int j=0; j<depth; j++){
 				line += Util.displayMoveStr(currentMove[j], false, false)+ " ";

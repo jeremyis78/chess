@@ -84,6 +84,7 @@ public class Solver {
     	int stackSize = getStackSize(pliesForMovesToMate);
     	search.setStackSize(stackSize);
 		GameState g = new GameState(pliesForMovesToMate);
+		search.setGameState(g);
 //		FenParser parser = new FenParser();
 //		parser.init(puzzle.getFen());
 //		parser.parse();
@@ -93,7 +94,7 @@ public class Solver {
 
 		log.debug("Searching for mate in "+movesToMate+"...");
 		long start = System.nanoTime();
-		int score = search.search(g, g.isWhiteToMove()?0:1);
+		int score = search.search(g.isWhiteToMove()?0:1);
 		double solveTimeMillis = (System.nanoTime() - start)/1000000.0;
 		long nodeCount = search.getNodeCount(); //g.nodes;
 		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
