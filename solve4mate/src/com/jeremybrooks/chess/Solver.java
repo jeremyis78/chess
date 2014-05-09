@@ -72,7 +72,7 @@ public class Solver {
 		eval.setMoveGenerator(mg);
 		setMoveGenerator(mg);
 		setEvaluator(eval);
-		search = new Search();
+		search = new IterativeDeepeningSearch();
 		search.setEvaluator(evaluator);
 		search.setMoveGenerator(moveGenerator);
 	}
