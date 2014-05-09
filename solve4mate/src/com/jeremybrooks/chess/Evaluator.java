@@ -102,14 +102,14 @@ public class Evaluator {
 	};
 
 
-	private MoveGenerator mg;
+	private DefaultGenerator mg;
 
 
-	public MoveGenerator getMoveGenerator() {
+	public DefaultGenerator getMoveGenerator() {
 		return mg;
 	}
 
-	public void setMoveGenerator(MoveGenerator mg) {
+	public void setMoveGenerator(DefaultGenerator mg) {
 		this.mg = mg;
 	}
 
@@ -136,7 +136,8 @@ public class Evaluator {
 		long pieces = 0;
 		boolean draw = false;
 		boolean mate = false;
-
+		mg.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
+		
 		Position position = g.getPosition();
 		if (isCheckMated(g, side, depth))
 		{
@@ -217,7 +218,7 @@ public class Evaluator {
 	{
 		//Does king have legal moves?
 		int moves[] = new int[70];
-		int numMoves = mg.GenerateKingEscapes(g, moves, side, depth);
+		int numMoves = mg.generateKingEscapes(moves, side, depth);
 		//number of moves may be helpful for evaluation tuning because 1 or 2 moves
 		//limits the branching factor so that could be use to feed into the overall evaluation score
 		Position position = g.getPosition();

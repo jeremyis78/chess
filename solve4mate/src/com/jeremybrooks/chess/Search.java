@@ -12,6 +12,10 @@ import org.apache.log4j.Logger;
  * @author jeremy
  *
  */
+/**
+ * @author jeremy
+ *
+ */
 public class Search {
 
 	private static final Logger log = Logger.getLogger(Search.class);
@@ -27,9 +31,10 @@ public class Search {
 	public static final int DRAW = 0;              //value for draw
 	private static final int MAX_NUM_GENERATED_MOVES = 70;
 
-	private MoveGenerator moveGenerator = new MoveGenerator();
+	private DefaultGenerator moveGenerator = new DefaultGenerator();
 	private Evaluator evaluator = new Evaluator();
 
+		
 	/* 
 	 * Initialize search's stack depth to this value
 	 */
@@ -99,7 +104,7 @@ public class Search {
 		super();
 		setStackSize(stackSize);
 	}
-	
+
 	public long getNodeCount() {
 		return nodeCount;
 	}
@@ -125,8 +130,8 @@ public class Search {
 		this.depthLimit = depthLimit;
 	}
 	
-	public void setMoveGenerator(MoveGenerator moveGenerator) {
-		this.moveGenerator = moveGenerator;
+	public void setMoveGenerator(DefaultGenerator defaultGenerator) {
+		this.moveGenerator = defaultGenerator;
 	}
 
 	public void setEvaluator(Evaluator evaluator) {
@@ -216,11 +221,11 @@ public class Search {
 	 */
 	protected int alphabeta(GameState g, int side, int alpha, int beta){
 	    int minimaxValue;
-
 	    int depth = 0;
 	    //Now reset the legal moves to zero so everything
 	    //works correctly for the search.
 	    g.numberOfLegalMoves[depth] = 0;
+	    moveGenerator.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
 	    if(side == Bitmap.WHITE){
 	      minimaxValue = max(g, alpha, beta, side, depth);
 	    } else {
@@ -376,10 +381,10 @@ public class Search {
 		// Generate legal moves from this position
 		int[] moves = new int[MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
 	    if (!moveGenerator.isAttacked(g, side, g.getPosition().getKingSquare(side))){
-	        moveGenerator.GenerateCaptures(g, moves, side, depth);
-	        moveGenerator.GenerateNonCaptures(g, moves, side, depth);
+	        moveGenerator.generateCaptures(moves, side, depth);
+	        moveGenerator.generateNonCaptures(moves, side, depth);
 	    } else {
-	        moveGenerator.GenerateKingEscapes(g, moves, side, depth);
+	        moveGenerator.generateKingEscapes(moves, side, depth);
 	    }
 	    return moves;
 	}

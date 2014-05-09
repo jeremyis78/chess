@@ -15,7 +15,7 @@ public class EvaluatorTest {
 	public void setUp()
 	{
 		eval = new Evaluator();
-		MoveGenerator moveGenerator = new MoveGenerator();
+		DefaultGenerator moveGenerator = new DefaultGenerator();
 		eval.setMoveGenerator(moveGenerator);
 	}
 

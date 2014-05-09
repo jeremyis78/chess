@@ -4,10 +4,10 @@ import static com.jeremybrooks.chess.Bitmap.*;
 
 import com.jeremybrooks.chess.Piece.Color;
 
-public class CaptureGenerator extends MoveGenerator implements Generator {
+public class CaptureGenerator extends AbstractGenerator {
 
 	@Override
-	public int generate(GameState g, int[] moves, int side, int depth) {
+	public int generate(int[] moves, int side, int depth) {
 	    // This includes pawns that capture to promote to a Q,R,B,N
 
 	    int to = 0;

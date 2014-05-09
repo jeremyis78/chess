@@ -438,14 +438,14 @@ public class GameStateTest {
 	}
 
 	private int encodeMove(int from, int to, int piece) {
-		return MoveGenerator.EncodeMove(from, to, piece, NONE, NONE);
+		return AbstractGenerator.EncodeMove(from, to, piece, NONE, NONE);
 	}
 	
 	private int encodeMove(int from, int to, int piece, int capturedPiece) {
-		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, NONE);
+		return AbstractGenerator.EncodeMove(from, to, piece, capturedPiece, NONE);
 	}
 	
 	private int encodeMove(int from, int to, int piece, int capturedPiece, int promotionPiece) {
-		return MoveGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
+		return AbstractGenerator.EncodeMove(from, to, piece, capturedPiece, promotionPiece);
 	}
 }

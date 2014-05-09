@@ -2,10 +2,10 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
-public class EscapeGenerator extends MoveGenerator implements Generator {
+public class EscapeGenerator extends AbstractGenerator {
 
 	@Override
-	public int generate(GameState g, int[] moves, int side, int depth) {
+	public int generate(int[] moves, int side, int depth) {
 	    int checker;
 	    int n;
 	    int from = 0;

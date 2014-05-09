@@ -12,7 +12,7 @@ import static com.jeremybrooks.chess.Bitmap.*;
  * @author jeremy
  *
  */
-public class MoveGenerator {
+public abstract class AbstractGenerator implements Generator {
 
 	public final static int BISHOP_OR_QUEEN = 0x01;  //mask to determine Bishop/Queen            
 	public final static int ROOK_OR_QUEEN   = 0x02;  //mask to determine Rook/Queen
@@ -20,18 +20,28 @@ public class MoveGenerator {
 	
 	
 	protected static final Attacks att = new Attacks();
-	private static final Generator capturesGenerator = new CaptureGenerator();
-	private static final Generator nonCapturesGenerator = new NonCaptureGenerator();
-	private static final Generator escapeGenerator = new EscapeGenerator();
+	
+	protected GameState g;
 
-	public MoveGenerator(){
+	public AbstractGenerator(){
 		
 	}
 
+	public GameState getGameState() {
+		return g;
+	}
+	
+	public void setGameState(GameState gameState) {
+		this.g = gameState;
+	}
+	
 	//These functions return the occupied status (middle six bits)
 	//of a Rank, File or Diagonal.  For a diagonal (R45, L45) whose length
 	//is not always 8 it returns the diagonal length minus the outer 2 bits
 	//for the occupied status  
+
+
+
 
 	private static byte Status(long b, int sq){
 		//Compute the x and y coordinates from 'sq' (aka, reverse linear index)
@@ -182,13 +192,6 @@ public class MoveGenerator {
 	    }
 	    return temp;
 	}
-
-	public int[] generate(GameState g, int side, int depth)
-	{
-	    GenerateCaptures(g, g.moves, side, depth);
-	    GenerateNonCaptures(g, g.moves, side, depth);
-		return g.moves;
-	}
 	
 	//
 	// The move generation functions
@@ -206,30 +209,11 @@ public class MoveGenerator {
 	// Having piece-wise move generation allows me to only generate captures
 	// when in the future I write the quiescent search.
 
-
-	// Side effect: g.legalMoves[depth] has the number of moves
-	// found in this function added to it after this function completes
-	public int GenerateCaptures (GameState g, int moves[], int side, int depth)
-	{
-		return capturesGenerator.generate(g, moves, side, depth);
-	}
-
-	// Side effect: g.legalMoves[depth] has the number of moves
-	// found in this function added to it after this function completes
-	public int GenerateNonCaptures (GameState g, int moves[], int side, int depth)
-	{
-		return nonCapturesGenerator.generate(g, moves, side, depth);
-	}
-	
 	public static boolean morePieces(long pieceBoard)
 	{
 		return pieceBoard != 0;
 	}
 
-	public int GenerateKingEscapes (GameState g, int moves[], int side, int depth)
-	{
-		return escapeGenerator.generate(g, moves, side, depth);
-	}
 
 
 	//
@@ -411,7 +395,8 @@ public class MoveGenerator {
     //	    attacks = Attackers(g, Color.BLACK, G8);
 	//
 	//NOTE: the king is not included in the attackers
-	protected long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
+	
+	public long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
 	{
 	    // Pretend "sq" contains a Queen AND a Knight.
 	    // If that QUEEN/KNIGHT combo can capture a piece from
@@ -517,8 +502,8 @@ public class MoveGenerator {
 	    return 0;
 	}
 
-
-	protected boolean canWhiteShortCastle(GameState g, int side){
+	@Override
+	public boolean canWhiteShortCastle(GameState g, int side){
 	    Position position = g.getPosition();
 		if (g.hasShortCastleOption()
 	    	&& position.isEmpty(F1)
@@ -532,7 +517,7 @@ public class MoveGenerator {
 	    return false;
 	}
 
-	protected boolean canWhiteLongCastle(GameState g, int side){
+	public boolean canWhiteLongCastle(GameState g, int side){
 	    Position position = g.getPosition();
 		if (g.hasLongCastleOption() &&
 	        position.isEmpty(D1)
@@ -548,7 +533,7 @@ public class MoveGenerator {
 	    return false;
 	}
 
-	protected boolean canBlackShortCastle(GameState g, int side){
+	public boolean canBlackShortCastle(GameState g, int side){
 	    Position position = g.getPosition();
 		if (g.hasShortCastleOption()
 	        && position.isEmpty(F8)
@@ -561,8 +546,8 @@ public class MoveGenerator {
 	    }
 	    return false;
 	}
-
-	protected boolean canBlackLongCastle(GameState g, int side){
+	
+	public boolean canBlackLongCastle(GameState g, int side){
 	    Position position = g.getPosition();
 		if (g.hasShortCastleOption()
 	        && position.isEmpty(D8)

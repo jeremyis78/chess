@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 public class Solver {
 	private static final Logger log = Logger.getLogger(Solver.class);
-	private MoveGenerator moveGenerator;
+	private DefaultGenerator moveGenerator;
 	private Evaluator evaluator;
 	private Search search = new Search();
 
@@ -67,7 +67,7 @@ public class Solver {
 	
 	public Solver() {
 		//TODO: use dependency injection instead
-		MoveGenerator mg = new MoveGenerator();
+		DefaultGenerator mg = new DefaultGenerator();
 		Evaluator eval = new Evaluator();
 		eval.setMoveGenerator(mg);
 		setMoveGenerator(mg);
@@ -163,7 +163,7 @@ public class Solver {
 	}
 
 
-	public void setMoveGenerator(MoveGenerator moveGenerator) {
+	public void setMoveGenerator(DefaultGenerator moveGenerator) {
 		this.moveGenerator = moveGenerator;
 		search.setMoveGenerator(moveGenerator);
 	}

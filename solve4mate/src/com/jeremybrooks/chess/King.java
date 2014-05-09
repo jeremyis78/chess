@@ -23,13 +23,13 @@ public class King extends Piece {
 	public long advances(int fromSquare, Position position) {
 		int mySide = (color==Color.W?0:1);
 		long notMyPieces = ~position.getPieces(mySide);
-        long advances = MoveGenerator.att.king[fromSquare] & notMyPieces;
+        long advances = AbstractGenerator.att.king[fromSquare] & notMyPieces;
 
         //exclude moves that are attacked by opponent's king
         if(position.isKingPlaced(Util.opposing(mySide)))
         {
         	int opposingKingSquare = position.getKingSquare(Util.opposing(mySide));
-        	long notAttackedByOpposingKing = ~MoveGenerator.att.king[opposingKingSquare];
+        	long notAttackedByOpposingKing = ~AbstractGenerator.att.king[opposingKingSquare];
 			advances &= notAttackedByOpposingKing;
         }
         return advances;

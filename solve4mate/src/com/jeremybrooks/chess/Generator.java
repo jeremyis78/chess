@@ -1,5 +1,7 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Bitmap.*;
+
 /**
  * Implement this to define your own move generator.
  * 
@@ -22,5 +24,31 @@ public interface Generator {
 	 * @param depth the depth at which these moves will be generated
 	 * @return the number of moves generated
 	 */
-	public int generate(GameState g, int[] moves, int side, int depth);
+	public int generate(int[] moves, int side, int depth);
+
+	public boolean isAttacked(GameState g, int side, int sq);
+	
+	// Returns a bitbrd of the pieces (excluding the king) attacking 
+	// "square".  "side" represents the color/side whose pieces we want to
+	// see that are under attack.
+	// To see all the black pieces attacking e4 do this:
+	//
+    //	    attacks = Attackers(g, Color.WHITE, E4);
+	//
+	// To see all the white pieces attacking g8 do this;
+	//
+    //	    attacks = Attackers(g, Color.BLACK, G8);
+	//
+	//NOTE: the king is not included in the attackers
+	public long attackers(GameState g, int sideUnderAttack, int squareUnderAttack);
+
+	public boolean canWhiteShortCastle(GameState g, int side);
+
+	public boolean canWhiteLongCastle(GameState g, int side);
+
+	public boolean canBlackShortCastle(GameState g, int side);
+
+	public boolean canBlackLongCastle(GameState g, int side);
+
+	public void setGameState(GameState gameState);
 }

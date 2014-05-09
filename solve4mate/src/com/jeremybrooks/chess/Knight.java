@@ -20,7 +20,7 @@ public class Knight extends Piece {
 	{
 		int mySide = (color==Color.W?0:1);
 		long notMyPieces = ~position.getPieces(mySide);
-		return MoveGenerator.att.knight[fromSquare] & notMyPieces;
+		return AbstractGenerator.att.knight[fromSquare] & notMyPieces;
 	}
 
 }

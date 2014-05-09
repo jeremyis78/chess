@@ -14,12 +14,13 @@ import org.junit.Test;
 
 public class MoveGeneratorTest {
 
-	private MoveGenerator mg = new MoveGenerator();
+	private DefaultGenerator mg = new DefaultGenerator();
 	private GameState g; 
 	
 	@Before
 	public void setUp() throws Exception {
 		g = new GameState(GameState.MAX_NUM_MOVES_MADE);
+		mg.setGameState(g);
 	}
 
 	@Test
@@ -30,7 +31,7 @@ public class MoveGeneratorTest {
 		int movingPiece = PIECE[TO_PIECE[PAWN]];
 		int capturedPiece = PIECE[TO_PIECE[BISHOP]];
 		int promotedPiece = PIECE[TO_PIECE[QUEEN]];
-		int encodedMove = MoveGenerator.EncodeMove(fromSquare, toSquare, movingPiece, capturedPiece, promotedPiece);
+		int encodedMove = AbstractGenerator.EncodeMove(fromSquare, toSquare, movingPiece, capturedPiece, promotedPiece);
 		
 		assertEquals(fromSquare, encodedMove & 0x3F);
 		assertEquals(toSquare, (encodedMove >> 6) & 0x3F);
@@ -367,8 +368,8 @@ public class MoveGeneratorTest {
 			g.set(position);
 			displayBoardAndSideToMove();
 			int depth = 0;
-			mg.GenerateCaptures(g, g.moves, g.isWhiteToMove()?0:1, depth);
-			mg.GenerateNonCaptures(g, g.moves, g.isWhiteToMove()?0:1, depth);
+			mg.generateCaptures(g.moves, g.isWhiteToMove()?0:1, depth);
+			mg.generateNonCaptures(g.moves, g.isWhiteToMove()?0:1, depth);
 			Set<String> generatedMoves = formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 			
 			String allMoves = "blah"; 
@@ -381,8 +382,8 @@ public class MoveGeneratorTest {
 		int side = g.isWhiteToMove()?0:1;
 		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateCaptures(g, g.moves, side, depth);
-		mg.GenerateNonCaptures(g, g.moves, side, depth);
+		mg.generateCaptures(g.moves, side, depth);
+		mg.generateNonCaptures(g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 
@@ -391,7 +392,7 @@ public class MoveGeneratorTest {
 		int side = g.isWhiteToMove()?0:1;
 		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateCaptures(g, g.moves, side, depth);
+		mg.generateCaptures(g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 	
@@ -400,7 +401,7 @@ public class MoveGeneratorTest {
 		int side = g.isWhiteToMove()?0:1;
 		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateNonCaptures(g, g.moves, side, depth);
+		mg.generateNonCaptures(g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 	
@@ -409,7 +410,7 @@ public class MoveGeneratorTest {
 		int side = g.isWhiteToMove()?0:1;
 		displayBoardAndSideToMove();
 		int depth = 0;
-		mg.GenerateKingEscapes(g, g.moves, side, depth);
+		mg.generateKingEscapes(g.moves, side, depth);
 		return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 	}
 

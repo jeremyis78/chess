@@ -2,10 +2,10 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
-public class NonCaptureGenerator extends MoveGenerator implements Generator {
+public class NonCaptureGenerator extends AbstractGenerator {
 
 	@Override
-	public int generate(GameState g, int[] moves, int side, int depth) {
+	public int generate(int[] moves, int side, int depth) {
 	    long pieces;
 	    long pMoves = 0;
 	    long advanceTwo = 0;
