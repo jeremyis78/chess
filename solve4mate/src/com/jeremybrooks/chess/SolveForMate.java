@@ -34,10 +34,7 @@ public class SolveForMate {
 	    	while (br.ready()){
 	    		String line = br.readLine();
 	    		if (line.trim().charAt(0) == '#') continue;
-	    		int firstSpaceIndex = line.indexOf(" ");
-				int mateInN = Integer.parseInt(line.substring(0, firstSpaceIndex));
-	    		String fen = line.substring(firstSpaceIndex+1);
-	    		Puzzle puzzle = new Puzzle(fen, mateInN);
+	    		Puzzle puzzle = new Puzzle(line);
 	    		puzzles.add(puzzle);
 	    	}
 	    } catch (FileNotFoundException e) {
@@ -79,6 +76,7 @@ public class SolveForMate {
 		StringBuilder header = new StringBuilder();
 		header.append(EOL);
 		header.append((isWhiteToMove?"White":"Black") + " to move and force mate in " + puzzle.getMovesToMate());
+		header.append(" (" + puzzle.getNotes() + ")");
 		header.append(EOL);
 	    AbstractDisplayer displayer = new Displayer();
 	    header.append(displayer.formatBoard(position));
@@ -87,23 +85,16 @@ public class SolveForMate {
 	
 	private static void displayResults(Solver.Info solveInfo) {
 		StringBuilder result = new StringBuilder();
-		if (solveInfo.isMate()){
-			result.append("Mate found: " + solveInfo.getSolutionMoves());
-		} else {
-			result.append("No mate found (best line: empty for now");
-//			for(int i=0; i<search.getMaxSearchDepth(); i++){
-//				result.append(Util.displayMoveStr(g.bestLine[i], false, false)+ " ");
-//			}
-//			result.append(")");
-		}
-		int totalNodes = solveInfo.getTotalNodes();
+		long totalNodes = solveInfo.getNodeCount();
 		double solveTimeMillis = solveInfo.getSolveTimeMillis();
 		result.append(EOL);
-		result.append("Is mate?  : ").append(solveInfo.isMate() + EOL);
+		result.append("Score     : ").append(solveInfo.getScore() + EOL);
 		result.append("Best line : ").append(solveInfo.getSolutionMoves() + EOL);
+		result.append("Is mate?  : ").append(solveInfo.isMate() + EOL);
 		result.append("Nodes     : ").append(totalNodes + EOL);
 		result.append("Time(ms)  : ").append(solveTimeMillis + EOL); 
 		result.append("Nodes/sec : ").append(((solveTimeMillis > 0) ? totalNodes/solveTimeMillis : "--") + EOL);
+		result.append("Root Moves: ").append(solveInfo.getScoredRootMoves());
 		result.append(EOL);
 		
 //		// Display the root moves and the best value seen so far in the tree
@@ -113,7 +104,7 @@ public class SolveForMate {
 //			result.append("       " + g.movesValue[i] + EOL);
 //		}
 //		result.append(EOL);
-		result.append("*************************************");
+		result.append("*****************************************************************");
 		out.println(result.toString());
 	}
 }

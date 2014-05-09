@@ -9,10 +9,21 @@ public class Solver {
 	private Search search = new Search();
 
 	public class Info {
-		private double solveTimeMillis;
-		private boolean mate;
+		private int score;
 		private String solutionMoves;
-		private int totalNodes;
+		private boolean mate;
+		private long nodeCount;
+		private double solveTimeMillis;
+		private String scoredRootMoves;
+		
+		public int getScore() {
+			return score;
+		}
+
+		public void setScore(int score) {
+			this.score = score;
+		}
+
 		public String getSolutionMoves() {
 			return solutionMoves;
 		}
@@ -37,12 +48,20 @@ public class Solver {
 			this.solveTimeMillis = solveTimeMillis;
 		}
 
-		public int getTotalNodes() {
-			return totalNodes;
+		public long getNodeCount() {
+			return nodeCount;
 		}
 
-		public void setTotalNodes(int totalNodes) {
-			this.totalNodes = totalNodes;
+		public void setNodeCount(long nodeCount) {
+			this.nodeCount = nodeCount;
+		}
+
+		public String getScoredRootMoves() {
+			return scoredRootMoves;
+		}
+
+		public void setScoredRootMoves(String scoredRootMoves) {
+			this.scoredRootMoves = scoredRootMoves;
 		}
 	}
 	
@@ -62,8 +81,8 @@ public class Solver {
 	{
 		int movesToMate = puzzle.getMovesToMate();
 		int pliesForMovesToMate = getPliesToMate(movesToMate);
-    	int maxSearchDepth = getMaxSearchDepth(pliesForMovesToMate);
-    	search.setMaxSearchDepth(maxSearchDepth);
+    	int stackSize = getStackSize(pliesForMovesToMate);
+    	search.setStackSize(stackSize);
 		GameState g = new GameState(pliesForMovesToMate);
 //		FenParser parser = new FenParser();
 //		parser.init(puzzle.getFen());
@@ -74,17 +93,31 @@ public class Solver {
 
 		log.debug("Searching for mate in "+movesToMate+"...");
 		long start = System.nanoTime();
-		search.getBestMove(g, g.isWhiteToMove()?0:1);
+		int score = search.search(g, g.isWhiteToMove()?0:1);
 		double solveTimeMillis = (System.nanoTime() - start)/1000000.0;
-		int totalNodes = g.nodes;
-		boolean mate = g.numberOfLinesToMate > 0;
+		long nodeCount = search.getNodeCount(); //g.nodes;
+		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
 		String solutionMoves = search.getPVMoveLine();
+		String scoredRootMoves = getScoredRootMoves();
 		Info solveInfo = new Info();
+		solveInfo.setScore(score);
 		solveInfo.setSolutionMoves(solutionMoves);
 		solveInfo.setMate(mate);
-		solveInfo.setTotalNodes(totalNodes);
+		solveInfo.setNodeCount(nodeCount);
 		solveInfo.setSolveTimeMillis(solveTimeMillis);
+		solveInfo.setScoredRootMoves(scoredRootMoves);
 		return solveInfo;
+	}
+
+	private String getScoredRootMoves() {
+		StringBuilder sb = new StringBuilder("\n");
+		for(Search.ScoredMove sm: search.getRootMove())
+		{
+			if(sm == null) break;
+			sb.append(Util.displayMoveStr(sm.getMove(),false,false));
+			sb.append("("+sm.getScore()+")\n");
+		}
+		return sb.toString();
 	}
 
 	// So given a position in which white mates in 2,
@@ -109,13 +142,13 @@ public class Solver {
 			depth = 4;
 			break;
 		case 3: 
-			depth = 5;
+			depth = 6;
 			break;
 		case 4: 
 			depth = 7;
 			break;
 		case 5: 
-			depth = 9;
+			depth = 10;
 			break;
 		default: 
 			depth = (2 * mateInN) - 1;
@@ -125,7 +158,7 @@ public class Solver {
 		return depth;
 	}
 
-	private static int getMaxSearchDepth(int depthForMovesToMate) {
+	private static int getStackSize(int depthForMovesToMate) {
 		return depthForMovesToMate-1; //-1 so we can eval and set flags and such for the next level in the graph/tree.
 	}
 
@@ -141,7 +174,7 @@ public class Solver {
 	}
 
 	private void setMaxSearchDepth(int maxSearchDepth) {
-		search.setMaxSearchDepth(maxSearchDepth);
+		search.setStackSize(maxSearchDepth);
 	}
 	
 

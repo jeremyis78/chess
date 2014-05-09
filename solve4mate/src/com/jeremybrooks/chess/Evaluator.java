@@ -124,10 +124,14 @@ public class Evaluator {
 	 * A more positive number is better for white.
 	 * A more negative number is better for black.
 	 */
-	public int evaluate(GameState g, int side, int depth, boolean isSearchDebug, boolean isEval){
+	public int evaluate(GameState g, int side, int depth, boolean searchDebug, boolean eval) {
+		return evaluate(g, side, depth, null, searchDebug, eval);
+	}
+	
+	public int evaluate(GameState g, int side, int depth, int[] currentMove, boolean isSearchDebug, boolean isEval){
 		int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
 		int wPositionalScore = 0, bPositionalScore = 0;
-		int score = 0;
+		int mateScore = 0;
 		int pieceSq = -1;
 		long pieces = 0;
 		boolean draw = false;
@@ -138,7 +142,7 @@ public class Evaluator {
 		{
 				mate = true;
 				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
-				score = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
+				mateScore = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
 		}
 
 		// Compute material value
@@ -188,28 +192,25 @@ public class Evaluator {
 		}
 		int wTotalScore = wMaterialScore + wPositionalScore;
 		int bTotalScore = bMaterialScore + wPositionalScore;
-		if(mate){
-
-//			if(isSearchDebug)
-//				String mateLine = "";
-//				for(int i=0;i<depth;i++){mateLine += Util.displayMoveStr(g.currentLine[i], false, false)+" ";}
-//				FenBuilder fb = new FenBuilder();
-//				fb.appendPieceBoard(g.getPosition());
-//				log.debug("mate("+score+"): " + mateLine + "  " +fb.toString());
-//			}
-			return score;
-		} else if (draw) {
-			log.debug("draw:");
-			g.display();
-			log.debug("finds draw");
-			return 0;
-		} else {
-			if(isEval){
-				log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
-				log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
+		int finalScore = wTotalScore - bTotalScore + mateScore;
+		if(isSearchDebug)
+		{
+			String currentLine = "";
+			if(currentMove != null && currentMove.length != 0)
+			{
+				for(int i=0;i<depth;i++){currentLine += Util.displayMoveStr(currentMove[i], false, false)+" ";}
 			}
-			return wTotalScore - bTotalScore;
+			FenBuilder fb = new FenBuilder();
+			fb.appendPieceBoard(g.getPosition());
+			log.debug("("+finalScore+") " + currentLine + "  " +fb.toString());
 		}
+
+		if(isEval){
+			log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
+			log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
+			log.debug("mate score : "+ mateScore);
+		}
+		return finalScore;
 	}
 
 	boolean isCheckMated(GameState g, int side, int depth)
@@ -226,4 +227,5 @@ public class Evaluator {
 		}
 		return false;
 	}
+
 }

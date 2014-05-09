@@ -37,7 +37,8 @@ public class EvaluatorTest {
 		GameState g = new GameState(2);
 		boolean isWhiteToMove = setupState(g, queenRookMate);
 		int searchDepth = 0;
-		int whiteMatesBlackScore = Evaluator.CHECKMATE - searchDepth;
+		int materialAdvantage = 1400; //white is up a queen and a rook
+		int whiteMatesBlackScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
 		int actualScore = evaluate(g, isWhiteToMove, searchDepth);
 		assertEquals(whiteMatesBlackScore, actualScore);
 		assertTrue("white mates black should be a negative score", actualScore > 0);
@@ -50,7 +51,8 @@ public class EvaluatorTest {
 		GameState g = new GameState(2);
 		boolean isWhiteToMove = setupState(g, backRankMate);
 		int searchDepth = 0;
-		int blackMatesWhiteScore = -1 * (Evaluator.CHECKMATE - searchDepth);
+		int materialAdvantage = 200; //black rook (500) minus 3 white pawns (300)
+		int blackMatesWhiteScore = -1 * (Evaluator.CHECKMATE - searchDepth + materialAdvantage);
 		int actualScore = evaluate(g, isWhiteToMove, searchDepth);
 		assertEquals(blackMatesWhiteScore, actualScore);
 		assertFalse("black mates white should be a negative score", actualScore >= 0);

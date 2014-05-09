@@ -62,16 +62,9 @@ public class GameState {
      * TODO: The following member vars are not related to the state of the game (board or flags)
      * So they should be refactored into Search or a search context object
      */
-    int currentLine[]; //line we are searching
-    int bestLine[]; //the best line of play
-    int numberOfLinesToMate;    //# of lines of play that lead to mate
     int numberOfLegalMoves[];  //no. of moves at this depth
-    int numberOfLegalMovesToDepth[]; //no of moves UP to current depth
     int moves[];             //legal moves from this state
     int movesValue[];        //minimax value of the moves from this state 
-    int nodes = 0;                  //nodes searched
-    int best = 0;                   //best value seen in search
-    int movesIndex;
     
     //TODO: need a variable or something to keep track of 
     //      the number of repeated positions 
@@ -92,18 +85,12 @@ public class GameState {
 		fullMoveClock = new byte[maxMoves];
 
 		attacked = new long[maxMoves];
-	    currentLine = new int[maxMoves];
-	    bestLine = new int[maxMoves];
 	    numberOfLegalMoves = new int[maxMoves];
-	    numberOfLegalMovesToDepth = new int[maxMoves];
 	    moves = new int[100];
 	    movesValue = new int[100]; 
-	    nodes = 0;
-	    best = 0;
 
 	    //TODO: fix this so it gets all the array indices 
 	    //filled (MAXDEPTH +1) see definitions.h for gamestate
-	    numberOfLinesToMate = 0;
 	    for (int moveNumber = 0;
 	    		moveNumber < maxMoves;
 	    		moveNumber++){
@@ -113,12 +100,8 @@ public class GameState {
 	        fullMoveClock[moveNumber] = 0;
 	        attacked[moveNumber] = 0;		
 	        numberOfLegalMoves[moveNumber] = 0;
-	        numberOfLegalMovesToDepth[moveNumber] = 0;
-	        currentLine[moveNumber] = 0;
-	        bestLine[moveNumber] = 0;
 	    }             
 	    castle[numberOfMovesMade] = CASTLE_START;
-	    movesIndex = 0;
 	    fullMoveClock[0] = 1;
 	    whiteToMove = true;
 	}
@@ -264,13 +247,6 @@ public class GameState {
 		return numberOfMovesMade;
 	}
 	
-	boolean movesLeft(){
-	  if (movesIndex < (numberOfLegalMovesToDepth[numberOfMovesMade] + numberOfLegalMoves[numberOfMovesMade]))
-		return true;
-	  else 
-		return false;
-	}
-
 	@Deprecated
 	public boolean makeMove(int move, int side){
 		boolean isWhitesMove = (WHITE == side);
@@ -355,22 +331,17 @@ public class GameState {
 	    whiteToMove = !isWhitesMove;
 	    numberOfMovesMade++;
 	    
-	    //Compute the number of moves that come before
-	    //this depth in the moves[] array
-	    for(int i = 0; i < numberOfMovesMade; i++)
-	        numberOfLegalMovesToDepth[numberOfMovesMade] += numberOfLegalMoves[i];
-	    movesIndex = 0;
 	    if(log.isTraceEnabled()) log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
 	    return false;
 	}
 
 	private String formatCurrentLine() {
-		StringBuilder current = new StringBuilder();
-		for(int i=0; i<numberOfMovesMade; i++){
-			String moveNo = (i%2==0) ? ((i+2)/2) + ". " : "";
-			current.append(moveNo+Util.displayMoveStr(currentLine[i], false, false)+ " ");
-		}
-		return current.toString();
+//		StringBuilder current = new StringBuilder();
+//		for(int i=0; i<numberOfMovesMade; i++){
+//			String moveNo = (i%2==0) ? ((i+2)/2) + ". " : "";
+//			current.append(moveNo+Util.displayMoveStr(currentLine[i], false, false)+ " ");
+//		}
+		return "<empty>";// current.toString();
 	}
 
 	private boolean isPawnAdvancingTwoSquares(int moving, int from, int to) {
