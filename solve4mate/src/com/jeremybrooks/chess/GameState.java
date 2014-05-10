@@ -298,7 +298,7 @@ public class GameState {
 	    } else {
 	        if( isEnPassantCapture(moving, to, captured))
 	        {
-	        	pos.erasePiece(squareBehind(to, isWhitesMove?0:1));
+	        	erasePiece(squareBehind(to, isWhitesMove?0:1));
 	        	captured = NONE;
 	        } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
 	        	updateEnPassantSquareForNextMove(squareAhead(from, whiteToMove?0:1));
@@ -308,7 +308,7 @@ public class GameState {
 
 	    //Move the piece
 	    if(captured != NONE){
-	        pos.erasePiece(to);
+	        erasePiece(to);
 	    }
 	    pos.erasePiece(from);
 	    if(promotion != NONE) {
@@ -391,7 +391,7 @@ public class GameState {
 	    numberOfMovesMade--;
 	    
 	    //Undo the moving piece
-	    pos.erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
+	    erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
 	    placePiece(moving, from);
 
 	    //Undo a castling move (that is, undo the rook move)
@@ -423,6 +423,21 @@ public class GameState {
 	    return false;
 	}
 
+	public long fullZobristKey()
+	{
+		long hash = 0L;
+		for(int square = A1; square <= H8; square++)
+		{
+			Piece piece = pos.get(square);
+			if(piece.exists())
+			{
+				hash ^= ZobristKey.get(piece, square);
+			}
+		}
+		return hash;
+	}
+	
+	
 	private String indent() {
 		String indent = "";
 		int depth = numberOfMovesMade;
@@ -440,6 +455,11 @@ public class GameState {
 	{
 		int side = (whiteToMove?0:1);
     	pos.placePiece(opposing(side), piece, to);
+	}
+	
+	private void erasePiece(int square)
+	{
+		pos.erasePiece(square);
 	}
 	
 	private int correspondingRookIfKingCastled(int from, int to) {
@@ -480,9 +500,8 @@ public class GameState {
 	}
 
 	private void moveRook(int rookFrom, int rookTo) {
-		int side = (whiteToMove?0:1);
-		pos.erasePiece(rookFrom);
-		pos.placePiece(side, ROOK, rookTo);
+		erasePiece(rookFrom);
+		placePiece(ROOK, rookTo);
 	}
 
 	private void updateCastlingOptionsWhenKingMoves() {
