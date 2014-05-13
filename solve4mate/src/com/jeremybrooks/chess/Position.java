@@ -2,9 +2,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
-import java.io.PrintStream;
-import java.util.Arrays;
-
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.Piece.Color;
@@ -30,8 +27,6 @@ public class Position
 	private static final int QUEENS = 4;
 	private static final int ALLPIECES = 5;
 
-	private static final String EMPTY_BOARD = "8/8/8/8/8/8/8/8";
-	private static PrintStream out = System.out;
 	private static final int KING_NOT_PLACED = -1;
 
     private long pieces[][] = new long[2][6];

@@ -1,7 +1,5 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.*;
-
 /**
  * Implement this to define your own move generator.
  * 

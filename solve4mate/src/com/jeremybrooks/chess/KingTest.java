@@ -3,7 +3,6 @@ package com.jeremybrooks.chess;
 import static com.jeremybrooks.chess.Bitmap.*;
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.Piece.Color;

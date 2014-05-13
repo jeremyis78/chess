@@ -134,14 +134,11 @@ public class Evaluator {
 		int mateScore = 0;
 		int pieceSq = -1;
 		long pieces = 0;
-		boolean draw = false;
-		boolean mate = false;
 		mg.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
 		
 		Position position = g.getPosition();
 		if (isCheckMated(g, side, depth))
 		{
-				mate = true;
 				//Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
 				mateScore = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
 		}

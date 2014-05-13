@@ -360,6 +360,12 @@ public class GameStateTest {
 		assertEquals(afterMove, makeMove(isWhitesMove, move));
 		assertEquals(beforeMove, undoMove(isWhitesMove, move));
 	}
+	
+	@Test
+	public void testZobristHash()
+	{
+		
+	}
 
 	@Test
 	public void testForA8AlreadyOccupiedBug()

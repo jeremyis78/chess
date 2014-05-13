@@ -2,8 +2,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.QUEEN;
 
-import com.jeremybrooks.chess.Piece.Color;
-
 public class Queen extends SlidingPiece {
 	
 	public Queen(Color color) { 

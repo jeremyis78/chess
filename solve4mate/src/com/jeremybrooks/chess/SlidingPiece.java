@@ -1,7 +1,5 @@
 package com.jeremybrooks.chess;
 
-import com.jeremybrooks.chess.Piece.Color;
-
 public abstract class SlidingPiece extends Piece {
 
 	public SlidingPiece(Color color, int pieceIndex, char displayCharacter)

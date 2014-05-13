@@ -2,8 +2,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
-import com.jeremybrooks.chess.Piece.Color;
-
 public class Pawn extends Piece {
 	
 	public Pawn(Color color){ 

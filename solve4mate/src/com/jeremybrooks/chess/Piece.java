@@ -1,8 +1,6 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
-
-import com.jeremybrooks.chess.Piece.Color;
 /**
  * <pre>
  * Represents a piece on the chess board.

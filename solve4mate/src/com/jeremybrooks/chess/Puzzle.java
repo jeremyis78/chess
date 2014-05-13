@@ -1,7 +1,6 @@
 package com.jeremybrooks.chess;
 
 public class Puzzle {
-	private static FenParser parser;
 	private String fen;
 	private int movesToMate;
 	private String notes;

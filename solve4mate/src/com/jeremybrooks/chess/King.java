@@ -2,8 +2,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.KING;
 
-import com.jeremybrooks.chess.Piece.Color;
-
 public class King extends Piece {
 
 	public King(Color color) 
