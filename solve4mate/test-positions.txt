@@ -2816,7 +2816,6 @@ r1r4k/1p3pb1/4b2p/4p1p1/4P1P1/2q5/1Q2BPP1/2NR1RK1 w - - 0 1	[ Rd8+ ]	chri.html:c
 n2q1r1k/4bp1p/4p3/4P1p1/2pPNQ2/2p4R/5PPP/2B3K1 w - - 0 1	[ Nf6 if Bxf6 Qe4 ]	chri.html:e) 	White Mates in 4.  Christiansen vs Glenn Flear, Szirak, 1987
 2b1r3/r5pk/2p1pq1N/1pP1N2P/pP1PpP2/P3P1Q1/6R1/6K1 w - - 0 1	[ Qg6+ Qxg6 hxg6+ Kh8 Nhf7+ Kg8 Rh2 ]	chri.html:a) 	White Mates in 8.  Christiansen vs Daniel Rodriguez, Saint John, 1988
 6k1/4bpp1/1pq1r2p/p2RP3/2p1QP2/P1N5/1P4PP/6K1 w - - 0 1	[ f5 if Bc5+ Kh1 Re8 Rd8 ]	chri.html:b) 	Christiansen vs Anthony Ker, Wellington, 1988
-6k1/2b2rpp/p1p5/q1P1p1Pn/1p2N3/1Q2P1B1/PP3P1P/1K6 w - - 0 1	[ g6 hxg6 Ng5 mates ]	chri.html:c) 	Christiansen vs Pavel Blatny, Thessalonika (ol), 1988
 2Q5/3q1r1k/3pNB1p/n3pp2/7P/5P2/P5PK/8 w - - 0 1	[ Nf8+ ]	chri.html:d) 	White Mates in 7.  Christiansen vs Juergen Graf, Germany, 1989
 2rr2k1/1p3pp1/p6p/3N4/3Q4/6P1/PP1nqP1P/2R1R1K1 w - - 0 1	[ Nf6+ gxf6 Qxd8+ ]	chri.html:e) 	Christiansen vs Tibor Tolnai, Lucerne, 1989
 rn2kb1r/2q2p2/p1b2p1p/2p5/2B1pP2/1Q2N3/PP4PP/2KR2NR w - - 0 1	[ Bxf7+ Qxf7 Rd8+ if Ke7 Nf5+ ]	chri.html:a) 	Christiansen vs Nikolai Andrianov, New York, 1990
@@ -11859,12 +11858,6 @@ r1b1r3/1p1p1Npp/pk6/2p1P3/PbQ2B1q/8/1P3PPP/R1R3K1 w - - 0 1	[ Qxb4+ ]	mcmiv.html
 8/8/2b2kr1/1p2p2p/3q1p2/2N2P1P/1PQ3PK/4R3 w - - 0 1	[ Rd1 if Qb4 Na2 ]	donn.html:	donn.html:
 1r2nk2/1b2Rppp/p7/1p3N2/3Q4/5P2/PP4PP/2q2BK1 w - - 0 1	[ Rxe8+ Kxe8 Qe5+ Kf8 Qxg7+ Ke8 Qe5+ ]	oll.html:	oll.html:
 rn3k2/pp1nr1b1/1q2pNQ1/2p1Pp2/5P2/3B4/PPP3P1/R1B1K2R w KQ - 1 0	[ Rh8+ ]	tp13.html:	tp13.html:
-2kr1b1r/pppnpppp/1q3nb1/3P4/5BP1/2N1N2P/PPP2P2/R2QKB1R w - - 0 1	[ Nc4 traps the Q ]	alek.html:	alek.html:
-3rk2r/p3bqp1/Pp3nQ1/4R3/2P5/1P4Pp/1B3P1P/R4K2 w - - 0 1	[ Rxe7+ w/Ba3+ ]	alek.html:	alek.html:
-5qk1/r1nr2p1/p2p1pPp/P1p1pP1Q/1pP3NP/1P1P1P2/3K2R1/6R1 w - - 0 1	[ Nxh6+ w/g7 ]	alek.html:	alek.html:
-r1bq1rk1/p4ppp/4p3/2R1P3/P2n4/5N2/2Q1BPPP/1R4K1 w - - 0 1	[ Nxd4 w/Bf3 ]	alek.html:	alek.html:
-r2q1nk1/pb2rppp/1p2p3/3pP1NQ/3PN3/8/PP3PPP/R2R2K1 w - - 0 1	[ Nf6+ ]	alek.html:	alek.html:
-r3kb1r/pp1nn1p1/2p2qpp/4p3/3P2QP/4B1N1/PPP2PP1/R3KB1R w - - 0 1	[ Ne4 ]	alek.html:	alek.html:
 Rnk5/1p4pp/1Pp2pq1/2B1r3/1P6/7P/3r2PQ/5RK1 w - - 0 1	[ Rxb8+ if Kxb8 Qxe5+ mates ]	alek.html:	alek.html:
 8/2K5/8/2k5/2b5/2B5/2Q2n2/8 w - - 0 1	[ Qa4 ]	anon2.html:a)	anon2.html:a)
 8/6b1/1pp5/k1pqN3/N6Q/PP2P3/3P4/4KB2 w - - 0 1	[ Qd8 ]	anon2.html:b)	anon2.html:b)
@@ -11948,7 +11941,6 @@ K7/8/2R1N3/3k4/4R3/8/4BB2/8 w - - 0 1	[ Be1 if Kxe4 Rc5 or if Kxc6 Rd4 ]	carp.ht
 1Q6/1Pr1p1p1/4P3/1nN4R/1B1kP3/4p1RB/bK1NP3/8 w - - 0 1	[ Bf1 ]	carp2.html:d)	carp2.html:d)
 8/7p/3Q3p/7B/1p2kB2/pP6/K7/8 w - - 0 1	[ Qc7 ]	carp2.html:d)	carp2.html:d)
 1B6/2R2PN1/8/7P/2p1pk2/2Q1pN1P/8/1B5K w - - 0 1	[ Nf5 ]	carp2.html:e)	carp2.html:e)
-r1qnr1k1/pp3R2/2p3Pp/3p1Nb1/P2PP1Q1/2N1P3/R7/7K w - - 0 1	[ Qxg5 ]	char.html:	char.html:
 4N3/2PBk1P1/1P3N1K/8/3P4/8/8/8 w - - 0 1	[ Nd6 ]	chen2.html:a)	chen2.html:a)
 8/8/8/6k1/3BB2R/6P1/7K/6R1 w - - 0 1	[ g4 ]	chen2.html:a)	chen2.html:a)
 3k1b1q/1ppbR3/2p2N2/6P1/1Q6/7p/8/2K5 w - - 0 1	[ Qg4 ]	chen2.html:a)	chen2.html:a)
@@ -11987,7 +11979,6 @@ K7/7p/Q7/8/6N1/5k2/B3N3/8 w - - 0 1	[ Qh6 if Kxe2 Qe3+ or if Kxg4 Qf4+ or if Kg2
 K7/8/8/6n1/B1k5/B7/8/4Q3 w - - 0 1	[ Bc2 if Kd4 Qd2+ or if Kd5 Qa5+ or if Kb5 (or N any) Qb4+  ]	deck.html:d)	deck.html:d)
 8/4p3/4Q3/2k5/8/P7/1PP5/5K2 w - - 0 1	[ a4 if Kb4 Qc6 or if Kd4 c3+ ]	deck.html:e)	deck.html:e)
 KQ6/8/p7/p7/k2P4/8/8/2B5 w - - 0 1	[ Qg3 if Kb5 Qc3 or if Kb4 Qd3 ]	deck.html:f)	deck.html:f)
-r3r1k1/p1p3bp/2p1bpp1/1q1n4/3PN3/P2N1Q2/1P1B1PPP/R4RK1 b - - 0 1	[ ...Bg4 if Qxg4 Qxd3 ]	dree.html:	dree.html:
 8/8/5Q2/8/6p1/8/3K2pk/6N1 w - - 0 1	[ Qb6 if g3 Nf3+ or if Kh1 (or Kg3) Ne2(+) ]	dubb.html:a)	dubb.html:a)
 1B6/1k6/6N1/K3R3/8/8/B7/8 w - - 0 1	[ Nf8 if Kxb8 (or Ka8) Kb6 or if Kc6 Bd5+ or if Kc8 Re8+ ]	dubb.html:a)	dubb.html:a)
 8/2N5/2p4Q/2k1N3/8/8/2K5/8 w - - 0 1	[ Nc4 if Kxc4 Qd6 or if Kb4 (or Kd4) Qe3(+) ]	dubb.html:c)	dubb.html:c)
@@ -12085,7 +12076,6 @@ R7/8/4B3/8/3pR2N/3k2P1/1P6/2K5 w - - 0 1	[ Re8 ]	mara2.html:d)	mara2.html:d)
 8/8/8/8/3k4/8/1p1NQ3/1K1N4 w - - 1 0	[ 1. Qh5 Kd3 2. Qh2 Kd4 3. Qd6# ]	teed3.html:b)	teed3.html:b)
 8/2Q5/4N3/3k1P2/8/2K5/6P1/8 w - - 1 0	[ 1. Kc2 Ke4 2. Qa5 Ke3 3. Qe1# ]	teed3.html:c)	teed3.html:c)
 8/8/3K4/8/4N3/4kP2/1P6/3Q4 w - - 1 0	[ 1. b4 Kf4 2. Qb3 Kf5 3. Qf7# ]	teed3.html:d)	teed3.html:d)
-r3nbk1/p3p3/n1p1q3/3pN1B1/1p1P3Q/3P4/PP4PP/R4RK1 w - - 0 1	[ Rxf8+ ]	zarn.html:	zarn.html:
 8/3B4/6N1/2P5/4k3/2K5/8/5R2 w - - 1 0	[ 1. Ne5 Kxe5 (1... Kd5 2. Nc4 Kxc5 3. Rf5#) (1... Ke3 2. Ng4+ Ke4 (2... Ke2 3. Bb5#) 3. Bc6#) 2. Kd3 Kd5 3. Rf5# ]	gear3.html:a)	gear3.html:a)
 8/7p/8/4p3/4P2k/5Q2/4K1P1/8 w - - 1 0	[ 1. Qf5 h5 (1... Kg3 2. Qh3+ Kf4 3. Qh4#) (1... h6 2. Kf3 h5 3. g3#) 2. Ke3 Kg3 3. Qh3# ]	gear3.html:a)	gear3.html:a)
 8/1K6/8/8/4kpR1/Q7/1B6/8 w - - 1 0	[ 1. Qh3 Kf5 (1... Kd5 2. Rg5+ Kd6 (2... Kc4 3. Qc3#) 3. Ba3#) 2. Rg3+ Ke4 3. Qe6# ]	gear3.html:b)	gear3.html:b)
