@@ -7,25 +7,16 @@ import org.apache.log4j.Logger;
 public class Evaluator {
 	private static final Logger log = Logger.getLogger(Evaluator.class);
 	static final int CHECKMATE = 100000;    //value for checkmate
-	private static final int whitePieceValue[] = 
-		{
+	private static final int PIECE_VALUE[] = 
+	{
 		100, // White Pawn
-		300, // White Knight
-		300, // White Bishop
+		325, // White Knight
+		325, // White Bishop
 		500, // White Rook
-		900  // White Queen
-		};
-	private static final int blackPieceValue[] = 
-		{
-		100, // Black Pawn
-		300, // Black Knight
-		300, // Black Bishop
-		500, // Black Rook
-		900  // Black Queen
-		};
+		975  // White Queen
+	};
 
-
-	//MoveGenerator mg = new MoveGenerator();
+	private final static int BISHOP_PAIR_VALUE = 50;
 
 	//These boards represent the Positional Value (in centipawns)
 	//on the board for the named piece (a1=0, b1=1,...,h8=63).
@@ -132,8 +123,6 @@ public class Evaluator {
 		int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
 		int wPositionalScore = 0, bPositionalScore = 0;
 		int mateScore = 0;
-		int pieceSq = -1;
-		long pieces = 0;
 		mg.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
 		
 		Position position = g.getPosition();
@@ -144,52 +133,26 @@ public class Evaluator {
 		}
 
 		// Compute material value
-		for (int i = PAWN; i <= QUEEN; i++){
-			wMaterialScore += whitePieceValue[i] * 
-					Util.bitCount(position.getPieces(Bitmap.WHITE,i));
-
-			bMaterialScore += blackPieceValue[i] * 
-					Util.bitCount(position.getPieces(Bitmap.BLACK,i));
+		for(int color = 0; color<2; color++){
+			int pieceScore = 0;
+			for (int i = PAWN; i <= QUEEN; i++){
+				int numPieces = Util.bitCount(position.getPieces(color,i));
+				pieceScore += PIECE_VALUE[i] * numPieces;
+				if(i==BISHOP && numPieces >= 2) 
+				{
+					//TODO: The above condition should ensure bishops are of opposite color which is the whole point
+					//As it is, it's possible to get the bonus if you had only one bishop and then 
+					//promoted a pawn to a bishop on a square of the same color of the existing bishop.
+					//This should NOT count as the bishop pair bonus
+					pieceScore += BISHOP_PAIR_VALUE;
+				}
+			}
+			if(color==WHITE) wMaterialScore += pieceScore;
+			else             bMaterialScore += pieceScore;
 		}
 
-		// Estimate positional value
-		for(int i = 0; i<2; i++){
-			// For knights
-			pieces = position.getPieces(i, KNIGHT);
-			while(pieces != 0){
-				pieceSq = lowestBitNumber(pieces);
-				if (i == Bitmap.WHITE){
-					wPositionalScore += knightPV[i][pieceSq];
-				} else {
-					bPositionalScore += knightPV[i][pieceSq];
-				} 
-				pieces = clearBit(pieces, pieceSq);
-			}
-			// For bishops
-			pieces = position.getPieces(i, BISHOP);
-			while(pieces != 0){
-				pieceSq = lowestBitNumber(pieces);
-				if (i == Bitmap.WHITE){
-					wPositionalScore += bishopPV[i][pieceSq];
-				} else {
-					bPositionalScore += bishopPV[i][pieceSq];
-				} 
-				pieces = clearBit(pieces, pieceSq);
-			}
-			// For rooks
-			pieces = position.getPieces(i, ROOK);
-			while(pieces != 0){
-				pieceSq = lowestBitNumber(pieces);
-				if (i == Bitmap.WHITE){
-					wPositionalScore += rookPV[i][pieceSq];
-				} else {
-					bPositionalScore += rookPV[i][pieceSq];
-				} 
-				pieces = clearBit(pieces, pieceSq);
-			}
-		}
-		int wTotalScore = wMaterialScore + wPositionalScore;
-		int bTotalScore = bMaterialScore + wPositionalScore;
+		int wTotalScore = wMaterialScore;
+		int bTotalScore = bMaterialScore;
 		int finalScore = wTotalScore - bTotalScore + mateScore;
 		if(isSearchDebug)
 		{
