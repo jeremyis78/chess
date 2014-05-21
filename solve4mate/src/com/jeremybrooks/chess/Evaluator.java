@@ -2,6 +2,9 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 public class Evaluator {
@@ -132,28 +135,47 @@ public class Evaluator {
 				mateScore = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
 		}
 
+		List<Term> whiteTerms = new ArrayList<>();
+		List<Term> blackTerms = new ArrayList<>();
 		// Compute material value
+		int[][] count = new int[2][5];
+		int[][] pieceValue = new int[2][5];
 		for(int color = 0; color<2; color++){
 			int pieceScore = 0;
-			for (int i = PAWN; i <= QUEEN; i++){
-				int numPieces = Util.bitCount(position.getPieces(color,i));
-				pieceScore += PIECE_VALUE[i] * numPieces;
-				if(i==BISHOP && numPieces >= 2) 
+			for (int piece = PAWN; piece <= QUEEN; piece++){
+				int numPieces = Util.bitCount(position.getPieces(color,piece));
+				int pcScore = PIECE_VALUE[piece] * numPieces;
+				pieceScore += pcScore;
+				count[color][piece] = numPieces;
+				pieceValue[color][piece] = pcScore;
+				if(piece==BISHOP && numPieces >= 2) 
 				{
 					//TODO: The above condition should ensure bishops are of opposite color which is the whole point
 					//As it is, it's possible to get the bonus if you had only one bishop and then 
 					//promoted a pawn to a bishop on a square of the same color of the existing bishop.
 					//This should NOT count as the bishop pair bonus
+					pcScore += BISHOP_PAIR_VALUE;
 					pieceScore += BISHOP_PAIR_VALUE;
 				}
+//				System.out.println(color + " - " + piece + ": " + pcScore + " (#" + numPieces+")");
 			}
 			if(color==WHITE) wMaterialScore += pieceScore;
 			else             bMaterialScore += pieceScore;
 		}
+		whiteTerms.add(new Term(wMaterialScore, "white material"));
+		blackTerms.add(new Term(bMaterialScore, "black material"));
+		
+		int wKnightAdjustment = knightAdjustment(count[WHITE][KNIGHT], count[WHITE][PAWN]);
+		whiteTerms.add(new Term(wKnightAdjustment, "white knights adjustment given more/less pawns"));
+		int bKnightAdjustment = knightAdjustment(count[BLACK][KNIGHT], count[BLACK][PAWN]);
+		blackTerms.add(new Term(bKnightAdjustment, "black knights adjustment given more/less pawns"));
 
-		int wTotalScore = wMaterialScore;
-		int bTotalScore = bMaterialScore;
-		int finalScore = wTotalScore - bTotalScore + mateScore;
+		int wRookAdjustment = rookAdjustment(count[WHITE][ROOK], count[WHITE][PAWN]);
+		whiteTerms.add(new Term(wRookAdjustment, "white rooks adjustment given more/less pawns"));
+		int bRookAdjustment = rookAdjustment(count[BLACK][ROOK], count[BLACK][PAWN]);
+		blackTerms.add(new Term(bRookAdjustment, "black rooks adjustment given more/less pawns"));
+
+		int finalScore = sum(whiteTerms) - sum(blackTerms) + mateScore;
 		if(isSearchDebug)
 		{
 			String currentLine = "";
@@ -166,12 +188,57 @@ public class Evaluator {
 			log.debug("("+finalScore+") " + currentLine + "  " +fb.toString());
 		}
 
-		if(isEval){
-			log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
-			log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
-			log.debug("mate score : "+ mateScore);
-		}
+//		if(isEval){
+//			log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
+//			log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
+//			log.debug("mate score : "+ mateScore);
+//		}
 		return finalScore;
+	}
+
+	private int knightAdjustment(int numKnights, int numPawns)
+	{
+		//knights can jump so they are worth more with more pawns around; worth less with fewer
+		int adjustment = 0;
+		int pawnCountBoundary = 5;
+		if(numKnights > 0)
+		{
+			int scoreAdjustmentPerPawn = 6;
+			if(numPawns > pawnCountBoundary)
+			{
+				adjustment += numKnights * (numPawns - pawnCountBoundary) * scoreAdjustmentPerPawn ; //+6 for every pawn over the boundary
+			} else { // < 5
+				adjustment -= numKnights * (pawnCountBoundary - numPawns) * scoreAdjustmentPerPawn; //-6 for every pawn under the boundary
+			}
+		}
+		return adjustment;
+	}
+
+	private int rookAdjustment(int numRooks, int numPawns)
+	{
+		//rooks need open files so they are worth more with fewer pawns around; less with more
+		int adjustment = 0;
+		int pawnCountBoundary = 5;
+		if(numRooks > 0)
+		{
+			int scoreAdjustmentPerPawn = 13;
+			if(numPawns > pawnCountBoundary)
+			{
+				adjustment -= numRooks * (numPawns - pawnCountBoundary) * scoreAdjustmentPerPawn;
+			} else { // < 5
+				adjustment += numRooks * (pawnCountBoundary - numPawns) * scoreAdjustmentPerPawn;
+			}
+		}
+		return adjustment;
+	}
+
+	private int sum(List<Term> terms) {
+		int sum = 0;
+		for(Term term: terms)
+		{
+			sum += term.getScore();
+		}
+		return sum;
 	}
 
 	boolean isCheckMated(GameState g, int side, int depth)
