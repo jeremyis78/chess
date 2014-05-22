@@ -2,6 +2,8 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
+import com.jeremybrooks.chess.Piece.Color;
+
 public class NonCaptureGenerator extends AbstractGenerator {
 
 	@Override
@@ -25,28 +27,10 @@ public class NonCaptureGenerator extends AbstractGenerator {
 		long allPiecesByRank = position.getAllPieces(0);
 		empty = ~allPiecesByRank;
 
-	    switch (side) {
-	        case Bitmap.WHITE:
-	        	long whitePawns = position.getPawns(Bitmap.WHITE);
-	            pMoves = (whitePawns << 8) & empty & ~EIGHTHRANK;
-	            // 'pMoves' is all moves except those to the eighth rank
-	            promoters = (whitePawns << 8) & empty & EIGHTHRANK;
-	            // 'promoters' is only the moves to the eighth rank
-	            advanceTwo = whitePawns & SECONDRANK;
-	            advanceTwo = (advanceTwo << 8) & empty;
-	            advanceTwo = (advanceTwo << 8) & empty;
-	            break;
-	        case Bitmap.BLACK:
-	        	long blackPawns = position.getPawns(Bitmap.BLACK);
-	            pMoves = (blackPawns >> 8) & empty & ~FIRSTRANK;
-	            // 'pMoves' is all moves except those to the first rank
-	            promoters = (blackPawns >> 8) & empty & FIRSTRANK;
-	            // 'promoters' is only the moves to the first rank
-	            advanceTwo = blackPawns & SEVENTHRANK;
-	            advanceTwo = (advanceTwo >> 8) & empty;
-	            advanceTwo = (advanceTwo >> 8) & empty;
-	            break;
-	    }
+	    Pawn pawn = new Pawn(side==WHITE?Color.W:Color.B);
+	    pMoves = pawn.pushes(position);
+	    advanceTwo = pawn.pushesTwo(position);
+	    promoters = pawn.promotions(position);
 	    // Pawn promotions
 	    while (morePieces(promoters)) {
 	        to = lowestBitNumber(promoters);
@@ -92,7 +76,9 @@ public class NonCaptureGenerator extends AbstractGenerator {
 	        Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*PIECE[p]);
 	        while (morePieces(pieces)) {
 	            from = lowestBitNumber(pieces);
-	            pMoves = piece.advances(from, position) & empty;
+	            long advances = piece.advances(from, position);
+//	            g.attacked[depth] |= advances;
+				pMoves = advances & empty;
 	            while (morePieces(pMoves)) {
 	                to = lowestBitNumber(pMoves);
 	                int move = EncodeMove(from,to,PIECE[p],0,0);

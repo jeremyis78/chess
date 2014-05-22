@@ -16,7 +16,11 @@ public class Empty extends Piece {
 
 	@Override
 	public long advances(int fromSquare, Position position) {
-		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long attacks(int fromSquare, Position position) {
 		return 0;
 	}
 

@@ -31,7 +31,7 @@ public class CaptureGenerator extends AbstractGenerator {
 	            pieceAttacks = 0;
 	            switch (p) {
 	            case PAWN:
-	                pieceAttacks = att.pawn[side][from];
+	                pieceAttacks = piece.attacks(from, position);
 	                pro = isPawnPromotion(side, from);
 
 	                //EnPassant captures

@@ -109,9 +109,15 @@ public abstract class Piece {
 	 */
 	public abstract long advances(int fromSquare, Position position);
 	
-
-//	public abstract long attacks(int fromSquare) { return 0L; }
+	/**
+	 * Get a bitboard containing all squares attacked given the piece sits on fromSquare.
+	 * Attacked squares include those occupied by friendly (non-enemy) pieces, a.k.a. squares
+	 * of defended pieces. 
+	 * 
+	 * @param fromSquare The square on which the piece sits.
+	 * @param position The current board position
+	 * @return
+	 */
+	public abstract long attacks(int fromSquare, Position position);
 	
-	
-
 }

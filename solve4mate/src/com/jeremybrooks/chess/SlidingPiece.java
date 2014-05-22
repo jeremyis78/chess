@@ -10,20 +10,26 @@ public abstract class SlidingPiece extends Piece {
 	@Override 
 	public long advances(int fromSquare, Position position)
 	{
-		long advances = 0;
+        return attacks(fromSquare, position);
+	}
+
+	@Override 
+	public long attacks(int fromSquare, Position position)
+	{
+		long attacks = 0;
         if (slidesOnDiagonals())
         {
             long allPieces45Left = position.getAllPieces(-45);
 			long allPieces45Right = position.getAllPieces(45);
-			advances |= AbstractGenerator.bishopAttacks(fromSquare, allPieces45Left, allPieces45Right);
+			attacks |= AbstractGenerator.bishopAttacks(fromSquare, allPieces45Left, allPieces45Right);
         }
         if (slidesLaterally())
         {
         	long allPiecesByRank = position.getAllPieces(0);
             long allPiecesByFile = position.getAllPieces(90);
-			advances |= AbstractGenerator.rookAttacks(fromSquare, allPiecesByRank, allPiecesByFile);
+			attacks |= AbstractGenerator.rookAttacks(fromSquare, allPiecesByRank, allPiecesByFile);
         }
-        return advances;
+        return attacks;
 	}
 
 	private boolean slidesLaterally() {
