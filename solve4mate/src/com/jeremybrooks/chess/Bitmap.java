@@ -161,7 +161,7 @@ public class Bitmap {
 	public static final long THIRDRANK   = ((long) 0xFF) << A3;
 	public static final long FOURTHRANK  = ((long) 0xFF) << A4;
 	public static final long FIFTHRANK   = ((long) 0xFF) << A5;
-	public static final long SIXTHRANK   = ((long) 0xFF) << A5;
+	public static final long SIXTHRANK   = ((long) 0xFF) << A6;
 	public static final long SEVENTHRANK = ((long) 0xFF) << A7;
 	public static final long EIGHTHRANK  = ((long) 0xFF) << A8;
 
