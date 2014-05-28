@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EvaluatorTest {
@@ -162,7 +163,38 @@ public class EvaluatorTest {
 		assertEquals(startingBlackScore, score);
 	}
 
-	@Test //@Ignore
+	@Test @Ignore
+	public void testEvaluateScoring()
+	{
+		List<String> positions = new ArrayList<>(14000);
+		try (BufferedReader br = new BufferedReader(new FileReader("test-positions.txt")))
+		{
+			while(br.ready())
+			{
+				String line = br.readLine();
+				if(line.startsWith("#")) continue;
+				positions.add(line.split("\t")[0]);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		positions.add("k7/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		positions.add("rnbqkbnr/pppppppp/8/8/8/8/8/4K3 w KQkq - 0 1");
+		positions.add("k7/8/8/8/8/8/4PPPP/RNBQKBNR w KQkq - 0 1");
+		positions.add("r1bk3r/3p1ppp/2p1p3/p2n4/8/BRPB4/P1P2PPP/1R4K1 w - - 2 17");
+
+		for(String position: positions)
+		{
+			GameState g = new GameState(2);
+			boolean isWhiteToMove = setupState(g, position);
+			int searchDepth = 0;
+			int actualScore = evaluate(g, isWhiteToMove, searchDepth);
+			System.out.println(actualScore + ": " + g.get());
+		}
+	}
+
+
+	@Test @Ignore
 	public void givenManyPositionsTimeMe()
 	{
 		/*
