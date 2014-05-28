@@ -7,7 +7,7 @@ import com.jeremybrooks.chess.Piece.Color;
 public class NonCaptureGenerator extends AbstractGenerator {
 
 	@Override
-	public int generate(int[] moves, int side, int depth) {
+	public int  generate(int[] moves, int side, int depth) {
 	    long pieces;
 	    long pMoves = 0;
 	    long advanceTwo = 0;
@@ -28,9 +28,15 @@ public class NonCaptureGenerator extends AbstractGenerator {
 		empty = ~allPiecesByRank;
 
 	    Pawn pawn = new Pawn(side==WHITE?Color.W:Color.B);
-	    pMoves = pawn.pushes(position);
-	    advanceTwo = pawn.pushesTwo(position);
-	    promoters = pawn.promotions(position);
+	    long advancesOne = pawn.advances(NOSQUARE, position);
+	    pMoves = advancesOne & ~EIGHTHRANK;
+	    advanceTwo = side==WHITE
+	    		? ((advancesOne & THIRDRANK) << 8) & empty
+	    		: ((advancesOne & SIXTHRANK) >> 8) & empty;
+	    promoters = (side==WHITE
+	    		? advancesOne & EIGHTHRANK
+	    		: advancesOne & FIRSTRANK)
+	    		& empty;
 	    // Pawn promotions
 	    while (morePieces(promoters)) {
 	        to = lowestBitNumber(promoters);
