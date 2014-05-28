@@ -98,12 +98,12 @@ public abstract class Piece {
 	public abstract boolean exists();
 	
 	/**
-	 * Get a bitboard indicating possible captures or moves for the piece.
+	 * Get a bitboard containing all squares where this piece can advance to
+	 * excluding captures.
 	 * All moves that indicate a pseudo legal move for this piece (e.g. pawn 
-	 * advance/capture, en passant capture, promotion, castling, or any other
-	 * piece move or capture).
+	 * advance.
 	 * 
-	 * @param fromSquare  square on which the piece resides 
+	 * @param fromSquare  square on which the piece resides, or NOSQUARE if moves are generated en masse 
 	 * @param position  the current position on the board
 	 * @return
 	 */
