@@ -2,8 +2,6 @@ package com.jeremybrooks.chess;
 
 public class DefaultGenerator {
 
-	private static final int MAX_NUM_GENERATED_MOVES = 70;
-	
 	private Generator capturesGenerator;
 	private Generator nonCapturesGenerator;
 	private Generator escapeGenerator;
@@ -32,7 +30,7 @@ public class DefaultGenerator {
 	
 	public int[] generateMoves(int side, int depth) {
 		// Generate legal moves from this position
-		int[] moves = new int[MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
+		int[] moves = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
 	    if (!getBaseMoveGenerator().isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        generateCaptures(moves, side, depth);
 	        generateNonCaptures(moves, side, depth);

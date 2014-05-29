@@ -8,10 +8,8 @@ import static com.jeremybrooks.chess.Bitmap.WHITE;
 
 import org.apache.log4j.Logger;
 
-/**
- * @author jeremy
- *
- */
+import com.jeremybrooks.chess.ScoredMove.Precision;
+
 /**
  * @author jeremy
  *
@@ -29,7 +27,6 @@ public class Search {
 	public static final int MAXWINDOW = 1000000;   //To pass to alpha beta for initial window (+inf, -inf)
 	public static final int CHECKMATE = 100000;    //value for checkmate
 	public static final int DRAW = 0;              //value for draw
-	private static final int MAX_NUM_GENERATED_MOVES = 70;
 
 	private DefaultGenerator moveGenerator = new DefaultGenerator();
 	private Evaluator evaluator = new Evaluator();
@@ -38,7 +35,7 @@ public class Search {
 	/*
 	 * Current state of the chess game 
 	 */
-	private GameState g;
+	protected GameState g;
 	
 	/* 
 	 * Initialize search's stack depth to this value
@@ -64,7 +61,7 @@ public class Search {
 	/*
 	 * Holds the best moves found (that is, moves on the principle variation) in ascending order of depth
 	 */
-	private ScoredMove[] pvLine;
+	protected ScoredMove[] pvLine;
 	
 	/*
 	 * Holds the current moves at this depth in the search.
@@ -72,34 +69,8 @@ public class Search {
 	 * If depth is 1, it holds all moves available after an initial first move
 	 * and so on.
 	 */
-	private ScoredMove[] rootMove;
-	
-	
-	/**
-	 * Holds a move and score for that move after a search
-	 * @author jeremy
-	 *
-	 */
-	public class ScoredMove {
-		private int move;
-		private int score;
+	private ScoredMove[] rootMove;	
 
-		public ScoredMove(int move, int score) {
-			super();
-			this.move = move;
-			this.score = score;
-		}
-		public int getMove() { return move; }
-		public void setMove(int move) { this.move = move; }
-		public int getScore() {	return score; }
-		public void setScore(int score) { this.score = score; }
-		public String toString(){
-			return Util.displayMoveStr(move, false, false);// + "("+score+")";
-		}
-		public String format(){
-			return Util.displayMoveStr(move, false, false) + "("+score+")";
-		}
-	}
 
 	public Search() {
 		super();
@@ -131,7 +102,7 @@ public class Search {
 		this.stackSize = size;
 		pvLine = new ScoredMove[this.stackSize];
 		currentMove = new int[this.stackSize];
-		rootMove = new ScoredMove[MAX_NUM_GENERATED_MOVES];
+		rootMove = new ScoredMove[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
 	}
 	
 	public int getDepthLimit() {
@@ -167,7 +138,8 @@ public class Search {
 				nodeIndex++)
 		{
 			ScoredMove node = pvLine[nodeIndex];
-			line.append(node).append(" ");
+			line.append(Util.displayMoveStr(node.getMove(), false, false));
+			line.append(" ");
 		}
 		return line.toString();
 	}
@@ -261,7 +233,17 @@ public class Search {
 	//		   }
 	//		   return alpha;
 	//		}
-	private int max(int alpha, int beta, int side, int depth){
+	protected int max(int alpha, int beta, int side, int depth){
+		long nodeKey = g.fullZobristKey();
+		Precision nodePrecision = Precision.LOWER_BOUND;
+		ScoredMove node = lookup(nodeKey);
+		if(isCacheHit(node, alpha, beta, depth))
+		{
+			int score = cachedScore(node, alpha, beta, depth);
+			if(log.isDebugEnabled()) log.debug("cache hit (score="+score+") on "+g.get());
+			return score;
+		}
+
 	    int[] moves = generateMoves(side, depth);
 	    if(isMaxDepthOrHasNoMoves(depth, moves.length)){
 	    	return evaluate(side, depth);
@@ -292,14 +274,17 @@ public class Search {
 	        		log.trace(indent(depth) + "@" + depth + " " + val + ">=" + beta + 
 	        				" prunes sub-graph (fail hard beta-cutoff) at move " + Util.displayMoveStr(move, false, false));
 	        	}
+	        	store(nodeKey, beta, Precision.UPPER_BOUND, depth);
 	        	return beta;
 	        }
 	        if(val > alpha)
 	        {    
 	        	alpha = val; // alpha acts like max in MiniMax  (shrinks the window up from -Infinity)
+	        	nodePrecision = Precision.EXACT;
 	        	updatePrincipalVariationLine(g, depth, val, move);
 	        }
 	    }
+		store(nodeKey, alpha, nodePrecision, depth);
 	    return alpha;
 	}
 
@@ -338,7 +323,17 @@ public class Search {
 	//		   }
 	//		   return beta;
 	//		}
-	private int min(int alpha, int beta, int side, int depth){
+	protected int min(int alpha, int beta, int side, int depth){
+		long nodeKey = g.fullZobristKey();
+		Precision nodePrecision = Precision.UPPER_BOUND;
+		ScoredMove node = lookup(nodeKey);
+		if(isCacheHit(node, alpha, beta, depth))
+		{
+			int score = cachedScore(node, alpha, beta, depth);
+			if(log.isDebugEnabled()) log.debug("cache hit (score="+score+") on "+g.get());
+			return score;
+		}
+
 		int[] moves = generateMoves(side, depth);
 		if(isMaxDepthOrHasNoMoves(depth, moves.length)){
 			return evaluate(side, depth);
@@ -369,14 +364,17 @@ public class Search {
 	        		log.trace(indent(depth) + "@" + depth + " " + val + "<=" + alpha + 
         				" prunes sub-graph (fail hard alpha-cutoff) at move " + Util.displayMoveStr(move, false, false));
 	        	}
+	        	store(nodeKey, alpha, Precision.LOWER_BOUND, depth);
 				return alpha;
 			}
 	        if(val < beta)
 	        {   
 	        	beta = val; // beta acts like min in MiniMax (shrinks the window down from +Infinity)
+	        	nodePrecision = Precision.EXACT;
 	        	updatePrincipalVariationLine(g, depth, val, move);
 	        }
 		}
+		store(nodeKey, beta, nodePrecision, depth);
 		return beta;
 	}
 
@@ -388,7 +386,7 @@ public class Search {
 
 	protected int[] generateMoves(int side, int depth) {
 		// Generate legal moves from this position
-		int[] moves = new int[MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
+		int[] moves = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
 	    if (!moveGenerator.isAttacked(g, side, g.getPosition().getKingSquare(side))){
 	        moveGenerator.generateCaptures(moves, side, depth);
 	        moveGenerator.generateNonCaptures(moves, side, depth);
@@ -404,6 +402,26 @@ public class Search {
 	// A more negative number is better for black.
 	int evaluate(int side, int depth){
 		return evaluator.evaluate(g, side, depth, currentMove, SEARCH_DEBUG, EVAL);
+	}
+
+	protected ScoredMove lookup(long key) {
+		//no cache by default;
+		return null; 
+	}
+
+	protected void store(Long key, int score, ScoredMove.Precision metadata, int depth) {
+		//no cache by default
+	}
+
+	protected boolean isCacheHit(ScoredMove node, int alpha, int beta, int depth) {
+		//no cache by default;
+		return false;
+	}
+
+	protected Integer cachedScore(ScoredMove node, int alpha, int beta, int depth)
+	{
+		//no cache by default;
+		return null;
 	}
 
 	protected void logMove(int depth, int move, int moveScore, int alpha, int beta) {

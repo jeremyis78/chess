@@ -112,7 +112,7 @@ public class Solver {
 
 	private String getScoredRootMoves() {
 		StringBuilder sb = new StringBuilder("\n");
-		for(Search.ScoredMove sm: search.getRootMove())
+		for(ScoredMove sm: search.getRootMove())
 		{
 			if(sm == null) break;
 			sb.append(Util.displayMoveStr(sm.getMove(),false,false));
