@@ -1,17 +1,12 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.Bitmap.BLACK;
+import static com.jeremybrooks.chess.Bitmap.WHITE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class EvaluatorTest {
@@ -21,9 +16,7 @@ public class EvaluatorTest {
 	@Before
 	public void setUp()
 	{
-		eval = new Evaluator();
-		DefaultGenerator moveGenerator = new DefaultGenerator();
-		eval.setMoveGenerator(moveGenerator);
+		eval = getEvaluator();
 	}
 
 	@Test
@@ -162,92 +155,8 @@ public class EvaluatorTest {
 		int startingBlackScore = twoRooksSevenPawnsScore + rookAdjustmentGivenSevenPawns;
 		assertEquals(startingBlackScore, score);
 	}
-
-	@Test @Ignore
-	public void testEvaluateScoring()
-	{
-		List<String> positions = new ArrayList<>(14000);
-		try (BufferedReader br = new BufferedReader(new FileReader("test-positions.txt")))
-		{
-			while(br.ready())
-			{
-				String line = br.readLine();
-				if(line.startsWith("#")) continue;
-				positions.add(line.split("\t")[0]);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		positions.add("k7/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		positions.add("rnbqkbnr/pppppppp/8/8/8/8/8/4K3 w KQkq - 0 1");
-		positions.add("k7/8/8/8/8/8/4PPPP/RNBQKBNR w KQkq - 0 1");
-		positions.add("r1bk3r/3p1ppp/2p1p3/p2n4/8/BRPB4/P1P2PPP/1R4K1 w - - 2 17");
-
-		for(String position: positions)
-		{
-			GameState g = new GameState(2);
-			boolean isWhiteToMove = setupState(g, position);
-			int searchDepth = 0;
-			int actualScore = evaluate(g, isWhiteToMove, searchDepth);
-			System.out.println(actualScore + ": " + g.get());
-		}
-	}
-
-
-	@Test @Ignore
-	public void givenManyPositionsTimeMe()
-	{
-		/*
-		 * Run speed tests on the eval functions
-		 */
-		List<String> positions = new ArrayList<>(14000);
-		try (BufferedReader br = new BufferedReader(new FileReader("test-positions.txt")))
-		{
-			while(br.ready())
-			{
-				String line = br.readLine();
-				if(line.startsWith("#")) continue;
-				positions.add(line.split("\t")[0]);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		int timesToRun[] = new int[]{300};
-		for(int numTimesToRun: timesToRun)
-		{
-			int numTimesExecuted=0;
-			long elapsedNanos = 0L;
-			int numPositions = positions.size();
-			for(int index=0; index < numPositions; index++)
-			{
-				int positionIndex = (int) (numPositions * Math.random());
-				String position = positions.get(positionIndex);
-				for(int times=0; times<numTimesToRun; times++)
-				{
-					GameState g = new GameState(2);
-					//System.out.println("index: " + positionIndex);
-					boolean isWhiteToMove = setupState(g, position);
-					int searchDepth = 0;
-					long start = System.nanoTime();
-					int actualScore = evaluate(g, isWhiteToMove, searchDepth);
-					elapsedNanos += System.nanoTime() - start;
-					//System.out.println(actualScore + ": " + g.get());
-					numTimesExecuted++;
-				}
-				index++;
-			}
-			assertTrue("needs to run at least 1.5 million times for good average results", 
-					numTimesExecuted > 1500000);
-			double nanosPerSecond = 1e9;
-			System.out.println("ran evaluate() " +
-					numTimesExecuted + " times in " + 
-					elapsedNanos/nanosPerSecond + " seconds = " +
-					(elapsedNanos / numTimesExecuted) + " nanos/run");
-		}
-	}
 	
-	private boolean setupState(GameState gameState, String startState) {
+	public static boolean setupState(GameState gameState, String startState) {
 		String position = startState;
 		gameState.set(startState);
 		String initialState = gameState.get();
@@ -255,6 +164,15 @@ public class EvaluatorTest {
 		return gameState.isWhiteToMove();
 	}
 
+	public static Evaluator getEvaluator()
+	{
+		Evaluator e = new Evaluator();
+		DefaultGenerator moveGenerator = new DefaultGenerator();
+		e.setMoveGenerator(moveGenerator);
+		return e;
+
+	}
+	
 	private int evaluate(GameState g, boolean isWhiteToMove, int searchDepth) {
 		return eval.evaluate(g, isWhiteToMove?0:1, searchDepth, false, false);
 	}
