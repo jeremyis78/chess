@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 public class Evaluator {
 	private static final Logger log = Logger.getLogger(Evaluator.class);
 	static final int CHECKMATE = 100000;    //value for checkmate
-	private static final int PIECE_VALUE[] = 
+	public static final int PIECE_VALUE[] = 
 	{
 		100, // White Pawn
 		325, // White Knight
@@ -165,17 +165,9 @@ public class Evaluator {
 		whiteTerms.add(new Term(wMaterialScore, "white material"));
 		blackTerms.add(new Term(bMaterialScore, "black material"));
 		
-		int wKnightAdjustment = knightAdjustment(count[WHITE][KNIGHT], count[WHITE][PAWN]);
-		whiteTerms.add(new Term(wKnightAdjustment, "white knights adjustment given more/less pawns"));
-		int bKnightAdjustment = knightAdjustment(count[BLACK][KNIGHT], count[BLACK][PAWN]);
-		blackTerms.add(new Term(bKnightAdjustment, "black knights adjustment given more/less pawns"));
-
-		int wRookAdjustment = rookAdjustment(count[WHITE][ROOK], count[WHITE][PAWN]);
-		whiteTerms.add(new Term(wRookAdjustment, "white rooks adjustment given more/less pawns"));
-		int bRookAdjustment = rookAdjustment(count[BLACK][ROOK], count[BLACK][PAWN]);
-		blackTerms.add(new Term(bRookAdjustment, "black rooks adjustment given more/less pawns"));
-
-		int finalScore = sum(whiteTerms) - sum(blackTerms) + mateScore;
+		int materialAdjustment = new MaterialAdjustmentTerm().evaluate(g);
+		
+		int finalScore = sum(whiteTerms) - sum(blackTerms) + materialAdjustment + mateScore;
 		if(isSearchDebug)
 		{
 			String currentLine = "";
@@ -194,42 +186,6 @@ public class Evaluator {
 //			log.debug("mate score : "+ mateScore);
 //		}
 		return finalScore;
-	}
-
-	private int knightAdjustment(int numKnights, int numPawns)
-	{
-		//knights can jump so they are worth more with more pawns around; worth less with fewer
-		int adjustment = 0;
-		int pawnCountBoundary = 5;
-		if(numKnights > 0)
-		{
-			int scoreAdjustmentPerPawn = 6;
-			if(numPawns > pawnCountBoundary)
-			{
-				adjustment += numKnights * (numPawns - pawnCountBoundary) * scoreAdjustmentPerPawn ; //+6 for every pawn over the boundary
-			} else { // < 5
-				adjustment -= numKnights * (pawnCountBoundary - numPawns) * scoreAdjustmentPerPawn; //-6 for every pawn under the boundary
-			}
-		}
-		return adjustment;
-	}
-
-	private int rookAdjustment(int numRooks, int numPawns)
-	{
-		//rooks need open files so they are worth more with fewer pawns around; less with more
-		int adjustment = 0;
-		int pawnCountBoundary = 5;
-		if(numRooks > 0)
-		{
-			int scoreAdjustmentPerPawn = 13;
-			if(numPawns > pawnCountBoundary)
-			{
-				adjustment -= numRooks * (numPawns - pawnCountBoundary) * scoreAdjustmentPerPawn;
-			} else { // < 5
-				adjustment += numRooks * (pawnCountBoundary - numPawns) * scoreAdjustmentPerPawn;
-			}
-		}
-		return adjustment;
 	}
 
 	private int sum(List<Term> terms) {
