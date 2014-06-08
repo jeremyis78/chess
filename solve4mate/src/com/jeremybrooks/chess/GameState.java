@@ -16,7 +16,8 @@ import org.apache.log4j.Logger;
  * the halfmove clock and full move number.
  *
  *  TODO: Board!!!!! (that's the best name for this class which would
- *  contain a Pieces (formerly Position) class
+ *  contain a Pieces (formerly Position) class (BoardStack might
+ *  be more accurate, given it's a stack of states/boards)
  *
  * @author jeremy
  *
@@ -56,7 +57,6 @@ public class GameState {
     private byte enPassantSq[];
     private byte halfMoveClock[];
     private byte fullMoveClock[];
-    long attacked[];
     
     /*
      * TODO: The following member vars are not related to the state of the game (board or flags)
@@ -84,7 +84,6 @@ public class GameState {
 		halfMoveClock = new byte[maxMoves];
 		fullMoveClock = new byte[maxMoves];
 
-		attacked = new long[maxMoves];
 	    numberOfLegalMoves = new int[maxMoves];
 	    moves = new int[100];
 	    movesValue = new int[100]; 
@@ -98,7 +97,6 @@ public class GameState {
 	        enPassantSq[moveNumber] = NOSQUARE;
 	        halfMoveClock[moveNumber] = 0;
 	        fullMoveClock[moveNumber] = 0;
-	        attacked[moveNumber] = 0;		
 	        numberOfLegalMoves[moveNumber] = 0;
 	    }             
 	    castle[numberOfMovesMade] = CASTLE_START;
@@ -445,16 +443,16 @@ public class GameState {
 		return indent;
 	}
 
-	private void placePiece(int piece, int to)
+	private void placePiece(int piece, int square)
 	{
-		int side = (whiteToMove?0:1);
-    	pos.placePiece(side, piece, to);
+		int side = (whiteToMove?WHITE:BLACK);
+    	pos.placePiece(side, piece, square);
 	}
 
-	private void placeOpposingPiece(int piece, int to)
+	private void placeOpposingPiece(int piece, int square)
 	{
-		int side = (whiteToMove?0:1);
-    	pos.placePiece(opposing(side), piece, to);
+		int side = (whiteToMove?WHITE:BLACK);
+    	pos.placePiece(opposing(side), piece, square);
 	}
 	
 	private void erasePiece(int square)

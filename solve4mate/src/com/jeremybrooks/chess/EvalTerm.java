@@ -3,11 +3,6 @@ package com.jeremybrooks.chess;
 public abstract class EvalTerm {
 	private String description;
 	
-	public EvalTerm(String description) {
-		super();
-		this.description = description;
-	}
-
 	/**
 	 * Returns the score for this term's evaluation.
 	 * 

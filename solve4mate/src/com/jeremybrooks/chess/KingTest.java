@@ -59,7 +59,9 @@ public class KingTest {
 		Position p = occupiedPositionGivenKingOn(kingSquare);
 		long emptySquares = ~p.getAllPieces(0);
 		long advances = king.advances(kingSquare, p) & emptySquares;
+		long attacks = king.attacks(kingSquare, p);
 		assertEquals("e3 f3 g3 g4 e5 f5 ", Util.displaySquaresStr(advances));
+		assertEquals("e3 f3 g3 e4 g4 e5 f5 g5 ", Util.displaySquaresStr(attacks));
 	}
 	
 	@Test

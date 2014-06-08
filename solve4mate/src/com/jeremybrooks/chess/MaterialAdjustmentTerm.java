@@ -10,7 +10,7 @@ public class MaterialAdjustmentTerm extends EvalTerm {
 	private static final String DESC = "knights/rooks material adjustment given either many or few pawns";
 	
 	public MaterialAdjustmentTerm() {
-		super(DESC);
+		setDescription(DESC);
 	}
 
 	@Override

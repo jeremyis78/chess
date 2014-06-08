@@ -1,19 +1,20 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Bitmap.BLACK;
-import static com.jeremybrooks.chess.Bitmap.WHITE;
-import static com.jeremybrooks.chess.MaterialAdjustmentTerm.*;
-import static org.junit.Assert.*;
+import static com.jeremybrooks.chess.MaterialAdjustmentTerm.KNIGHT_ADJUSTMENT_PER_PAWN;
+import static com.jeremybrooks.chess.MaterialAdjustmentTerm.PAWN_COUNT_BOUNDARY;
+import static com.jeremybrooks.chess.MaterialAdjustmentTerm.ROOK_ADJUSTMENT_PER_PAWN;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MaterialAdjustmentTermTest {
+public class MaterialAdjustmentTermTest extends EvalTermBaseTest {
 
-	private static final int GAMESTATE_MAX_MOVES = 2;
-	private MaterialAdjustmentTerm term = new MaterialAdjustmentTerm();
-	
+	@Before
+	public void setUp()
+	{
+		term = new MaterialAdjustmentTerm();
+	}
 	
 	@Test
 	public void givenTwoBlackKnightsEightPawns() {
@@ -58,7 +59,6 @@ public class MaterialAdjustmentTermTest {
 		String fen = "r3k3/pppp4/8/8/8/8/8/4K3 b - - 0 1";
 		int pawns = pieceCount('p', fen);
 		int rooks = pieceCount('r', fen);
-		System.out.println("pawns: " + pawns + "  rooks: " + rooks);
 		int expectedScore = blackScore(forLessPawns(rooks, pawns, ROOK_ADJUSTMENT_PER_PAWN));
 		int score = evaluate(fen);
 		assertEquals(expectedScore, score);
@@ -82,16 +82,6 @@ public class MaterialAdjustmentTermTest {
 		assertEquals(expectedScore, score);
 	}
 
-	public int evaluate(String fen) {
-		GameState g = new GameState(GAMESTATE_MAX_MOVES);
-		g.set(fen);
-		int score = term.evaluate(g);
-		return score;
-	}
-	
-	private static int whiteScore(int score) { return score; }
-	private static int blackScore(int score) { return -1 * score; }
-
 	private static int forMorePawns(int pieces, int pawns, int adjustmentPerPawn)
 	{
 		return pieces * (adjustmentPerPawn * pawnsOverBoundary(pawns));
@@ -110,15 +100,6 @@ public class MaterialAdjustmentTermTest {
 	private static int pawnsOverBoundary(int pawnCount)
 	{
 		return Math.abs(pawnsUnderBoundary(pawnCount));
-	}
-
-	private static int pieceCount(char pieceChar, String fen) {
-		int count = 0;
-		for(char c: fen.toCharArray())
-		{
-			if(pieceChar == c) count++;
-		}
-		return count;
 	}
 
 }

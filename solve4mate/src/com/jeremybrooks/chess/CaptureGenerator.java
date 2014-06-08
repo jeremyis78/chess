@@ -55,10 +55,6 @@ public class CaptureGenerator extends AbstractGenerator {
 	                break;
 	            }
 
-	            //Add or update which squares are currently attacked
-	            //Following line doesn't do anythign right now!
-	            g.attacked[depth] |= pieceAttacks;
-
 	            attackedPieces = pieceAttacks & position.getOpponentPiecesExceptKing(side);
 	            while (morePieces(attackedPieces)) {
 	                to = lowestBitNumber(attackedPieces);

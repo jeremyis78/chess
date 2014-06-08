@@ -83,7 +83,6 @@ public class NonCaptureGenerator extends AbstractGenerator {
 	        while (morePieces(pieces)) {
 	            from = lowestBitNumber(pieces);
 	            long advances = piece.advances(from, position);
-//	            g.attacked[depth] |= advances;
 				pMoves = advances & empty;
 	            while (morePieces(pMoves)) {
 	                to = lowestBitNumber(pMoves);
