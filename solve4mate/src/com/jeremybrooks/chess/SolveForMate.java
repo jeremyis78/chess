@@ -34,7 +34,7 @@ public class SolveForMate {
 	    	while (br.ready()){
 	    		String line = br.readLine();
 	    		if (line.trim().charAt(0) == '#') continue;
-	    		Puzzle puzzle = new Puzzle(line);
+	    		Puzzle puzzle = Puzzle.parse(line);
 	    		puzzles.add(puzzle);
 	    	}
 	    } catch (FileNotFoundException e) {
