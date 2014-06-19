@@ -9,6 +9,7 @@ import static com.jeremybrooks.chess.Bitmap.WHITE;
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.ScoredMove.Precision;
+import com.jeremybrooks.chess.eval.Evaluator;
 
 /**
  * @author jeremy

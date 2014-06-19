@@ -1,4 +1,4 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
@@ -7,9 +7,16 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.DefaultGenerator;
+import com.jeremybrooks.chess.FenBuilder;
+import com.jeremybrooks.chess.GameState;
+import com.jeremybrooks.chess.Position;
+import com.jeremybrooks.chess.Term;
+import com.jeremybrooks.chess.Util;
+
 public class Evaluator {
 	private static final Logger log = Logger.getLogger(Evaluator.class);
-	static final int CHECKMATE = 100000;    //value for checkmate
+	public static final int CHECKMATE = 100000;    //value for checkmate
 	public static final int PIECE_VALUE[] = 
 	{
 		100, // White Pawn

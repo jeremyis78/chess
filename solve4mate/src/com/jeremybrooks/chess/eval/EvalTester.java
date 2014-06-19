@@ -1,4 +1,4 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.jeremybrooks.chess.GameState;
 
 public class EvalTester {
 

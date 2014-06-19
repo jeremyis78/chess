@@ -1,6 +1,10 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+
+import com.jeremybrooks.chess.GameState;
+import com.jeremybrooks.chess.Position;
+import com.jeremybrooks.chess.Util;
 
 public class MaterialAdjustmentTerm extends EvalTerm {
 

@@ -1,4 +1,6 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
+
+import com.jeremybrooks.chess.GameState;
 
 public abstract class EvalTerm {
 	private String description;

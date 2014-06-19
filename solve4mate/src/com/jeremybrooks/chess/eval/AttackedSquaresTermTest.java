@@ -1,11 +1,11 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class AttackedSquaresTermTest extends EvalTermBaseTest {
+public class AttackedSquaresTermTest extends EvalTermTestBase {
 
 	@Before
 	public void setUp() throws Exception {
@@ -26,6 +26,21 @@ public class AttackedSquaresTermTest extends EvalTermBaseTest {
 		int expectedScore = -1; // = 40 squares attacked by white - 41 by black
 		int score = evaluate(fen);
 		assertEquals(expectedScore, score);
+	}
+
+	
+	@Test
+	public void givenTwoDifferentOpeningMoves() {
+		String fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+		int expectedScore = 0;
+		int score = evaluate(fen);
+		
+		//assertEquals(expectedScore, score);
+		
+		fen = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1";
+		int score2 = evaluate(fen);
+		System.out.println("e4: " + score + "   " + "a5: " + score2);
+		
 	}
 
 }

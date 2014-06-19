@@ -1,14 +1,14 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.MaterialAdjustmentTerm.KNIGHT_ADJUSTMENT_PER_PAWN;
-import static com.jeremybrooks.chess.MaterialAdjustmentTerm.PAWN_COUNT_BOUNDARY;
-import static com.jeremybrooks.chess.MaterialAdjustmentTerm.ROOK_ADJUSTMENT_PER_PAWN;
+import static com.jeremybrooks.chess.eval.MaterialAdjustmentTerm.KNIGHT_ADJUSTMENT_PER_PAWN;
+import static com.jeremybrooks.chess.eval.MaterialAdjustmentTerm.PAWN_COUNT_BOUNDARY;
+import static com.jeremybrooks.chess.eval.MaterialAdjustmentTerm.ROOK_ADJUSTMENT_PER_PAWN;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class MaterialAdjustmentTermTest extends EvalTermBaseTest {
+public class MaterialAdjustmentTermTest extends EvalTermTestBase {
 
 	@Before
 	public void setUp()

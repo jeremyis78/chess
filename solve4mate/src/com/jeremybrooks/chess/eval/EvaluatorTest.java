@@ -1,4 +1,4 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.Bitmap.BLACK;
 import static com.jeremybrooks.chess.Bitmap.WHITE;
@@ -8,6 +8,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.jeremybrooks.chess.DefaultGenerator;
+import com.jeremybrooks.chess.GameState;
 
 public class EvaluatorTest {
 

@@ -1,16 +1,13 @@
-package com.jeremybrooks.chess;
+package com.jeremybrooks.chess.eval;
 
-public class EvalTermBaseTest {
+import com.jeremybrooks.chess.GameState;
+
+public abstract class EvalTermTestBase {
 
 	private static final int GAMESTATE_MAX_MOVES = 2;
-	
 	protected EvalTerm term;
 
 	
-	public EvalTermBaseTest() {
-		super();
-	}
-
 	protected int evaluate(String fen) {
 		GameState g = new GameState(GAMESTATE_MAX_MOVES);
 		g.set(fen);

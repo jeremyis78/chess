@@ -2,6 +2,8 @@ package com.jeremybrooks.chess;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.eval.Evaluator;
+
 public class Solver {
 	private static final Logger log = Logger.getLogger(Solver.class);
 	private DefaultGenerator moveGenerator;
