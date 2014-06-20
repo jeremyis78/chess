@@ -3,8 +3,7 @@ package com.jeremybrooks.chess;
 public class Displayer extends AbstractDisplayer {
 
 	void appendPiece(Position position, int currentSquare) {
-		int boardPiece = position.getBoard(currentSquare);
-		Piece piece = PieceFactory.fromBoardPiece(boardPiece);
+		Piece piece = position.get(currentSquare);
 		if(piece.exists())
 		{
 			display.append(piece.toString());
