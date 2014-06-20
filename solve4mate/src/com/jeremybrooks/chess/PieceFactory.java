@@ -54,4 +54,20 @@ public class PieceFactory {
 		}
 	}
 
+	public static Piece create(char pieceChar) {
+	    Piece piece = new Empty();
+	    Color color = Character.isUpperCase(pieceChar) ? Color.W : Color.B;
+		char upperPieceChar = Character.toUpperCase(pieceChar);
+		if(upperPieceChar == 'P') piece = color==Color.W ? WHITE_PAWN : BLACK_PAWN;
+		if(upperPieceChar == 'N') piece = color==Color.W ? WHITE_KNIGHT : BLACK_KNIGHT;
+		if(upperPieceChar == 'B') piece = color==Color.W ? WHITE_BISHOP : BLACK_BISHOP;
+		if(upperPieceChar == 'R') piece = color==Color.W ? WHITE_ROOK : BLACK_ROOK;
+		if(upperPieceChar == 'Q') piece = color==Color.W ? WHITE_QUEEN : BLACK_QUEEN;
+		if(upperPieceChar == 'K') piece = color==Color.W ? WHITE_KING : BLACK_KING;
+		if(!piece.exists())
+			throw new IllegalArgumentException("board contains invalid "
+					+ "piece '"+pieceChar+"'; allowed piece characters are: KkQqRrBbNnPp");
+		return piece;
+	}
+
 }

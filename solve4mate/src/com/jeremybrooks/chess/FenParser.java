@@ -207,7 +207,7 @@ public class FenParser {
 					//System.out.println("  " + boardCharacter + " empty squares");
 				} else {
 					int color = (Character.isUpperCase(boardCharacter)) ? WHITE : BLACK;
-					int piece = getPieceFromBoardCharacter(boardCharacter);
+					int piece = PieceFactory.create(boardCharacter).index();
 					if(piece == KING && color == WHITE) numWhiteKingsPlaced++;
 					if(piece == KING && color == BLACK) numBlackKingsPlaced++;
 					validateOneKingPerColorOrThrow(numWhiteKingsPlaced, numBlackKingsPlaced);
@@ -252,22 +252,6 @@ public class FenParser {
 		if(numBlackKingsPlaced > 1)
 			throw new IllegalArgumentException("board has too many black kings; bking='k'");
 	}
-
-	private int getPieceFromBoardCharacter(char pieceChar) {
-		int piece = NONE;
-		char upperPieceChar = Character.toUpperCase(pieceChar);
-		if(upperPieceChar == 'P') piece = PAWN;
-		if(upperPieceChar == 'N') piece = KNIGHT;
-		if(upperPieceChar == 'B') piece = BISHOP;
-		if(upperPieceChar == 'R') piece = ROOK;
-		if(upperPieceChar == 'Q') piece = QUEEN;
-		if(upperPieceChar == 'K') piece = KING;
-		if(piece == NONE)
-			throw new IllegalArgumentException("board contains invalid "
-					+ "piece '"+pieceChar+"'; allowed piece characters are: KkQqRrBbNnPp");
-		return piece;
-	}
-	
 
 	private void parseOnMove() {
 		String toParse = field[ON_MOVE_FIELD].trim();
