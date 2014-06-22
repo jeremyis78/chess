@@ -39,7 +39,6 @@ public class UciDriver {
 						respond("readyok");
 				} else if ("position".equals(token)) {
 					//TODO: setup position
-					gameState = new GameState(GameState.MAX_NUM_MOVES_MADE);
 					token = guiArgs[argIndex++];
 					String fen = "";
 					if("startpos".equals(token))
@@ -57,9 +56,9 @@ public class UciDriver {
 					} else {
 						throw new Exception(token + " is not allowed; only fen or startpos are allowed.");
 					}
+					gameState = new GameState();
 					gameState.set(fen.trim());
 					gameState.display();
-					//TODO: read and make all the moves that are given
 					token = guiArgs[argIndex++];
 					if(!"moves".equals(token))
 						continue;
@@ -105,9 +104,9 @@ public class UciDriver {
 	private static void go(String[] guiArgs) {
 		int argIndex = 1;
 		String token = guiArgs[argIndex++];
-		if("mate".equals(token))
+		if("infinite".equals(token))
 		{
-			
+			//info multipv 1 depth 10 seldepth 26 score cp 10 time 2032 nodes 1673940 pv b5c6 b7c6 b1c3 g8f6 g1f3 d8b6 d4b6 a7b6 c1g5 f8c5 g5f6 g7f6 a1d1 d7d5
 		}
 	}
 

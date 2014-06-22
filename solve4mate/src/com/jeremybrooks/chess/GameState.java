@@ -72,7 +72,12 @@ public class GameState {
     // I think the only way to do this is to have a transposition table
     // whose key is the current position of the board.
     //
-    
+
+	public GameState()
+	{
+		this(MAX_NUM_MOVES_MADE);
+	}
+
 	public GameState(int maxNumberOfMovesToSupport)
 	{
 		pos = new Position();

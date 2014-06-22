@@ -61,7 +61,7 @@ public class SolveForMate {
 	    
 	    for(Puzzle puzzle: puzzles){
 	    	displayHeader(puzzle);
-	    	Solver.Info solveInfo = solver.solve(puzzle);
+	    	SearchInfo solveInfo = solver.solve(puzzle);
 	    	displayResults(solveInfo);
 	    }
 	}
@@ -83,7 +83,7 @@ public class SolveForMate {
 		out.println(header.toString());
 	}
 	
-	private static void displayResults(Solver.Info solveInfo) {
+	private static void displayResults(SearchInfo solveInfo) {
 		StringBuilder result = new StringBuilder();
 		long totalNodes = solveInfo.getNodeCount();
 		double solveTimeMillis = solveInfo.getSolveTimeMillis();

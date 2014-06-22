@@ -23,7 +23,7 @@ public class SolverTest {
 		String expectedSolution = "Qf6xg7";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(1);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		assertTrue(isMate);
@@ -36,7 +36,7 @@ public class SolverTest {
 		String expectedSolution = "Rd1-d8 Re7-e8 Rd8xe8";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(2);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		System.out.println(solution);
@@ -50,7 +50,7 @@ public class SolverTest {
 		String expectedSolution = "Nc6-e7 Kg8-h8 Nd6-f7";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(2);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		System.out.println(solution);
@@ -64,7 +64,7 @@ public class SolverTest {
 		String expectedSolution = "Kf4-f3 Kf1-e1 Qa2-e2";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(2);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		System.out.println(solution);
@@ -79,7 +79,7 @@ public class SolverTest {
 		String expectedSolution = "Bc4xf7 Ke8-e7 Nc3-d5";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(2);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		System.out.println(solution);
@@ -93,7 +93,7 @@ public class SolverTest {
 		String expectedSolution = "Bc4xf7 Ke8-e7 Nc3-d5";
 		puzzle.setFen(fen);
 		puzzle.setMovesToMate(2);
-		Solver.Info info = solver.solve(puzzle);
+		SearchInfo info = solver.solve(puzzle);
 		boolean isMate = info.isMate();
 		String solution = info.getSolutionMoves();
 		System.out.println(solution);

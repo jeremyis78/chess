@@ -10,62 +10,6 @@ public class Solver {
 	private Evaluator evaluator;
 	private Search search = new Search();
 
-	public class Info {
-		private int score;
-		private String solutionMoves;
-		private boolean mate;
-		private long nodeCount;
-		private double solveTimeMillis;
-		private String scoredRootMoves;
-		
-		public int getScore() {
-			return score;
-		}
-
-		public void setScore(int score) {
-			this.score = score;
-		}
-
-		public String getSolutionMoves() {
-			return solutionMoves;
-		}
-
-		public void setSolutionMoves(String solutionMoves) {
-			this.solutionMoves = solutionMoves;
-		}
-
-		public boolean isMate() {
-			return mate;
-		}
-
-		public void setMate(boolean mate) {
-			this.mate = mate;
-		}
-
-		public double getSolveTimeMillis() {
-			return solveTimeMillis;
-		}
-
-		public void setSolveTimeMillis(double solveTimeMillis) {
-			this.solveTimeMillis = solveTimeMillis;
-		}
-
-		public long getNodeCount() {
-			return nodeCount;
-		}
-
-		public void setNodeCount(long nodeCount) {
-			this.nodeCount = nodeCount;
-		}
-
-		public String getScoredRootMoves() {
-			return scoredRootMoves;
-		}
-
-		public void setScoredRootMoves(String scoredRootMoves) {
-			this.scoredRootMoves = scoredRootMoves;
-		}
-	}
 	
 	public Solver() {
 		//TODO: use dependency injection instead
@@ -78,8 +22,34 @@ public class Solver {
 		search.setEvaluator(evaluator);
 		search.setMoveGenerator(moveGenerator);
 	}
-	
-	public Info solve(Puzzle puzzle)
+
+	public SearchInfo search(GameState g, int maxDepth)
+	{
+		assert(maxDepth <= GameState.MAX_NUM_MOVES_MADE);
+		
+    	search.setStackSize(maxDepth + 1);
+		search.setGameState(g);
+
+		log.debug("Searching...");
+		long start = System.nanoTime();
+		int score = search.search(g.isWhiteToMove()?0:1);
+
+		double elapsedTimeMillis = (System.nanoTime() - start)/1000000.0;
+		long nodeCount = search.getNodeCount();
+		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
+		String solutionMoves = search.getPVMoveLine();
+		String scoredRootMoves = getScoredRootMoves();
+		SearchInfo info = new SearchInfo();
+		info.setScore(score);
+		info.setSolutionMoves(solutionMoves);
+		info.setMate(mate);
+		info.setNodeCount(nodeCount);
+		info.setSolveTimeMillis(elapsedTimeMillis);
+		info.setScoredRootMoves(scoredRootMoves);
+		return info;
+	}
+
+	public SearchInfo solve(Puzzle puzzle)
 	{
 		int movesToMate = puzzle.getMovesToMate();
 		int pliesForMovesToMate = getPliesToMate(movesToMate);
@@ -102,7 +72,7 @@ public class Solver {
 		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
 		String solutionMoves = search.getPVMoveLine();
 		String scoredRootMoves = getScoredRootMoves();
-		Info solveInfo = new Info();
+		SearchInfo solveInfo = new SearchInfo();
 		solveInfo.setScore(score);
 		solveInfo.setSolutionMoves(solutionMoves);
 		solveInfo.setMate(mate);
