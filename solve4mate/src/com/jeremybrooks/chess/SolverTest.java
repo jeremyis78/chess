@@ -100,4 +100,22 @@ public class SolverTest {
 		assertTrue(isMate);
 		assertTrue(solution.startsWith(expectedSolution));
 	}
+	
+	//@Test -- FIXME: currently fails to find this double sacrifice mate 3 moves out
+	//This will probably be easily fixed once move ordering is implemented and checks 
+	//are higher priority to search.
+	public void givenMateInThreeWithTrickyDoubleSacrifice () {
+		String fen = "r1b2rk1/p5pp/1pp3q1/3p1p2/1B1PnPnR/3BPK2/PP2N1P1/R4NQ1 b - - 0 1 #Polgar No. 4190";
+		String expectedSolution = "Ng4-e5 f4xe5 Qg6-g4 Rh4xg4 f5xg4";  //double sacrifice!! (knight, then queen)
+		puzzle.setFen(fen);
+		puzzle.setMovesToMate(3);
+		SearchInfo info = solver.solve(puzzle);
+		boolean isMate = info.isMate();
+		String solution = info.getSolutionMoves();
+		System.out.println(solution);
+		assertTrue(isMate);
+		assertEquals(expectedSolution, solution);
+	}
+	
+	
 }
