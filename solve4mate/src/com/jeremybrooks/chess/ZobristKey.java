@@ -9,7 +9,7 @@ import java.security.SecureRandom;
 public class ZobristKey {
 
 	private static final long[][][] zobristKey = new long[2][6][64];
-	private static final byte[] seed = toByteArray("quickfoxlazydog");
+	private static final byte[] seed = toByteArray("GaMe-0F_pAwNs!");
 	private static final SecureRandom random = new SecureRandom(seed);
 
 	/*
