@@ -1,7 +1,6 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
-import static com.jeremybrooks.chess.Util.StrToSq;
 import static com.jeremybrooks.chess.FenBuilder.*;
 
 /**
@@ -310,7 +309,7 @@ public class FenParser {
 	    if (UNSET == toParse.charAt(0)){
 	        enPassantSquare = NOSQUARE;
 	    } else {
-	    	int unvalidatedSquare = StrToSq(toParse);
+	    	int unvalidatedSquare = Square.squareOf(toParse);
 	    	enPassantSquare = validEnPassantSquare(isWhiteToMove(), unvalidatedSquare);
 	    }
 	}

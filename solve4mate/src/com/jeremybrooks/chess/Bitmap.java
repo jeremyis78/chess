@@ -315,7 +315,7 @@ public class Bitmap {
 	@Override
 	public String toString()
 	{
-		return Util.DisplayBoardStr(bitmap);
+		return format(bitmap);
 	}
 	
 	public Bitmap bitwiseOr(Bitmap bitsToSet)
@@ -477,5 +477,53 @@ public class Bitmap {
 		return (sq % 8);
 	}
 
+	public static String format(long moves){
+		return format(moves, 0L);
+	}
+
+	public static String format(long moves, long piece){
+	    //This prints X for set bits (- for unset bits) and a + for
+		//a bit set in pieces.  It orients the board so that a1 is
+		//in the lower left hand corner and h8 is in the upper right hand
+	    //corner--the real world chess board view.
+	    
+	    long mask = 1; //, m = 1;
+	    
+	    int  num_of_sq_to_display = 64; //must be multiple of 8 and <= 64
+	    
+	    //Above value should be 64 to display the entire chessboard
+	    //To display only the first rank (a1-h1) it should be 8.
+	    //To display 2nd and 1st rank (a2-h2 and a1-h1) it should be 16, & so on.
+	    
+	    StringBuffer sb = new StringBuffer();
+	    int i, j;
+	    for(i = num_of_sq_to_display - 8; i >=0; i-=8){
+	        // I cannot manually write "mask = 0x00..01 << i;"
+	        // because the compiler treats mask as 32 bits instead of 64 bits
+	        // Therefore only "mask = setmask[i];" will work.
+	        //	
+	        //		mask = setmask[i];  
+	        mask = 1L << i;
+	        
+	        int k = i + 8;  //set upper bound on next for-loop
+	        
+	        //		printf("%d ", (i / 8) + 1);
+	        //cout << ((i/8) + 1) << ' ';
+	        sb.append( ((i/8)+1) + " ");
+	        for(j = i; j < k; ++j, mask <<= 1){
+	            //If there's a bit/move/piece at that square
+	            //Print "*" otherwise a "-"
+	            
+	            if (Util.bool(mask & piece))		//Print the '+' first so
+	                sb.append("+ ");  	//we don't overwrite a move
+	            else if (Util.bool(mask & moves))
+	                sb.append("X ");  
+	            else
+	                sb.append("- ");
+	        }
+	        sb.append("\n");
+	    }
+	    return sb.append("  a b c d e f g h\n").toString();
+	}
 
 }

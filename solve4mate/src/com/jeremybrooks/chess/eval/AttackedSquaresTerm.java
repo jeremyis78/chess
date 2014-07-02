@@ -4,11 +4,11 @@ import static com.jeremybrooks.chess.Bitmap.*;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.Bitmap;
 import com.jeremybrooks.chess.Displayer;
 import com.jeremybrooks.chess.GameState;
 import com.jeremybrooks.chess.Piece;
 import com.jeremybrooks.chess.Position;
-import com.jeremybrooks.chess.Util;
 
 public class AttackedSquaresTerm extends EvalTerm {
 	private static final Logger log = Logger.getLogger(AttackedSquaresTerm.class);
@@ -37,8 +37,8 @@ public class AttackedSquaresTerm extends EvalTerm {
 		int wAttacks = Long.bitCount(attackedBy[WHITE]);
 		int bAttacks = Long.bitCount(attackedBy[BLACK]);
 		log.trace(new Displayer().formatBoard(gameState.getPosition()));
-		log.trace("white attacks: " + wAttacks + "\n" + Util.DisplayBoardStr(attackedBy[WHITE]));
-		log.trace("black attacks: " + bAttacks + "\n" + Util.DisplayBoardStr(attackedBy[BLACK]));
+		log.trace("white attacks: " + wAttacks + "\n" + Bitmap.format(attackedBy[WHITE]));
+		log.trace("black attacks: " + bAttacks + "\n" + Bitmap.format(attackedBy[BLACK]));
 		return wAttacks - bAttacks;
 	}
 

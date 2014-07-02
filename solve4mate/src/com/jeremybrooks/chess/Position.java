@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.Square.*;
 
 import org.apache.log4j.Logger;
 
@@ -224,15 +225,15 @@ public class Position
 		if(p == KING && kingSq[c] != KING_NOT_PLACED)
 		{
 			throw new IllegalStateException("cannot place " + (c==WHITE?"white":"black") +
-					" king on "+ Util.SqToStr(sq)+"; already placed on " +
-					Util.SqToStr(kingSq[c])+ "; use erasePiece()");
+					" king on "+ named(sq)+"; already placed on " +
+					named(kingSq[c])+ "; use erasePiece()");
 		}
 		if(isNotEmpty(sq))
 		{
-			throw new IllegalStateException(Util.SqToStr(sq)+ " is already occupied");
+			throw new IllegalStateException(named(sq)+ " is already occupied");
 		}
 		if(log.isTraceEnabled()) 
-			log.trace("placing "+(c==WHITE?"white":"black")+" "+p+" on " +Util.SqToStr(sq));
+			log.trace("placing "+(c==WHITE?"white":"black")+" "+p+" on " +named(sq));
 	    long mask = 1L << sq;
 	    all[ALL] |= mask;
 	    all[ALL90] |= 1L << SQ2BIT90R[sq];
@@ -263,7 +264,7 @@ public class Position
 		int color = (boardPiece > 0) ? WHITE : BLACK;
 		int piece = TO_PIECE[Math.abs(boardPiece)];
 		if(log.isTraceEnabled()) 
-			log.trace("erasing "+(color==WHITE?"white":"black")+" piece on " + Util.SqToStr(square));
+			log.trace("erasing "+(color==WHITE?"white":"black")+" piece on " + named(square));
 	    long mask = 1L << square;
 	    all[Bitmap.ALL] ^= mask;
 	    all[ALL90] ^= 1L << SQ2BIT90R[square];

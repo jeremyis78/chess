@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.Square.*;
 
 import com.jeremybrooks.chess.Piece.Color;
 
@@ -40,7 +41,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
 	    // Pawn promotions
 	    while (morePieces(promoters)) {
 	        to = lowestBitNumber(promoters);
-	        from = Util.squareBehind(to, side);
+	        from = squareBehind(to, side);
 	        for (int i = QUEEN; i >= KNIGHT; i--) {
 	            moves[n++] = EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
 	            //g.legalMoves[depth]++;
@@ -51,7 +52,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
 	    // Pawns advance two squares
 	    while (morePieces(advanceTwo)) {
 	        to = lowestBitNumber(advanceTwo);
-	        from = Util.twoSquaresBehind(to, side);
+	        from = twoSquaresBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {
@@ -62,7 +63,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
 	    // Pawns advance one square
 	    while (morePieces(pMoves)) {
 	        to = lowestBitNumber(pMoves);
-	        from = Util.squareBehind(to, side);
+	        from = squareBehind(to, side);
 	        int move = EncodeMove (from, to, PIECE[PAWN], 0, 0);
 	        if(isLegal(g, move, side)) //can't move if pinned
 	        {

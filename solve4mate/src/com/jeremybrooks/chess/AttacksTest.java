@@ -62,10 +62,10 @@ public class AttacksTest {
 				shift++;
 			}
 			readable.append("bit " + currentSquare);
-			readable.append(" maps to " + Util.SqToStr(shift));
+			readable.append(" maps to " + Square.named(shift));
 			readable.append(" (1L shifted "+shift+" bits)");
 			readable.append("\n");
-			readable.append(Util.DisplayBoardStr(mask[currentSquare]));
+			readable.append(Bitmap.format(mask[currentSquare]));
 		}
 		return readable.toString();
 	}
@@ -199,7 +199,7 @@ public class AttacksTest {
 			while (br.ready())
 			{
 				String[] fields = br.readLine().split("\t");
-				int squareIndex = Util.StrToSq(fields[0]);
+				int squareIndex = Square.squareOf(fields[0]);
 				int occupationIndex = occupationIndex(fields[1]);
 				String associatedFEN = fields[2];
 				String expectedMoves = fields[movesColumn];
@@ -227,7 +227,7 @@ public class AttacksTest {
 			while (br.ready())
 			{
 				String[] fields = br.readLine().split("\t");
-				int pieceSquareIndex = Util.StrToSq(fields[0]);
+				int pieceSquareIndex = Square.squareOf(fields[0]);
 				String givenFEN = fields[1];
 				String expectedMoves = fields[columnOfMoves];
 				assertMovesGivenFEN(pieceName, givenFEN, 

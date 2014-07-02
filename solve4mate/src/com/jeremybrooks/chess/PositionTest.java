@@ -355,7 +355,7 @@ public class PositionTest extends TestCase {
 		assertEquals(bitNotSetMsg, sqMask45R, p.getAllPieces(45) & sqMask45R);
 		if(piece == KING)
 		{
-			assertEquals("king should be placed", Util.SqToStr(sq), Util.SqToStr(p.getKingSquare(color)));
+			assertEquals("king should be placed", Square.named(sq), Square.named(p.getKingSquare(color)));
 			assertEquals(bitNotSetMsg, sqMask, p.getKing(color));
 		}
 	}
@@ -378,7 +378,7 @@ public class PositionTest extends TestCase {
 		assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(45) & sqMask45R);
 		if(piece == KING)
 		{
-			assertEquals("king should be unplaced", "", Util.SqToStr(p.getKingSquare(color)));
+			assertEquals("king should be unplaced", "", Square.named(p.getKingSquare(color)));
 			assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getKing(color) & sqMask);
 		}
 	}

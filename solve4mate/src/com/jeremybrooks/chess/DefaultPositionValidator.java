@@ -23,7 +23,7 @@ public class DefaultPositionValidator implements PositionValidator {
 	}
 
 	private static boolean areKingsAdjacent(Position position) {
-		return Util.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
+		return Square.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
 	}
 
 	private static boolean eitherKingIsMissing(Position position) {

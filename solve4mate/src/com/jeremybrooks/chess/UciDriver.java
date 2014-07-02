@@ -1,5 +1,7 @@
 package com.jeremybrooks.chess;
 
+import static com.jeremybrooks.chess.Square.*;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -170,9 +172,9 @@ public class UciDriver {
 	}
 
 	private static String formatUciMove(int move) {
-		int from = move & 0x3F;
-		int to = (move >> 6) & 0x3F;
-		return Util.SqToStr(from) + Util.SqToStr(to);
+		int fromSquare = move & 0x3F;
+		int toSquare = (move >> 6) & 0x3F;
+		return named(fromSquare) + named(toSquare);
 	}
 
 	private static int parseUciMove(GameState gameState2, String uciMove) {
@@ -182,8 +184,8 @@ public class UciDriver {
 		 * Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
 		 */
 		assert(uciMove.length()>=4);
-		int fromSquare = Util.StrToSq(uciMove.substring(0, 2));
-		int toSquare = Util.StrToSq(uciMove.substring(2, 4));
+		int fromSquare = squareOf(uciMove.substring(0, 2));
+		int toSquare = squareOf(uciMove.substring(2, 4));
 		Piece piece = gameState.getPosition().get(fromSquare);
 		Piece captured = gameState.getPosition().get(toSquare);
 		Piece promoter = new Empty();

@@ -58,7 +58,7 @@ public class LeftDiagonalIteratorTest {
 			
 			while(it.hasNext())
 			{
-				sb.append(Util.SqToStr(it.next()) + " ");
+				sb.append(Square.named(it.next()) + " ");
 			}
 			sb.deleteCharAt(sb.length()-1);
 		}

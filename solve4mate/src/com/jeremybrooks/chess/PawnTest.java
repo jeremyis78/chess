@@ -125,7 +125,7 @@ public class PawnTest {
 		String[] square = onSquares.split(" ");
 		for(String sq: square)
 		{
-			p.placePiece(side, PAWN, Util.StrToSq(sq));
+			p.placePiece(side, PAWN, Square.squareOf(sq));
 		}
 		return p;
 	}

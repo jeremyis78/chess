@@ -1,7 +1,6 @@
 package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
-
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -239,6 +238,58 @@ public class BitmapTest extends TestCase {
 		Bitmap bRotated45DegreesRight = b.rotate45DegRight();
 		Bitmap bRotated45DegreesLeft = b.roate45DegLeft();
 		*/
+	}
+
+	@Test
+	public void testBitmapFormat() {
+		long board = 1L << Bitmap.A1;
+		board |= 1L << Bitmap.B2;
+		board |= 1L << Bitmap.C3;
+		board |= 1L << Bitmap.D4;
+		board |= 1L << Bitmap.E5;
+		board |= 1L << Bitmap.F6;
+		board |= 1L << Bitmap.G7;
+		board |= 1L << Bitmap.H8;
+
+		String output =
+			"8 - - - - - - - X \n" +
+			"7 - - - - - - X - \n" +
+			"6 - - - - - X - - \n" +
+			"5 - - - - X - - - \n" +
+			"4 - - - X - - - - \n" +
+			"3 - - X - - - - - \n" +
+			"2 - X - - - - - - \n" +
+			"1 X - - - - - - - \n" +
+			"  a b c d e f g h\n";
+		
+		assertEquals(output, Bitmap.format(board));
+	}
+
+	@Test
+	public void testBitmapFormatWithCalloutSquareSet() {
+		long board = 1L << Bitmap.A1;
+		board     |= 1L << Bitmap.B2;
+		board     |= 1L << Bitmap.C3;
+		board     |= 1L << Bitmap.D4;
+		board     |= 1L << Bitmap.E5;
+		board     |= 1L << Bitmap.F6;
+		board     |= 1L << Bitmap.G7;
+		board     |= 1L << Bitmap.H8;
+		
+		long pieceBitboard = 1L << Bitmap.D1;
+
+		String output =
+			"8 - - - - - - - X \n" +
+			"7 - - - - - - X - \n" +
+			"6 - - - - - X - - \n" +
+			"5 - - - - X - - - \n" +
+			"4 - - - X - - - - \n" +
+			"3 - - X - - - - - \n" +
+			"2 - X - - - - - - \n" +
+			"1 X - - + - - - - \n" +
+			"  a b c d e f g h\n";
+		
+		assertEquals(output, Bitmap.format(board, pieceBitboard));
 	}
 
 }

@@ -6,6 +6,7 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 import static com.jeremybrooks.chess.Util.*;
+import static com.jeremybrooks.chess.Square.*;
 
 import org.apache.log4j.Logger;
 
@@ -334,7 +335,7 @@ public class GameState {
 	    whiteToMove = !isWhitesMove;
 	    numberOfMovesMade++;
 	    
-	    if(log.isTraceEnabled()) log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
+	    if(log.isTraceEnabled()) log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+named(getEnPassantSquare()));
 	    return false;
 	}
 
@@ -422,7 +423,7 @@ public class GameState {
 	    } else if (captured != NONE) { //Normal capture
 	    	placeOpposingPiece(captured, to);
 	    }
-	    if(log.isTraceEnabled()) log.debug(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+Util.SqToStr(getEnPassantSquare()));
+	    if(log.isTraceEnabled()) log.debug(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+named(getEnPassantSquare()));
 	    return false;
 	}
 

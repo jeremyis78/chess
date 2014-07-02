@@ -271,7 +271,7 @@ public abstract class AbstractGenerator implements Generator {
 	        //Add move ONLY if the move is to 'targets'
 	        if (Util.bool((1L << to) & targets))
 	        {
-	            from = Util.squareBehind(to, side);
+	            from = Square.squareBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
@@ -294,7 +294,7 @@ public abstract class AbstractGenerator implements Generator {
 	        to = lowestBitNumber(advanceTwo);
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets)){ 
-	            from = Util.twoSquaresBehind(to, side);
+	            from = Square.twoSquaresBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
@@ -311,7 +311,7 @@ public abstract class AbstractGenerator implements Generator {
 	        //Add move ONLY if the move is to 'targets'
 	        if(Util.bool((1L << to) & targets))
 	        {
-	            from = Util.squareBehind(to, side);
+	            from = Square.squareBehind(to, side);
 
 	            //Only add an interposer if it's not pinned to the King
 	            //if (!isPinned(g, from, to, PIECE[PAWN], 0)){

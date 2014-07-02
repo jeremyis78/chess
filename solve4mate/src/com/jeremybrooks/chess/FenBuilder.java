@@ -49,7 +49,7 @@ public class FenBuilder {
 		appendField(pieceBoard);
 		appendField(""+(whiteToMove?WHITE_ON_MOVE:BLACK_ON_MOVE));
 		appendField(castlingOptions);
-		appendField(Util.SqToStr(enPassantSquare));
+		appendField(Square.named(enPassantSquare));
 		appendField(""+halfMovesSinceCaptureOrPawnAdvance);
 		appendField(""+currentMoveNumber);
 		removeLastDelimiter();
@@ -152,13 +152,13 @@ public class FenBuilder {
 	{
 	    if(isWhitesMove)
 	    {
-	    	if(Util.notOnSixthRank(enPassantSquare))
+	    	if(Square.notOnSixthRank(enPassantSquare))
 	    	{
 	    		// with 'w' to move, enPassant on a square other than the 6th rank is invalid
 	    		enPassantSquare = Bitmap.NOSQUARE;
 	    	}
 	    } else {
-	    	if(Util.notOnThirdRank(enPassantSquare))
+	    	if(Square.notOnThirdRank(enPassantSquare))
 	    	{
 	    		// with 'b' to move, enPassant on a square other than 3rd rank is invalid
 	    		enPassantSquare = Bitmap.NOSQUARE;

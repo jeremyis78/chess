@@ -14,11 +14,20 @@ import java.io.PrintStream;
  */
 public class Util {
 
-	private static PrintStream out = System.out;
 	private static PrintStream err = System.err;
 
-	
-
+    /**
+	 * Give current time in milliseconds (as an int, not a long).
+	 * 
+	 * This method is applicable for use in successive calls that span less than
+	 * approximately 24 days (2^31 milliseconds), otherwise numerical overflow will occur.
+	 * 
+	 * @return an int representing {@code (int) (System.nanoTime() / 1000000)}
+	 */
+	public static int milliTime()
+	{
+		return (int) (System.nanoTime() / 1000000);
+	}
 	
 	/** 
 	 * convenience methods for determining non-zero given a
@@ -31,88 +40,11 @@ public class Util {
 	    return side == Bitmap.WHITE ? Bitmap.BLACK : Bitmap.WHITE;
 	}
 
-    public static int Toggle(int sideToMove){
-		if(sideToMove == Bitmap.WHITE)
-			return Bitmap.BLACK; 
-		return Bitmap.WHITE;	
-	}
-
-    public static byte ReverseBits(byte b)
-	{
-	    byte r = 0;
-	    for(int i=0; i<8; i++)
-	    {
-	        int mask = 1 << i;
-	        int bit = (b & mask) >> i;
-	        int reversedMask = bit << (7 - i);
-	        r |= (byte)reversedMask;
-	    }
-	    return r;
-	}
-
-    public static long ReverseBits(long b){
-	    long r = 0;
-	    for (int sq=63; sq >= 0; sq--){
-	        if (bool((1L << sq) & b)){
-	            r |= 1L << (63 - sq);
-	        }
-	    }
-	    return r;
-	}
-
-
-    public static boolean adjacentSquares(int sq1, int sq2){
-	    int x1 = Bitmap.fileNumber(sq1);//(sq1 % 8);
-	    int y1 = Bitmap.rankNumber(sq1);//(sq1 / 8);  //integer division
-	    int x2 = Bitmap.fileNumber(sq2);//(sq2 % 8);
-	    int y2 = Bitmap.rankNumber(sq2);//(sq2 / 8);  //integer division
-	    
-	    //Squares sq1 and sq2 are adjacent if the square of 
-	    //the distance between them is less than or equal to two.
-	    
-	    int d2 = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1); 
-	    
-	    if (d2 <= 2)
-	    	return true;
-	    return false;
-	}
-
-    public static int StrToSq(final String str) {
-	    int x, y;
-	    String s = str.toLowerCase();
-	    if (s.length() == 2){
-	        if (s.charAt(0) >= 'a' && s.charAt(0) <= 'h' && s.charAt(1) >= '1' && s.charAt(1) <= '8'){
-	            x = s.charAt(0) - 'a'; 
-	            y = s.charAt(1) - '1';
-	            
-	            //Compute linear index
-	            return (y * 8) + x;		
-	        } else
-	            return NOSQUARE;
-//	        	throw new IllegalArgumentException(s + " is an invalid square");
-	    } else
-	        return NOSQUARE;
-//	    	throw new IllegalArgumentException(s + " is an invalid square");
-	}
-	
-    public static String SqToStr(int sq){
-	    String s = ""; 
-	    if (sq >= Bitmap.A1 && sq <= Bitmap.H8){
-	    	s += (char)('a' + (sq % 8));
-	    	s += (char)('1' + (sq / 8)); //int division
-	    } 
-	    return s; //throw new IllegalArgumentException(sq + " is an invalid index for a bitboard");
-	}
-
-    public static void displaySquares(long b){
-		out.println(displaySquaresStr(b));
-	}
-
     public static String displaySquaresStr(long b){
 	    StringBuffer sb = new StringBuffer();
 		for (int i=0; i<64; i++){
 	        if(bool(b & (1L << i))){
-	            sb.append(SqToStr(i) + ' ');
+	            sb.append(Square.named(i) + ' ');
 	        }
 	    }
 	    return sb.toString();
@@ -123,33 +55,6 @@ public class Util {
     	return Long.bitCount(pieces);
     }
     
-// test: sqtoStr(), displayMove(int m), 
-    public static char PieceToChar(int color, int piece){
-	    char ch = '^'; //should be set to an invalid character
-	    switch(piece){
-	    case 1: ch = 'P'; break; 
-	    case 2: ch = 'N'; break;
-	    case 3: ch = 'K'; break;
-	    case 5: ch = 'B'; break;
-	    case 6: ch = 'R'; break;
-	    case 7: ch = 'Q'; break;
-	    default: throw new IllegalArgumentException("expecting a piece that's one of (1,2,3,5,6,7), found: " + piece);
-	    }
-	    if (color == Bitmap.BLACK) 
-	        return Character.toLowerCase(ch);
-	    else if (color == Bitmap.WHITE)
-	    	return ch;
-	    throw new IllegalArgumentException("expecting color that's one of {0|1), found: " + color);
-	}
-
-    public static void DisplayBitbrd(long board){
-		out.printf("0x%016X", board);
-	}
-
-    public static void displayMove(int m, boolean check, boolean mate){
-		out.print(displayMoveStr(m, check, mate));
-	}
-
     public static String displayMoveStr(int m, boolean check, boolean mate){
 	    int from, to, mov, cap, pro;
 	    from = m & 0x3F;  //grab from square (6 bits)
@@ -164,7 +69,7 @@ public class Util {
 
 	    //Add the moving piece
 	    coordStr.append(pieceChar[mov]);
-	    coordStr.append(Util.SqToStr(from));
+	    coordStr.append(Square.named(from));
 	    if (pieceChar[mov] == 'P' && bool(cap)){ //if pawn capture
 	    	SANStr.append(coordStr.toString().charAt(1)); //the file of the pawn
 	    } else {
@@ -181,8 +86,8 @@ public class Util {
 	    }
 
 	    //Add the 'to' square
-	    coordStr.append(Util.SqToStr(to));
-	    SANStr.append(Util.SqToStr(to));
+	    coordStr.append(Square.named(to));
+	    SANStr.append(Square.named(to));
 	    
 	    //Add the promotion piece
 	    if(bool(pro)){
@@ -206,162 +111,14 @@ public class Util {
 	    //Print the moves in coordinate notation and SAN (TODO: SAN doesn't account for ambiguous moves yet!)
 	    if ('K' == pieceChar[mov]){
 		    if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
-	            //printf("%s 0-0", coordStr);
 		    	coordStr.append(" 0-0");
 		    } else if ((from == Bitmap.E1 && to == Bitmap.C1) || (from == Bitmap.E8 && to == Bitmap.C8)){
-		        //printf("%s 0-0-0", coordStr);
 		    	coordStr.append(" 0-0-0");
 		    } 
 	    }
-	    //out.printf("0x%06X %s %s ", m, coordStr, SANStr);
 	    return coordStr.toString();
 	}
-
-    public static void DisplayMoves(long moves){
-		out.print(DisplayMovesStr(moves));
-	}
-
-    public static String DisplayMovesStr(long moves){
-	    long mask = 1L;
-	    StringBuffer sb = new StringBuffer();
-	    for (int sq = 0; sq < 64; ++sq, mask <<= 1){
-	        //If there's a move (aka: a bit set) at this spot, print the move	
-	        if (bool(moves & mask)){
-	            int file = sq;
-	            int rank = 1; //start at first rank
-	            for(; file > 7; ++rank)
-	                file-=8;
-	            //printf("%c%d, ", 'a' + file, rank);
-	            sb.append(String.format("%c%d, ", 'a' + file, rank));
-	        }
-	    }
-	    return sb.toString();
-	}
-
-    /* these two below are for trouble shooting only */
-    public static void DisplayMoves(short moves){
-    	out.print(DisplayMovesStr(moves));
-    }
-
-    /* this function is designed to print just a single 8 bits of information
-     * contained in either one rank or one file on the board.
-     */
-    public static String DisplayMovesStr(short moves){
-    	if (bool(moves & 0xff00)){
-    		throw new IllegalArgumentException("moves: " + Integer.toHexString(moves) + " should have only its lower order byte set");
-    	}
-    	short mask = 1;
-	    StringBuffer sb = new StringBuffer();
-	    for(int i = 0; i < 8; i++, mask <<= 1){
-	        //If there's a bit/move/piece at that square
-	        //Print "X" otherwise a "-"
-	        if (bool(mask & moves))
-				sb.append("X ");  
-	        else
-	            sb.append("- ");
-	    }	
-	    return sb.append("\n").toString();
-	}
-
-    
-    /*
-     * Displays a single byte of the bitboard, showing the occupied squares
-     * with an 'X' and the piece with a '+'.  Empty squares are denoted with a '-'
-     */
-    public static String DisplayPieceOnOccupiedRowStr(int piece, short moves){
-    	if (bool(piece & 0xffffff00)){
-    		throw new IllegalArgumentException("piece: " + Integer.toHexString(piece) + " should have only its lower order byte set");
-    	}
-    	if (bool(moves & 0xff00)){
-    		throw new IllegalArgumentException("moves: " + Integer.toHexString(moves) + " should have only its lower order byte set");
-    	}
-    	short mask = 1;
-	    StringBuffer sb = new StringBuffer();
-	    for(int i = 0; i < 8; i++, mask <<= 1){
-	        //If there's a bit/move/piece at that square
-	        //Print "X" otherwise a "-"
-            if (bool(mask & piece)){		//Print the '+' first so
-                sb.append("+ ");
-	    	} else {
-		    	if (bool(mask & moves))
-					sb.append("X ");  
-		        else
-		            sb.append("- ");
-            }
-
-	        //do this last so it doesn't get overridden
-
-	    }	
-	    return sb.append("\n").toString();
-	}
-
    
-    public static void DisplayBoard(long moves){
-		out.print(DisplayBoardStr(moves));
-	}
-
-    public static String DisplayBoardStr(long moves){
-		return DisplayBoardStr(moves, 0L);
-	}
-
-    public static void DisplayBoard(long moves, int square){
-		out.print(DisplayBoardStr(moves, square));
-	}
-	
-    public static String DisplayBoardStr(long moves, int square){
-		return DisplayBoardStr(moves, 1L << square);
-	}
-	
-    public static void DisplayBoard(long moves, long piece){
-		out.print(DisplayBoardStr(moves, piece));
-	}
-
-    public static String DisplayBoardStr(long moves, long piece){
-	    //Displays ASCII chessboard graphic...
-	    
-	    //This prints the board so that a1 is in the lower
-	    //left hand corner and h8 is in the upper right hand
-	    //corner--the normal chessboard view.
-	    
-	    long mask = 1; //, m = 1;
-	    
-	    int  num_of_sq_to_display = 64; //must be multiple of 8 and <= 64
-	    
-	    //Above value should be 64 to display the entire chessboard
-	    //To display only the first rank (a1-h1) it should be 8.
-	    //To display 2nd and 1st rank (a2-h2 and a1-h1) it should be 16, & so on.
-	    
-	    StringBuffer sb = new StringBuffer();
-	    int i, j;
-	    for(i = num_of_sq_to_display - 8; i >=0; i-=8){
-	        // I cannot manually write "mask = 0x00..01 << i;"
-	        // because the compiler treats mask as 32 bits instead of 64 bits
-	        // Therefore only "mask = setmask[i];" will work.
-	        //	
-	        //		mask = setmask[i];  
-	        mask = 1L << i;
-	        
-	        int k = i + 8;  //set upper bound on next for-loop
-	        
-	        //		printf("%d ", (i / 8) + 1);
-	        //cout << ((i/8) + 1) << ' ';
-	        sb.append( ((i/8)+1) + " ");
-	        for(j = i; j < k; ++j, mask <<= 1){
-	            //If there's a bit/move/piece at that square
-	            //Print "*" otherwise a "-"
-	            
-	            if (bool(mask & piece))		//Print the '+' first so
-	                sb.append("+ ");  	//we don't overwrite a move
-	            else if (bool(mask & moves))
-	                sb.append("X ");  
-	            else
-	                sb.append("- ");
-	        }
-	        sb.append("\n");
-	    }
-	    return sb.append("  a b c d e f g h\n").toString();
-	}
-	
     /**
      * Pretty print the squares represented within the bitmap.  
      * If no squares (bits) are found, then "NONE" is returned.
@@ -379,7 +136,7 @@ public class Util {
 			if(!isFirst) formatted.append(" ");
 			isFirst = false;
 			squareOfPiece = Bitmap.lowestBitNumber(bitmap);
-			formatted.append(SqToStr(squareOfPiece));
+			formatted.append(Square.named(squareOfPiece));
 			bitmap = Bitmap.clearBit(bitmap, squareOfPiece);
 		}
 		String formattedSquares = formatted.toString().trim();
@@ -440,15 +197,6 @@ public class Util {
     	return formatByteBitmap((byte) bitmap);
     }
 
-    public static String formatByteBitmap(String header, int bitmap){
-    	if (bool(bitmap & 0xffffff00)){
-    		throw new IllegalArgumentException(
-    				"bitmap should have only bits in its least significant byte set");
-    	}
-    	return formatByteBitmap(header, (byte) bitmap);
-    }
-
-
     /**
      * Formats three bitmaps as described below.  This function is mainly
      * for debugging and testing purposes.
@@ -486,192 +234,5 @@ public class Util {
 				formatByteBitmap("occupied: ", (byte)occupiedBitmap) + "\n" +
 				formatByteBitmap("attacks : ", (byte)attackBitmap) + "\n";
     }
-
     
-    /**
-     * Status is shorthand way of representing the occupied squares (bits)
-     * on a rank (bitmap).  The status represents the middle six bits of a byte.
-     * We can use iterate over all possible statuses by looping from [1..63]
-     * Since the last piece on either end of a rank is always attacked whether
-     * there is a bit there or not we use status as a way to save on memory usage.
-     * Example,
-     * 
-     * 	TODO: give examples
-     * 
-     * @param status a bitmap representing the occupied state on the given rank/file/diag
-     * @return
-     */
-    public static String formatStatus(byte status){
-	    //The least significant bit of status is b1 (for rank 1)
-	    //so we must left shift it before we use it to display
-    	//TODO 1/2/2010 need an assertion test here so we can check for illegal argument
-	    status = (byte)(status << 1);
-	    return formatByteBitmap(status);
-	}
-
-
-    public static String formatStatus(int status){
-    	if (bool(status & 0xffffff00)){
-    		throw new IllegalArgumentException(
-    				"bitmap should have only bits in its least significant byte set");
-    	}
-    	return formatStatus((byte)status);
-    }
-
-
-
-    /**
-     * 	Displays a human readable ASCII chess board graphic showing
-     *  the bit set in singleBitBitmap with a '+' and the bits set in
-     *  multipleBitsBitmap with an 'X'.  The singleBitBitmap must contain
-     *  on a single bit set. This is mainly for debugging purposes. It's 
-     *  useful for printing a human readable form of, for example, the 
-     *  placement of a Queen and all the squares she attacks.
-     *     The board is printed so that a1 is in the lower left hand corner
-     *  and h8 is in the upper right hand corner--the normal chess board view.
-	 *  
-	 *  The two bitmaps should not overlap (singleBitBitmap & multipleBitBitmap == 0)
-	 *
-     * @param singleBitBitmap a bitmap containing a single bit set
-     * @param multipleBitsBitmap a bitmap containing any number of 
-     * 			bits set
-     * @return an ASCII chess board graphic depicting the set bits
-     */
-    public static String formatLongBitmapAsBoard(long singleBitBitmap, long multipleBitsBitmap){
-
-    	if (bitCount(singleBitBitmap) > 1){
-    		throw new IllegalArgumentException("singleBitBitmap: " + Long.toBinaryString(singleBitBitmap) + " can have only a single bit set");
-    	}
-    	if (bool(singleBitBitmap & multipleBitsBitmap)){
-    		throw new IllegalArgumentException("singleBitBitmap and multipleBitsBitmap have overlapping bits. This is probably not desired.");
-    	}
-	    
-	    long mask = 1; //, m = 1;
-	    
-	    int  num_of_sq_to_display = 64; //must be multiple of 8 and <= 64
-	    
-	    //Above value should be 64 to display the entire chess board
-	    //To display only the first rank (a1-h1) it should be 8.
-	    //To display 2nd and 1st rank (a2-h2 and a1-h1) it should be 16, & so on.
-	    
-	    StringBuffer sb = new StringBuffer();
-	    int i, j;
-	    for(i = num_of_sq_to_display - 8; i >=0; i-=8){
-	        mask = 1L << i;
-	        
-	        int k = i + 8;  //set upper bound on next for-loop
-	        
-	        //printf("%d ", (i / 8) + 1);
-	        //cout << ((i/8) + 1) << ' ';
-	        sb.append( ((i/8)+1) + " ");
-	        for(j = i; j < k; ++j, mask <<= 1){
-	            //If there's a bit/move/piece at that square
-	            //Print "*" otherwise a "-"
-	            
-	            if (bool(mask & singleBitBitmap))		//Print the '+' first so
-	                sb.append("+ ");  	//we don't overwrite a move
-	            else if (bool(mask & multipleBitsBitmap))
-	                sb.append("X ");  
-	            else
-	                sb.append("- ");
-	        }
-	        sb.deleteCharAt(sb.toString().length()-1); //delete last space
-	        sb.append("\n");
-	    }
-	    return sb.append("  a b c d e f g h\n").toString();
-	}
-
-    /**
-     * Displays a chess board with X's for any bits set in bitmap
-     */
-    public static String formatLongBitmapAsBoard(long bitmap){ 
-    	return formatLongBitmapAsBoard(0x0, bitmap);
-    }
-    
-    
-    public static String formatSideBySide(String left, String right)
-    {
-    	StringBuffer sb = new StringBuffer();
-    	String[] leftSide = left.split("\n");
-    	String[] rightSide = right.split("\n");
-    	if (leftSide.length != rightSide.length)
-    	{
-    		throw new IllegalArgumentException(
-    				"left and right args must have same num of lines");
-    	}
-    	for(int i=0; i < leftSide.length; i++)
-    	{
-    		sb.append(leftSide[i] + " " + rightSide[i] + "\n");
-    	}
-    	return sb.toString();
-    }
-	// minusOneRank
-	//
-	// Returns the from square given the square
-	// the pawn moved to. (pawn advanced one square)
-	//
-	protected static int squareBehind(int currentSquare, int side){
-	    return (side == WHITE) ? (currentSquare - 8) : (currentSquare + 8);
-	}
-	
-	// minusTwoRank
-	//
-	// Returns the from square given the square
-	// the pawn moved to. (pawn advanced two squares)
-	//
-	protected static int twoSquaresBehind(int currentSquare, int side){
-		return squareBehind(squareBehind(currentSquare, side), side);
-	}
-
-	protected static int squareAhead(int currentSquare, int side){
-	    return (side == WHITE) ? (currentSquare + 8) : (currentSquare - 8);
-	}
-
-	protected static int squareLeftOf(int currentSquare){
-	    return squareLeftOf(currentSquare, 0);
-	}
-
-	@Deprecated
-	protected static int squareLeftOf(int currentSquare, int side){
-	    return (currentSquare - 1);
-	}
-
-	protected static int squareRightOf(int currentSquare){
-	    return squareRightOf(currentSquare, 0);
-	}
-	
-	@Deprecated
-	protected static int squareRightOf(int currentSquare, int side){
-	    return (currentSquare + 1);
-	}
-
-	public static boolean isOnGFile(int currentSquare){
-	    return (fileNumber(currentSquare) == G1);
-	}
-
-	public static boolean isOnCFile(int currentSquare){
-	    return (fileNumber(currentSquare) == C1);
-	}
-	
-	public static boolean notOnSixthRank(int currentSquare) {
-		return (rankNumber(currentSquare) != 5); //zero-based rank
-	}
-
-	public static boolean notOnThirdRank(int currentSquare) {
-		return (rankNumber(currentSquare) != 2); //zero-based rank
-	}
-
-	/**
-	 * Give current time in milliseconds (as an int, not a long).
-	 * 
-	 * This method is applicable for use in successive calls that span less than
-	 * approximately 24 days (2^31 milliseconds), otherwise numerical overflow will occur.
-	 * 
-	 * @return an int representing {@code (int) (System.nanoTime() / 1000000)}
-	 */
-	public static int milliTime()
-	{
-		return (int) (System.nanoTime() / 1000000);
-	}
-	
 }
