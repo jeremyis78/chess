@@ -86,7 +86,7 @@ public class SolveForMate {
 	private static void displayResults(SearchInfo solveInfo) {
 		StringBuilder result = new StringBuilder();
 		long totalNodes = solveInfo.getNodeCount();
-		double solveTimeMillis = solveInfo.getSolveTimeMillis();
+		double solveTimeMillis = solveInfo.getElapsedTime();
 		result.append(EOL);
 		result.append("Score     : ").append(solveInfo.getScore() + EOL);
 		result.append("Best line : ").append(solveInfo.getSolutionMoves() + EOL);

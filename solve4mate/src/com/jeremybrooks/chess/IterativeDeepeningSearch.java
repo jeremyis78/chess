@@ -13,6 +13,7 @@ public class IterativeDeepeningSearch extends Search {
 				depth<=getStackSize();
 				depth++)
 		{
+			UciDriver.sendResponse("info depth %d", depth);
 			minimax = super.search(side, depth);
 			String pvLine = getPVMoveLine();
 			if(log.isDebugEnabled())

@@ -759,4 +759,17 @@ public class Util {
 		return (rankNumber(currentSquare) != 2); //zero-based rank
 	}
 
+	/**
+	 * Give current time in milliseconds (as an int, not a long).
+	 * 
+	 * This method is applicable for use in successive calls that span less than
+	 * approximately 24 days (2^31 milliseconds), otherwise numerical overflow will occur.
+	 * 
+	 * @return an int representing {@code (int) (System.nanoTime() / 1000000)}
+	 */
+	public static int milliTime()
+	{
+		return (int) (System.nanoTime() / 1000000);
+	}
+	
 }

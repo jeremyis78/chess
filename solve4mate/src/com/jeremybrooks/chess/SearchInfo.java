@@ -7,9 +7,10 @@ package com.jeremybrooks.chess;
 public class SearchInfo {
 	private int score;
 	private String solutionMoves;
+	private ScoredMove[] bestLine;
 	private boolean mate;
 	private long nodeCount;
-	private double solveTimeMillis;
+	private int elapsedMillis;
 
 	private String scoredRootMoves;
 
@@ -32,6 +33,17 @@ public class SearchInfo {
 		this.solutionMoves = solutionMoves;
 	}
 
+	/**
+	 * @return an array of the best moves indexed by depth (ie, moves on the principal variation)
+	 */
+	public ScoredMove[] getBestLine() {
+		return bestLine;
+	}
+	
+	public void setBestLine(ScoredMove[] bestLine) {
+		this.bestLine = bestLine;
+	}
+	
 	public boolean isMate() {
 		return mate;
 	}
@@ -40,12 +52,12 @@ public class SearchInfo {
 		this.mate = mate;
 	}
 
-	public double getSolveTimeMillis() {
-		return solveTimeMillis;
+	public int getElapsedTime() {
+		return elapsedMillis;
 	}
 
-	public void setSolveTimeMillis(double solveTimeMillis) {
-		this.solveTimeMillis = solveTimeMillis;
+	public void setElapsedTime(int milliseconds) {
+		this.elapsedMillis = milliseconds;
 	}
 
 	public long getNodeCount() {
@@ -56,8 +68,8 @@ public class SearchInfo {
 		this.nodeCount = nodeCount;
 	}
 
-	public int getNodesPerSecond() {
-		return (int) (nodeCount / (solveTimeMillis * 1000)); //int division is okay;
+	public double getNodesPerSecond() {
+		return (1.0 * nodeCount / elapsedMillis) * SearchParams.MILLIS_PER_SECOND;
 	}
 
 	public String getScoredRootMoves() {
@@ -66,6 +78,6 @@ public class SearchInfo {
 
 	public void setScoredRootMoves(String scoredRootMoves) {
 		this.scoredRootMoves = scoredRootMoves;
-	}
+	}	
 }
 

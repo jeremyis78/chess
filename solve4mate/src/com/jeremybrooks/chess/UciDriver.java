@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.List;
+
 
 public class UciDriver {
 	//  position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 moves e2e4 d7d5 g1f3
@@ -59,9 +61,8 @@ public class UciDriver {
 					gameState = new GameState();
 					gameState.set(fen.trim());
 					gameState.display();
-					token = guiArgs[argIndex++];
-					if(!"moves".equals(token))
-						continue;
+					if(argIndex < guiArgs.length)
+						token = guiArgs[argIndex++]; //read "moves" token
 					boolean isWhitesMove = gameState.isWhiteToMove();
 					while(argIndex < guiArgs.length)
 					{
@@ -102,12 +103,77 @@ public class UciDriver {
 	}
 
 	private static void go(String[] guiArgs) {
+		int[] remainingMillis = new int[2];
+		int[] incrementMillis = new int[2];
+		int depth = 0;
+		boolean findMate = false;
+		int movesToGo = 0;
+		
 		int argIndex = 1;
-		String token = guiArgs[argIndex++];
-		if("infinite".equals(token))
+		while(argIndex < guiArgs.length)
 		{
-			//info multipv 1 depth 10 seldepth 26 score cp 10 time 2032 nodes 1673940 pv b5c6 b7c6 b1c3 g8f6 g1f3 d8b6 d4b6 a7b6 c1g5 f8c5 g5f6 g7f6 a1d1 d7d5
+			String token = guiArgs[argIndex++];
+			if("wtime".equals(token)) {
+				token = guiArgs[argIndex++];
+				remainingMillis[Bitmap.WHITE] = Integer.parseInt(token);
+			} else if("winc".equals(token)) {
+				token = guiArgs[argIndex++];
+				incrementMillis[Bitmap.WHITE] = Integer.parseInt(token);
+			} else if("btime".equals(token)) {
+				token = guiArgs[argIndex++];
+				remainingMillis[Bitmap.BLACK] = Integer.parseInt(token);
+			} else if("binc".equals(token)) {
+				token = guiArgs[argIndex++];
+				incrementMillis[Bitmap.BLACK] = Integer.parseInt(token);
+			} else if("movestogo".equals(token)) {
+				token = guiArgs[argIndex++];
+				movesToGo = Integer.parseInt(token);
+			} else if("depth".equals(token)) {
+				token = guiArgs[argIndex++];
+				depth = Integer.parseInt(token);
+			} else if("nodes".equals(token)) {
+				
+			} else if("mate".equals(token)) {
+				findMate = true;
+			} else if("movetime".equals(token)) {
+				
+			} else if("infinite".equals(token)) {
+				
+			} else if("searchmoves".equals(token)) {
+				
+			} else if("ponder".equals(token)) {
+				
+			}
 		}
+		SearchParams params = new SearchParams();
+		params.setRemainingMillisFor(Bitmap.WHITE, remainingMillis[Bitmap.WHITE]);
+		params.setIncrementMillisFor(Bitmap.WHITE, incrementMillis[Bitmap.WHITE]);
+		params.setRemainingMillisFor(Bitmap.BLACK, remainingMillis[Bitmap.BLACK]);
+		params.setIncrementMillisFor(Bitmap.BLACK, incrementMillis[Bitmap.BLACK]);
+		params.setMovesToGo(movesToGo);
+		params.setDepth(depth);
+		Solver engine = new Solver();
+		engine.setSearchParams(params);
+		
+		if(findMate)
+		{
+			SearchInfo info = engine.search(gameState, depth);
+			sendResponse("info depth %d time %.0f nodes %d nps %.0f",
+					depth,
+					info.getElapsedTime(),
+					info.getNodeCount(),
+					info.getNodesPerSecond());
+			int bestMove = info.getBestLine()[0].getMove();
+			String uciBestMove = formatUciMove(bestMove);
+			sendResponse("info bestmove " + uciBestMove);
+			sendResponse("info bestline " + info.getSolutionMoves());
+		}
+	}
+
+	private static String formatUciMove(int move) {
+		int from = move & 0x3F;
+		int to = (move >> 6) & 0x3F;
+		return Util.SqToStr(from) + Util.SqToStr(to);
 	}
 
 	private static int parseUciMove(GameState gameState2, String uciMove) {
@@ -150,6 +216,12 @@ public class UciDriver {
 	public static void respond(String response) throws IOException {
 		bw.write(response + EOL);
 		bw.flush();
+	}
+	
+	public static void sendResponse(String formatMessage, Object... args)
+	{
+		String s = String.format(formatMessage, args);
+		System.out.println(s);
 	}
 
 }

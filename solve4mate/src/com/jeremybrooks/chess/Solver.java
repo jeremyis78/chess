@@ -9,6 +9,7 @@ public class Solver {
 	private DefaultGenerator moveGenerator;
 	private Evaluator evaluator;
 	private Search search = new Search();
+	private SearchParams searchParams;
 
 	
 	public Solver() {
@@ -31,21 +32,8 @@ public class Solver {
 		search.setGameState(g);
 
 		log.debug("Searching...");
-		long start = System.nanoTime();
-		int score = search.search(g.isWhiteToMove()?0:1);
-
-		double elapsedTimeMillis = (System.nanoTime() - start)/1000000.0;
-		long nodeCount = search.getNodeCount();
-		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
-		String solutionMoves = search.getPVMoveLine();
-		String scoredRootMoves = getScoredRootMoves();
-		SearchInfo info = new SearchInfo();
-		info.setScore(score);
-		info.setSolutionMoves(solutionMoves);
-		info.setMate(mate);
-		info.setNodeCount(nodeCount);
-		info.setSolveTimeMillis(elapsedTimeMillis);
-		info.setScoredRootMoves(scoredRootMoves);
+		search.search(g.isWhiteToMove()?0:1);
+		SearchInfo info = search.getInfo();
 		return info;
 	}
 
@@ -65,20 +53,8 @@ public class Solver {
 		g.set(puzzle.getFen());
 
 		log.debug("Searching for mate in "+movesToMate+"...");
-		long start = System.nanoTime();
-		int score = search.search(g.isWhiteToMove()?0:1);
-		double solveTimeMillis = (System.nanoTime() - start)/1000000.0;
-		long nodeCount = search.getNodeCount(); //g.nodes;
-		boolean mate = Math.abs(score) > Evaluator.CHECKMATE / 2;
-		String solutionMoves = search.getPVMoveLine();
-		String scoredRootMoves = getScoredRootMoves();
-		SearchInfo solveInfo = new SearchInfo();
-		solveInfo.setScore(score);
-		solveInfo.setSolutionMoves(solutionMoves);
-		solveInfo.setMate(mate);
-		solveInfo.setNodeCount(nodeCount);
-		solveInfo.setSolveTimeMillis(solveTimeMillis);
-		solveInfo.setScoredRootMoves(scoredRootMoves);
+		search.search(g.isWhiteToMove()?0:1);
+		SearchInfo solveInfo = search.getInfo();
 		return solveInfo;
 	}
 
@@ -148,6 +124,10 @@ public class Solver {
 
 	private void setMaxSearchDepth(int maxSearchDepth) {
 		search.setStackSize(maxSearchDepth);
+	}
+
+	public void setSearchParams(SearchParams params) {
+		this.searchParams = params;
 	}
 	
 

@@ -71,6 +71,11 @@ public class Search {
 	 * and so on.
 	 */
 	private ScoredMove[] rootMove;	
+	
+	/*
+	 * Holds results of the search
+	 */
+	private SearchInfo info;
 
 
 	public Search() {
@@ -130,6 +135,17 @@ public class Search {
 	public void setRootMove(ScoredMove[] rootMove) {
 		this.rootMove = rootMove;
 	}
+	
+	private String getScoredRootMoves() {
+		StringBuilder sb = new StringBuilder("\n");
+		for(ScoredMove sm: rootMove)
+		{
+			if(sm == null) break;
+			sb.append(Util.displayMoveStr(sm.getMove(),false,false));
+			sb.append("("+sm.getScore()+")\n");
+		}
+		return sb.toString();
+	}
 
 	public String getPVMoveLine()
 	{
@@ -143,6 +159,19 @@ public class Search {
 			line.append(" ");
 		}
 		return line.toString();
+	}
+
+	public ScoredMove[] getPVLine()
+	{
+		return pvLine;
+	}
+	
+
+	/**
+	 * @return the results of the search
+	 */
+	public SearchInfo getInfo() {
+		return info;
 	}
 
 	/**
@@ -164,7 +193,21 @@ public class Search {
 	 */
 	public int search(int side, int depthLimit){
 		setDepthLimit(depthLimit);
-	    return alphabetaMaxWindow(side);
+		int start = Util.milliTime();
+		int minimax = alphabetaMaxWindow(side);
+		int elapsedTimeMillis = (Util.milliTime() - start);
+		boolean mate = Math.abs(minimax) > Evaluator.CHECKMATE / 2;
+		String solutionMoves = getPVMoveLine();
+		String scoredRootMoves = getScoredRootMoves();
+		info = new SearchInfo();
+		info.setScore(minimax);
+		info.setSolutionMoves(solutionMoves);
+		info.setBestLine(getPVLine());
+		info.setMate(mate);
+		info.setNodeCount(getNodeCount());
+		info.setElapsedTime(elapsedTimeMillis);
+		info.setScoredRootMoves(scoredRootMoves);
+	    return minimax;
 	}
 
 	/**
@@ -404,7 +447,7 @@ public class Search {
 	int evaluate(int side, int depth){
 		return evaluator.evaluate(g, side, depth, currentMove, SEARCH_DEBUG, EVAL);
 	}
-
+	
 	protected ScoredMove lookup(long key) {
 		//no cache by default;
 		return null; 
