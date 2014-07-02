@@ -81,7 +81,7 @@ public class EvalTester {
 					boolean isWhiteToMove = EvaluatorTest.setupState(g, position);
 					int searchDepth = 0;
 					long start = System.nanoTime();
-					int actualScore = evaluate(g, isWhiteToMove, searchDepth);
+					evaluate(g, isWhiteToMove, searchDepth);
 					elapsedNanos += System.nanoTime() - start;
 					//System.out.println(actualScore + ": " + g.get());
 					numTimesExecuted++;

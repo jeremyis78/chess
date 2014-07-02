@@ -18,7 +18,6 @@ import com.jeremybrooks.chess.eval.Evaluator;
 public class Search {
 
 	private static final Logger log = Logger.getLogger(Search.class);
-	private static transient final boolean isDebug = log.isDebugEnabled();
 	private static transient final boolean isTrace = log.isTraceEnabled();
 	private static transient final boolean showPvUpdates = false; //logs principle variation changes
 

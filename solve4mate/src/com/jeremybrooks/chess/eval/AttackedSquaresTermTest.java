@@ -28,19 +28,4 @@ public class AttackedSquaresTermTest extends EvalTermTestBase {
 		assertEquals(expectedScore, score);
 	}
 
-	
-	@Test
-	public void givenTwoDifferentOpeningMoves() {
-		String fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-		int expectedScore = 0;
-		int score = evaluate(fen);
-		
-		//assertEquals(expectedScore, score);
-		
-		fen = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1";
-		int score2 = evaluate(fen);
-		System.out.println("e4: " + score + "   " + "a5: " + score2);
-		
-	}
-
 }

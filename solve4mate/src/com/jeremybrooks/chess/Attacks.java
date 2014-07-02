@@ -85,9 +85,9 @@ public class Attacks {
       genWhitePawnAttacks();
       genBlackPawnAttacks();
       genKingKnightAttacks();
-  }
+    }
 
-  void _GenAllMasks(){
+    private void _GenAllMasks(){
 	  	log.info("generating masks");
 	  	genMask();
 	  	genMask90();
@@ -97,7 +97,7 @@ public class Attacks {
         genMasksPlusMinus();
     }
 
-	void genMask() {
+    private void genMask() {
 		long m = 1;
 		for(int currentSquare=Bitmap.A1; currentSquare <= Bitmap.H8; currentSquare++){
 			mask[currentSquare] = m << currentSquare;
@@ -105,7 +105,7 @@ public class Attacks {
 		}
 	}
   
-	void genMask90() {
+	private void genMask90() {
 		int squareIndex = 0;  //runs from 0 to 63 inclusive
 		for(int lastSquareOnFile=Bitmap.A8; 
 				lastSquareOnFile <= Bitmap.H8;
@@ -121,7 +121,7 @@ public class Attacks {
 		}
 	}
 
-	void genMask45DegreesRight(){
+	private void genMask45DegreesRight(){
 	  	log.info("generating single-bit bitmasks rotated 45 deg right");
 
     	int squareIndex = 0;
@@ -136,7 +136,7 @@ public class Attacks {
         }
     }
     
-    void genMask45DegreesLeft(){
+    private void genMask45DegreesLeft(){
 	  	log.info("generating single-bit bitmasks rotated 45 deg left");
 
     	int squareIndex = 0;
@@ -151,7 +151,7 @@ public class Attacks {
         }
     }
     
-    void genMasksPlusMinus(){
+    private void genMasksPlusMinus(){
 	  	log.info("generating plus/minus masks");
 
         //For each square, generate the masks plusN and minusN where N is {1,7,8,9}
@@ -202,7 +202,7 @@ public class Attacks {
     }
 
 
-    void genBaseAttacks(){
+    private void genBaseAttacks(){
     /*
      *  Generate RANK (base) attacks from squares a1 to h1
      *
@@ -310,7 +310,7 @@ public class Attacks {
 	}
 
     
-    void genRankAttacks(){
+    private void genRankAttacks(){
         //Generate RANK attacks for all squares (a1 to h8)
 	  	log.info("generating rank attacks");
 
@@ -324,7 +324,7 @@ public class Attacks {
         }
     }
 
-    void genFileAttacks(){
+    private void genFileAttacks(){
     //Generate FILE attacks for all squares (a1 to h8)
     //A graphic of the board rotated 90 degrees left.
     //The position of the square in the graphic represent the bit positions
@@ -376,7 +376,7 @@ public class Attacks {
     }
 
 
-    void genDiagonal45DegreesRightAttacks(){
+    private void genDiagonal45DegreesRightAttacks(){
 	  	log.info("generating diagonal attacks 45 deg right (a1-h8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
@@ -393,12 +393,7 @@ public class Attacks {
         }
     }
 
-
-    long getA1H8diag(int diagonal, short bitmap){
-    	return getDiagonalSet(bitmap, new RightDiagonalIterator(diagonal));
-    }
-
-    void genDiagonal45DegreesLeftAttacks(){
+    private void genDiagonal45DegreesLeftAttacks(){
 	  	log.info("generating diagonal attacks 45 deg left (h1-a8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
         	LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
@@ -418,17 +413,9 @@ public class Attacks {
         }
     }
 
-    long getH1A8diag(int diagonal, short bitmap){
-    	return getDiagonalSet(bitmap, new LeftDiagonalIterator(diagonal));
-    }
-
-    long getDiagonalSet(short bitmap, DiagonalIterator iterator){
-    //"diagonal" is the diagonal that we want to set to "b"
-    //"diagonal" is in range 0..14 inclusive 
-    //"diagonal" corresponds to these diagonals: "diagonal"={diagonal squares)
-//    	0={0}, 1={1,8}, 2={2,9,16},...,7={7,14,21,28,35,42,49,56},...,14={63}
-    	
-        //set the bits set in b to the diagonal dnum in a.
+    private long getDiagonalSet(short bitmap, DiagonalIterator iterator){
+        //construct a bitboard such that the bits set in the given bitmap
+    	//are set as the bits within the diagonal defined within the iterator.
         long board = 0;
         int diagonalLength = iterator.diagonalLength();
         for (int bitToCheck=0;
@@ -462,7 +449,7 @@ public class Attacks {
 		return (bitmap & (1 << index)) != 0;
 	}
 
-    void genWhitePawnAttacks(){ //G30 functions should do one thing
+    private void genWhitePawnAttacks(){ //G30 functions should do one thing
 		int white = 0;
         int square;
         int offsetForAttackingRight = 9; //G19
@@ -490,7 +477,7 @@ public class Attacks {
         }
     }
 
-    void genBlackPawnAttacks(){ //G30
+    private void genBlackPawnAttacks(){ //G30
 		int black = 1;
         int square;
         int offsetForAttackingLeft = -7; //G19
@@ -534,7 +521,7 @@ public class Attacks {
 		return fileNumber(square + 1) == 0;
 	}
 
-    void genKingKnightAttacks(){  //violates G30 by doing more than one thing, both king AND knight
+    private void genKingKnightAttacks(){  //violates G30 by doing more than one thing, both king AND knight
         //A 5x5 grid of squares, indexed from 0 to 24, can represent the
         //squares a king or knight can move to.  The piece rests
         //on square 12 (12th bit if zero-indexed) in the 5X5 grid.  

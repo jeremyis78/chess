@@ -258,28 +258,6 @@ public class AttacksTest {
 		}
 	}
 
-	@Test
-	public void testGetA1H8diag(){
-		StringBuilder sb = new StringBuilder();
-		for(int i=0; i<15; i++)
-    	{
-    		String board = Util.formatLongBitmapAsBoard(attacks.getA1H8diag(i,(byte)0xff));
-    		sb.append(board + "\n");
-    	}
-		assertFileEqualsString(BASE_DIR + "diagonals-a1h8.txt", sb.toString());
-	}
-
-	@Test
-	public void testGetH1A8diag(){
-		StringBuilder sb = new StringBuilder();
-		for(int i=0; i<15; i++)
-    	{
-    		String board = Util.formatLongBitmapAsBoard(attacks.getH1A8diag(i,(byte)0xff));
-    		sb.append(board + "\n");
-    	}
-		assertFileEqualsString(BASE_DIR + "diagonals-h1a8.txt", sb.toString());
-	}
-	
 	/**
 	 * Asserts the trimmed version of the file contents of filename
 	 *  as a string equals the trimmed version of string

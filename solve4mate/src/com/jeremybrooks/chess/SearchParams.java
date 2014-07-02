@@ -8,7 +8,6 @@ import static com.jeremybrooks.chess.Bitmap.*;
  *
  */
 public class SearchParams {
-	private static final int NANOS_PER_MILLI = 1000;
 	static final int MILLIS_PER_SECOND       = 1000;
 	static final int ONE_MILLISECOND         =    1;
 	static final int ONE_SECOND              = 1000 * ONE_MILLISECOND;

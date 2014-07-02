@@ -142,48 +142,9 @@ public class Util {
 	    throw new IllegalArgumentException("expecting color that's one of {0|1), found: " + color);
 	}
 
-    private static String toFenBoard(Position position)
-	{
-		FenBuilder builder = new FenBuilder();
-		builder.appendPieceBoard(position);
-		return builder.toString().split(" ")[0];
-	}
-
-    private static Position toPosition(String fen)
-    {
-    	FenParser parser = FenParser.INSTANCE;
-    	parser.init(fen);
-    	parser.parse();
-    	return parser.getPosition();
-    }
-    
     public static void DisplayBitbrd(long board){
 		out.printf("0x%016X", board);
 	}
-
-	// displayMoves()
-	//
-	// Displays the the number of moves up to g.legalMoves[depth]
-	// to stdout. Does NOT account for appending '+', '#' for
-	// check and checkmate, respectively.
-	//
-	// PRE: Assumes that g.legalMoves[depth] contains the correct
-//	      number of legal moves.
-
-	/* TODO: 1/2/2010 - need this function...add it back
- 	//TODO: 1/2/2010 - fix this to accept a gamestate
-	void displayMoves(gamestate &g, int moves[], int depth){
-	    char delim1 = ' ';  //Delimiter between moves
-	    char delim2 = '\n';  //Delimiter after all moves are displayed
-	    out.print(g.legalMoves[depth] + "  ");
-	    for (int i = 0; i < g.legalMoves[depth]; i++){
-		//cout << i << '\t';
-	        displayMove(moves[i], false, false);
-	        out.print(delim1); //cout << delim1;
-	    }
-	    out.print(delim2); //cout << delim2;
-	}
-	*/
 
     public static void displayMove(int m, boolean check, boolean mate){
 		out.print(displayMoveStr(m, check, mate));
@@ -276,65 +237,6 @@ public class Util {
 	    }
 	    return sb.toString();
 	}
-
-
-	
-/* TODO: 1/2/2010 - DO i really need these two functions other than for debugging?	
-	void DisplayMoves(unsigned char moves){
-	    unsigned char mask = 0x01;
-	    int m;
-	    for(int i=0; i<8; ++i){
-	        m = moves;
-	        m &= (mask << i); 
-	        if (m > 0){
-	            //cout << "\nbefore display_move call: moves = " << i << endl;
-	            DisplayMove(i); cout << ", ";
-	        }
-	    }
-	}//end void DisplayMoves(unsigned char moves){
-*/
-
-//	void DisplayStatus(unsigned char status){
-//	    //The least significant bit of status is b1 (for rank 1)
-//	    //so we must left shift it before we use it to display
-//	    status = status << 1;
-//	    unsigned char mask = 0x01;
-//	    for(int i = 0; i < 8; i++, mask <<= 1){
-//	        //If there's a bit/move/piece at that square
-//	        //Print "X" otherwise a "-"
-//	        if (mask & status)
-//				out.printf("X ");  
-//	        else
-//	            out.printf("- ");
-//	    }	
-//	    out.println();
-//	}
-
-    
-//    public static void DisplayStatus(int status){
-//    	out.print(DisplayStatusStr(status));
-//    }
-//    
-    /* status should be between 0/1 and 255/256  i think */
-//   USE formatBitmapByte and shift the argument left one INSTEAD    
-//    public static String DisplayStatusStr(int status){
-//	    //The least significant bit of status is b1 (for rank 1)
-//	    //so we must left shift it before we use it to display
-//    	//TODO 1/2/2010 need an assertion test here so we can check for illegal argument
-//	    status = status << 1;
-//	    short mask = 0x01;
-//	    StringBuffer sb = new StringBuffer();
-//	    for(int i = 0; i < 8; i++, mask <<= 1){
-//	        //If there's a bit/move/piece at that square
-//	        //Print "X" otherwise a "-"
-//	        if (bool(mask & status))
-//				sb.append("X ");  
-//	        else
-//	            sb.append("- ");
-//	    }	
-//	    return sb.append("\n").toString();
-//	}
-
 
     /* these two below are for trouble shooting only */
     public static void DisplayMoves(short moves){

@@ -2,8 +2,6 @@ package com.jeremybrooks.chess;
 
 import static com.jeremybrooks.chess.Bitmap.*;
 
-import java.security.SecureRandom;
-
 import junit.framework.TestCase;
 
 import org.junit.Test;

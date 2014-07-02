@@ -98,10 +98,7 @@ public class MoveOrderingTest {
 		}
 		for(int m: moves)
 		{
-		    int from = m & 0x3F;         //first 6 bits
-		    int to = (m >> 6) & 0x3F;    //next 6
 		    int mov = (m >> 12) & 0x7;   //next 3
-		    int adj = (m >> 15) & 0x7;  //next 3
 		    int cap = (m >> 18) & 0x7;   //next 3
 		    int pro = (m >> 21) & 0x7;   //next 3
 		    
@@ -185,74 +182,6 @@ public class MoveOrderingTest {
 				from;
 	}
 	
-    private static String formatMove(int m, boolean check, boolean mate){
-	    int from, to, mov, cap, pro, gain;
-	    from = m & 0x3F;          //first 6 bits
-	    to = (m >> 6) & 0x3F;     //next 6
-	    mov = (m >> 12) & 0x7;    //next 3
-	    gain = (m >> 15) & 0x7;   //next 3
-	    cap = (m >> 18) & 0x7;    //next 3
-	    pro = (m >> 21) & 0x7;    //next 3
-
-	    char pieceChar[] = {' ','P','N','K',' ','B','R','Q'};
-	    StringBuilder coordStr = new StringBuilder(); 
-	    StringBuilder SANStr = new StringBuilder();
-
-	    //Add the moving piece
-	    coordStr.append(pieceChar[mov]);
-	    coordStr.append(Util.SqToStr(from));
-	    if (pieceChar[mov] == 'P' && cap != 0){ //if pawn capture
-	    	SANStr.append(coordStr.toString().charAt(1)); //the file of the pawn
-	    } else {
-	    	SANStr.append(pieceChar[mov]);  //the type of piece
-	    }
-	    
-	    //Add 'x' or '-' for capture or noncapture	
-	    if (cap != 0){
-	        //coordStr[i++] = SANStr[j++] = 'x';
-	    	coordStr.append("x");
-	    	SANStr.append("x");
-	    } else {
-	        coordStr.append('-');
-	    }
-
-	    //Add the 'to' square
-	    coordStr.append(Util.SqToStr(to));
-	    SANStr.append(Util.SqToStr(to));
-	    
-	    //Add the promotion piece
-	    if(pro != 0){
-	        if (pieceChar[mov] == 'P'){
-	            coordStr.append(pieceChar[pro]);
-	            SANStr.append('=');
-	            SANStr.append(pieceChar[pro]);
-	        } else {
-	        	System.err.println("can't promote a piece other than a pawn");
-	        }
-	    }
-
-	    if (mate || (check && mate)){
-	    	coordStr.append("#");
-        	SANStr.append("#");
-	    } else if (check){
-	    	coordStr.append("+");
-	    	SANStr.append("+");
-	    }
-	    
-	    //Print the moves in coordinate notation and SAN (TODO: SAN doesn't account for ambiguous moves yet!)
-	    if ('K' == pieceChar[mov]){
-		    if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
-	            //printf("%s 0-0", coordStr);
-		    	coordStr.append(" 0-0");
-		    } else if ((from == Bitmap.E1 && to == Bitmap.C1) || (from == Bitmap.E8 && to == Bitmap.C8)){
-		        //printf("%s 0-0-0", coordStr);
-		    	coordStr.append(" 0-0-0");
-		    } 
-	    }
-	    //out.printf("0x%06X %s %s ", m, coordStr, SANStr);
-	    return coordStr.toString();
-	}
-
     /**
      * Reverses the order of the elements in the specified array.<p>
      *

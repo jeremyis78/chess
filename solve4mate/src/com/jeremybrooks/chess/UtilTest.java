@@ -634,52 +634,13 @@ public class UtilTest extends TestCase {
 		final String expected = "abc def\nghi jkl\n";
 		assertEquals(expected, Util.formatSideBySide(left,right));
 	}
-	
-    public void testGetA1H8diagFunction(){
-    	for(int i=0; i<15; i++)
-    	{
-    		String board = Util.formatLongBitmapAsBoard(Attacks.getInstance().getH1A8diag(i,(byte)0xff));
-//    		System.out.println(board);
-    	}
-    }
-    
+	    
 	//This is a constant for the diagonal length
 	//To access the length of the main diagonal use dlen[7]
 	//The first diagonal is the zero-th.
 	static final int DLEN[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
  
-    private static long getA1H8diag(int diagonal, short b){  // 1/2/2010 - b used to be a byte
-	
-    //"diagonal" is the diagonal that we want to set to "b"
-    //"diagonal" is in range 0..14 inclusive 
-    //"diagonal" corresponds to these diagonals dnum = {diagonal squares)
-    // 	0={7}, 1={6,15}, 2={5,14,23},...,7={0,9,18,27,36,45,54,63},...,14={56}
-    	
-        int dstartsq[] = {7,6,5,4,3,2,1,0,8,16,24,32,40,48,56}; //should have 15 elements
-        //TODO: could replace above with (for clarity maybe??) 
-        // {H1,G1,F1,E1,D1,C1,B1,A1,A2,A3,A4,A5,A6,A7,A8}
-        
-        //access length of diagonal dnum by DLEN[dnum]
-        //dstartsq is the diagonal starting square
-        
-        //set the bits set in b to the diagonal dnum in a.
-        long board = 0;
-        int len = DLEN[diagonal];
-        byte mask = 1;
-        int x=0;
-        for (int d = dstartsq[diagonal];  x < len; d += 9){
-        	boolean something = (b & (mask << x++)) != 0;
-            if(something) 
-            	board |= (1L << d);
-        }
-        //cout << "\t\tdnum: " << dnum << "\t loops: " << x << endl;
-        return board;
-    }
-
-
-	
-	
-	public void testByteBitShifting(){
+    public void testByteBitShifting(){
 		byte piece = 1;
 
 		piece <<= 1;
@@ -716,42 +677,6 @@ public class UtilTest extends TestCase {
 		move |= (capturedPiece << 15);
 		move |= (promotionPiece << 18);
 		return move;
-	}
-	
-	private static void printMove(int move){
-	    int from, to, mov, cap, pro;
-	    from = move & 0x3F;  //grab from square (6 bits)
-	    to = (move >> 6) & 0x3F; //grab to square (6 bits)
-	    mov = (move >> 12) & 0x7; //grab moving piece (3bits)
-	    cap = (move >> 15) & 0x7; //grab captured piece (3bits)
-	    pro = (move >> 18) & 0x7; //grab promotion piece (3bits)
-
-		System.out.println("pro cap mov   to    from ");
-		System.out.println("--- --- --- ------ ------");
-		System.out.print(getBinaryPadded(pro, 3) + " ");
-		System.out.print(getBinaryPadded(cap, 3) + " ");
-		System.out.print(getBinaryPadded(mov, 3) + " ");
-		System.out.print(getBinaryPadded(to, 6) + " ");
-		System.out.print(getBinaryPadded(from, 6) + "\n");
-	}
-
-	private static String getBinaryPadded(short move, int minPadding){
-		return getBinaryPadded((int)move, minPadding);
-	}
-
-	private static String getBinaryPadded(byte move, int minPadding){
-		return getBinaryPadded((int)move, minPadding);
-	}
-	
-	private static String getBinaryPadded(int move, int minPadding){
-		String b = Integer.toBinaryString(move);
-		int reqPadding = minPadding - b.length();
-		StringBuffer sb = new StringBuffer();
-		while (reqPadding-- > 0){
-			sb.append("0");
-		}
-		sb.append(b);
-		return sb.toString();
 	}
 
 	

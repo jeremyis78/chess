@@ -131,7 +131,6 @@ public class Evaluator {
 	
 	public int evaluate(GameState g, int side, int depth, int[] currentMove, boolean isSearchDebug, boolean isEval){
 		int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
-		int wPositionalScore = 0, bPositionalScore = 0;
 		int mateScore = 0;
 		mg.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
 		
