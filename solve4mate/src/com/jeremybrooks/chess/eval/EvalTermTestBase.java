@@ -1,6 +1,6 @@
 package com.jeremybrooks.chess.eval;
 
-import com.jeremybrooks.chess.GameState;
+import com.jeremybrooks.chess.base.GameState;
 
 public abstract class EvalTermTestBase {
 

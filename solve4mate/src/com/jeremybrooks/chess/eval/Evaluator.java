@@ -1,18 +1,17 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.DefaultGenerator;
-import com.jeremybrooks.chess.FenBuilder;
-import com.jeremybrooks.chess.GameState;
-import com.jeremybrooks.chess.Position;
-import com.jeremybrooks.chess.Term;
-import com.jeremybrooks.chess.Util;
+import com.jeremybrooks.chess.base.FenBuilder;
+import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.movegen.DefaultGenerator;
+import com.jeremybrooks.chess.util.Util;
 
 public class Evaluator {
 	private static final Logger log = Logger.getLogger(Evaluator.class);

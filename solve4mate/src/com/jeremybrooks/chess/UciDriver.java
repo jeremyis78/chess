@@ -1,12 +1,22 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.Square.*;
+import static com.jeremybrooks.chess.base.Square.*;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
+import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Empty;
+import com.jeremybrooks.chess.base.FenBuilder;
+import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
+import com.jeremybrooks.chess.base.PieceFactory;
+import com.jeremybrooks.chess.search.SearchInfo;
+import com.jeremybrooks.chess.search.SearchParams;
+import com.jeremybrooks.chess.util.Util;
 
 
 public class UciDriver {
@@ -201,7 +211,7 @@ public class UciDriver {
 
 	public static int encodeMove(int fromSquare, int toSquare, Piece piece,
 			Piece captured, Piece promoter) {
-		return AbstractGenerator.EncodeMove(fromSquare, toSquare, piece.encoded(), 
+		return Util.EncodeMove(fromSquare, toSquare, piece.encoded(), 
 				captured.encoded(),	promoter.encoded());
 	}
 

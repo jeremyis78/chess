@@ -1,14 +1,14 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.Bitmap;
-import com.jeremybrooks.chess.Displayer;
-import com.jeremybrooks.chess.GameState;
-import com.jeremybrooks.chess.Piece;
-import com.jeremybrooks.chess.Position;
+import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
+import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.util.Displayer;
 
 public class AttackedSquaresTerm extends EvalTerm {
 	private static final Logger log = Logger.getLogger(AttackedSquaresTerm.class);

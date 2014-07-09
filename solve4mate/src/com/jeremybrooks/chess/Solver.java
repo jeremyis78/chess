@@ -2,7 +2,15 @@ package com.jeremybrooks.chess;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
+import com.jeremybrooks.chess.movegen.DefaultGenerator;
+import com.jeremybrooks.chess.search.IterativeDeepeningSearch;
+import com.jeremybrooks.chess.search.ScoredMove;
+import com.jeremybrooks.chess.search.Search;
+import com.jeremybrooks.chess.search.SearchInfo;
+import com.jeremybrooks.chess.search.SearchParams;
+import com.jeremybrooks.chess.util.Util;
 
 public class Solver {
 	private static final Logger log = Logger.getLogger(Solver.class);
@@ -43,7 +51,7 @@ public class Solver {
 		int pliesForMovesToMate = getPliesToMate(movesToMate);
     	int stackSize = getStackSize(pliesForMovesToMate);
     	search.setStackSize(stackSize);
-		GameState g = new GameState(pliesForMovesToMate);
+		GameState g = new GameState();
 		search.setGameState(g);
 //		FenParser parser = new FenParser();
 //		parser.init(puzzle.getFen());
