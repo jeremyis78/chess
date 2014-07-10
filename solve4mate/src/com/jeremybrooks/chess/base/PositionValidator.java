@@ -12,5 +12,5 @@ package com.jeremybrooks.chess.base;
  */
 public interface PositionValidator {
 
-	public void validateOrThrow(Position position);
+    public void validateOrThrow(Position position);
 }

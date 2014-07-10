@@ -20,7 +20,7 @@ import java.util.Iterator;
  * DiagonalIterator di =  new ConcreteImplementation(2)
  * while(di.hasNext())
  * {
- * 	 int currentSquareIndex = di.next();
+ *      int currentSquareIndex = di.next();
  *   //use the index to access that bit within the bitboard
  * }
  * </code>
@@ -31,50 +31,50 @@ import java.util.Iterator;
  */
 public abstract class DiagonalIterator implements Iterator<Integer>
 {
-	private static final int LENGTH[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
-	protected int diagonal;
-	protected int index;
+    private static final int LENGTH[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
+    protected int diagonal;
+    protected int index;
 
-	public DiagonalIterator(int diagonalIndex)
-	{
-		if(diagonalIndex > LENGTH.length)
-			throw new IllegalArgumentException("index '"+diagonalIndex+"' must be in range 0-14");
-		diagonal = diagonalIndex;
-		index = 0;
-	}
+    public DiagonalIterator(int diagonalIndex)
+    {
+        if(diagonalIndex > LENGTH.length)
+            throw new IllegalArgumentException("index '"+diagonalIndex+"' must be in range 0-14");
+        diagonal = diagonalIndex;
+        index = 0;
+    }
 
-	public int diagonalLength()
-	{
-		return LENGTH[diagonal];
-	}
+    public int diagonalLength()
+    {
+        return LENGTH[diagonal];
+    }
 
-	@Override
-	public boolean hasNext() {
-		return index < diagonalLength();
-	}
+    @Override
+    public boolean hasNext() {
+        return index < diagonalLength();
+    }
 
-	@Override
-	public Integer next() {
-		return new Integer(startSquare() + (numberOfNextSquares() * nextSquareOffset())); //G34 and/or G6
-	}
+    @Override
+    public Integer next() {
+        return new Integer(startSquare() + (numberOfNextSquares() * nextSquareOffset())); //G34 and/or G6
+    }
 
-	private int numberOfNextSquares() {  //G20
-		return index++;
-	}
+    private int numberOfNextSquares() {  //G20
+        return index++;
+    }
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 
-	/**
-	 * Gets the square (the index) of the first square on this diagonal
-	 */
-	public abstract int startSquare();
-	
-	/**
-	 * Gets the offset to proceed to the next square in the diagonal
-	 */
-	public abstract int nextSquareOffset();
-	
+    /**
+     * Gets the square (the index) of the first square on this diagonal
+     */
+    public abstract int startSquare();
+    
+    /**
+     * Gets the offset to proceed to the next square in the diagonal
+     */
+    public abstract int nextSquareOffset();
+    
 }

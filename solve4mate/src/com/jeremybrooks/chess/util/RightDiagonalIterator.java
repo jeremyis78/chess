@@ -32,20 +32,20 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
  */
 public class RightDiagonalIterator extends DiagonalIterator {
 
-	private static final int START_SQUARE[] = {H1,G1,F1,E1,D1,C1,B1,A1,A2,A3,A4,A5,A6,A7,A8};
-	
-	public RightDiagonalIterator(int diagonalIndex) {
-		super(diagonalIndex);
-	}
+    private static final int START_SQUARE[] = {H1,G1,F1,E1,D1,C1,B1,A1,A2,A3,A4,A5,A6,A7,A8};
+    
+    public RightDiagonalIterator(int diagonalIndex) {
+        super(diagonalIndex);
+    }
 
-	@Override
-	public int nextSquareOffset() {
-		return 9;
-	}
+    @Override
+    public int nextSquareOffset() {
+        return 9;
+    }
 
-	@Override
-	public int startSquare() {
-		return START_SQUARE[diagonal];
-	}
+    @Override
+    public int startSquare() {
+        return START_SQUARE[diagonal];
+    }
 
 }

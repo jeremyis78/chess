@@ -13,26 +13,26 @@ import com.jeremybrooks.chess.base.Square;
  */
 public class DefaultPositionValidator implements PositionValidator {
 
-	@Override
-	public void validateOrThrow(Position position) {
+    @Override
+    public void validateOrThrow(Position position) {
 
-		if(eitherKingIsMissing(position) )
-		{
-			throw new IllegalArgumentException("board is missing one or both kings");
-		}
-	    if(areKingsAdjacent(position))
-	    {
-	        throw new IllegalArgumentException("board cannot have adjacent kings");
-	    }
-	}
+        if(eitherKingIsMissing(position) )
+        {
+            throw new IllegalArgumentException("board is missing one or both kings");
+        }
+        if(areKingsAdjacent(position))
+        {
+            throw new IllegalArgumentException("board cannot have adjacent kings");
+        }
+    }
 
-	private static boolean areKingsAdjacent(Position position) {
-		return Square.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
-	}
+    private static boolean areKingsAdjacent(Position position) {
+        return Square.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
+    }
 
-	private static boolean eitherKingIsMissing(Position position) {
-		boolean isWhiteKingMissing = !position.isKingPlaced(WHITE);
-		boolean isBlackKingMissing = !position.isKingPlaced(BLACK);
-		return isWhiteKingMissing || isBlackKingMissing;
-	}
+    private static boolean eitherKingIsMissing(Position position) {
+        boolean isWhiteKingMissing = !position.isKingPlaced(WHITE);
+        boolean isBlackKingMissing = !position.isKingPlaced(BLACK);
+        return isWhiteKingMissing || isBlackKingMissing;
+    }
 }
