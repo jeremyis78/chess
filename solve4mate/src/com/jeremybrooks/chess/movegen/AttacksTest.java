@@ -10,10 +10,10 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.Bitmap;
-import com.jeremybrooks.chess.base.FenParser;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
 
 public class AttacksTest {

@@ -1,10 +1,12 @@
-package com.jeremybrooks.chess.base;
+package com.jeremybrooks.chess.util;
 
 import static org.junit.Assert.*;
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.jeremybrooks.chess.base.Position;
 
 public class FenParserTest {
 

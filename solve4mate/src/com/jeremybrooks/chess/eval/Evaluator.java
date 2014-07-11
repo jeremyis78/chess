@@ -7,10 +7,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.base.FenBuilder;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
+import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 public class Evaluator {

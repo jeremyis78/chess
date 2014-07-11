@@ -15,11 +15,11 @@ import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.base.FenParser;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
 import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.util.FenParser;
 
 /**
  * @author jeremy

@@ -1,6 +1,12 @@
-package com.jeremybrooks.chess.base;
+package com.jeremybrooks.chess.util;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
+
+import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Piece;
+import com.jeremybrooks.chess.base.PieceFactory;
+import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.base.Square;
 
 public class FenBuilder {
 

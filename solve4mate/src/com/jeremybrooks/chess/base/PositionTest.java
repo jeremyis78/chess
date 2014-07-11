@@ -7,6 +7,7 @@ import org.junit.Assert;
 
 import com.jeremybrooks.chess.util.BitboardDisplayer;
 import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
 
 public class PositionTest extends TestCase {

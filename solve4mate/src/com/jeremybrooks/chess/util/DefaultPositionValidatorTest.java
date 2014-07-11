@@ -7,8 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.Bitmap;
-import com.jeremybrooks.chess.base.FenBuilder;
-import com.jeremybrooks.chess.base.FenParser;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.PositionValidator;
 

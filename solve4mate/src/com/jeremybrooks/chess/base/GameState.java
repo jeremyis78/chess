@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.util.AbstractDisplayer;
 import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.util.FenBuilder;
+import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
 import com.jeremybrooks.chess.util.ZobristKey;
 

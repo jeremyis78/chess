@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 public class GameStateTest {

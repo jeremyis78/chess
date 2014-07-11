@@ -10,12 +10,12 @@ import java.io.OutputStreamWriter;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Empty;
-import com.jeremybrooks.chess.base.FenBuilder;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
+import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 
