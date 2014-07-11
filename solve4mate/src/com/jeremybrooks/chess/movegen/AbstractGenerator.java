@@ -198,27 +198,6 @@ public abstract class AbstractGenerator implements Generator {
                 //between the king and the checker (by ANDing with targets).
                 Piece thePiece = PieceFactory.fromIndex(side==WHITE?Color.W:Color.B, p);
                 pMoves = Attacks.forPiece(thePiece, from, position) & empty & targets;
-//Attacks.forPiece() replaces this code here                
-//                switch (p) {
-//                    case KNIGHT:
-//                        pMoves = att.knight[from] & empty & targets;
-//                        break;
-//                    case BISHOP:   //fall through
-//                    case ROOK:     //fall through
-//                    case QUEEN:
-//                        if (Util.bool(PIECE[p] & BISHOP_OR_QUEEN))
-//                        {
-//                            long allPieces45Left = position.getAllPieces(-45);
-//                            long allPieces45Right = position.getAllPieces(45);
-//                            pMoves |= bishopAttacks (from, allPieces45Left, allPieces45Right) & empty & targets;
-//                        }
-//                        if (Util.bool(PIECE[p] & ROOK_OR_QUEEN))
-//                        {
-//                            long allPiecesByFile = position.getAllPieces(90);
-//                            pMoves |= rookAttacks (from, allPiecesByRank, allPiecesByFile) & empty & targets;
-//                        }
-//                        break;
-//                }
                 while (morePieces(pMoves)) {
                     to = lowestBitNumber(pMoves);
                     //Add move ONLY if it is to 'targets'

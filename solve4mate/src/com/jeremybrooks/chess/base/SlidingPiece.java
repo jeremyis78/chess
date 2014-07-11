@@ -21,20 +21,6 @@ public abstract class SlidingPiece extends Piece {
     public long attacks(int fromSquare, Position position)
     {
         return Attacks.forPiece(this, fromSquare, position);
-//        long attacks = 0;
-//        if (slidesOnDiagonals())
-//        {
-//            long allPieces45Left = position.getAllPieces(-45);
-//            long allPieces45Right = position.getAllPieces(45);
-//            attacks |= AbstractGenerator.bishopAttacks(fromSquare, allPieces45Left, allPieces45Right);
-//        }
-//        if (slidesLaterally())
-//        {
-//            long allPiecesByRank = position.getAllPieces(0);
-//            long allPiecesByFile = position.getAllPieces(90);
-//            attacks |= AbstractGenerator.rookAttacks(fromSquare, allPiecesByRank, allPiecesByFile);
-//        }
-//        return attacks;
     }
 
     public boolean slidesLaterally() {
