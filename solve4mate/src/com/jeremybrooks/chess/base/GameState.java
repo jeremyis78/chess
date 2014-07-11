@@ -42,27 +42,22 @@ public class GameState {
     public static final int MAX_NUM_MOVES_MADE = 150; //N2: far better than 'max depth' in this context
     private static final int NO_CASTLING_ALLOWED = 0;
 
-    final byte CASTLE_START = 
-        W_SHORT_CASTLE | W_LONG_CASTLE | B_SHORT_CASTLE | B_LONG_CASTLE; 
-            
     private Position pos;
-    
+    private PositionInfo[] posInfo;
+
     /**
      *  Represents the number of moves (i.e. black moves a pawn) applied to
      *  this game state.  For example, after
      *     MoveNumber    Move   numberOfMovesMade    halfMoveNumber  
      *     1.            e4            1                    0
-     *     1.             ... e5        2                    0
-     *     2.             Nc3            3                    1
-     *     2.             ... Nf6        4                    2
+     *     1.             ... e5       2                    0
+     *     2.             Nc3          3                    1
+     *     2.             ... Nf6      4                    2
      */
     private int numberOfMovesMade = 0; // N2 !! choose names at appropriate abstraction level
     private int maxNumberOfMovesMade;
     private boolean whiteToMove = true;
-    private int castle[];
-    private byte enPassantSq[];
-    private byte halfMoveClock[];
-    private byte fullMoveClock[];
+    
     
     /*
      * TODO: The following member vars are not related to the state of the game (board or flags)
@@ -72,12 +67,6 @@ public class GameState {
     public /* HACK: FIXME make private */ int moves[];             //legal moves from this state
     public /* HASK: FIXME make private */int movesValue[];        //minimax value of the moves from this state 
     
-    //TODO: need a variable or something to keep track of 
-    //      the number of repeated positions 
-    //      (for claiming/declaring a draw)
-    // I think the only way to do this is to have a transposition table
-    // whose key is the current position of the board.
-    //
 
     public GameState()
     {
@@ -95,28 +84,20 @@ public class GameState {
         log.trace("initializing stack to depth " + maxNumberOfMovesToSupport);
         maxNumberOfMovesMade = maxNumberOfMovesToSupport;
         int maxMoves = maxNumberOfMovesToSupport + 1;
-        castle = new int[maxMoves];
-        enPassantSq = new byte[maxMoves];
-        halfMoveClock = new byte[maxMoves];
-        fullMoveClock = new byte[maxMoves];
+        posInfo = new PositionInfo[maxMoves];
 
         numberOfLegalMoves = new int[maxMoves];
         moves = new int[100];
         movesValue = new int[100]; 
 
-        //TODO: fix this so it gets all the array indices 
-        //filled (MAXDEPTH +1) see definitions.h for gamestate
         for (int moveNumber = 0;
                 moveNumber < maxMoves;
                 moveNumber++){
-            castle[moveNumber] = 0;
-            enPassantSq[moveNumber] = NOSQUARE;
-            halfMoveClock[moveNumber] = 0;
-            fullMoveClock[moveNumber] = 0;
+            posInfo[moveNumber] = new PositionInfo();
             numberOfLegalMoves[moveNumber] = 0;
         }             
-        castle[numberOfMovesMade] = CASTLE_START;
-        fullMoveClock[0] = 1;
+        posInfo[0].setMoveNumber(1);
+        posInfo[0].setCastleOptionsFromFen("KQkq");
         whiteToMove = true;
     }
 
@@ -137,18 +118,10 @@ public class GameState {
         parser.parse();
         pos = parser.getPosition();
         setWhiteToMove(parser.isWhiteToMove());
+        setCastlingOptions(parser.getCastlingOptions());
         setEnPassantSquare(parser.getEnPassantSquare());
         setHalfMoveNumber(parser.getHalfMoveNumber());
         setMoveNumber(parser.getCurrentMoveNumber());
-        overwriteCastlingFlags(NO_CASTLING_ALLOWED);
-        if(parser.hasWhiteShortCastleOption())
-            addCastlingOption(W_SHORT_CASTLE);
-        if(parser.hasWhiteLongCastleOption())
-            addCastlingOption(W_LONG_CASTLE);
-        if(parser.hasBlackShortCastleOption())
-            addCastlingOption(B_SHORT_CASTLE);
-        if(parser.hasBlackLongCastleOption())
-            addCastlingOption(B_LONG_CASTLE);
     }
     
     public String get()
@@ -156,10 +129,10 @@ public class GameState {
         FenBuilder fb = new FenBuilder();
         fb.appendPieceBoard(pos);
         fb.appendOnMove(isWhiteToMove());
-        fb.appendCastlingOptions(castle[numberOfMovesMade]);
-        fb.appendEnPassantSquare(enPassantSq[numberOfMovesMade]);
-        fb.appendHalfMoveNumber(halfMoveClock[numberOfMovesMade]);
-        fb.appendCurrentMoveNumber(fullMoveClock[numberOfMovesMade]);
+        fb.appendCastlingOptions(posInfo[numberOfMovesMade].getCastleOptionsAsFen());
+        fb.appendEnPassantSquare(posInfo[numberOfMovesMade].getEnPassantSquare());
+        fb.appendHalfMoveNumber(posInfo[numberOfMovesMade].getReversiblePlies());
+        fb.appendCurrentMoveNumber(posInfo[numberOfMovesMade].getMoveNumber());
         return fb.toString();
     }
 
@@ -177,41 +150,31 @@ public class GameState {
     {
         whiteToMove = isWhitesMove;
     }
-    
-    /**
-     * Adds the castling option at the current depth
-     * 
-     * @param castlingFlag
-     */
-    private void addCastlingOption(int castlingFlag)
-    {
-        castle[numberOfMovesMade] |= castlingFlag; 
-    }
 
     /**
-     * Overwrites the castling flags with the given flags
+     * Sets the castling options to the given flags (overwrites)
      * 
      * @param castlingFlags
      */
-    private void overwriteCastlingFlags(int castlingFlags)
+    private void setCastlingOptions(String castlingOptions)
     {
-        castle[numberOfMovesMade] = castlingFlags;
+        posInfo[numberOfMovesMade].setCastleOptionsFromFen(castlingOptions);
     }
 
     public boolean hasShortCastleOption()
     {
-        if(whiteToMove) 
-            return bool(castle[numberOfMovesMade] & W_SHORT_CASTLE);
+        if(whiteToMove)
+            return posInfo[numberOfMovesMade].hasShortCastleOption(WHITE);
         else
-            return bool(castle[numberOfMovesMade] & B_SHORT_CASTLE);
+            return posInfo[numberOfMovesMade].hasShortCastleOption(BLACK);
     }
 
     public boolean hasLongCastleOption()
     {
         if(whiteToMove) 
-            return bool(castle[numberOfMovesMade] & W_LONG_CASTLE);
+            return posInfo[numberOfMovesMade].hasLongCastleOption(WHITE);
         else
-            return bool(castle[numberOfMovesMade] & B_LONG_CASTLE);
+            return posInfo[numberOfMovesMade].hasLongCastleOption(BLACK);
     }
 
     public boolean hasEnPassantOption()
@@ -221,12 +184,12 @@ public class GameState {
 
     public int getEnPassantSquare()
     {
-        return enPassantSq[numberOfMovesMade];
+        return posInfo[numberOfMovesMade].getEnPassantSquare();
     }
 
     public void setEnPassantSquare(int enPassantSquare)
     {
-        enPassantSq[numberOfMovesMade] = (byte) enPassantSquare;
+        posInfo[numberOfMovesMade].setEnPassantSquare((byte) enPassantSquare);
     }
 
     /**
@@ -235,12 +198,12 @@ public class GameState {
      * @return the halfMoveClock
      */
     public byte getHalfMoveNumber() {
-        return halfMoveClock[numberOfMovesMade];
+        return (byte) posInfo[numberOfMovesMade].getReversiblePlies();
     }
 
     public void setHalfMoveNumber(int halfMoves)
     {
-        halfMoveClock[numberOfMovesMade] = (byte) halfMoves;
+        posInfo[numberOfMovesMade].setReversiblePlies((byte) halfMoves);
     }
     
     /**
@@ -248,12 +211,12 @@ public class GameState {
      * @return the fullMoveClock
      */
     public byte getMoveNumber() {
-        return fullMoveClock[numberOfMovesMade];
+        return (byte) posInfo[numberOfMovesMade].getMoveNumber();
     }
     
     public void setMoveNumber(int moveNumber)
     {
-        fullMoveClock[numberOfMovesMade] = (byte) moveNumber;
+        posInfo[numberOfMovesMade].setMoveNumber(moveNumber);
     }
 
     public int getNumberOfMovesMade()
@@ -399,7 +362,7 @@ public class GameState {
         // Undo any moves made here at this depth
         // by setting legalMoves to zero.
         numberOfLegalMoves[numberOfMovesMade] = 0;
-        halfMoveClock[numberOfMovesMade] = 0;
+        posInfo[numberOfMovesMade].setReversiblePlies(0); //Is this needed???
         
         //Undo the depth
         numberOfMovesMade--;
@@ -494,23 +457,27 @@ public class GameState {
     private void duplicateCastlingFlags() {
         // Castle status remains constant since king and
         // rook did not move
-        castle[numberOfMovesMade + 1] = castle[numberOfMovesMade];
+        int existingCastleOptions = posInfo[numberOfMovesMade].getCastleOptions();
+        posInfo[numberOfMovesMade + 1].setCastleOptions(existingCastleOptions);
     }
 
     private void incrementFullMoveClock() {
-        fullMoveClock[numberOfMovesMade + 1] = (byte)(fullMoveClock[numberOfMovesMade] + 1);
+        int existingMoveNumber = posInfo[numberOfMovesMade].getMoveNumber();
+        posInfo[numberOfMovesMade + 1].setMoveNumber(existingMoveNumber + 1);
     }
 
     private void duplicateFullMoveClock() {
-        fullMoveClock[numberOfMovesMade + 1] = fullMoveClock[numberOfMovesMade];
+        int existingMoveNumber = posInfo[numberOfMovesMade].getMoveNumber();
+        posInfo[numberOfMovesMade + 1].setMoveNumber(existingMoveNumber);
     }
 
     private void incrementHalfMoveClock() {
-        halfMoveClock[numberOfMovesMade + 1] = (byte)(halfMoveClock[numberOfMovesMade] + 1);
+        int existingRevPlies = posInfo[numberOfMovesMade].getReversiblePlies();
+        posInfo[numberOfMovesMade + 1].setReversiblePlies(existingRevPlies  + 1);
     }
 
     private void resetHalfMoveClock() {
-        halfMoveClock[numberOfMovesMade + 1] = 0;
+        posInfo[numberOfMovesMade + 1].setReversiblePlies(0);
     }
 
     private void moveRook(int rookFrom, int rookTo) {
@@ -542,7 +509,9 @@ public class GameState {
 
     private void removeCastlingOptionForNextMove(int castlingOption)
     {
-        castle[numberOfMovesMade + 1] = castle[numberOfMovesMade] & ~castlingOption;
+        int newOptions = posInfo[numberOfMovesMade].getCastleOptions();
+        newOptions &= ~castlingOption;
+        posInfo[numberOfMovesMade + 1].setCastleOptions(newOptions);
     }
 
     private boolean isBlackLongCastle(int from, int to) {
@@ -562,7 +531,7 @@ public class GameState {
     }
 
     private void updateEnPassantSquareForNextMove(int from) {
-        enPassantSq[numberOfMovesMade + 1] = (byte)from;
+        posInfo[numberOfMovesMade + 1].setEnPassantSquare(from);
     }
 
     private boolean isEnPassantCapture(int moving, int to, int captured) {

@@ -93,10 +93,11 @@ public class FenParser {
     /* provide reasonable defaults, empty board, white to move, no castling, first move */
     private Position position = new Position();
     private int playerOnMove = WHITE;
-    private boolean whiteShortCastle = false;
-    private boolean whiteLongCastle = false;
-    private boolean blackShortCastle = false;
-    private boolean blackLongCastle = false;
+    private String castlingOptions = ""+FenBuilder.UNSET;
+//    private boolean whiteShortCastle = false;
+//    private boolean whiteLongCastle = false;
+//    private boolean blackShortCastle = false;
+//    private boolean blackLongCastle = false;
     private int enPassantSquare = NOSQUARE;
     private int halfMovesSinceCaptureOrPawnAdvance = 0;
     private int currentMoveNumber = 1;
@@ -270,33 +271,7 @@ public class FenParser {
             throw new IllegalArgumentException("castling options '" + toParse + "' "
                     + "must not be empty or exceed four characters; use only characters from KQkq");
         }
-        for (char option: toParse.toCharArray())
-        {
-            switch(option)
-            {
-            case UNSET:
-                whiteShortCastle = false;
-                whiteLongCastle = false;
-                blackShortCastle = false;
-                blackLongCastle = false;
-                break;
-            case WHITE_SHORT_CASTLE_OPTION:
-                whiteShortCastle = true;
-                break;
-            case WHITE_LONG_CASTLE_OPTION:
-                whiteLongCastle = true;
-                break;
-            case BLACK_SHORT_CASTLE_OPTION:
-                blackShortCastle = true;
-                break;
-            case BLACK_LONG_CASTLE_OPTION:
-                blackLongCastle = true;
-                break;
-            default:
-                throw new IllegalArgumentException("castling options '" + toParse + "' "
-                        + "are invalid; use only characters from KQkq or - for none");
-            }
-        }
+        castlingOptions = toParse;
     }
 
     /*
@@ -349,21 +324,25 @@ public class FenParser {
         return playerOnMove == WHITE;
     }
 
-    public boolean hasWhiteShortCastleOption() {
-        return whiteShortCastle;
+    public String getCastlingOptions() {
+        return castlingOptions;
     }
-
-    public boolean hasWhiteLongCastleOption() {
-        return whiteLongCastle;
-    }
-
-    public boolean hasBlackShortCastleOption() {
-        return blackShortCastle;
-    }
-
-    public boolean hasBlackLongCastleOption() {
-        return blackLongCastle;
-    }
+    
+//    public boolean hasWhiteShortCastleOption() {
+//        return castlingOptions.contains("K");
+//    }
+//
+//    public boolean hasWhiteLongCastleOption() {
+//        return castlingOptions.contains("Q");
+//    }
+//
+//    public boolean hasBlackShortCastleOption() {
+//        return castlingOptions.contains("k");
+//    }
+//
+//    public boolean hasBlackLongCastleOption() {
+//        return castlingOptions.contains("q");
+//    }
 
     public int getEnPassantSquare() {
         return enPassantSquare;
@@ -376,4 +355,5 @@ public class FenParser {
     public int getCurrentMoveNumber() {
         return currentMoveNumber;
     }
+
 }

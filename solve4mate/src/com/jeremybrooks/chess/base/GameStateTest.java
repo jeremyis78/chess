@@ -201,6 +201,7 @@ public class GameStateTest {
     
     @Test
     public void testMakeAndUndoWhitePawnCapturesEnPassant() {
+        System.out.println("**** start test");
         String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 2 23";
         int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
         String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";

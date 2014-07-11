@@ -37,7 +37,7 @@ public class FenBuilderTest {
         Position position = new Position();
         builder.appendPieceBoard(position);
         builder.appendOnMove(false);
-        builder.appendCastlingOptions(GameState.W_LONG_CASTLE | GameState.B_SHORT_CASTLE);
+        builder.appendCastlingOptions("Qk");
         builder.appendEnPassantSquare(Bitmap.H3);
         builder.appendHalfMoveNumber(0);
         builder.appendCurrentMoveNumber(1);
@@ -72,19 +72,22 @@ public class FenBuilderTest {
     }
 
     @Test
-    public void givenEveryCombinationOfCastlingOptions() {
-        String[] options = new String[]{"-",   "K",   "Q",   "KQ",  
-                                        "k",  "Kk",  "Qk",  "KQk",
-                                        "q",  "Kq",  "Qq",  "KQq",
-                                        "kq", "Kkq", "Qkq", "KQkq"};
-        int castlingBitmap = 0;
-        for(String option: options)
-        {
-            builder.appendCastlingOptions(castlingBitmap++);
-            String expected = "- w "+option+" - 0 1";
-            assertEquals(expected, builder.toString());
-            builder.reset();
-        }
+    public void givenSomeCastlingFlags() {
+        builder.appendCastlingOptions("Kkq");
+        String expected = "- w Kkq - 0 1";
+        assertEquals(expected, builder.toString());
+    }
+
+    @Test
+    public void givenNoCastlingFlags() {
+        String expected = "- w - - 0 1";
+
+        builder.appendCastlingOptions("");
+        assertEquals(expected, builder.toString());
+        builder.reset();
+        
+        builder.appendCastlingOptions("-");
+        assertEquals(expected, builder.toString());
     }
 
     @Test

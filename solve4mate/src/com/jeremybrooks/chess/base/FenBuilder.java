@@ -1,20 +1,15 @@
 package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
-import static com.jeremybrooks.chess.util.Util.bool;
 
 public class FenBuilder {
 
 
     public static final String RANK_DELIMITER = "/";
-    public static final char WHITE_ON_MOVE = 'w';
-    public static final char BLACK_ON_MOVE = 'b';
-    public static final char WHITE_SHORT_CASTLE_OPTION = 'K';
-    public static final char WHITE_LONG_CASTLE_OPTION = 'Q';
-    public static final char BLACK_SHORT_CASTLE_OPTION = 'k';
-    public static final char BLACK_LONG_CASTLE_OPTION = 'q';
-    public static final char FIELD_DELIMITER = ' ';
-    public static final char UNSET = '-';
+    public static final char WHITE_ON_MOVE    = 'w';
+    public static final char BLACK_ON_MOVE    = 'b';
+    public static final char FIELD_DELIMITER  = ' ';
+    public static final char UNSET            = '-';
     
     private StringBuilder builder;
     private String pieceBoard;
@@ -119,15 +114,11 @@ public class FenBuilder {
         return this;
     }
     
-    public FenBuilder appendCastlingOptions(int castlingOptions)
+    public FenBuilder appendCastlingOptions(String castlingOptions)
     {
-        String options = "";
-        if(bool(castlingOptions & GameState.W_SHORT_CASTLE)) options += WHITE_SHORT_CASTLE_OPTION;
-        if(bool(castlingOptions & GameState.W_LONG_CASTLE)) options += WHITE_LONG_CASTLE_OPTION;
-        if(bool(castlingOptions & GameState.B_SHORT_CASTLE)) options += BLACK_SHORT_CASTLE_OPTION;
-        if(bool(castlingOptions & GameState.B_LONG_CASTLE)) options += BLACK_LONG_CASTLE_OPTION;
-        if(options.isEmpty()) options += UNSET;
-        this.castlingOptions = options;
+        if(castlingOptions.trim().isEmpty())
+            castlingOptions = "" + UNSET;
+        this.castlingOptions = castlingOptions;
         return this;
     }
 

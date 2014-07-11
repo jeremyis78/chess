@@ -9,18 +9,18 @@ import org.junit.Test;
 public class FenParserTest {
 
     //use these to compare to what is returned from Position.getBoard(int)
-    private static final int WHITE_PAWN = PIECE[PAWN];
+    private static final int WHITE_PAWN   = PIECE[PAWN];
     private static final int WHITE_KNIGHT = PIECE[KNIGHT];
     private static final int WHITE_BISHOP = PIECE[BISHOP];
-    private static final int WHITE_ROOK = PIECE[ROOK];
-    private static final int WHITE_QUEEN = PIECE[QUEEN];
-    private static final int WHITE_KING = PIECE[KING];
-    private static final int BLACK_PAWN = -WHITE_PAWN;
+    private static final int WHITE_ROOK   = PIECE[ROOK];
+    private static final int WHITE_QUEEN  = PIECE[QUEEN];
+    private static final int WHITE_KING   = PIECE[KING];
+    private static final int BLACK_PAWN   = -WHITE_PAWN;
     private static final int BLACK_KNIGHT = -WHITE_KNIGHT;
     private static final int BLACK_BISHOP = -WHITE_BISHOP;
-    private static final int BLACK_ROOK = -WHITE_ROOK;
-    private static final int BLACK_QUEEN = -WHITE_QUEEN;
-    private static final int BLACK_KING = -WHITE_KING;
+    private static final int BLACK_ROOK   = -WHITE_ROOK;
+    private static final int BLACK_QUEEN  = -WHITE_QUEEN;
+    private static final int BLACK_KING   = -WHITE_KING;
     
     private FenParser parser;
     
@@ -127,10 +127,7 @@ public class FenParserTest {
         assertEquals(WHITE_ROOK, position.getBoard(H1));
 
         assertTrue(parser.isWhiteToMove());
-        assertTrue(parser.hasWhiteShortCastleOption());
-        assertTrue(parser.hasWhiteLongCastleOption());
-        assertTrue(parser.hasBlackShortCastleOption());
-        assertTrue(parser.hasBlackLongCastleOption());
+        assertEquals("KQkq", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
         assertEquals(5, parser.getHalfMoveNumber());
         assertEquals(20, parser.getCurrentMoveNumber());
@@ -147,10 +144,7 @@ public class FenParserTest {
         assertEquals(BLACK_KING, position.getBoard(A1)); // -3
         assertEquals(WHITE_KING, position.getBoard(H1)); //  3
         assertFalse(parser.isWhiteToMove());
-        assertTrue(parser.hasWhiteShortCastleOption());
-        assertTrue(parser.hasWhiteLongCastleOption());
-        assertFalse(parser.hasBlackShortCastleOption());
-        assertTrue(parser.hasBlackLongCastleOption());
+        assertEquals("KQq", parser.getCastlingOptions());
         assertEquals(D3, parser.getEnPassantSquare());
         assertEquals(3, parser.getHalfMoveNumber());
         assertEquals(22, parser.getCurrentMoveNumber());
@@ -193,10 +187,7 @@ public class FenParserTest {
         
         //Defaults from here on
         assertTrue(parser.isWhiteToMove());
-        assertFalse(parser.hasWhiteShortCastleOption());
-        assertFalse(parser.hasWhiteLongCastleOption());
-        assertFalse(parser.hasBlackShortCastleOption());
-        assertFalse(parser.hasBlackLongCastleOption());
+        assertEquals("-", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
         assertEquals(0, parser.getHalfMoveNumber());
         assertEquals(1, parser.getCurrentMoveNumber());
@@ -215,10 +206,7 @@ public class FenParserTest {
         assertFalse(parser.isWhiteToMove());
         
         //Defaults from here on
-        assertFalse(parser.hasWhiteShortCastleOption());
-        assertFalse(parser.hasWhiteLongCastleOption());
-        assertFalse(parser.hasBlackShortCastleOption());
-        assertFalse(parser.hasBlackLongCastleOption());
+        assertEquals("-", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
         assertEquals(0, parser.getHalfMoveNumber());
         assertEquals(1, parser.getCurrentMoveNumber());
@@ -235,10 +223,7 @@ public class FenParserTest {
         assertEquals(BLACK_KING, position.getBoard(A8));
         assertEquals(WHITE_KING, position.getBoard(H8));
         assertFalse(parser.isWhiteToMove());
-        assertTrue(parser.hasWhiteShortCastleOption());
-        assertTrue(parser.hasWhiteLongCastleOption());
-        assertTrue(parser.hasBlackShortCastleOption());
-        assertTrue(parser.hasBlackLongCastleOption());
+        assertEquals("KQkq", parser.getCastlingOptions());
         
         //Defaults from here on
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
@@ -299,14 +284,6 @@ public class FenParserTest {
     {
         String badFen = "k6K/8/8/8/8/8/8/8 xx - - 0 1";
         String expectedError = "onMove 'xx' is invalid; use 'w' for white or 'b' for black";
-        assertInvalid(badFen, expectedError);
-    }
-
-    @Test
-    public void testInvalidCastlingCharacters()
-    {
-        String badFen = "k6K/8/8/8/8/8/8/8 b KQxx - 0 2";
-        String expectedError = "castling options 'KQxx' are invalid; use only characters from KQkq or - for none";
         assertInvalid(badFen, expectedError);
     }
 
@@ -380,48 +357,6 @@ public class FenParserTest {
         parser.parse();
         assertEquals(1, parser.getCurrentMoveNumber());
     }
-
-//    public void testIsValidRankFen(){
-//        String[] good = 
-//            new String[]
-//                       {
-//                        "8",
-//                        "1p1p1p1p",
-//                        "p1p1p1p1",
-//                        "RNBQKBNR",
-//                        "2P5",
-//                       };
-//        for(int i=0; i<good.length; i++)
-//        {
-//            try
-//            {
-//                FenParser.validateFiles(good[i], 1);
-//            } catch (IllegalArgumentException e){
-//                fail("should not throw, valid rank fen " + good[i] + " " + e.getMessage());
-//            }
-//        }
-//
-//    
-//        String[] bad = 
-//            new String[]
-//                       {
-//                        "7",
-//                        "p1p1p1p1p1p",
-//                        "1p1p1p1",
-//                        "RNB3BNR",
-//                        "2P4",
-//                       };
-//        for(int i=0; i<good.length; i++)
-//        {
-//            try
-//            {
-//                FenParser.validateFiles(bad[i], 1);
-//                fail("should throw, invalid rank fen " + bad[i]);
-//            } catch (IllegalArgumentException e){
-//            }
-//        }
-//
-//    }
 
     private void assertInvalid(String position, String expectedError) {
         try {
