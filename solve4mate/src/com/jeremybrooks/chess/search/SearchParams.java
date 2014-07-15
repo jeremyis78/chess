@@ -24,40 +24,40 @@ public class SearchParams {
     private int movesToGo;
     private int depth;
 
-     public SearchParams() {}    
-     public SearchParams(int remainingMillis)
+    public SearchParams() {}    
+    public SearchParams(int remainingMillis)
     {
          //sudden death
-        setRemainingMillisFor(WHITE, remainingMillis);
-        setRemainingMillisFor(BLACK, remainingMillis);
+        setTime(WHITE, remainingMillis);
+        setTime(BLACK, remainingMillis);
     }    
     public SearchParams(int remainingMillis, int incrementMillis)
     {
         //sudden death with increment
-        setRemainingMillisFor(WHITE, remainingMillis);
-        setIncrementMillisFor(WHITE, incrementMillis);
-        setRemainingMillisFor(BLACK, remainingMillis);
-        setIncrementMillisFor(BLACK, incrementMillis);
+        setTime(WHITE, remainingMillis);
+        setIncrement(WHITE, incrementMillis);
+        setTime(BLACK, remainingMillis);
+        setIncrement(BLACK, incrementMillis);
     }
-     public SearchParams(int movesToGo, int remainingMillis, int incrementMillis)
+    public SearchParams(int movesToGo, int remainingMillis, int incrementMillis)
     {
          //X moves in Y time
          setMovesToGo(movesToGo);
-        setRemainingMillisFor(WHITE, remainingMillis);
-        setIncrementMillisFor(WHITE, incrementMillis);
-        setRemainingMillisFor(BLACK, remainingMillis);
-        setIncrementMillisFor(BLACK, incrementMillis);
+        setTime(WHITE, remainingMillis);
+        setIncrement(WHITE, incrementMillis);
+        setTime(BLACK, remainingMillis);
+        setIncrement(BLACK, incrementMillis);
     }    
-    public int getRemainingMillisFor(int color) {
+    public int getTime(int color) {
         return remainingMillis[color];
     }
-    public void setRemainingMillisFor(int color, int remainingMillis) {
+    public void setTime(int color, int remainingMillis) {
         this.remainingMillis[color] = remainingMillis;
     }
-    public int getIncrementMillisFor(int color) {
+    public int getIncrement(int color) {
         return incrementMillis[color];
     }
-    public void setIncrementMillisFor(int color, int incrementMillis) {
+    public void setIncrement(int color, int incrementMillis) {
         this.incrementMillis[color] = incrementMillis;
     }
     public int getMovesToGo() {

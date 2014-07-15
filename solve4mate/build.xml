@@ -63,6 +63,7 @@
 	        	includeantruntime="true"> 
 			<classpath refid="compile.classpath"/>
 		</javac>
+		<copy file="${src}/../log4j.properties" todir="${classes.dir}"/>
 	</target>
 
 	<target name="prepare-test" depends="init">
@@ -92,11 +93,14 @@
 
 
 	<target name="dist" depends="compile" description="generate the distribution">
-		<!-- Create the distribution directory -->
-		<mkdir dir="${dist}/lib" />
-
-		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-		<jar jarfile="${dist}/lib/MyProject-${DSTAMP}.jar" basedir="${build}" />
+		<jar jarfile="${build}/breaker-${DSTAMP}.jar" basedir="${classes.dir}">
+			<fileset dir="${classes.dir}" excludes="**/*Test.class"/>
+			<zipfileset includes="**/*.class" src="lib/log4j-1.2.15.jar"/>
+			<manifest>
+			      <attribute name="Main-Class"
+			            value="com.jeremybrooks.chess.UciDriver"/>
+		    </manifest>
+		</jar>
 	</target>
 
 	<target name="clean" description="clean up">

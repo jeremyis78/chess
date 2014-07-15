@@ -10,18 +10,18 @@ import com.jeremybrooks.chess.search.ScoredMove;
 import com.jeremybrooks.chess.search.Search;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
+import com.jeremybrooks.chess.search.TimeMgmt;
 import com.jeremybrooks.chess.util.Util;
 
 public class Solver {
     private static final Logger log = Logger.getLogger(Solver.class);
     private DefaultGenerator moveGenerator;
     private Evaluator evaluator;
-    private Search search = new Search();
+    private Search search;
     private SearchParams searchParams;
 
     
     public Solver() {
-        //TODO: use dependency injection instead
         DefaultGenerator mg = new DefaultGenerator();
         Evaluator eval = new Evaluator();
         eval.setMoveGenerator(mg);
@@ -30,6 +30,7 @@ public class Solver {
         search = new IterativeDeepeningSearch();
         search.setEvaluator(evaluator);
         search.setMoveGenerator(moveGenerator);
+        search.setTimer(new TimeMgmt());
     }
 
     public SearchInfo search(GameState g, int maxDepth)
@@ -38,6 +39,7 @@ public class Solver {
         
         search.setStackSize(maxDepth + 1);
         search.setGameState(g);
+        search.setParams(searchParams);
 
         log.debug("Searching...");
         search.search(g.isWhiteToMove()?0:1);
@@ -122,12 +124,10 @@ public class Solver {
 
     public void setMoveGenerator(DefaultGenerator moveGenerator) {
         this.moveGenerator = moveGenerator;
-        search.setMoveGenerator(moveGenerator);
     }
 
     public void setEvaluator(Evaluator evaluator) {
         this.evaluator = evaluator;
-        search.setEvaluator(evaluator);
     }
 
     private void setMaxSearchDepth(int maxSearchDepth) {

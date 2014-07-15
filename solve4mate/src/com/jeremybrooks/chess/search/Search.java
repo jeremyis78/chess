@@ -8,6 +8,7 @@ import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.UciDriver;
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
@@ -35,7 +36,8 @@ public class Search {
 
     private DefaultGenerator moveGenerator = new DefaultGenerator();
     private Evaluator evaluator = new Evaluator();
-
+    protected SearchParams params;
+    protected TimeMgmt timer;
         
     /*
      * Current state of the chess game 
@@ -80,10 +82,21 @@ public class Search {
      * Holds results of the search
      */
     private SearchInfo info;
+    
+    /*
+     * Time we started searching
+     */
+    protected int startTime;
 
 
     public Search() {
         super();
+    }
+    
+    public Search(TimeMgmt timer)
+    {
+        super();
+        this.timer = timer;
     }
     
     public Search(int stackSize) {
@@ -132,6 +145,14 @@ public class Search {
         this.evaluator = evaluator;
     }
     
+    public void setParams(SearchParams params) {
+        this.params = params;
+    }
+
+    public void setTimer(TimeMgmt timer) {
+        this.timer = timer;
+    }
+
     public ScoredMove[] getRootMove() {
         return rootMove;
     }
@@ -197,9 +218,10 @@ public class Search {
      */
     public int search(int side, int depthLimit){
         setDepthLimit(depthLimit);
-        int start = Util.milliTime();
+        timer.setParams(params);
+        startTime = Util.milliTime();
         int minimax = alphabetaMaxWindow(side);
-        int elapsedTimeMillis = (Util.milliTime() - start);
+        int elapsedTimeMillis = (Util.milliTime() - startTime);
         boolean mate = Math.abs(minimax) > Evaluator.CHECKMATE / 2;
         String solutionMoves = getPVMoveLine();
         String scoredRootMoves = getScoredRootMoves();
@@ -251,6 +273,7 @@ public class Search {
     protected int alphabeta(int side, int alpha, int beta){
         int minimaxValue;
         int depth = 0;
+        
         //Now reset the legal moves to zero so everything
         //works correctly for the search.
         g.numberOfLegalMoves[depth] = 0;
@@ -299,7 +322,7 @@ public class Search {
         int numMoves = g.numberOfLegalMoves[depth];
         if(isTrace)
             log.trace("num moves at depth " + depth + ": "+numMoves);
-        for(int i=0; i<numMoves; i++){
+        for(int i=0; i<numMoves /* && timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves[i];
             if(depth == 0)
@@ -389,7 +412,7 @@ public class Search {
         int numMoves = g.numberOfLegalMoves[depth];
         if(isTrace)
             log.trace("num moves at depth " + depth + ": "+numMoves);
-        for(int i=0; i<numMoves; i++){
+        for(int i=0; i<numMoves /*&& timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves[i];
             if(depth == 0)

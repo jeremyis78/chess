@@ -14,6 +14,7 @@ import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Util;
+
 /**
  * TODO: Make the move generator functions return an int[]
  * of moves and remove the depth variable being passed in

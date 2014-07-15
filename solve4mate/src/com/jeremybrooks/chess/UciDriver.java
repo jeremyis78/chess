@@ -1,12 +1,15 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.base.Square.*;
+import static com.jeremybrooks.chess.base.Square.named;
+import static com.jeremybrooks.chess.base.Square.squareOf;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
+import org.apache.log4j.BasicConfigurator;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Empty;
@@ -29,78 +32,51 @@ public class UciDriver {
     private static BufferedWriter bw;
     
     private static GameState gameState;
+    private static Solver engine;
     
     public static void main(String[] args) throws Exception 
     {
         try
         {
-            initIO();
+            init();
+            //Read an optional uci "position" command from the command line
+            if(args.length > 0) {
+                int index = 0;
+                setPosition(args, index);
+            }
             while(true)
             {
-                String guiLine = readGuiCommand();
-                String guiArgs[] = guiLine.split(" ");
+                String[] cmd = new String[0];
+                cmd = parseInput();
                 int argIndex = 0;
-                String token = guiArgs[argIndex++];
-                //respond(command);
+                String token = cmd[argIndex++];
                 if("uci".equals(token))
                 {
-                    respond("id name Breaker 0.1 by Jeremy Brooks (c) 2005-2014");
-                    //respond("print my engine options for the gui here")
+                    respond("id name Breaker 0.1 by Jeremy Brooks (c) 2004-2014");
                     respond("uciok");
                 } else if ("isready".equals(token)) {
-                    //TODO: get ready
-                        respond("readyok");
+                    respond("readyok");
                 } else if ("position".equals(token)) {
-                    //TODO: setup position
-                    token = guiArgs[argIndex++];
-                    String fen = "";
-                    if("startpos".equals(token))
-                    {
-                        fen = START_FEN;
-                    } else if ("fen".equals(token)) {
-                        //TODO: utilize the FenParser to do this work instead
-                        //      it would have to be updated to read a token at a time though
-                        int lastFenField = argIndex + 6;
-                        while(argIndex < lastFenField)
-                        {
-                            token = guiArgs[argIndex++];
-                            fen += token + FenBuilder.FIELD_DELIMITER;
-                        }
-                    } else {
-                        throw new Exception(token + " is not allowed; only fen or startpos are allowed.");
-                    }
-                    gameState = new GameState();
-                    gameState.set(fen.trim());
-                    gameState.display();
-                    if(argIndex < guiArgs.length)
-                        token = guiArgs[argIndex++]; //read "moves" token
-                    boolean isWhitesMove = gameState.isWhiteToMove();
-                    while(argIndex < guiArgs.length)
-                    {
-                        token = guiArgs[argIndex++];
-                        int move = parseUciMove(gameState, token);
-                        gameState.makeMove(move, isWhitesMove);
-                        isWhitesMove = !isWhitesMove;
-                    }
-                    gameState.display();
+                    setPosition(cmd, argIndex);
                 } else if ("go".equals(token)) {
-                    //TODO: start searching
-                    go(guiArgs);
+                    go(cmd);
                 } else if ("stop".equals(token)) {
-                    //TODO: stop searching
                     respond("readyok??");
                 } else if ("ponderhit".equals(token)) {
                     //TODO: opponent made the move we were pondering on
                     //      switch from pondering back to searching
                 } else if ("debug".equals(token)) {
                     //TODO: turn on/off engine's debug mode
-                    token = guiArgs[argIndex++];
+                    token = cmd[argIndex++];
                     if("on".equals(token))
                     {
                         //turn debugging on
                     } else if ("off".equals(token)) {
                         //turn it off
                     }
+                } else if ("d".equals(token) || "diagram".equals(token)) {
+                    if(gameState != null)
+                        gameState.display();
                 } else if("quit".equals(token)) {
                     System.exit(0);
                 }
@@ -110,6 +86,39 @@ public class UciDriver {
             // TODO Auto-generated catch block
             throw e;
             //e.printStackTrace();
+        }
+    }
+
+    public static void setPosition(String[] cmd, int argIndex) throws Exception {
+        String token;
+        token = cmd[argIndex++];
+        String fen = "";
+        if("startpos".equals(token))
+        {
+            fen = START_FEN;
+        } else if ("fen".equals(token)) {
+            //TODO: utilize the FenParser to do this work instead
+            //      it would have to be updated to read a token at a time though
+            int lastFenField = argIndex + 6;
+            while(argIndex < lastFenField)
+            {
+                token = cmd[argIndex++];
+                fen += token + FenBuilder.FIELD_DELIMITER;
+            }
+        } else {
+            throw new Exception(token + " is not allowed; only fen or startpos are allowed.");
+        }
+        gameState = new GameState();
+        gameState.set(fen.trim());
+        if(argIndex < cmd.length)
+            token = cmd[argIndex++]; //read "moves" token
+        boolean isWhitesMove = gameState.isWhiteToMove();
+        while(argIndex < cmd.length)
+        {
+            token = cmd[argIndex++];
+            int move = parseUciMove(gameState, token);
+            gameState.makeMove(move, isWhitesMove);
+            isWhitesMove = !isWhitesMove;
         }
     }
 
@@ -157,19 +166,19 @@ public class UciDriver {
             }
         }
         SearchParams params = new SearchParams();
-        params.setRemainingMillisFor(Bitmap.WHITE, remainingMillis[Bitmap.WHITE]);
-        params.setIncrementMillisFor(Bitmap.WHITE, incrementMillis[Bitmap.WHITE]);
-        params.setRemainingMillisFor(Bitmap.BLACK, remainingMillis[Bitmap.BLACK]);
-        params.setIncrementMillisFor(Bitmap.BLACK, incrementMillis[Bitmap.BLACK]);
+        params.setTime(Bitmap.WHITE, remainingMillis[Bitmap.WHITE]);
+        params.setIncrement(Bitmap.WHITE, incrementMillis[Bitmap.WHITE]);
+        params.setTime(Bitmap.BLACK, remainingMillis[Bitmap.BLACK]);
+        params.setIncrement(Bitmap.BLACK, incrementMillis[Bitmap.BLACK]);
         params.setMovesToGo(movesToGo);
         params.setDepth(depth);
-        Solver engine = new Solver();
         engine.setSearchParams(params);
         
         if(findMate)
         {
             SearchInfo info = engine.search(gameState, depth);
-            sendResponse("info depth %d time %.0f nodes %d nps %.0f",
+            String fmt = "info depth %d time %d nodes %d nps %.0f";
+            sendResponse(fmt,
                     depth,
                     info.getElapsedTime(),
                     info.getNodeCount(),
@@ -215,13 +224,15 @@ public class UciDriver {
                 captured.encoded(),    promoter.encoded());
     }
 
-    public static String readGuiCommand() throws IOException {
-        return br.readLine();
+    public static String[] parseInput() throws IOException {
+        return br.readLine().split(" ");
     }
 
-    public static void initIO() {
+    public static void init() {
+        BasicConfigurator.configure(); //setup logger
         br = new BufferedReader(new InputStreamReader(System.in));
         bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        engine = new Solver(); //initialize engine (ie, Attacks instance)
     }
 
     public static void respond(String response) throws IOException {
