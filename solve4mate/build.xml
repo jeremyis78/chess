@@ -23,14 +23,6 @@
 
 	<property file="build.properties" />
 
-	<path id="cobertura.classpath">
-		<fileset dir="${tools}/cobertura-2.0.3">
-			<include name="cobertura*.jar" />
-			<include name="lib/**/*.jar" />
-		</fileset>
-	</path>
-	<taskdef classpathref="cobertura.classpath" resource="tasks.properties"/>
-
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp />
@@ -48,10 +40,18 @@
 			<fileset dir="${lib}">
 				<include name="*.jar" />
 			</fileset>
-			<fileset dir="c:\eclipse\plugins">
-				<include name="org.hamcrest.core*.jar" />
+		</path>
+		
+		<path id="test.classpath">
+	        <fileset dir="${tools}/junit">
+	            <include name="**/*.jar"/>
+	        </fileset>
+			<fileset dir="${tools}/cobertura-2.0.3">
+				<include name="cobertura*.jar" />
+				<include name="lib/**/*.jar" />
 			</fileset>
 		</path>
+		<taskdef classpathref="test.classpath" resource="tasks.properties"/>
 	</target>
 
 	<target name="compile" depends="init" description="compile the source ">
@@ -63,34 +63,7 @@
 	        	includeantruntime="true"> 
 			<classpath refid="compile.classpath"/>
 		</javac>
-		<copy file="${src}/../log4j.properties" todir="${classes.dir}"/>
 	</target>
-
-	<target name="prepare-test" depends="init">
-		<mkdir dir="${reports}" />
-	</target>
-	
-	<target name="test-mine" depends="compile, prepare-test">
-		<junit printsummary="yes" haltonfailure="no">
-			<classpath refid="compile.classpath"/>
-				<!-- pathelement location="${build.tests}" /-->
-<!--  				<pathelement path="${java.class.path}" />
-			</classpath>
- -->
-			<formatter type="xml" />
-
-			<!-- <test name="my.test.TestCase" haltonfailure="no" outfile="result"> 
-				<formatter type="xml"/> </test> -->
-
-			<batchtest fork="yes" todir="${reports}">
-				<fileset dir="${src}">
-					<include name="**/*Test.java" />
-					<exclude name="**/AllTests.java" />
-				</fileset>
-			</batchtest>
-		</junit>
-	</target>
-
 
 	<target name="dist" depends="compile" description="generate the distribution">
 		<jar jarfile="${build}/breaker-${DSTAMP}.jar" basedir="${classes.dir}">
@@ -138,6 +111,10 @@
 		</cobertura-instrument>
 	</target>
 
+	<target name="prepare-test" depends="init">
+		<mkdir dir="${reports}" />
+	</target>
+	
 	<target name="test" depends="init,compile,prepare-test">
 		<junit fork="yes" dir="${basedir}"> <!--   failureProperty="test.failed">-->
 			<!--
@@ -146,14 +123,15 @@
 			-->
 			<classpath location="${instrumented.dir}" />
 			<classpath refid="compile.classpath" />
+			<!--classpath refid="junit.classpath" /-->
 
 			<!--
 				The instrumented classes reference classes used by the
 				Cobertura runtime, so Cobertura and its dependencies
 				must be on your classpath.
 			-->
-			<classpath refid="cobertura.classpath" />
-
+			<classpath refid="test.classpath" />
+			
 			<formatter type="xml" />
 			<test name="${testcase}" todir="${reports.xml.dir}" if="testcase" />
 			<batchtest todir="${reports.xml.dir}" unless="testcase">
