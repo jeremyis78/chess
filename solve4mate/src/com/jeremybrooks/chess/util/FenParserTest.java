@@ -6,6 +6,8 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
 
 public class FenParserTest {
@@ -131,13 +133,14 @@ public class FenParserTest {
         assertTrue(parser.isWhiteToMove());
         assertEquals("KQkq", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
-        assertEquals(5, parser.getHalfMoveNumber());
-        assertEquals(20, parser.getCurrentMoveNumber());
+        assertEquals(new Integer(5), parser.getOperandInt(FenParser.OPCODE_HMVC));
+        assertEquals(new Integer(20), parser.getOperandInt(FenParser.OPCODE_FMVN));
     }
 
     @Test
     public void givenBlackCastlingEnPassant() {
         String fen = "8/4B3/8/8/8/8/4P3/k6K b KQq d3 3 22";
+        String epd = "8/4B3/8/8/8/8/4P3/k6K b KQq d3 fmvn 22; hmvc 3;";
         parser.init(fen);
         parser.parse();
         Position position = parser.getPosition();
@@ -148,8 +151,11 @@ public class FenParserTest {
         assertFalse(parser.isWhiteToMove());
         assertEquals("KQq", parser.getCastlingOptions());
         assertEquals(D3, parser.getEnPassantSquare());
-        assertEquals(3, parser.getHalfMoveNumber());
-        assertEquals(22, parser.getCurrentMoveNumber());
+        int hmvc = parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(3, hmvc);
+        int fmvn = parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(22, fmvn);
+        assertEquals(epd, parser.toEpd());
     }
 
     @Test
@@ -191,8 +197,12 @@ public class FenParserTest {
         assertTrue(parser.isWhiteToMove());
         assertEquals("-", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
-        assertEquals(0, parser.getHalfMoveNumber());
-        assertEquals(1, parser.getCurrentMoveNumber());
+        
+        int hmvc = (int) parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(0, hmvc);
+        int fmvn = (int) parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(1, fmvn);
+
     }
 
     @Test
@@ -210,8 +220,12 @@ public class FenParserTest {
         //Defaults from here on
         assertEquals("-", parser.getCastlingOptions());
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
-        assertEquals(0, parser.getHalfMoveNumber());
-        assertEquals(1, parser.getCurrentMoveNumber());
+        
+        int hmvc = (int) parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(0, hmvc);
+        int fmvn = (int) parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(1, fmvn);
+
     }
 
     @Test
@@ -229,8 +243,12 @@ public class FenParserTest {
         
         //Defaults from here on
         assertEquals(NOSQUARE, parser.getEnPassantSquare());
-        assertEquals(0, parser.getHalfMoveNumber());
-        assertEquals(1, parser.getCurrentMoveNumber());
+        
+        int hmvc = (int) parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(0, hmvc);
+        int fmvn = (int) parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(1, fmvn);
+
     }
 
     @Test
@@ -341,7 +359,8 @@ public class FenParserTest {
         //expected    = "k6K/8/8/8/8/8/8/8 b KQkq - 0 2";
         parser.init(badFen);
         parser.parse();
-        assertEquals(0, parser.getHalfMoveNumber());
+        int hmvc = parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(0, hmvc);
     }
 
     @Test
@@ -351,13 +370,145 @@ public class FenParserTest {
         //expected    = "k6K/8/8/8/8/8/8/8 b KQkq - 1 1";
         parser.init(badFen);
         parser.parse();
-        assertEquals(1, parser.getCurrentMoveNumber());
-
+        int fmvn = (int) parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(1, fmvn);
+        
         String badFen2 = "k6K/8/8/8/8/8/8/8 b KQkq - 1 -9";
         //expected     = "k6K/8/8/8/8/8/8/8 b KQkq - 1 1";
         parser.init(badFen2);
         parser.parse();
-        assertEquals(1, parser.getCurrentMoveNumber());
+        fmvn = parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(1, fmvn);
+    }
+    
+    @Test
+    public void givenEPD()
+    {
+        String e = "3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/4K3/R7 w Q e6 id DummyPosition;";
+        parser.init(e);
+        parser.parseEpd();
+        assertNotNull(                parser.getPosition());
+        assertEquals(true,            parser.isWhiteToMove());
+        assertEquals("Q",             parser.getCastlingOptions());
+        assertEquals(Bitmap.E6,       parser.getEnPassantSquare());
+        assertEquals(null,            parser.getOperand(FenParser.OPCODE_HMVC));
+        assertEquals(null,            parser.getOperand(FenParser.OPCODE_FMVN));
+        assertEquals("DummyPosition", parser.getOperand("id"));
+        assertEquals(e, parser.toEpd());
+    }
+
+    @Test
+    public void givenEPDwithNoOperations()
+    {
+        String e = "3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/4K3/R7 w Q e6";
+        parser.init(e);
+        parser.parseEpd();
+        assertNotNull(                parser.getPosition());
+        assertEquals(true,            parser.isWhiteToMove());
+        assertEquals("Q",             parser.getCastlingOptions());
+        assertEquals(Bitmap.E6,       parser.getEnPassantSquare());
+        assertEquals(null,            parser.getOperand(FenParser.OPCODE_HMVC));
+        assertEquals(null,            parser.getOperand(FenParser.OPCODE_FMVN));
+        assertEquals(e,               parser.toEpd());
+    }
+
+    @Test
+    public void givenFenCompleteParseEPD()
+    {
+        String e = "3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/4K3/R7 w Q e6 2 45";
+        String expectedEpd = 
+                    "3r1k2/4npp1/1ppr3p/p6P/P2PPPP1/1NR5/4K3/R7 w Q e6 fmvn 45; hmvc 2;";
+        parser.init(e);
+        parser.parseEpd();
+        assertNotNull(                parser.getPosition());
+        assertEquals(true,            parser.isWhiteToMove());
+        assertEquals("Q",             parser.getCastlingOptions());
+        assertEquals(Bitmap.E6,       parser.getEnPassantSquare());
+        assertEquals(new Integer(2),  parser.getOperandInt(FenParser.OPCODE_HMVC));
+        assertEquals(new Integer(45), parser.getOperandInt(FenParser.OPCODE_FMVN));
+        assertEquals(expectedEpd,     parser.toEpd());
+    }
+
+    @Test
+    public void givenEPDwithIncorrectlySortedOpcodes()
+    {
+        String epd = "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - "
+                 + "fmvn 89; hmvc 22; bm Bxe4;";
+        String expectedEpd = "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - "
+                + "bm Bxe4; fmvn 89; hmvc 22;";
+        parser.init(epd);
+        parser.parseEpd();
+        assertNotNull(                parser.getPosition());
+        assertEquals(false,           parser.isWhiteToMove());
+        assertEquals("-",             parser.getCastlingOptions());
+        assertEquals(Bitmap.NOSQUARE, parser.getEnPassantSquare());
+        int hmvc = (int) parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(22,              hmvc);
+        int fmvn = (int) parser.getOperandInt(FenParser.OPCODE_FMVN);
+        assertEquals(89,              fmvn);
+        assertEquals("Bxe4",          parser.getOperand("bm"));
+        assertEquals(expectedEpd, parser.toEpd());
+    }
+
+    @Test
+    public void callingToEpdWithoutParsingFirst()
+    {
+        String epd = "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - "
+                 + "multipleOperands a1 a2 a3;";
+        parser.init(epd);
+        try {
+            parser.toEpd();
+        } catch (IllegalStateException e) {
+            assertEquals("need to call parse() first",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void givenEPDwithMultipleOperands()
+    {
+        String epd = "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - "
+                 + "multipleOperands a1 a2 a3;";
+        parser.init(epd);
+        try {
+            parser.parseEpd();
+        } catch (UnsupportedOperationException e) {
+            assertEquals("multiple operands not supported: multipleOperands a1 a2 a3",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void givenEPDwithQuotedArgument()
+    {
+        String epd = "2r2rk1/1bqnbpp1/1p1ppn1p/pP6/N1P1P3/P2B1N1P/1B2QPP1/R2R2K1 b - - "
+                 + "id \"someText\";";
+        parser.init(epd);
+        try {
+            parser.parseEpd();
+        } catch (UnsupportedOperationException e) {
+            assertEquals("quoted operands not supported: id \"someText\"",
+                    e.getMessage());
+        }
+    }
+    
+    @Test
+    public void givenEPDwithNoClosingDelimiter()
+    {
+        String e = "8/5k2/2R1b1pp/5p2/5Pn1/4qBKP/4R1P1/8 b - - bm someMove; dm 3; hmvc 4";
+        String expectedEpd = e + ";";
+        parser.init(e);
+        parser.parseEpd();
+        assertNotNull(                parser.getPosition());
+        assertEquals(false,           parser.isWhiteToMove());
+        assertEquals("-",             parser.getCastlingOptions());
+        assertEquals(Bitmap.NOSQUARE, parser.getEnPassantSquare());
+        int hmvc = (int) parser.getOperandInt(FenParser.OPCODE_HMVC);
+        assertEquals(4,               hmvc);
+        assertEquals(null,            parser.getOperand(FenParser.OPCODE_FMVN));
+        assertEquals("3",             parser.getOperand("dm"));
+        assertEquals("someMove",      parser.getOperand("bm"));
+        assertEquals(expectedEpd,     parser.toEpd());
     }
 
     private void assertInvalid(String position, String expectedError) {

@@ -1,7 +1,15 @@
 package com.jeremybrooks.chess.util;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.BLACK;
+import static com.jeremybrooks.chess.base.Bitmap.KING;
+import static com.jeremybrooks.chess.base.Bitmap.NOSQUARE;
+import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 import static com.jeremybrooks.chess.util.FenBuilder.*;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.PieceFactory;
@@ -85,6 +93,9 @@ import com.jeremybrooks.chess.base.Square;
  *  </pre>  
  */
 public class FenParser {
+    private static final Logger log = Logger.getLogger(FenParser.class);
+    public static final String OPCODE_FMVN = "fmvn";
+    public static final String OPCODE_HMVC = "hmvc";
     private static final int PIECE_BOARD_FIELD         = 0;
     private static final int ON_MOVE_FIELD             = 1;
     private static final int CASTLING_OPTIONS_FIELD    = 2;
@@ -92,20 +103,15 @@ public class FenParser {
     private static final int HALF_MOVE_NUMBER_FIELD    = 4;
     private static final int CURRENT_MOVE_NUMBER_FIELD = 5;
 
-    private boolean nothingToParse = true;
-    private int numberOfFieldsFound = 0;
+    private boolean nothingToParse                 = true;
+    private int numberOfFieldsFound                = 0;
     private String[] field;
     /* provide reasonable defaults, empty board, white to move, no castling, first move */
-    private Position position = new Position();
-    private int playerOnMove = WHITE;
-    private String castlingOptions = ""+FenBuilder.UNSET;
-//    private boolean whiteShortCastle = false;
-//    private boolean whiteLongCastle = false;
-//    private boolean blackShortCastle = false;
-//    private boolean blackLongCastle = false;
-    private int enPassantSquare = NOSQUARE;
-    private int halfMovesSinceCaptureOrPawnAdvance = 0;
-    private int currentMoveNumber = 1;
+    private Position position                      = new Position();
+    private int playerOnMove                       = WHITE;
+    private String castlingOptions                 = ""+FenBuilder.UNSET;
+    private int enPassantSquare                    = NOSQUARE;
+    private Map<String,Object> opMap               = new TreeMap<>();
     
     public static FenParser INSTANCE = new FenParser();
 
@@ -130,12 +136,73 @@ public class FenParser {
     
     public void parse()
     {
-        if(PIECE_BOARD_FIELD < numberOfFieldsFound) parsePieceBoard();
-        if(ON_MOVE_FIELD < numberOfFieldsFound)    parseOnMove();
-        if(CASTLING_OPTIONS_FIELD < numberOfFieldsFound) parseCastlingOptions();
-        if(EN_PASSANT_SQUARE_FIELD < numberOfFieldsFound) parseEnPassantSquare();
-        if(HALF_MOVE_NUMBER_FIELD < numberOfFieldsFound) parseHalfMoveNumber();
+        parseBase();
+        /* provide reasonable defaults: first move */
+        opMap.put(OPCODE_HMVC, ""+0);
+        opMap.put(OPCODE_FMVN, ""+1);
+        if(HALF_MOVE_NUMBER_FIELD < numberOfFieldsFound)    parseHalfMoveNumber();
         if(CURRENT_MOVE_NUMBER_FIELD < numberOfFieldsFound) parseCurrentMoveNumber();
+    }
+
+    //Started at 9:15 (with writing the new test in FenParserTest):
+    //ETA to completion: 45 minutes
+    //End of work not done yet:  12:15  (going to bed)
+    //Actual completion: 
+    public void parseEpd()
+    {
+        parseBase();
+        if(HALF_MOVE_NUMBER_FIELD < numberOfFieldsFound)
+        {
+            //if we have an int, it's FEN
+            //otherwise          it's EPD
+            String toParse = field[HALF_MOVE_NUMBER_FIELD];
+            char firstCh = toParse.charAt(0);
+            if(Character.isDigit(firstCh)){
+                parseHalfMoveNumber();
+                parseCurrentMoveNumber();
+            } else {
+                parseOperations();
+            }
+        }
+    }
+
+    private void parseBase()
+    {
+        if(PIECE_BOARD_FIELD < numberOfFieldsFound)         parsePieceBoard();
+        if(ON_MOVE_FIELD < numberOfFieldsFound)             parseOnMove();
+        if(CASTLING_OPTIONS_FIELD < numberOfFieldsFound)    parseCastlingOptions();
+        if(EN_PASSANT_SQUARE_FIELD < numberOfFieldsFound)   parseEnPassantSquare();
+    }
+
+    private void parseOperations() {
+        //TODO: actual EPD supports List<String>s as values in the map
+        //HACK: We makes simplifiying assumptions so we can enable integration testing
+        //      sooner rather than later.
+        //
+        //  1) operations are opcode/operand pairs ("bm Qh7#";  unsupported are "bm e4 d5", "draw_accept", etc)
+        //  2) operations are delimited only by ";" and not a ";" followed by single space. This
+        //     would mean that some operand values may have a semi-colon embedded w/o a space
+        //     and this parsing would fail on such input (if that's allowed by EPD standards).
+        //  3) operands cannot contain spaces (id KaufmanPz1;  unsupported: id "Kaufman Puzzle #1"
+        //
+        int index = HALF_MOVE_NUMBER_FIELD;
+        StringBuilder ops = new StringBuilder();
+        while(index < numberOfFieldsFound)
+            ops.append(field[index++]).append(' ');
+        log.trace("operations: '" + ops.toString() + "'");
+        String[] operation = ops.toString().trim().split(";");
+        for(String op: operation)
+        {
+            String o = op.trim();
+            log.trace("parsing '" + o + "'");
+            String[] pair = o.split(" ");
+            if(pair.length > 2)
+                throw new UnsupportedOperationException("multiple operands not supported: "+op);
+            if('\"' == op.charAt(0))
+                throw new UnsupportedOperationException("quoted operands not supported: "+op);
+            log.trace("adding "+pair[0]+"="+pair[1]);
+            opMap.put(pair[0], pair[1]);
+        }
     }
 
     /**
@@ -209,7 +276,7 @@ public class FenParser {
                 {
                     //Skip those empty squares by adding the digit's value
                     currentSquare += (boardCharacter - '0');
-                    //System.out.println("  " + boardCharacter + " empty squares");
+                    log.trace("  " + boardCharacter + " empty squares");
                 } else {
                     int color = (Character.isUpperCase(boardCharacter)) ? WHITE : BLACK;
                     int piece = PieceFactory.create(boardCharacter).index();
@@ -217,11 +284,11 @@ public class FenParser {
                     if(piece == KING && color == BLACK) numBlackKingsPlaced++;
                     validateOneKingPerColorOrThrow(numWhiteKingsPlaced, numBlackKingsPlaced);
                     position.placePiece(color, piece, currentSquare);
-                    //System.out.println("  " + boardCharacter + " add at " + Util.SqToStr(currentSquare));
+                    log.trace("  " + boardCharacter + " add at " + Square.named(currentSquare));
                     currentSquare++;
                 }
             }    
-            //System.out.println("put "+charsOnRow+" on rank #" + rankNumber);
+            log.trace("put "+charsOnRow+" on rank #" + rankNumber);
             //move down the board to first square of the rank beneath
             //the current one (a7, a6, a5 ...)
             currentSquare = ((rankNumber - 1) * 8) - 8;
@@ -302,9 +369,9 @@ public class FenParser {
     private void parseHalfMoveNumber() {
         String toParse = field[HALF_MOVE_NUMBER_FIELD];
         int n = Integer.parseInt(toParse);
-        halfMovesSinceCaptureOrPawnAdvance = 0;
+        opMap.put(OPCODE_HMVC, ""+0);
         if (n > 0){
-            halfMovesSinceCaptureOrPawnAdvance = n;
+            opMap.put(OPCODE_HMVC, ""+n);
         }
     }
 
@@ -315,8 +382,9 @@ public class FenParser {
     private void parseCurrentMoveNumber() {
         String toParse = field[CURRENT_MOVE_NUMBER_FIELD];
         int n = Integer.parseInt(toParse);
+        opMap.put(OPCODE_FMVN, ""+1);
         if (n > 0){
-            currentMoveNumber = n;
+            opMap.put(OPCODE_FMVN, ""+n);
         }  
     }
     
@@ -333,32 +401,50 @@ public class FenParser {
         return castlingOptions;
     }
     
-//    public boolean hasWhiteShortCastleOption() {
-//        return castlingOptions.contains("K");
-//    }
-//
-//    public boolean hasWhiteLongCastleOption() {
-//        return castlingOptions.contains("Q");
-//    }
-//
-//    public boolean hasBlackShortCastleOption() {
-//        return castlingOptions.contains("k");
-//    }
-//
-//    public boolean hasBlackLongCastleOption() {
-//        return castlingOptions.contains("q");
-//    }
-
     public int getEnPassantSquare() {
         return enPassantSquare;
     }
 
-    public int getHalfMoveNumber() {
-        return halfMovesSinceCaptureOrPawnAdvance;
+    public Object getOperand(String opcode)
+    {
+        //opcodes with no operand could return ""
+        //opcodes not found return null
+        return opMap.get(opcode);
+    }
+    
+    public Integer getOperandInt(String opcode)
+    {
+        Object tmp = getOperand(opcode);
+        try {
+            int n = Integer.parseInt(tmp.toString());
+            return n;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
-    public int getCurrentMoveNumber() {
-        return currentMoveNumber;
+    public String toEpd() {
+        if(position == null)
+        {
+            throw new IllegalStateException("need to call parse() first");
+        }
+        StringBuilder sb = new StringBuilder(field[0]); //the piece board
+        sb.append(FenBuilder.FIELD_DELIMITER);
+        sb.append(isWhiteToMove()?FenBuilder.WHITE_ON_MOVE:FenBuilder.BLACK_ON_MOVE);
+        sb.append(FenBuilder.FIELD_DELIMITER);
+        sb.append(getCastlingOptions());
+        sb.append(FenBuilder.FIELD_DELIMITER);
+        int epSq = getEnPassantSquare();
+        sb.append(Bitmap.NOSQUARE == epSq ? FenBuilder.UNSET : Square.named(epSq));
+        sb.append(FenBuilder.FIELD_DELIMITER);
+        for(String opcode: opMap.keySet())
+        {
+            sb.append(opcode);
+            sb.append(FenBuilder.FIELD_DELIMITER);
+            sb.append(opMap.get(opcode));
+            sb.append("; ");
+        }
+        sb.deleteCharAt(sb.length()-1);
+        return sb.toString();
     }
-
 }

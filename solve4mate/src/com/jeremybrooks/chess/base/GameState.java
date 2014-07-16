@@ -122,8 +122,8 @@ public class GameState {
         setWhiteToMove(parser.isWhiteToMove());
         setCastlingOptions(parser.getCastlingOptions());
         setEnPassantSquare(parser.getEnPassantSquare());
-        setHalfMoveNumber(parser.getHalfMoveNumber());
-        setMoveNumber(parser.getCurrentMoveNumber());
+        setHalfMoveNumber(parser.getOperandInt(FenParser.OPCODE_HMVC));
+        setMoveNumber(parser.getOperandInt(FenParser.OPCODE_FMVN));
     }
     
     public String get()
