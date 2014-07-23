@@ -141,8 +141,6 @@ public class Evaluator {
                 mateScore = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
         }
 
-        List<Term> whiteTerms = new ArrayList<>();
-        List<Term> blackTerms = new ArrayList<>();
         // Compute material value
         int[][] count = new int[2][5];
         int[][] pieceValue = new int[2][5];
@@ -168,12 +166,10 @@ public class Evaluator {
             if(color==WHITE) wMaterialScore += pieceScore;
             else             bMaterialScore += pieceScore;
         }
-        whiteTerms.add(new Term(wMaterialScore, "white material"));
-        blackTerms.add(new Term(bMaterialScore, "black material"));
-        
+
+        int materialScore = wMaterialScore - bMaterialScore;
         int materialAdjustment = new MaterialAdjustmentTerm().evaluate(g);
-        
-        int finalScore = sum(whiteTerms) - sum(blackTerms) + materialAdjustment + mateScore;
+        int finalScore = materialScore + materialAdjustment + mateScore;
         if(isSearchDebug)
         {
             String currentLine = "";
@@ -192,15 +188,6 @@ public class Evaluator {
 //            log.debug("mate score : "+ mateScore);
 //        }
         return finalScore;
-    }
-
-    private int sum(List<Term> terms) {
-        int sum = 0;
-        for(Term term: terms)
-        {
-            sum += term.getScore();
-        }
-        return sum;
     }
 
     boolean isCheckMated(GameState g, int side, int depth)

@@ -107,6 +107,7 @@
 				-->
 				<include name="**/*.class" />
 				<exclude name="**/*Test.class" />
+				<exclude name="**/*Tester.class" />
 			</fileset>
 		</cobertura-instrument>
 	</target>
