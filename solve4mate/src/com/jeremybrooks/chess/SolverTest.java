@@ -1,11 +1,13 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.search.SearchInfo;
+import com.jeremybrooks.chess.search.SearchParams;
 
 public class SolverTest {
 
@@ -16,6 +18,8 @@ public class SolverTest {
     public void setUp()
     {
         solver = new Solver();
+        int oneMinuteMillis = 60 * 1000;
+        solver.setSearchParams(new SearchParams(oneMinuteMillis));
         puzzle = new Puzzle();
     }
     

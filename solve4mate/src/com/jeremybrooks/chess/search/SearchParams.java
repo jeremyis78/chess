@@ -24,6 +24,19 @@ public class SearchParams {
     private int movesToGo;
     private int depth;
 
+    /**
+     * Create an instance suitable for allocating all thinking time
+     * to searching one single position.
+     * 
+     * @param thinkingTimeMillis
+     * @return SearchParams with 1 move to go and with given thinking time
+     */
+    public static SearchParams forOnePosition(int thinkingTimeMillis)
+    {
+        SearchParams p = new SearchParams(1, thinkingTimeMillis);
+        return p;
+    }
+    
     public SearchParams() {}    
     public SearchParams(int remainingMillis)
     {
@@ -31,18 +44,19 @@ public class SearchParams {
         setTime(WHITE, remainingMillis);
         setTime(BLACK, remainingMillis);
     }    
-    public SearchParams(int remainingMillis, int incrementMillis)
+    public SearchParams(int movesToGo, int remainingMillis)
     {
-        //sudden death with increment
+        //sudden death
+        setMovesToGo(movesToGo);
         setTime(WHITE, remainingMillis);
-        setIncrement(WHITE, incrementMillis);
+        setIncrement(WHITE, 0);
         setTime(BLACK, remainingMillis);
-        setIncrement(BLACK, incrementMillis);
+        setIncrement(BLACK, 0);
     }
     public SearchParams(int movesToGo, int remainingMillis, int incrementMillis)
     {
-         //X moves in Y time
-         setMovesToGo(movesToGo);
+        //X moves in Y time
+        setMovesToGo(movesToGo);
         setTime(WHITE, remainingMillis);
         setIncrement(WHITE, incrementMillis);
         setTime(BLACK, remainingMillis);

@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.movegen.AbstractGenerator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
@@ -205,7 +206,7 @@ public class Evaluator {
     boolean isCheckMated(GameState g, int side, int depth)
     {
         //Does king have legal moves?
-        int moves[] = new int[70];
+        int moves[] = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
         int numMoves = mg.generateKingEscapes(moves, side, depth);
         //number of moves may be helpful for evaluation tuning because 1 or 2 moves
         //limits the branching factor so that could be use to feed into the overall evaluation score

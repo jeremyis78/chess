@@ -8,6 +8,8 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
 
@@ -39,11 +41,7 @@ public class UciDriver {
         try
         {
             init();
-            //Read an optional uci "position" command from the command line
-            if(args.length > 0) {
-                int index = 0;
-                setPosition(args, index);
-            }
+            executeCmdLineArgs(args);
             while(true)
             {
                 String[] cmd = new String[0];
@@ -89,7 +87,58 @@ public class UciDriver {
         }
     }
 
-    public static void setPosition(String[] cmd, int argIndex) throws Exception {
+    private static void executeCmdLineArgs(String[] args) {
+        int length = args.length;
+        if(length == 0) 
+            return;
+        
+        int limit = 0;
+        String token;
+        for(int i=0; i<2; i++){
+            token = args[i++];
+            switch(token)
+            {
+            case "time":
+                token = args[i];
+                limit = parseTimeLimit(token);
+                System.out.println("time " + limit + " milliSeconds");
+                break;
+            default:
+                System.out.println("no more arguments prior to fen");
+                break;
+            }
+        }
+        int argIndex = 2;
+        setPosition(args, argIndex);
+        SearchParams params = SearchParams.forOnePosition(limit);
+        engine.setSearchParams(params);
+        startSearch(GameState.MAX_NUM_MOVES_MADE);
+        System.exit(0);
+    }
+
+    private static void showUsage() {
+        System.out.println("java -jar engineJarFile");
+        System.out.println("java -jar engineJarFile time X[ms] ['startpos' | 'fen' piecePlacement sideToMove castlingOptions epSquare]");
+        System.exit(0);
+    }
+
+    private static int parseTimeLimit(String token) {
+        boolean isSeconds = true;
+        int millisPerSecond = 1000;
+        String tmp = "";
+        if(token.endsWith("ms"))
+        {
+            isSeconds = false;
+            tmp = token.substring(0, token.length()-2);
+        } else {
+            tmp = token;
+        }
+        int limitMillis = Integer.parseInt(tmp);
+        if(isSeconds) limitMillis *= millisPerSecond;
+        return limitMillis;
+    }
+
+    public static void setPosition(String[] cmd, int argIndex) {
         String token;
         token = cmd[argIndex++];
         String fen = "";
@@ -106,10 +155,11 @@ public class UciDriver {
                 fen += token + FenBuilder.FIELD_DELIMITER;
             }
         } else {
-            throw new Exception(token + " is not allowed; only fen or startpos are allowed.");
+            throw new IllegalArgumentException(token + " is not allowed; only fen or startpos are allowed.");
         }
         gameState = new GameState();
         gameState.set(fen.trim());
+        gameState.display();
         if(argIndex < cmd.length)
             token = cmd[argIndex++]; //read "moves" token
         boolean isWhitesMove = gameState.isWhiteToMove();
@@ -176,18 +226,22 @@ public class UciDriver {
         
         if(findMate)
         {
-            SearchInfo info = engine.search(gameState, depth);
-            String fmt = "info depth %d time %d nodes %d nps %.0f";
-            sendResponse(fmt,
-                    depth,
-                    info.getElapsedTime(),
-                    info.getNodeCount(),
-                    info.getNodesPerSecond());
-            int bestMove = info.getBestLine()[0].getMove();
-            String uciBestMove = formatUciMove(bestMove);
-            sendResponse("info bestmove " + uciBestMove);
-            sendResponse("info bestline " + info.getSolutionMoves());
+            startSearch(depth);
         }
+    }
+
+    public static void startSearch(int depth) {
+        SearchInfo info = engine.search(gameState, depth);
+        String fmt = "info depth %d time %d nodes %d nps %.0f";
+        sendResponse(fmt,
+                depth,
+                info.getElapsedTime(),
+                info.getNodeCount(),
+                info.getNodesPerSecond());
+        int bestMove = info.getBestLine()[0].getMove();
+        String uciBestMove = formatUciMove(bestMove);
+        sendResponse("info bestmove " + uciBestMove);
+        sendResponse("info bestline " + info.getSolutionMoves());
     }
 
     private static String formatUciMove(int move) {

@@ -55,6 +55,7 @@ public class Solver {
         search.setStackSize(stackSize);
         GameState g = new GameState();
         search.setGameState(g);
+        search.setParams(searchParams);
 //        FenParser parser = new FenParser();
 //        parser.init(puzzle.getFen());
 //        parser.parse();

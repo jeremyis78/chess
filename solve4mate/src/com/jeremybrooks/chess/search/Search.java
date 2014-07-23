@@ -81,7 +81,7 @@ public class Search {
     /*
      * Holds results of the search
      */
-    private SearchInfo info;
+    protected SearchInfo info;
     
     /*
      * Time we started searching
@@ -161,7 +161,7 @@ public class Search {
         this.rootMove = rootMove;
     }
     
-    private String getScoredRootMoves() {
+    protected String getScoredRootMoves() {
         StringBuilder sb = new StringBuilder("\n");
         for(ScoredMove sm: rootMove)
         {
@@ -218,21 +218,7 @@ public class Search {
      */
     public int search(int side, int depthLimit){
         setDepthLimit(depthLimit);
-        timer.setParams(params);
-        startTime = Util.milliTime();
         int minimax = alphabetaMaxWindow(side);
-        int elapsedTimeMillis = (Util.milliTime() - startTime);
-        boolean mate = Math.abs(minimax) > Evaluator.CHECKMATE / 2;
-        String solutionMoves = getPVMoveLine();
-        String scoredRootMoves = getScoredRootMoves();
-        info = new SearchInfo();
-        info.setScore(minimax);
-        info.setSolutionMoves(solutionMoves);
-        info.setBestLine(getPVLine());
-        info.setMate(mate);
-        info.setNodeCount(getNodeCount());
-        info.setElapsedTime(elapsedTimeMillis);
-        info.setScoredRootMoves(scoredRootMoves);
         return minimax;
     }
 
