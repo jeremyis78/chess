@@ -41,7 +41,6 @@ public class UciDriver {
     {
         if(args.length > 0) showUsage();
         
-        BasicConfigurator.configure(); //setup logger
         UciDriver driver = new UciDriver(System.in, System.out, System.err);
         driver.start();
     }

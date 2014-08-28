@@ -27,10 +27,7 @@ public abstract class AbstractGenerator implements Generator {
     public static final int MAX_NUM_GENERATED_MOVES = 100;
     public static final int BISHOP_OR_QUEEN = 0x01;  //mask to determine Bishop/Queen            
     public static final int ROOK_OR_QUEEN   = 0x02;  //mask to determine Rook/Queen
-
-    
-    
-    /* delete me*/ protected static final Attacks att = new Attacks();
+    protected static final Attacks att = Attacks.INSTANCE;
     
     protected GameState g;
 
