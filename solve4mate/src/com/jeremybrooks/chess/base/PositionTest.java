@@ -5,8 +5,6 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 
-import com.jeremybrooks.chess.util.BitboardDisplayer;
-import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
 
@@ -225,34 +223,6 @@ public class PositionTest extends TestCase {
         assertErased(p, WHITE, PAWN, E4);
         p.placePiece(WHITE, PAWN, D5);
         assertPlaced(p, WHITE, PAWN, D5);
-
-        String expectedBoard = 
-                "   -----------------\n" +
-                "8 | r n b q k b n r |\n" +
-                "7 | p p p - p p p p |\n" +
-                "6 | - - - - - - - - |\n" +
-                "5 | - - - P - - - - |\n" +
-                "4 | - - - - - - - - |\n" +
-                "3 | - - - - - - - - |\n" +
-                "2 | P P P P - P P P |\n" +
-                "1 | R N B Q K B N R |\n" +
-                "   -----------------\n" +
-                "    a b c d e f g h\n";
-        Assert.assertEquals(expectedBoard, new Displayer().formatBoard(p));
-
-        String expectedBitboard =
-                "   -----------------\n" +
-                "8 | r n b q - b n r |\n" +
-                "7 | p p p - p p p p |\n" +
-                "6 | - - - - - - - - |\n" +
-                "5 | - - - P - - - - |\n" +
-                "4 | - - - - - - - - |\n" +
-                "3 | - - - - - - - - |\n" +
-                "2 | P P P P - P P P |\n" +
-                "1 | R N B Q - B N R |\n" +
-                "   -----------------\n" +
-                "    a b c d e f g h\n";
-        Assert.assertEquals(expectedBitboard, new BitboardDisplayer().formatBoard(p));
     }
     
     public void testIsSameColor() {
