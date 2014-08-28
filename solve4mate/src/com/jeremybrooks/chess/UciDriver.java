@@ -4,12 +4,11 @@ import static com.jeremybrooks.chess.base.Square.named;
 import static com.jeremybrooks.chess.base.Square.squareOf;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import org.apache.log4j.BasicConfigurator;
 
@@ -18,8 +17,11 @@ import com.jeremybrooks.chess.base.Empty;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
+import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
+import com.jeremybrooks.chess.util.AbstractDisplayer;
+import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
@@ -29,55 +31,92 @@ public class UciDriver {
     //  position fen k7/7P/8/8/8/8/4p3/7K b - - 0 1 moves e2e1q h7h8q a8b7 
     private static final String START_FEN = 
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    private static final String EOL = System.getProperty("line.separator");
-    private static BufferedReader br;
-    private static BufferedWriter bw;
+    private InputStream in;
+    private PrintStream out;
+    private GameState gameState;
+    private Solver engine;
+    private String fen;
     
-    private static GameState gameState;
-    private static Solver engine;
+    public static void main(String[] args) throws Exception
+    {
+        if(args.length > 0) showUsage();
+        
+        BasicConfigurator.configure(); //setup logger
+        UciDriver driver = new UciDriver(System.in, System.out, System.err);
+        driver.start();
+    }
     
-    public static void main(String[] args) throws Exception 
+    private static void showUsage() {
+        System.out.println("java -jar engineJarFile");
+        System.exit(0);
+    }
+    
+    public UciDriver(InputStream in, PrintStream out, PrintStream err)
+    {
+        setIn(in);
+        setOut(out);
+        engine = new Solver(); //initialize engine (ie, Attacks instance)   
+    }
+    
+    public void start() throws Exception
+    {
+       String input = "";
+       BufferedReader br = new BufferedReader(new InputStreamReader(in));
+       while(true)
+       {
+           input = br.readLine();
+           execute(input);
+       }
+    }
+
+    public void execute(String input) throws Exception 
     {
         try
         {
-            init();
-            executeCmdLineArgs(args);
-            while(true)
+            String[] cmd = new String[0];
+            cmd = input.split(" ");
+            int argIndex = 0;
+            String token = cmd[argIndex++];
+            switch(token)
             {
-                String[] cmd = new String[0];
-                cmd = parseInput();
-                int argIndex = 0;
-                String token = cmd[argIndex++];
-                if("uci".equals(token))
+            case "uci":
+                respond("id name Breaker 0.1 by Jeremy Brooks (c) 2004-2014");
+                respond("uciok");
+                break;
+            case "isready":
+                respond("readyok");
+                break;
+            case "position":
+                setPosition(cmd, argIndex);
+                break;
+            case "go":
+                go(cmd);
+                break;
+            case "stop":
+                respond("readyok??");
+                break;
+            case "ponderhit":
+                //TODO: opponent made the move we were pondering on
+                //      switch from pondering back to searching
+                break;
+            case "debug":
+                //TODO: turn on/off engine's debug mode
+                token = cmd[argIndex++];
+                if("on".equals(token))
                 {
-                    respond("id name Breaker 0.1 by Jeremy Brooks (c) 2004-2014");
-                    respond("uciok");
-                } else if ("isready".equals(token)) {
-                    respond("readyok");
-                } else if ("position".equals(token)) {
-                    setPosition(cmd, argIndex);
-                } else if ("go".equals(token)) {
-                    go(cmd);
-                } else if ("stop".equals(token)) {
-                    respond("readyok??");
-                } else if ("ponderhit".equals(token)) {
-                    //TODO: opponent made the move we were pondering on
-                    //      switch from pondering back to searching
-                } else if ("debug".equals(token)) {
-                    //TODO: turn on/off engine's debug mode
-                    token = cmd[argIndex++];
-                    if("on".equals(token))
-                    {
-                        //turn debugging on
-                    } else if ("off".equals(token)) {
-                        //turn it off
-                    }
-                } else if ("d".equals(token) || "diagram".equals(token)) {
-                    if(gameState != null)
-                        gameState.display();
-                } else if("quit".equals(token)) {
-                    System.exit(0);
+                    //turn debugging on
+                } else if ("off".equals(token)) {
+                    //turn it off
                 }
+                break;
+            case "d":
+            case "diagram":
+                display();
+                break;
+            case "quit":
+                System.exit(0);
+            default:
+                break;
             }
         } 
         catch (Exception e) {
@@ -87,39 +126,13 @@ public class UciDriver {
         }
     }
 
-    private static void executeCmdLineArgs(String[] args) {
-        int length = args.length;
-        if(length == 0) 
-            return;
-        
-        int limit = 0;
-        String token;
-        for(int i=0; i<2; i++){
-            token = args[i++];
-            switch(token)
-            {
-            case "time":
-                token = args[i];
-                limit = parseTimeLimit(token);
-                System.out.println("time " + limit + " milliSeconds");
-                break;
-            default:
-                System.out.println("no more arguments prior to fen");
-                break;
-            }
+    public void display() {
+        if(gameState != null)
+        {
+            AbstractDisplayer displayer = new Displayer();
+            Position position = gameState.getPosition();
+            out.println(displayer.formatBoard(position));
         }
-        int argIndex = 2;
-        setPosition(args, argIndex);
-        SearchParams params = SearchParams.forOnePosition(limit);
-        engine.setSearchParams(params);
-        startSearch(GameState.MAX_NUM_MOVES_MADE);
-        System.exit(0);
-    }
-
-    private static void showUsage() {
-        System.out.println("java -jar engineJarFile");
-        System.out.println("java -jar engineJarFile time X[ms] ['startpos' | 'fen' piecePlacement sideToMove castlingOptions epSquare]");
-        System.exit(0);
     }
 
     private static int parseTimeLimit(String token) {
@@ -133,12 +146,12 @@ public class UciDriver {
         } else {
             tmp = token;
         }
-        int limitMillis = Integer.parseInt(tmp);
+        int limitMillis = readInt(tmp);
         if(isSeconds) limitMillis *= millisPerSecond;
         return limitMillis;
     }
 
-    public static void setPosition(String[] cmd, int argIndex) {
+    public void setPosition(String[] cmd, int argIndex) {
         String token;
         token = cmd[argIndex++];
         String fen = "";
@@ -159,7 +172,6 @@ public class UciDriver {
         }
         gameState = new GameState();
         gameState.set(fen.trim());
-        gameState.display();
         if(argIndex < cmd.length)
             token = cmd[argIndex++]; //read "moves" token
         boolean isWhitesMove = gameState.isWhiteToMove();
@@ -172,47 +184,62 @@ public class UciDriver {
         }
     }
 
-    private static void go(String[] guiArgs) {
-        int[] remainingMillis = new int[2];
-        int[] incrementMillis = new int[2];
+    public void go(String[] guiArgs) throws IOException {
+        int[] remainingMillis = new int[]{5000, 5000}; //default: 5 seconds each
+        int[] incrementMillis = new int[]{   0,    0}; //default: no increment
+        int movesToGo = 1;  //default: allow engine use all the default time for this search
         int depth = 0;
         boolean findMate = false;
-        int movesToGo = 0;
         
         int argIndex = 1;
         while(argIndex < guiArgs.length)
         {
             String token = guiArgs[argIndex++];
-            if("wtime".equals(token)) {
+            
+            switch(token)
+            {
+            case "wtime":
                 token = guiArgs[argIndex++];
-                remainingMillis[Bitmap.WHITE] = Integer.parseInt(token);
-            } else if("winc".equals(token)) {
+                remainingMillis[Bitmap.WHITE] = readInt(token);
+                break;
+            case "winc":
                 token = guiArgs[argIndex++];
-                incrementMillis[Bitmap.WHITE] = Integer.parseInt(token);
-            } else if("btime".equals(token)) {
+                incrementMillis[Bitmap.WHITE] = readInt(token);
+                break;
+            case "btime":
                 token = guiArgs[argIndex++];
-                remainingMillis[Bitmap.BLACK] = Integer.parseInt(token);
-            } else if("binc".equals(token)) {
+                remainingMillis[Bitmap.BLACK] = readInt(token);
+                break;
+            case "binc":
                 token = guiArgs[argIndex++];
-                incrementMillis[Bitmap.BLACK] = Integer.parseInt(token);
-            } else if("movestogo".equals(token)) {
+                incrementMillis[Bitmap.BLACK] = readInt(token);
+                break;
+            case "movestogo":
                 token = guiArgs[argIndex++];
-                movesToGo = Integer.parseInt(token);
-            } else if("depth".equals(token)) {
+                movesToGo = readInt(token);
+                break;
+            case "depth":
                 token = guiArgs[argIndex++];
-                depth = Integer.parseInt(token);
-            } else if("nodes".equals(token)) {
-                
-            } else if("mate".equals(token)) {
+                depth = readInt(token);
+                break;
+            case "nodes": 
+                break;
+            case "mate":
+                token = guiArgs[argIndex++];
+                depth = (2 * readInt(token)) - 1;
                 findMate = true;
-            } else if("movetime".equals(token)) {
-                
-            } else if("infinite".equals(token)) {
-                
-            } else if("searchmoves".equals(token)) {
-                
-            } else if("ponder".equals(token)) {
-                
+                break;
+            case "movetime":
+                //search exactly X milliseconds "movetime X"
+                break;
+            case "infinite":
+                break;
+            case "searchmoves":
+                break;
+            case "ponder":
+                break;
+            default:
+                break;
             }
         }
         SearchParams params = new SearchParams();
@@ -223,14 +250,15 @@ public class UciDriver {
         params.setMovesToGo(movesToGo);
         params.setDepth(depth);
         engine.setSearchParams(params);
-        
-        if(findMate)
-        {
-            startSearch(depth);
-        }
+        startSearch(depth);
     }
 
-    public static void startSearch(int depth) {
+    public static int readInt(String token) {
+        int n = Integer.parseInt(token);
+        return n;
+    }
+
+    public void startSearch(int depth) throws IOException {
         SearchInfo info = engine.search(gameState, depth);
         String fmt = "info depth %d time %d nodes %d nps %.0f";
         sendResponse(fmt,
@@ -240,8 +268,8 @@ public class UciDriver {
                 info.getNodesPerSecond());
         int bestMove = info.getBestLine()[0].getMove();
         String uciBestMove = formatUciMove(bestMove);
-        sendResponse("info bestmove " + uciBestMove);
-        sendResponse("info bestline " + info.getSolutionMoves());
+        respond("info bestmove " + uciBestMove);
+        respond("info bestline " + info.getSolutionMoves());
     }
 
     private static String formatUciMove(int move) {
@@ -250,7 +278,7 @@ public class UciDriver {
         return named(fromSquare) + named(toSquare);
     }
 
-    private static int parseUciMove(GameState gameState2, String uciMove) {
+    private int parseUciMove(GameState gameState2, String uciMove) {
         /*        
          * The move format is in long algebraic notation.
          * A nullmove from the Engine to the GUI should be sent as 0000.
@@ -278,26 +306,29 @@ public class UciDriver {
                 captured.encoded(),    promoter.encoded());
     }
 
-    public static String[] parseInput() throws IOException {
-        return br.readLine().split(" ");
-    }
-
-    public static void init() {
-        BasicConfigurator.configure(); //setup logger
-        br = new BufferedReader(new InputStreamReader(System.in));
-        bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        engine = new Solver(); //initialize engine (ie, Attacks instance)
-    }
-
-    public static void respond(String response) throws IOException {
-        bw.write(response + EOL);
-        bw.flush();
-    }
-    
-    public static void sendResponse(String formatMessage, Object... args)
+    public void sendResponse(String formatMessage, Object... args) throws IOException
     {
         String s = String.format(formatMessage, args);
-        System.out.println(s);
+        respond(s);
     }
 
+    public void respond(String s) throws IOException {
+        out.println(s);
+    }
+
+    public InputStream getIn() {
+        return in;
+    }
+
+    public void setIn(InputStream in) {
+        this.in = in;
+    }
+
+    public PrintStream getOut() {
+        return out;
+    }
+
+    public void setOut(PrintStream out) {
+        this.out = out;
+    }
 }

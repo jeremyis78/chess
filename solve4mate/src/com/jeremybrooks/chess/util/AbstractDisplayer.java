@@ -8,6 +8,7 @@ import com.jeremybrooks.chess.base.Position;
 
 public abstract class AbstractDisplayer {
 
+    public static final String EOL = System.lineSeparator();
     protected StringBuilder display;
 
     public AbstractDisplayer() {
@@ -40,7 +41,7 @@ public abstract class AbstractDisplayer {
 
 
     protected void appendBorder() {
-        display.append("   -----------------\n");
+        display.append("   -----------------"+EOL);
     }
 
     protected void appendRankLabel(int firstSquareOnRank) {
@@ -48,7 +49,7 @@ public abstract class AbstractDisplayer {
     }
 
     protected void appendRankSuffix() {
-        display.append("|\n");
+        display.append("|"+EOL);
     }
 
     private void appendDelimiter() {
@@ -56,7 +57,7 @@ public abstract class AbstractDisplayer {
     }
 
     protected void appendFileLabels() {
-        display.append("    a b c d e f g h\n");
+        display.append("    a b c d e f g h"+EOL);
     }
 
     abstract void appendPiece(Position position, int currentSquare);

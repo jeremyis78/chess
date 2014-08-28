@@ -32,7 +32,7 @@ public class DefaultGenerator {
     
     public int[] generateMoves(int side, int depth) {
         // Generate legal moves from this position
-        int[] moves = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
+        int[] moves = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50 and 70
         if (!getBaseMoveGenerator().isAttacked(g, side, g.getPosition().getKingSquare(side))){
             generateCaptures(moves, side, depth);
             generateNonCaptures(moves, side, depth);

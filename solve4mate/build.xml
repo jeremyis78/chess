@@ -66,7 +66,7 @@
 	</target>
 
 	<target name="dist" depends="compile" description="generate the distribution">
-		<jar jarfile="${build}/breaker-${DSTAMP}.jar" basedir="${classes.dir}">
+		<jar jarfile="${build}/engine.jar" basedir="${classes.dir}">
 			<fileset dir="${classes.dir}" excludes="**/*Test.class"/>
 			<zipfileset includes="**/*.class" src="lib/log4j-1.2.15.jar"/>
 			<manifest>
@@ -150,6 +150,17 @@
 			<report format="frames" todir="${reports.html.dir}" />
 		</junitreport>
 		<open-for-viewing file="${reports.html.dir}/index.html"/>
+	</target>
+
+	<target name="test-int" depends="init,dist,prepare-test">
+		<java jar="${build}/engine.jar"
+		           fork="true"
+		           failonerror="true"
+		           maxmemory="128m"
+				   input="data/uci-test-input.txt"
+			       output="${build}/engine-output.txt"
+			>
+       </java>
 	</target>
 
 	<target name="coverage-check">

@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.search.SearchInfo;
+import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.FenParser;
@@ -64,6 +65,8 @@ public class SolveForMate {
         String filename = args[0];
         List<Puzzle> puzzles = readPuzzleFile(filename);
         Solver solver = new Solver();
+        int threeSeconds = 3 * 1000;
+        solver.setSearchParams(SearchParams.forOnePosition(threeSeconds));
         
         for(Puzzle puzzle: puzzles){
             displayHeader(puzzle);

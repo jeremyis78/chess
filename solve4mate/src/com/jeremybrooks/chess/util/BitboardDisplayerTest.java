@@ -23,19 +23,19 @@ public class BitboardDisplayerTest {
         
         String initialBoard = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
         Position p = FenParser.parsePieceBoard(initialBoard);
-        String expectedPieceBitboards =
-                "   -----------------\n" +
-                        "8 | r n b q - b n r |\n" +
-                        "7 | p p p p p p p p |\n" +
-                        "6 | - - - - - - - - |\n" +
-                        "5 | - - - - - - - - |\n" +
-                        "4 | - - - - - - - - |\n" +
-                        "3 | - - - - - - - - |\n" +
-                        "2 | P P P P P P P P |\n" +
-                        "1 | R N B Q - B N R |\n" +
-                        "   -----------------\n" +
-                        "    a b c d e f g h\n";
-        assertEquals(expectedPieceBitboards, bitboardDisplayer.formatBoard(p));
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("   -----------------");
+        expected.append("8 | r n b q - b n r |");
+        expected.append("7 | p p p p p p p p |");
+        expected.append("6 | - - - - - - - - |");
+        expected.append("5 | - - - - - - - - |");
+        expected.append("4 | - - - - - - - - |");
+        expected.append("3 | - - - - - - - - |");
+        expected.append("2 | P P P P P P P P |");
+        expected.append("1 | R N B Q - B N R |");
+        expected.append("   -----------------");
+        expected.append("    a b c d e f g h");
+        assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
     }
 
     @Test
@@ -43,19 +43,19 @@ public class BitboardDisplayerTest {
     {
         String board = "rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR";
         Position p = FenParser.parsePieceBoard(board);
-        String expectedPieceBitboards =
-                "   -----------------\n" +
-                        "8 | r n b q - b n r |\n" +
-                        "7 | p p p - p p p p |\n" +
-                        "6 | - - - - - - - - |\n" +
-                        "5 | - - - P - - - - |\n" +
-                        "4 | - - - - - - - - |\n" +
-                        "3 | - - - - - - - - |\n" +
-                        "2 | P P P P - P P P |\n" +
-                        "1 | R N B Q - B N R |\n" +
-                        "   -----------------\n" +
-                        "    a b c d e f g h\n";
-        Assert.assertEquals(expectedPieceBitboards, bitboardDisplayer.formatBoard(p));
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("   -----------------");
+        expected.append("8 | r n b q - b n r |");
+        expected.append("7 | p p p - p p p p |");
+        expected.append("6 | - - - - - - - - |");
+        expected.append("5 | - - - P - - - - |");
+        expected.append("4 | - - - - - - - - |");
+        expected.append("3 | - - - - - - - - |");
+        expected.append("2 | P P P P - P P P |");
+        expected.append("1 | R N B Q - B N R |");
+        expected.append("   -----------------");
+        expected.append("    a b c d e f g h");
+        Assert.assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
     }
 
     @Test
@@ -63,18 +63,18 @@ public class BitboardDisplayerTest {
     {
         String board = "q1n5/1P3p2/2P5/8/1K6/5b2/k6P/7R";
         Position p = FenParser.parsePieceBoard(board);
-        String expectedPieceBitboards =
-                "   -----------------\n" +
-                        "8 | q - n - - - - - |\n" +
-                        "7 | - P - - - p - - |\n" +
-                        "6 | - - P - - - - - |\n" +
-                        "5 | - - - - - - - - |\n" +
-                        "4 | - - - - - - - - |\n" +
-                        "3 | - - - - - b - - |\n" +
-                        "2 | - - - - - - - P |\n" +
-                        "1 | - - - - - - - R |\n" +
-                        "   -----------------\n" +
-                        "    a b c d e f g h\n";
-        Assert.assertEquals(expectedPieceBitboards, bitboardDisplayer.formatBoard(p));
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("   -----------------");
+        expected.append("8 | q - n - - - - - |");
+        expected.append("7 | - P - - - p - - |");
+        expected.append("6 | - - P - - - - - |");
+        expected.append("5 | - - - - - - - - |");
+        expected.append("4 | - - - - - - - - |");
+        expected.append("3 | - - - - - b - - |");
+        expected.append("2 | - - - - - - - P |");
+        expected.append("1 | - - - - - - - R |");
+        expected.append("   -----------------");
+        expected.append("    a b c d e f g h");
+        Assert.assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
     }
 }

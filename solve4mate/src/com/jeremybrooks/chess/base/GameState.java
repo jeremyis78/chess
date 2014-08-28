@@ -90,7 +90,7 @@ public class GameState {
 
         numberOfLegalMoves = new int[maxMoves];
         moves = new int[100];
-        movesValue = new int[100]; 
+        movesValue = new int[100];
 
         for (int moveNumber = 0;
                 moveNumber < maxMoves;
@@ -538,11 +538,5 @@ public class GameState {
 
     private boolean isEnPassantCapture(int moving, int to, int captured) {
         return moving == PAWN && captured == PAWN && to == getEnPassantSquare();
-    }
-
-    public /* HACK: for debugging only.  FIXME: move to client code; class isn't responsible for displaying itself */
-    void display(){
-        AbstractDisplayer displayer = new Displayer();
-        System.out.println(displayer.formatBoard(pos));
     }
 }
