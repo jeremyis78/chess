@@ -20,8 +20,10 @@ import java.util.Iterator;
  * DiagonalIterator di =  new ConcreteImplementation(2)
  * while(di.hasNext())
  * {
- *      int currentSquareIndex = di.next();
- *   //use the index to access that bit within the bitboard
+ *      int currentIndex  = di.nextIndex(); // value is within [0..lengthOfDiagonal-1]
+ *      int currentSquare = di.next();     // value is within [0..63]
+ *      //use currentSquare to access that bit within the bitboard
+ *      //for proper usage of nextIndex() the call must occur BEFORE the call to next();
  * }
  * </code>
  * </pre>
@@ -29,11 +31,15 @@ import java.util.Iterator;
  * @author jeremy
  *
  */
+/**
+ * @author jeremy
+ *
+ */
 public abstract class DiagonalIterator implements Iterator<Integer>
 {
     private static final int LENGTH[] = {1,2,3,4,5,6,7,8,7,6,5,4,3,2,1};
-    protected int diagonal;
-    protected int index;
+    protected int diagonal;  //identifies the diagonal number (zero-based, [0..14])
+    protected int index;     //identifies the index into the diagonal (zero-based, [0..diagLen-1])
 
     public DiagonalIterator(int diagonalIndex)
     {
@@ -56,6 +62,18 @@ public abstract class DiagonalIterator implements Iterator<Integer>
     @Override
     public Integer next() {
         return new Integer(startSquare() + (numberOfNextSquares() * nextSquareOffset())); //G34 and/or G6
+    }
+    
+    /**
+     * Gets the internal zero-based index within the diagonal (NOT the value of next()!), where
+     * the first index in a diagonal is zero, the next is one, and so forth until, the length of
+     * the diagonal-1 is reached.
+     * When next() is called this index will determine how many offsets by which to multiply
+     * to get the correct next square.
+     * @see #next()
+     */
+    public int nextIndex() {
+        return index;
     }
 
     private int numberOfNextSquares() {  //G20

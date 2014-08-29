@@ -8,7 +8,7 @@ import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Square;
 
 public class RightDiagonalIteratorTest {
-    private static final String EOL = "\n";
+    static final String EOL = "\n";
     private static final String DIAGONAL_SQUARES = 
             "h1" + EOL + 
             "g1 h2" + EOL + 
@@ -25,7 +25,7 @@ public class RightDiagonalIteratorTest {
             "a6 b7 c8" + EOL + 
             "a7 b8" + EOL + 
             "a8";
-    
+
     @Test
     public void testInvalidConstructionWithAnInvalidDiagonalIndex()
     {
@@ -59,9 +59,13 @@ public class RightDiagonalIteratorTest {
             if(notFirst) sb.append("\n");
             else notFirst = true;
             
+            int expectedNextIndex = 0;
             while(it.hasNext())
             {
+                assertTrue(it.nextIndex() < it.diagonalLength());
+                assertEquals(expectedNextIndex, it.nextIndex());
                 sb.append(Square.named(it.next()) + " ");
+                expectedNextIndex++;
             }
             sb.deleteCharAt(sb.length()-1);
         }

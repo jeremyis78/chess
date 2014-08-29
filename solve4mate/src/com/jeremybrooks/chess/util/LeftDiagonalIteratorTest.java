@@ -59,9 +59,13 @@ public class LeftDiagonalIteratorTest {
             if(notFirst) sb.append("\n");
             else notFirst = true;
             
+            int expectedNextIndex = 0;
             while(it.hasNext())
             {
+                assertTrue(it.nextIndex() < it.diagonalLength());
+                assertEquals(expectedNextIndex, it.nextIndex());
                 sb.append(Square.named(it.next()) + " ");
+                expectedNextIndex++;
             }
             sb.deleteCharAt(sb.length()-1);
         }
