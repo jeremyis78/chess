@@ -308,10 +308,10 @@ public class Attacks {
         byte temp = 0;
         switch (x+y){
         case 0: 
-            temp = 0;                           //h1-h1 diag
+            temp = 0;                          //h1-h1 diag
             break;
         case 1: 
-            temp = 0;                            //g1-h2 diag
+            temp = 0;                          //g1-h2 diag
             break;
         case 2: 
             temp = (byte)((b >> 3+1) & 1);     //f1-h3 diag
@@ -338,13 +338,13 @@ public class Attacks {
             temp = (byte)((b >> 43+1) & 15);   //a3-f8 diag
             break;
         case 10: 
-            temp = (byte)((b >> 49+1) & 7);   //a4-e8 diag
+            temp = (byte)((b >> 49+1) & 7);    //a4-e8 diag
             break;
         case 11: 
-            temp = (byte)((b >> 54+1) & 3);   //a5-d8 diag
+            temp = (byte)((b >> 54+1) & 3);    //a5-d8 diag
             break;
         case 12: 
-            temp = (byte)((b >> 58+1) & 1);   //a6-c8 diag
+            temp = (byte)((b >> 58+1) & 1);    //a6-c8 diag
             break;
         case 13: 
             temp = 0;                          //a7-b8 diag
@@ -356,35 +356,35 @@ public class Attacks {
         return temp;
     }
     
-    public static final long maskFor(int square){         return INSTANCE.mask[square]; }
-    public static final long mask90For(int square){     return INSTANCE.mask90[square]; }
-    public static final long mask45RFor(int square){     return INSTANCE.mask45R[square]; }
-    public static final long mask45LFor(int square){     return INSTANCE.mask45L[square]; }
-    public static final long maskPlus1(int square){        return INSTANCE.plus1[square]; }
-    public static final long maskPlus7(int square){        return INSTANCE.plus7[square]; }
-    public static final long maskPlus8(int square){        return INSTANCE.plus8[square]; }
-    public static final long maskPlus9(int square){        return INSTANCE.plus9[square]; }
-    public static final long maskMinus1(int square){    return INSTANCE.minus1[square]; }
-    public static final long maskMinus7(int square){    return INSTANCE.minus7[square]; }
-    public static final long maskMinus8(int square){    return INSTANCE.minus8[square]; }
-    public static final long maskMinus9(int square){    return INSTANCE.minus9[square]; }
+    public static final long maskFor(int square){     return INSTANCE.mask[square]; }
+    public static final long mask90For(int square){   return INSTANCE.mask90[square]; }
+    public static final long mask45RFor(int square){  return INSTANCE.mask45R[square]; }
+    public static final long mask45LFor(int square){  return INSTANCE.mask45L[square]; }
+    public static final long maskPlus1(int square){   return INSTANCE.plus1[square]; }
+    public static final long maskPlus7(int square){   return INSTANCE.plus7[square]; }
+    public static final long maskPlus8(int square){   return INSTANCE.plus8[square]; }
+    public static final long maskPlus9(int square){   return INSTANCE.plus9[square]; }
+    public static final long maskMinus1(int square){  return INSTANCE.minus1[square]; }
+    public static final long maskMinus7(int square){  return INSTANCE.minus7[square]; }
+    public static final long maskMinus8(int square){  return INSTANCE.minus8[square]; }
+    public static final long maskMinus9(int square){  return INSTANCE.minus9[square]; }
     
     public Attacks(){
-      _GenAllMasks();
-      genBaseAttacks();
-      genRankAttacks();
-      genFileAttacks();
-      genDiagonal45DegreesRightAttacks();
-      genDiagonal45DegreesLeftAttacks();
-      genWhitePawnAttacks();
-      genBlackPawnAttacks();
-      genKingKnightAttacks();
+      generateMasks();
+      generateBaseAttacks();
+      generateRankAttacks();
+      generateFileAttacks();
+      generateDiagonal45DegreesRightAttacks();
+      generateDiagonal45DegreesLeftAttacks();
+      generateWhitePawnAttacks();
+      generateBlackPawnAttacks();
+      generateKingKnightAttacks();
     }
 
-    private void _GenAllMasks(){
-          log.info("generating masks");
-          genMask();
-          genMask90();
+    private void generateMasks(){
+        log.trace("generating masks");
+        genMask();
+        genMask90();
 
         genMask45DegreesRight();
         genMask45DegreesLeft();
@@ -395,12 +395,11 @@ public class Attacks {
         long m = 1;
         for(int currentSquare=Bitmap.A1; currentSquare <= Bitmap.H8; currentSquare++){
             mask[currentSquare] = m << currentSquare;
-            //out.printf("0x%08X\n", mask[i]);
         }
     }
   
     private void genMask90() {
-        int squareIndex = 0;  //runs from 0 to 63 inclusive
+        int squareIndex = 0;
         for(int lastSquareOnFile=Bitmap.A8; 
                 lastSquareOnFile <= Bitmap.H8;
                 lastSquareOnFile++)
@@ -416,7 +415,7 @@ public class Attacks {
     }
 
     private void genMask45DegreesRight(){
-          log.info("generating single-bit bitmasks rotated 45 deg right");
+        log.trace("generating single-bit bitmasks rotated 45 deg right");
 
         int squareIndex = 0;
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
@@ -431,7 +430,7 @@ public class Attacks {
     }
     
     private void genMask45DegreesLeft(){
-          log.info("generating single-bit bitmasks rotated 45 deg left");
+          log.trace("generating single-bit bitmasks rotated 45 deg left");
 
         int squareIndex = 0;
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
@@ -446,7 +445,7 @@ public class Attacks {
     }
     
     private void genMasksPlusMinus(){
-          log.info("generating plus/minus masks");
+        log.trace("generating plus/minus masks");
 
         //For each square, generate the masks plusN and minusN where N is {1,7,8,9}
         //Also, there should never be more than 7 squares attacked 
@@ -496,7 +495,7 @@ public class Attacks {
     }
 
 
-    private void genBaseAttacks(){
+    private void generateBaseAttacks(){
     /*
      *  Generate RANK (base) attacks from squares a1 to h1
      *
@@ -531,7 +530,7 @@ public class Attacks {
      *    ROF        
      **************************************************************************
      */
-          log.info("generating base attacks");
+        log.trace("generating base attacks");
         
         //These shouldn't exceeded what would fit in a byte
         //We use int's because shifting in java always upcasts to an int anyway
@@ -604,9 +603,8 @@ public class Attacks {
     }
 
     
-    private void genRankAttacks(){
-        //Generate RANK attacks for all squares (a1 to h8)
-          log.info("generating rank attacks");
+    private void generateRankAttacks(){
+        log.trace("generating rank attacks");
 
         int shift;
         for (int sq = Bitmap.A1; sq <= Bitmap.H8; ++sq){
@@ -618,42 +616,43 @@ public class Attacks {
         }
     }
 
-    private void genFileAttacks(){
-    //Generate FILE attacks for all squares (a1 to h8)
-    //A graphic of the board rotated 90 degrees left.
-    //The position of the square in the graphic represent the bit positions
-    //within the bitboard/bitmap.  For example, the 56 square in the lower
-    //left represents the 2^0 bit in the bitmap because it's in the LSB's spot.
-    //Also, the 18 square represents the 2^21 bit in the bitboard/bitmap.
-    //To read the 64bit int from this graphic, start in the lower left (the LSB)
-    //and read it from left to right until you reach the     is read from
-    //the lower left to the upper right
-//                                                       MSB
-//                                                       /
-//               8    7    6    5    4    3    2    1   /
-//             |----|----|----|----|----|----|----|----|
-//           h | 63 | 55 | 47 | 39 | 31 | 23 | 15 | 07 |
-//             |----|----|----|----|----|----|----|----|
-//           g | 62 | 54 | 46 | 38 | 30 | 22 | 14 | 06 |
-//             |----|----|----|----|----|----|----|----|
-//           f | 61 | 53 | 45 | 37 | 29 | 21 | 13 | 05 |
-//             |----|----|----|----|----|----|----|----|
-//           e | 60 | 52 | 44 | 36 | 28 | 20 | 12 | 04 |
-//             |----|----|----|----|----|----|----|----|    
-//           d | 59 | 51 | 43 | 35 | 27 | 19 | 11 | 03 |    
-//             |----|----|----|----|----|----|----|----|    
-//           c | 58 | 50 | 42 | 34 | 26 | 18 | 10 | 02 |    
-//             |----|----|----|----|----|----|----|----|
-//           b | 57 | 49 | 41 | 33 | 25 | 17 | 09 | 01 |    
-//             |----|----|----|----|----|----|----|----|    
-//           a | 56 | 48 | 40 | 32 | 24 | 16 | 08 | 00 |    
-//             |----|----|----|----|----|----|----|----|
-//            /  8    7    6    5    4    3    2    1
-//           /
-//        LSB
-    //
-    //
-          log.info("generating file attacks");
+    private void generateFileAttacks(){
+        log.trace("generating file attacks");
+        
+        //Generate FILE attacks for all squares (a1 to h8)
+        //A graphic of the board rotated 90 degrees left.
+        //The position of the square in the graphic represent the bit positions
+        //within the bitboard/bitmap.  For example, the 56 square in the lower
+        //left represents the 2^0 bit in the bitmap because it's in the LSB's spot.
+        //Also, the 18 square represents the 2^21 bit in the bitboard/bitmap.
+        //To read the 64bit int from this graphic, start in the lower left (the LSB)
+        //and read it from left to right until you reach the     is read from
+        //the lower left to the upper right
+        //                                                       MSB
+        //                                                       /
+        //               8    7    6    5    4    3    2    1   /
+        //             |----|----|----|----|----|----|----|----|
+        //           h | 63 | 55 | 47 | 39 | 31 | 23 | 15 | 07 |
+        //             |----|----|----|----|----|----|----|----|
+        //           g | 62 | 54 | 46 | 38 | 30 | 22 | 14 | 06 |
+        //             |----|----|----|----|----|----|----|----|
+        //           f | 61 | 53 | 45 | 37 | 29 | 21 | 13 | 05 |
+        //             |----|----|----|----|----|----|----|----|
+        //           e | 60 | 52 | 44 | 36 | 28 | 20 | 12 | 04 |
+        //             |----|----|----|----|----|----|----|----|    
+        //           d | 59 | 51 | 43 | 35 | 27 | 19 | 11 | 03 |    
+        //             |----|----|----|----|----|----|----|----|    
+        //           c | 58 | 50 | 42 | 34 | 26 | 18 | 10 | 02 |    
+        //             |----|----|----|----|----|----|----|----|
+        //           b | 57 | 49 | 41 | 33 | 25 | 17 | 09 | 01 |    
+        //             |----|----|----|----|----|----|----|----|    
+        //           a | 56 | 48 | 40 | 32 | 24 | 16 | 08 | 00 |    
+        //             |----|----|----|----|----|----|----|----|
+        //            /  8    7    6    5    4    3    2    1
+        //           /
+        //        LSB
+        //
+        //
 
         byte mask = 1;
         int rankNumber, maskindex;
@@ -669,9 +668,8 @@ public class Attacks {
         } 
     }
 
-
-    private void genDiagonal45DegreesRightAttacks(){
-          log.info("generating diagonal attacks 45 deg right (a1-h8)");
+    private void generateDiagonal45DegreesRightAttacks(){
+        log.trace("generating diagonal attacks 45 deg right (a1-h8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             RightDiagonalIterator rightDiagIterator = new RightDiagonalIterator(d);
             int len = rightDiagIterator.diagonalLength();
@@ -680,15 +678,16 @@ public class Attacks {
             for (int i=0; i < len ; i++){
                 //And finally, one loop for each occupation combination
                 int sq = rightDiagIterator.next();
-                for (byte occupationCombination = 0; occupationCombination <= maxOccupationCombination; occupationCombination++){
+                byte occupationCombination = 0;
+                for (; occupationCombination <= maxOccupationCombination; occupationCombination++){
                     R45[sq][occupationCombination] = getDiagonalSet(base[i][occupationCombination], new RightDiagonalIterator(d));
                 }
             }
         }
     }
 
-    private void genDiagonal45DegreesLeftAttacks(){
-          log.info("generating diagonal attacks 45 deg left (h1-a8)");
+    private void generateDiagonal45DegreesLeftAttacks(){
+        log.trace("generating diagonal attacks 45 deg left (h1-a8)");
         for(int d = 0; d < 15; d++){ //one loop for each diagonal
             LeftDiagonalIterator leftDiagIterator = new LeftDiagonalIterator(d);
             int len = leftDiagIterator.diagonalLength();
@@ -699,7 +698,8 @@ public class Attacks {
             {
                 int currentSquare = leftDiagIterator.next();
                 //And finally, one loop for each occupied combination
-                for (byte occupationCombination = 0; occupationCombination <= maxOccupationCombination; occupationCombination++){
+                byte occupationCombination = 0;
+                for (; occupationCombination <= maxOccupationCombination; occupationCombination++){
                     L45[currentSquare][occupationCombination] = getDiagonalSet(base[i][occupationCombination], new LeftDiagonalIterator(d));
                 }
                 i++;
@@ -743,7 +743,7 @@ public class Attacks {
         return (bitmap & (1 << index)) != 0;
     }
 
-    private void genWhitePawnAttacks(){ //G30 functions should do one thing
+    private void generateWhitePawnAttacks(){ //G30 functions should do one thing
         int white = 0;
         int square;
         int offsetForAttackingRight = 9; //G19
@@ -754,7 +754,7 @@ public class Attacks {
         //can be on legally) because MoveGenerator.isAttacked()
         //uses it.
         
-          log.info("generating white pawn attacks");
+        log.trace("generating white pawn attacks");
         for (square = Bitmap.A1; square <= Bitmap.H7; square++){
             //Use these conditionals below to ensure we don't "go off the board" and
             //all accesses to the mask[64] array are valid. We'll get an AIOOB if 
@@ -771,7 +771,7 @@ public class Attacks {
         }
     }
 
-    private void genBlackPawnAttacks(){ //G30
+    private void generateBlackPawnAttacks(){ //G30
         int black = 1;
         int square;
         int offsetForAttackingLeft = -7; //G19
@@ -782,7 +782,7 @@ public class Attacks {
         //can be on legally) because MoveGenerator.isAttacked()
         //uses it.
 
-          log.info("generating black pawn attacks");
+        log.trace("generating black pawn attacks");
         for (square = Bitmap.H8; square >= Bitmap.A2; square--){
             //Use these conditionals below to ensure we don't "go off the board" and
             //all accesses to the mask[64] array are valid. We'll get an AIOOB if 
@@ -799,7 +799,7 @@ public class Attacks {
         }
     }
 
-    private void genKingKnightAttacks(){  //violates G30 by doing more than one thing, both king AND knight
+    private void generateKingKnightAttacks(){  //violates G30 by doing more than one thing, both king AND knight
         //A 5x5 grid of squares, indexed from 0 to 24, can represent the
         //squares a king or knight can move to.  The piece rests
         //on square 12 (12th bit if zero-indexed) in the 5X5 grid.  
@@ -825,7 +825,7 @@ public class Attacks {
         //      or knight5x5 is always zero because you can't make a move to the 
         //      square you're already on, i.e. Nf3-f3 or Kg7-g7
 
-          log.info("generating king/knight attacks");
+        log.trace("generating king/knight attacks");
 
         int king5x5        = 0x000729C0;
         int knight5x5    = 0x00A8822A;
