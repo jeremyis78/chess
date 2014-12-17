@@ -1,6 +1,6 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -75,9 +75,114 @@ public class UciDriverTest {
         Assert.assertEquals(expected.toString(),out.toString());
     }
 
+    @Test
+    public void givenPositionStartPosAndMovesIncludesCastling() throws Exception {
+        
+        /*
+         * Fischer-Myagmarsuren, Sousse Interzonal 1967
+         * (King's Indian Attack)
+         * 
+         * 1. e4 e6
+         * 2. d3 d5
+         * 3. Nd2 Nf6
+         * 4. g3 c5
+         * 5. Bg2 Nc6
+         * 6. Ngf3 Be7
+         * 7. 0-0 0-0
+         */
+        String input = "position startpos";
+        input       += " moves e2e4 e7e6 d2d3 d7d5 b1d2 g8f6 g2g3 c7c5 f1g2 b8c6 g1f3 f8e7 e1g1 e8g8";
+        driver.execute(input);
+        assertNoOutputOrErr();
+        driver.execute("diagram");
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("   -----------------");
+        expected.append("8 | r - b q - r k - |");
+        expected.append("7 | p p - - b p p p |");
+        expected.append("6 | - - n - p n - - |");
+        expected.append("5 | - - p p - - - - |");
+        expected.append("4 | - - - - P - - - |");
+        expected.append("3 | - - - P - N P - |");
+        expected.append("2 | P P P N - P B P |");
+        expected.append("1 | R - B Q - R K - |");
+        expected.append("   -----------------");
+        expected.append("    a b c d e f g h");
+        expected.append("");
+        Assert.assertEquals(expected.toString(),out.toString());
+    }
+
+    @Test
+    public void givenPositionFenAndMovesIncludesCaptures() throws Exception {
+        
+        /*
+         * Fischer-Myagmarsuren, Sousse Interzonal 1967
+         * (King's Indian Attack)
+         * 
+         * 1. e4 e6
+         * 2. d3 d5
+         * 3. Nd2 Nf6
+         * 4. g3 c5
+         * 5. Bg2 Nc6
+         * 6. Ngf3 Be7
+         * 7. 0-0 0-0 (initial fen)
+         * 
+         * 8.  e5 Nd7-
+         * 9.  Re1 b5-
+         * 10. Nf1 b4-
+         * 11. h4 a5
+         * 12. Bf4 a4
+         * 13. a3 bxa3
+         * 14. bxa3 Na5
+         * 
+         */
+        String input = "position fen r1bq1rk1/pp2bppp/2n1pn2/2pp4/4P3/3P1NP1/PPPN1PBP/R1BQ1RK1 w - - 0 8";
+        input       += " moves e4e5 f6d7 f1e1 b7b5 d2f1 b5b4 h2h4 a7a5 c1f4 a5a4 a2a3 b4a3 b2a3 c6a5";
+        driver.execute(input);
+        assertNoOutputOrErr();
+        driver.execute("diagram");
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("   -----------------");
+        expected.append("8 | r - b q - r k - |");
+        expected.append("7 | - - - n b p p p |");
+        expected.append("6 | - - - - p - - - |");
+        expected.append("5 | n - p p P - - - |");
+        expected.append("4 | p - - - - B - P |");
+        expected.append("3 | P - - P - N P - |");
+        expected.append("2 | - - P - - P B - |");
+        expected.append("1 | R - - Q R N K - |");
+        expected.append("   -----------------");
+        expected.append("    a b c d e f g h");
+        expected.append("");
+        Assert.assertEquals(expected.toString(),out.toString());
+    }
+
+    @Test
+    public void givenPositionInvalidToken() throws Exception {
+        String input = "position invalid";
+        try 
+        {
+            driver.execute(input);
+            fail("an invalid token should throw");
+        } catch (Exception e) {
+            assertTrue(e instanceof IllegalArgumentException);
+            //assertEquals("must be good", e.getMessage());
+        }
+    }
+
     
-    public void testStartSearch() {
-        fail("Not yet implemented");
+    @Test
+    public void testGo() throws Exception {
+        fail("fix this so it passes without having to know the specific numbers for time, nodes, etc");
+        String input = "position startpos";
+        driver.execute(input);
+        assertNoOutputOrErr();
+        driver.execute("go wtime 1000 winc 0 btime 1000 binc 0 depth 4");
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("info depth \\d+ time \\d+ nodes \\d+ nps \\d+ pv .*");
+        expected.append("info bestmove g2g3");
+        expected.append("");
+        //Assert.assertEquals(expected.toString(),out.toString());
+        Assert.assertTrue(out.toString().matches(expected.toString()));
     }
 
     

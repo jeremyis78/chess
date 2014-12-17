@@ -18,6 +18,7 @@ import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.search.ScoredMove;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
@@ -259,19 +260,37 @@ public class UciDriver {
 
     public void startSearch(int depth) throws IOException {
         SearchInfo info = engine.search(gameState, depth);
-        String fmt = "info depth %d time %d nodes %d nps %.0f";
+        ScoredMove bestMove = info.getBestLine()[0];
+        String uciBestMove = toUciMove(bestMove);
+        String uciPvMoves = toUciMoves(info.getBestLine());
+        String fmt = "info depth %d time %d nodes %d nps %.0f pv %s";
         sendResponse(fmt,
                 depth,
                 info.getElapsedTime(),
                 info.getNodeCount(),
-                info.getNodesPerSecond());
-        int bestMove = info.getBestLine()[0].getMove();
-        String uciBestMove = formatUciMove(bestMove);
+                info.getNodesPerSecond(),
+                uciPvMoves);
         respond("info bestmove " + uciBestMove);
-        respond("info bestline " + info.getSolutionMoves());
+//        respond("info bestline " + info.getSolutionMoves());
     }
 
-    private static String formatUciMove(int move) {
+    private static String toUciMoves(ScoredMove[] bestLine) {
+        StringBuilder pvLine = new StringBuilder();
+        for(ScoredMove move: bestLine)
+        {
+            String uciMove = toUciMove(move);
+            pvLine.append(uciMove);
+            pvLine.append(" ");
+        }
+        return pvLine.toString();
+    }
+
+    private static String toUciMove(ScoredMove move)
+    {
+        return toUciMove(move.getMove());
+    }
+    
+    private static String toUciMove(int move) {
         int fromSquare = move & 0x3F;
         int toSquare = (move >> 6) & 0x3F;
         return named(fromSquare) + named(toSquare);
