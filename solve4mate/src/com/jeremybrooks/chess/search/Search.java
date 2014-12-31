@@ -6,6 +6,9 @@ package com.jeremybrooks.chess.search;
 
 import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.UciDriver;
@@ -301,8 +304,8 @@ public class Search {
             return score;
         }
 
-        int[] moves = generateMoves(side, depth);
-        if(isMaxDepthOrHasNoMoves(depth, moves.length)){
+        List<Integer> moves = generateLegalMoves(side, depth);
+        if(isMaxDepthOrHasNoMoves(depth, moves.size())){
             return evaluate(side, depth);
         }
         int numMoves = g.numberOfLegalMoves[depth];
@@ -310,7 +313,7 @@ public class Search {
             log.trace("num moves at depth " + depth + ": "+numMoves);
         for(int i=0; i<numMoves /* && timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
-            int move = moves[i];
+            int move = moves.get(i);
             if(depth == 0)
             {
                 String moveStr = Util.displayMoveStr(move, false, false);
@@ -321,8 +324,8 @@ public class Search {
             int val = min(alpha,beta,Util.opposing(side),depth+1); //recurse!
             g.undoMove(move, side==WHITE);
             if(depth==0){
-                g.moves[i] = move;
-                g.movesValue[i] = val;
+                g.moves.add(move);
+                g.movesValue.add(val);
             }
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
@@ -391,8 +394,8 @@ public class Search {
             return score;
         }
 
-        int[] moves = generateMoves(side, depth);
-        if(isMaxDepthOrHasNoMoves(depth, moves.length)){
+        List<Integer> moves = generateLegalMoves(side, depth);
+        if(isMaxDepthOrHasNoMoves(depth, moves.size())){
             return evaluate(side, depth);
         }
         int numMoves = g.numberOfLegalMoves[depth];
@@ -400,7 +403,7 @@ public class Search {
             log.trace("num moves at depth " + depth + ": "+numMoves);
         for(int i=0; i<numMoves /*&& timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
-            int move = moves[i];
+            int move = moves.get(i);
             if(depth == 0)
             {
                 String moveStr = Util.displayMoveStr(move, false, false);
@@ -411,8 +414,8 @@ public class Search {
             int val = max(alpha,beta,Util.opposing(side),depth+1);  //recurse!
             g.undoMove(move, side==WHITE);
             if(depth==0){
-                g.moves[i] = move;
-                g.movesValue[i] = val;
+                g.moves.add(move);
+                g.movesValue.add(val);
             }
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
@@ -441,16 +444,8 @@ public class Search {
         return isMaxDepth || numMoves == 0;
     }
 
-    protected int[] generateMoves(int side, int depth) {
-        // Generate legal moves from this position
-        int[] moves = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES]; //how many moves are there actually? fails with 50
-        if (!moveGenerator.isAttacked(g, side, g.getPosition().getKingSquare(side))){
-            moveGenerator.generateCaptures(moves, side, depth);
-            moveGenerator.generateNonCaptures(moves, side, depth);
-        } else {
-            moveGenerator.generateKingEscapes(moves, side, depth);
-        }
-        return moves;
+    protected List<Integer> generateLegalMoves(int side, int depth) {
+        return moveGenerator.generateMoves(side, depth);
     }
 
     //

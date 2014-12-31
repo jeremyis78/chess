@@ -436,7 +436,7 @@ public class MoveGeneratorTest {
         Set<String> moves = new HashSet<>();
         for(int i=0; i < numberOfLegalMoves; i++)
         {
-            String s = Util.displayMoveStr(g.moves[i], false, false); 
+            String s = Util.displayMoveStr(g.moves.get(i), false, false); 
             moves.add(s);
         }
         return moves;

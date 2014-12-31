@@ -1,5 +1,7 @@
 package com.jeremybrooks.chess.movegen;
 
+import java.util.List;
+
 import com.jeremybrooks.chess.base.GameState;
 
 /**
@@ -24,7 +26,7 @@ public interface Generator {
      * @param depth the depth at which these moves will be generated
      * @return the number of moves generated
      */
-    public int generate(int[] moves, int side, int depth);
+    public int generate(List<Integer> moves, int side, int depth);
 
     public boolean isAttacked(GameState g, int side, int sq);
     

@@ -193,7 +193,7 @@ public class Evaluator {
     boolean isCheckMated(GameState g, int side, int depth)
     {
         //Does king have legal moves?
-        int moves[] = new int[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
+        List<Integer> moves = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
         int numMoves = mg.generateKingEscapes(moves, side, depth);
         //number of moves may be helpful for evaluation tuning because 1 or 2 moves
         //limits the branching factor so that could be use to feed into the overall evaluation score

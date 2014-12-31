@@ -2,6 +2,8 @@ package com.jeremybrooks.chess.movegen;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
+import java.util.List;
+
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.util.Util;
@@ -9,7 +11,7 @@ import com.jeremybrooks.chess.util.Util;
 public class EscapeGenerator extends AbstractGenerator {
 
     @Override
-    public int generate(int[] moves, int side, int depth) {
+    public int generate(List<Integer> moves, int side, int depth) {
         int checker;
         int n;
         int from = 0;
@@ -92,7 +94,7 @@ public class EscapeGenerator extends AbstractGenerator {
 //                        System.err.print("Adding pawn captures and promotes to any piece: ");
 //                        Util.displayMove(move, false, false);
                         for (pro = QUEEN; pro >= KNIGHT; pro--) {
-                            moves[n++] = Util.EncodeMove(from,checker, mover,cap,PIECE[pro]);
+                            moves.add(Util.EncodeMove(from,checker, mover,cap,PIECE[pro])); n++;
                             //g.legalMoves[depth]++;
                         }
                     }
@@ -107,7 +109,7 @@ public class EscapeGenerator extends AbstractGenerator {
                         if (isLegal(g, move, side)){
 //                            System.err.print("Added pawn captures via en-passant: ");
 //                            Util.displayMove(move, false, false);
-                            moves[n++] = move;
+                            moves.add(move); n++;
                             //g.legalMoves[depth]++;
                         }
                     }                
@@ -117,7 +119,7 @@ public class EscapeGenerator extends AbstractGenerator {
                     if (isLegal(g, move, side)){
 //                        System.err.print("Added capture the checking piece: ");
 //                        Util.displayMove(move, false, false);
-                        moves[n++] = move;
+                        moves.add(move); n++;
                         //g.legalMoves[depth]++;
                         //g.addMove (move);
                     }
@@ -190,7 +192,7 @@ public class EscapeGenerator extends AbstractGenerator {
                     //cap = abs (g.pos.board[to]);
 //                    System.err.print("Adding king captures one of two checking pieces: ");
 //                    Util.displayMove(move, false, false);
-                    moves[n++] = move;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
+                    moves.add(move); n++;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
                 }
 
                 kingMoves = clearBit(kingMoves, to);
@@ -213,7 +215,7 @@ public class EscapeGenerator extends AbstractGenerator {
             if ( isLegal(g, move, side)){
 //                System.err.print("Adding king escapes via flight square: ");
 //                Util.displayMove(move, false, false);
-                moves[n++] = move;
+                moves.add(move); n++;
             }
             kingMoves = clearBit(kingMoves, to);
         }

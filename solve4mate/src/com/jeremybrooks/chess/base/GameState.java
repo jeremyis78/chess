@@ -6,12 +6,14 @@ package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 import static com.jeremybrooks.chess.base.Square.*;
-import static com.jeremybrooks.chess.util.Util.*;
+import static com.jeremybrooks.chess.util.Util.opposing;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.util.AbstractDisplayer;
-import com.jeremybrooks.chess.util.Displayer;
+import com.jeremybrooks.chess.movegen.AbstractGenerator;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
@@ -66,8 +68,8 @@ public class GameState {
      * So they should be refactored into Search or a search context object
      */
     public /* HACK: FIXME make private */ int numberOfLegalMoves[];  //no. of moves at this depth
-    public /* HACK: FIXME make private */ int moves[];             //legal moves from this state
-    public /* HASK: FIXME make private */int movesValue[];        //minimax value of the moves from this state 
+    public /* HACK: FIXME make private */ List<Integer> moves;       //legal moves from this state
+    public /* HASK: FIXME make private */ List<Integer> movesValue;           //minimax value of the moves from this state 
     
 
     public GameState()
@@ -89,8 +91,8 @@ public class GameState {
         posInfo = new PositionInfo[maxMoves];
 
         numberOfLegalMoves = new int[maxMoves];
-        moves = new int[100];
-        movesValue = new int[100];
+        moves = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
+        movesValue = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
 
         for (int moveNumber = 0;
                 moveNumber < maxMoves;

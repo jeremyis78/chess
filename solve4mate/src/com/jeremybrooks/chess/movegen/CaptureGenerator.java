@@ -2,6 +2,8 @@ package com.jeremybrooks.chess.movegen;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
+import java.util.List;
+
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
@@ -10,7 +12,7 @@ import com.jeremybrooks.chess.util.Util;
 public class CaptureGenerator extends AbstractGenerator {
 
     @Override
-    public int generate(int[] moves, int side, int depth) {
+    public int generate(List<Integer> moves, int side, int depth) {
         // This includes pawns that capture to promote to a Q,R,B,N
 
         int to = 0;
@@ -47,7 +49,7 @@ public class CaptureGenerator extends AbstractGenerator {
                         {
                             to = enPassantSquare;
                             cap = PIECE[PAWN];
-                            moves[n++] = Util.EncodeMove (from, to, PIECE[PAWN], cap, 0);
+                            moves.add(Util.EncodeMove (from, to, PIECE[PAWN], cap, 0)); n++;
                         }
                     }
                     break;
@@ -70,20 +72,20 @@ public class CaptureGenerator extends AbstractGenerator {
                         //if((piece)p == KING && !isAttacked(g, side, to)){
                         if(p == KING){
                             if(isLegal(g, move, side)){
-                                moves[n++] = move;
+                                moves.add(move); n++;
                             }
                         } else {
-                            moves[n++] = move;
+                            moves.add(move); n++;
                         }
                     } else {        //Capture and promotion
                         int move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[QUEEN]);
                         if(isLegal(g, move, side)) //can't move if pinned
                         {
-                            moves[n++] = move;
+                            moves.add(move); n++;
                             //If the queen promotion is legal the other promotion choices will be too
                             for (int i = ROOK; i >= KNIGHT; i--) {
                                 move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
-                                moves[n++] = move;
+                                moves.add(move); n++;
                             }
                         }
                     }

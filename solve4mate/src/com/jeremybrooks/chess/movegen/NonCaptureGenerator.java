@@ -3,6 +3,8 @@ package com.jeremybrooks.chess.movegen;
 import static com.jeremybrooks.chess.base.Bitmap.*;
 import static com.jeremybrooks.chess.base.Square.*;
 
+import java.util.List;
+
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Pawn;
 import com.jeremybrooks.chess.base.Piece;
@@ -14,7 +16,7 @@ import com.jeremybrooks.chess.util.Util;
 public class NonCaptureGenerator extends AbstractGenerator {
 
     @Override
-    public int  generate(int[] moves, int side, int depth) {
+    public int  generate(List<Integer> moves, int side, int depth) {
         long pieces;
         long pMoves = 0;
         long advanceTwo = 0;
@@ -49,7 +51,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
             to = lowestBitNumber(promoters);
             from = squareBehind(to, side);
             for (int i = QUEEN; i >= KNIGHT; i--) {
-                moves[n++] = Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
+                moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i])); n++;
                 //g.legalMoves[depth]++;
                 //g.addMove (move);
             }
@@ -62,7 +64,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
             int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
             if(isLegal(g, move, side)) //can't move if pinned
             {
-                moves[n++] = move;
+                moves.add(move); n++;
             }
             advanceTwo = clearBit(advanceTwo, to);
         }
@@ -73,7 +75,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
             int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
             if(isLegal(g, move, side)) //can't move if pinned
             {
-                moves[n++] = move;
+                moves.add(move); n++;
             }
             pMoves = clearBit(pMoves, to);
         }
@@ -97,10 +99,10 @@ public class NonCaptureGenerator extends AbstractGenerator {
                     if (p == KING){
                         if (!isAttacked(g, side, to)){
                         //if(isLegal(g, move, side)){
-                            moves[n++] = move;
+                            moves.add(move); n++;
                         }
                     } else {
-                        moves[n++] = move;
+                        moves.add(move); n++;
                     }
                     pMoves = clearBit(pMoves, to);
                 }
@@ -116,18 +118,18 @@ public class NonCaptureGenerator extends AbstractGenerator {
         switch (side) {
         case Bitmap.WHITE:
             if(canWhiteShortCastle(g, side)){
-                moves[n++] = Util.EncodeMove(E1,G1,PIECE[KING],0,0);
+                moves.add(Util.EncodeMove(E1,G1,PIECE[KING],0,0)); n++;
             }
             if(canWhiteLongCastle(g, side)){
-                moves[n++] = Util.EncodeMove(E1,C1,PIECE[KING],0,0);
+                moves.add(Util.EncodeMove(E1,C1,PIECE[KING],0,0)); n++;
             }
             break;
         case Bitmap.BLACK:
             if(canBlackShortCastle(g, side)){
-                moves[n++] = Util.EncodeMove(E8,G8,PIECE[KING],0,0);
+                moves.add(Util.EncodeMove(E8,G8,PIECE[KING],0,0)); n++;
             }
             if(canBlackLongCastle(g, side)){
-                moves[n++] = Util.EncodeMove(E8,C8,PIECE[KING],0,0);
+                moves.add(Util.EncodeMove(E8,C8,PIECE[KING],0,0)); n++;
             }
             break;
         }

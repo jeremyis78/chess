@@ -6,6 +6,8 @@ package com.jeremybrooks.chess.movegen;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
+import java.util.List;
+
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
@@ -79,7 +81,7 @@ public abstract class AbstractGenerator implements Generator {
     // Generate moves to any squares that are set in 'targets'
     // Side effect: g.legalMoves[depth] has the number of moves
     // found in this function added to it.
-    protected int GenerateInterpositions (GameState g, int moves[], int side, int depth,
+    protected int GenerateInterpositions (GameState g, List<Integer> moves, int side, int depth,
                                  long targets)
     {
         //TODO: finished this function...now just call it from
@@ -137,7 +139,7 @@ public abstract class AbstractGenerator implements Generator {
                 {    
                     for (int i = QUEEN; i >= KNIGHT; i--)
                     {
-                        moves[n++] = Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]);
+                        moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i])); n++;
                         numip++;
                         //g.legalMoves[depth]++;
                         //g.addMove (move);
@@ -157,7 +159,7 @@ public abstract class AbstractGenerator implements Generator {
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
                 if(isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0), side)){
-                    moves[n++] = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
+                    moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, 0)); n++;
                     numip++;
                 }
             }
@@ -175,7 +177,7 @@ public abstract class AbstractGenerator implements Generator {
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
                 int encodedMove = Util.EncodeMove(from, to, PIECE[PAWN], 0, 0);
                 if(isLegal(g, encodedMove, side)){
-                    moves[n++] = encodedMove;
+                    moves.add(encodedMove); n++;
                     numip++;
                 }
             }
@@ -205,7 +207,7 @@ public abstract class AbstractGenerator implements Generator {
                     //if (!isPinned(g, from, to, PIECE[p], 0)){
                     int encodedMove = Util.EncodeMove(from, to, PIECE[p], 0, 0);
                     if(isLegal(g, encodedMove, side)){
-                       moves[n++] = encodedMove;
+                       moves.add(encodedMove); n++;
                        numip++;
                        //g.legalMoves[depth]++;
                        //g.addMove (move);
