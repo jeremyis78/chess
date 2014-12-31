@@ -12,20 +12,17 @@ import com.jeremybrooks.chess.util.Util;
 public class CaptureGenerator extends AbstractGenerator {
 
     @Override
-    public int generate(List<Integer> moves, int side, int depth) {
+    public void generate(List<Integer> moves, int side, int depth) {
         // This includes pawns that capture to promote to a Q,R,B,N
 
         int to = 0;
         int from = 0;
         int cap = 0;
         int pro = 0;
-        int n;       //move index counter
         int mover;
         long pieces;
         long pieceAttacks = 0;    //must be zeroed
         long attackedPieces;      //as in "the enemy pieces that are attacked"
-
-        n = g.numberOfLegalMoves[depth];
 
         for (int p = PAWN; p <= KING; p++) {
             mover = PIECE[p];
@@ -49,7 +46,7 @@ public class CaptureGenerator extends AbstractGenerator {
                         {
                             to = enPassantSquare;
                             cap = PIECE[PAWN];
-                            moves.add(Util.EncodeMove (from, to, PIECE[PAWN], cap, 0)); n++;
+                            moves.add(Util.EncodeMove (from, to, PIECE[PAWN], cap, 0));
                         }
                     }
                     break;
@@ -72,20 +69,20 @@ public class CaptureGenerator extends AbstractGenerator {
                         //if((piece)p == KING && !isAttacked(g, side, to)){
                         if(p == KING){
                             if(isLegal(g, move, side)){
-                                moves.add(move); n++;
+                                moves.add(move);
                             }
                         } else {
-                            moves.add(move); n++;
+                            moves.add(move);
                         }
                     } else {        //Capture and promotion
                         int move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[QUEEN]);
                         if(isLegal(g, move, side)) //can't move if pinned
                         {
-                            moves.add(move); n++;
+                            moves.add(move);
                             //If the queen promotion is legal the other promotion choices will be too
                             for (int i = ROOK; i >= KNIGHT; i--) {
                                 move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
-                                moves.add(move); n++;
+                                moves.add(move);
                             }
                         }
                     }
@@ -94,8 +91,6 @@ public class CaptureGenerator extends AbstractGenerator {
                 pieces = clearBit(pieces, from);
             }
         }
-        g.numberOfLegalMoves[depth] = n;
-        return g.numberOfLegalMoves[depth];
     }
 
 }

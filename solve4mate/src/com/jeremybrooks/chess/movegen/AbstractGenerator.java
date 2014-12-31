@@ -18,8 +18,6 @@ import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Util;
 
 /**
- * TODO: Make the move generator functions return an int[]
- * of moves and remove the depth variable being passed in
  * 
  * @author jeremy
  *
@@ -44,51 +42,21 @@ public abstract class AbstractGenerator implements Generator {
     public void setGameState(GameState gameState) {
         this.g = gameState;
     }
-    
-    //These functions return the occupied status (middle six bits)
-    //of a Rank, File or Diagonal.  For a diagonal (R45, L45) whose length
-    //is not always 8 it returns the diagonal length minus the outer 2 bits
-    //for the occupied status  
-
-
-
-
-    
-    //
-    // The move generation functions
-    //
-    // I followed generating the moves in a piece-wise fashion.
-    // The move generation is divided up into three sections:
-    //  1) captures (includes captures and all pawn promotions) 
-    //  2) non-captures 
-    //  3) king escapes (moves for when the king is in check)
-    //
-    // This allows me the flexibility to add things like quiescent search
-    // which helps minimize the horizon effect by extending the search until
-    // only a "quiet" position is encountered.  Basically it means to finish
-    // of any sequence of captures before evaluating the board position.
-    // Having piece-wise move generation allows me to only generate captures
-    // when in the future I write the quiescent search.
 
     public static boolean morePieces(long pieceBoard)
     {
         return pieceBoard != 0;
     }
 
-
-
-    //
     // Generate moves to any squares that are set in 'targets'
-    // Side effect: g.legalMoves[depth] has the number of moves
-    // found in this function added to it.
-    protected int GenerateInterpositions (GameState g, List<Integer> moves, int side, int depth,
+    protected void generateInterpositions (GameState g, List<Integer> moves, int side, int depth,
                                  long targets)
     {
         //TODO: finished this function...now just call it from
         //      GenerateInCheckMoves() where appropriate.
         if(!Util.bool(targets))
         {
-            return 0;
+            return;
         }
         long pieces;
         long pMoves;
@@ -96,9 +64,6 @@ public abstract class AbstractGenerator implements Generator {
         long promoters;
         long empty;
         int to, from;
-        int n;
-
-        int numip = 0;
 
         //***************************************************************************
         //*                                                                         *
@@ -106,8 +71,6 @@ public abstract class AbstractGenerator implements Generator {
         //*                                                                         *
         //***************************************************************************
 
-        n = g.numberOfLegalMoves[depth];
-        //n = 0;
         Position position = g.getPosition();
         long allPiecesByRank = position.getAllPieces(0);
         empty = ~allPiecesByRank;
@@ -139,10 +102,7 @@ public abstract class AbstractGenerator implements Generator {
                 {    
                     for (int i = QUEEN; i >= KNIGHT; i--)
                     {
-                        moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i])); n++;
-                        numip++;
-                        //g.legalMoves[depth]++;
-                        //g.addMove (move);
+                        moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]));
                     }
                 }
             }
@@ -159,8 +119,7 @@ public abstract class AbstractGenerator implements Generator {
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
                 if(isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0), side)){
-                    moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, 0)); n++;
-                    numip++;
+                    moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, 0));
                 }
             }
             advanceTwo = clearBit(advanceTwo, to);
@@ -177,8 +136,7 @@ public abstract class AbstractGenerator implements Generator {
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
                 int encodedMove = Util.EncodeMove(from, to, PIECE[PAWN], 0, 0);
                 if(isLegal(g, encodedMove, side)){
-                    moves.add(encodedMove); n++;
-                    numip++;
+                    moves.add(encodedMove);
                 }
             }
             pMoves = clearBit(pMoves, to);
@@ -207,18 +165,13 @@ public abstract class AbstractGenerator implements Generator {
                     //if (!isPinned(g, from, to, PIECE[p], 0)){
                     int encodedMove = Util.EncodeMove(from, to, PIECE[p], 0, 0);
                     if(isLegal(g, encodedMove, side)){
-                       moves.add(encodedMove); n++;
-                       numip++;
-                       //g.legalMoves[depth]++;
-                       //g.addMove (move);
+                       moves.add(encodedMove);
                     }
                     pMoves = clearBit(pMoves, to);
                 }
                 pieces = clearBit(pieces, from);
             }
         }
-        //g.legalMoves[depth] = n;
-        return numip;//g.legalMoves[depth];
     }
 
     public boolean isAttacked(GameState g, int side, int sq)
@@ -357,9 +310,9 @@ public abstract class AbstractGenerator implements Generator {
 
         //Save the king square in case the king is the moving piece
         //int kingSq = g.pos.kingSq[side];
-        g.makeMove(move, side);
+        g.makeMove(move, WHITE==side);
         legal = !isAttacked(g, side, g.getPosition().getKingSquare(side));  //use the saved king square
-        g.undoMove(move, side);
+        g.undoMove(move, WHITE==side);
         return legal;
     }
     

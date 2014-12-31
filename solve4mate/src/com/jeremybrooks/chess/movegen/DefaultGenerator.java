@@ -7,6 +7,10 @@ import com.jeremybrooks.chess.base.GameState;
 
 public class DefaultGenerator {
 
+    public static ArrayList<Integer> newMoveList() {
+        return new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
+    }
+
     private Generator capturesGenerator;
     private Generator nonCapturesGenerator;
     private Generator escapeGenerator;
@@ -35,7 +39,7 @@ public class DefaultGenerator {
     
     public List<Integer> generateMoves(int side, int depth) {
         // Generate legal moves from this position
-        List<Integer> moves = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
+        List<Integer> moves = DefaultGenerator.newMoveList();
         if (!getBaseMoveGenerator().isAttacked(g, side, g.getPosition().getKingSquare(side))){
             generateCaptures(moves, side, depth);
             generateNonCaptures(moves, side, depth);
@@ -45,23 +49,19 @@ public class DefaultGenerator {
         return moves;
     }
     
-    // Side effect: g.legalMoves[depth] has the number of moves
-    // found in this function added to it after this function completes
-    public int generateCaptures(List<Integer> moves, int side, int depth)
+    public void generateCaptures(List<Integer> moves, int side, int depth)
     {
-        return capturesGenerator.generate(moves, side, depth);
+        capturesGenerator.generate(moves, side, depth);
     }
 
-    // Side effect: g.legalMoves[depth] has the number of moves
-    // found in this function added to it after this function completes
-    public int generateNonCaptures(List<Integer> moves, int side, int depth)
+    public void generateNonCaptures(List<Integer> moves, int side, int depth)
     {
-        return nonCapturesGenerator.generate(moves, side, depth);
+        nonCapturesGenerator.generate(moves, side, depth);
     }
     
-    public int generateKingEscapes(List<Integer> moves, int side, int depth)
+    public void generateKingEscapes(List<Integer> moves, int side, int depth)
     {
-        return escapeGenerator.generate(moves, side, depth);
+        escapeGenerator.generate(moves, side, depth);
     }
 
     public boolean isAttacked(GameState g2, int side, int square) {

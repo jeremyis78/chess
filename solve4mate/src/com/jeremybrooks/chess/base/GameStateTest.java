@@ -202,7 +202,6 @@ public class GameStateTest {
     
     @Test
     public void testMakeAndUndoWhitePawnCapturesEnPassant() {
-        System.out.println("**** start test");
         String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 2 23";
         int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
         String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";
@@ -410,10 +409,10 @@ public class GameStateTest {
             i++;
         }
         FenBuilder fb = new FenBuilder();
-        Displayer d = new Displayer();
-        System.out.println(d.formatBoard(gameState.getPosition()));
+//        Displayer d = new Displayer();
+//        System.out.println(d.formatBoard(gameState.getPosition()));
         fb.appendPieceBoard(gameState.getPosition());
-        System.out.println(fb.toString());
+//        System.out.println(fb.toString());
         //Create 13...Qd8-a8
         int move = 0;
         move = Bitmap.D8;

@@ -1,15 +1,16 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.BISHOP;
+import static com.jeremybrooks.chess.base.Bitmap.PAWN;
+import static com.jeremybrooks.chess.base.Bitmap.QUEEN;
+import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
-import com.jeremybrooks.chess.movegen.AbstractGenerator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
@@ -193,12 +194,12 @@ public class Evaluator {
     boolean isCheckMated(GameState g, int side, int depth)
     {
         //Does king have legal moves?
-        List<Integer> moves = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
-        int numMoves = mg.generateKingEscapes(moves, side, depth);
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        mg.generateKingEscapes(moves, side, depth);
         //number of moves may be helpful for evaluation tuning because 1 or 2 moves
         //limits the branching factor so that could be use to feed into the overall evaluation score
         Position position = g.getPosition();
-        if (numMoves == 0 &&   mg.isAttacked(g, side, position.getKingSquare(side)))
+        if (moves.size() == 0 && mg.isAttacked(g, side, position.getKingSquare(side)))
         {
             return true;
         }

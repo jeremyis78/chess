@@ -355,7 +355,7 @@ public class MoveGeneratorTest {
 //        fail("not implemented yet");
 //    }
 
-    public void testPrintingMoves() {
+    public void tryPrintingMoves() {
         
         String[] positions = new String[]{
                 "r1b2k1r/1pQn2pp/pP2p3/2p1Pp1N/B2p2q1/B2P4/P1P2PPP/R3K2R w KQ f6 0 1"
@@ -372,9 +372,10 @@ public class MoveGeneratorTest {
             g.set(position);
             displayBoardAndSideToMove();
             int depth = 0;
-            mg.generateCaptures(g.moves, g.isWhiteToMove()?0:1, depth);
-            mg.generateNonCaptures(g.moves, g.isWhiteToMove()?0:1, depth);
-            Set<String> generatedMoves = formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+            List<Integer> moves = DefaultGenerator.newMoveList();
+            mg.generateCaptures(moves, g.isWhiteToMove()?0:1, depth);
+            mg.generateNonCaptures(moves, g.isWhiteToMove()?0:1, depth);
+            Set<String> generatedMoves = toCoordinateMoveSet(moves);
             
             String allMoves = "blah"; 
             assertMovesAreEqual(toSet(allMoves), generatedMoves);
@@ -386,9 +387,10 @@ public class MoveGeneratorTest {
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
         int depth = 0;
-        mg.generateCaptures(g.moves, side, depth);
-        mg.generateNonCaptures(g.moves, side, depth);
-        return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        mg.generateCaptures(moves, side, depth);
+        mg.generateNonCaptures(moves, side, depth);
+        return toCoordinateMoveSet(moves);
     }
 
     private Set<String> generateCaptures(String positionFen) {
@@ -396,8 +398,9 @@ public class MoveGeneratorTest {
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
         int depth = 0;
-        mg.generateCaptures(g.moves, side, depth);
-        return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        mg.generateCaptures(moves, side, depth);
+        return toCoordinateMoveSet(moves);
     }
     
     private Set<String> generateNonCaptures(String positionFen) {
@@ -405,8 +408,9 @@ public class MoveGeneratorTest {
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
         int depth = 0;
-        mg.generateNonCaptures(g.moves, side, depth);
-        return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        mg.generateNonCaptures(moves, side, depth);
+        return toCoordinateMoveSet(moves);
     }
     
     private Set<String> generateKingEscapes(String positionFen) {
@@ -414,8 +418,9 @@ public class MoveGeneratorTest {
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
         int depth = 0;
-        mg.generateKingEscapes(g.moves, side, depth);
-        return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        mg.generateKingEscapes(moves, side, depth);
+        return toCoordinateMoveSet(moves);
     }
 
     private void displayBoardAndSideToMove() {
@@ -432,14 +437,14 @@ public class MoveGeneratorTest {
 //        return formatGameStatesCoordinateMoveSet(g.numberOfLegalMoves[depth]);
 //    }
 
-    private Set<String> formatGameStatesCoordinateMoveSet(int numberOfLegalMoves) {
-        Set<String> moves = new HashSet<>();
-        for(int i=0; i < numberOfLegalMoves; i++)
+    private Set<String> toCoordinateMoveSet(List<Integer> moveList) {
+        Set<String> moveSet = new HashSet<>();
+        for(int move: moveList)
         {
-            String s = Util.displayMoveStr(g.moves.get(i), false, false); 
-            moves.add(s);
+            String s = Util.displayMoveStr(move, false, false); 
+            moveSet.add(s);
         }
-        return moves;
+        return moveSet;
     }
     
     private static Set<String> toSet(String movesInCSV)

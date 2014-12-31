@@ -8,23 +8,39 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
 import static com.jeremybrooks.chess.base.Square.*;
 import static com.jeremybrooks.chess.util.Util.opposing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.movegen.AbstractGenerator;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
 import com.jeremybrooks.chess.util.ZobristKey;
 
 /**
- * GameState contains a board representation and flags or metadata.
+ * GameState contains a board representation and flags for each move that was made.
  * 
- * The flags are castling status, en passant target squares,
+ * The flags are castling status, the en passant target square,
  * the halfmove clock and full move number.
  *
+ *  makeMove() updates the board to make the given move on the internal
+ *  representation, updates the side to move, and increments the 
+ *  numberOfMovesMade (getNumberOfMovesMade()). 
+ *  
+ *  undoMove() reverses the changes made by the given move, reverts side
+ *  to move and decrements numberOfMovesMade.
+ *  
+ *  numberOfMovesMade is akin to ply or depth in other engines; it does NOT represent 
+ *  the full move clock or move number.  For example, after
+ *  <pre>
+ *  -----------------------------------------------------------------------
+ *  | Chess Notation |              GameState members                     |
+ *  |---------------------------------------------------------------------|
+ *  |                |     numberOfMovesMade  halfMoveNumber   moveNumber | 
+ *  |    1. e4       |            1                  0             1      |
+ *  |    1...e5      |            2                  0             1      |
+ *  |    2. Nc3      |            3                  1             2      |
+ *  |    2...Nf6     |            4                  2             2      |
+ *  -----------------------------------------------------------------------
+ *  </pre>
  *  TODO: Board!!!!! (that's the best name for this class which would
  *  contain a Pieces (formerly Position) class (BoardStack might
  *  be more accurate, given it's a stack of states/boards)
@@ -44,33 +60,12 @@ public class GameState {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     public static final int MAX_NUM_MOVES_MADE = 150; //N2: far better than 'max depth' in this context
-    private static final int NO_CASTLING_ALLOWED = 0;
 
     private Position pos;
     private PositionInfo[] posInfo;
-
-    /**
-     *  Represents the number of moves (i.e. black moves a pawn) applied to
-     *  this game state.  For example, after
-     *     MoveNumber    Move   numberOfMovesMade    halfMoveNumber  
-     *     1.            e4            1                    0
-     *     1.             ... e5       2                    0
-     *     2.             Nc3          3                    1
-     *     2.             ... Nf6      4                    2
-     */
     private int numberOfMovesMade = 0; // N2 !! choose names at appropriate abstraction level
     private int maxNumberOfMovesMade;
     private boolean whiteToMove = true;
-    
-    
-    /*
-     * TODO: The following member vars are not related to the state of the game (board or flags)
-     * So they should be refactored into Search or a search context object
-     */
-    public /* HACK: FIXME make private */ int numberOfLegalMoves[];  //no. of moves at this depth
-    public /* HACK: FIXME make private */ List<Integer> moves;       //legal moves from this state
-    public /* HASK: FIXME make private */ List<Integer> movesValue;           //minimax value of the moves from this state 
-    
 
     public GameState()
     {
@@ -89,16 +84,10 @@ public class GameState {
         maxNumberOfMovesMade = maxNumberOfMovesToSupport;
         int maxMoves = maxNumberOfMovesToSupport + 1;
         posInfo = new PositionInfo[maxMoves];
-
-        numberOfLegalMoves = new int[maxMoves];
-        moves = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
-        movesValue = new ArrayList<>(AbstractGenerator.MAX_NUM_GENERATED_MOVES);
-
         for (int moveNumber = 0;
                 moveNumber < maxMoves;
                 moveNumber++){
             posInfo[moveNumber] = new PositionInfo();
-            numberOfLegalMoves[moveNumber] = 0;
         }             
         posInfo[0].setMoveNumber(1);
         posInfo[0].setCastleOptionsFromFen("KQkq");
@@ -237,7 +226,7 @@ public class GameState {
     /**
      * Makes the given move and updates the board's state accordingly.
      * 
-     * After calling this method you can expect the current depth will be
+     * After calling this method you can expect the numberOfMovesMade will be
      * incremented by 1 and {@code g.isWhiteToMove() == !isWhitesMove}.  The move number, 
      * castling flags, enPassant square, and half move clock are also updated.
      * 
@@ -363,9 +352,6 @@ public class GameState {
         int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
         int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
         
-        // Undo any moves made here at this depth
-        // by setting legalMoves to zero.
-        numberOfLegalMoves[numberOfMovesMade] = 0;
         posInfo[numberOfMovesMade].setReversiblePlies(0); //Is this needed???
         
         //Undo the depth

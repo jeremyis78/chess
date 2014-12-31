@@ -11,9 +11,8 @@ import com.jeremybrooks.chess.util.Util;
 public class EscapeGenerator extends AbstractGenerator {
 
     @Override
-    public int generate(List<Integer> moves, int side, int depth) {
+    public void generate(List<Integer> moves, int side, int depth) {
         int checker;
-        int n;
         int from = 0;
         int to = 0;
         int mover = 0;
@@ -29,8 +28,6 @@ public class EscapeGenerator extends AbstractGenerator {
         long interpose = 0;
         long kingMoves;
 
-        n = g.numberOfLegalMoves[depth];
-        //n = 0;
         Position position = g.getPosition();
         kingSq = position.getKingSquare(side);
         checkers = attackers(g, side, position.getKingSquare(side));
@@ -94,8 +91,7 @@ public class EscapeGenerator extends AbstractGenerator {
 //                        System.err.print("Adding pawn captures and promotes to any piece: ");
 //                        Util.displayMove(move, false, false);
                         for (pro = QUEEN; pro >= KNIGHT; pro--) {
-                            moves.add(Util.EncodeMove(from,checker, mover,cap,PIECE[pro])); n++;
-                            //g.legalMoves[depth]++;
+                            moves.add(Util.EncodeMove(from,checker, mover,cap,PIECE[pro]));
                         }
                     }
                 } else if (TO_PIECE[mover] == PAWN && g.hasEnPassantOption()){
@@ -109,8 +105,7 @@ public class EscapeGenerator extends AbstractGenerator {
                         if (isLegal(g, move, side)){
 //                            System.err.print("Added pawn captures via en-passant: ");
 //                            Util.displayMove(move, false, false);
-                            moves.add(move); n++;
-                            //g.legalMoves[depth]++;
+                            moves.add(move);
                         }
                     }                
                 } else {
@@ -119,9 +114,7 @@ public class EscapeGenerator extends AbstractGenerator {
                     if (isLegal(g, move, side)){
 //                        System.err.print("Added capture the checking piece: ");
 //                        Util.displayMove(move, false, false);
-                        moves.add(move); n++;
-                        //g.legalMoves[depth]++;
-                        //g.addMove (move);
+                        moves.add(move);
                     }
                 }
                 capturers = clearBit(capturers, from);
@@ -177,9 +170,8 @@ public class EscapeGenerator extends AbstractGenerator {
                     //attack from northwest
                     interpose = att.plus7[kingSq] & att.minus7[checker];
                 }
-                g.numberOfLegalMoves[depth] = n;  //required for call to GenInter() below
                 //DisplayBoard(interpose);
-                n += GenerateInterpositions (g, moves, side, depth, interpose);
+                generateInterpositions (g, moves, side, depth, interpose);
             }
         } else if (Util.bitCount (checkers) == 2) {  //Two pieces checking the king
         // Add king moves that would capture either checking piece
@@ -192,9 +184,8 @@ public class EscapeGenerator extends AbstractGenerator {
                     //cap = abs (g.pos.board[to]);
 //                    System.err.print("Adding king captures one of two checking pieces: ");
 //                    Util.displayMove(move, false, false);
-                    moves.add(move); n++;//EncodeMove(kingSq, to, PIECE[KING], cap, NONE);
+                    moves.add(move);
                 }
-
                 kingMoves = clearBit(kingMoves, to);
             }
         } 
@@ -215,15 +206,10 @@ public class EscapeGenerator extends AbstractGenerator {
             if ( isLegal(g, move, side)){
 //                System.err.print("Adding king escapes via flight square: ");
 //                Util.displayMove(move, false, false);
-                moves.add(move); n++;
+                moves.add(move);
             }
             kingMoves = clearBit(kingMoves, to);
         }
-
-        //cout << "moves added: " << n << endl;
-        g.numberOfLegalMoves[depth] = n;
-        //cout << "legalMoves: " << g.legalMoves[depth] << endl;
-        return g.numberOfLegalMoves[depth];
     }
 
 }

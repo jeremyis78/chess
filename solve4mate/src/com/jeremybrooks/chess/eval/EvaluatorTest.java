@@ -62,6 +62,20 @@ public class EvaluatorTest {
     }
 
     @Test
+    public void givenCheckWithFlightSquares()
+    {
+        String fen = "8/8/8/8/5K2/pP6/8/Q4k2 b - - 0 1"; //     #Polgar #307"
+        boolean isWhiteToMove = setupState(gameState, fen);
+        int searchDepth = 0;
+        int materialAdvantage = 975; //white is up a queen
+        int mateScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
+        int expectedScore = materialAdvantage;
+        int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
+        assertTrue("king has flight squares so it should not be a mate score", actualScore < mateScore);
+        assertEquals(expectedScore, actualScore);
+    }
+
+    @Test
     public void givenBishopPair()
     {
         String whiteHasBishopPair = "7k/8/8/8/8/8/8/BB5K w - - 0 1";

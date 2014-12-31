@@ -6,12 +6,10 @@ package com.jeremybrooks.chess.search;
 
 import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.UciDriver;
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
@@ -262,10 +260,6 @@ public class Search {
     protected int alphabeta(int side, int alpha, int beta){
         int minimaxValue;
         int depth = 0;
-        
-        //Now reset the legal moves to zero so everything
-        //works correctly for the search.
-        g.numberOfLegalMoves[depth] = 0;
         moveGenerator.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
         if(side == Bitmap.WHITE){
           minimaxValue = max(alpha, beta, side, depth);
@@ -305,12 +299,12 @@ public class Search {
         }
 
         List<Integer> moves = generateLegalMoves(side, depth);
-        if(isMaxDepthOrHasNoMoves(depth, moves.size())){
+        int numMoves = moves.size();
+        if(isTrace)
+            log.trace("max player: num moves at depth " + depth + ": "+numMoves);
+        if(isMaxDepthOrHasNoMoves(depth, numMoves)){
             return evaluate(side, depth);
         }
-        int numMoves = g.numberOfLegalMoves[depth];
-        if(isTrace)
-            log.trace("num moves at depth " + depth + ": "+numMoves);
         for(int i=0; i<numMoves /* && timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves.get(i);
@@ -323,10 +317,6 @@ public class Search {
             g.makeMove(move, side==WHITE);
             int val = min(alpha,beta,Util.opposing(side),depth+1); //recurse!
             g.undoMove(move, side==WHITE);
-            if(depth==0){
-                g.moves.add(move);
-                g.movesValue.add(val);
-            }
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
             if (val >= beta){
@@ -365,6 +355,10 @@ public class Search {
             }
             pvLine[i] = newNode;
         }
+        StringBuilder pv = new StringBuilder(pvLine[0].getScore()+": ");
+        for(int i=0; i<=depth; i++) 
+            pv.append(Util.displayMoveStr(pvLine[i].getMove(), false, false)).append(" ");
+        if(showPvUpdates) log.debug("new pv: " + pv.toString());
     }
 
     // min   - returns minimum value from state 'g'
@@ -395,12 +389,12 @@ public class Search {
         }
 
         List<Integer> moves = generateLegalMoves(side, depth);
-        if(isMaxDepthOrHasNoMoves(depth, moves.size())){
+        int numMoves = moves.size();
+        if(isTrace)
+            log.trace("min player: num moves at depth " + depth + ": "+numMoves);
+        if(isMaxDepthOrHasNoMoves(depth, numMoves)){
             return evaluate(side, depth);
         }
-        int numMoves = g.numberOfLegalMoves[depth];
-        if(isTrace)
-            log.trace("num moves at depth " + depth + ": "+numMoves);
         for(int i=0; i<numMoves /*&& timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves.get(i);
@@ -413,10 +407,6 @@ public class Search {
             g.makeMove(move, side==WHITE);
             int val = max(alpha,beta,Util.opposing(side),depth+1);  //recurse!
             g.undoMove(move, side==WHITE);
-            if(depth==0){
-                g.moves.add(move);
-                g.movesValue.add(val);
-            }
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
             if (val <= alpha){   //Found a cutoff
