@@ -49,11 +49,8 @@ public abstract class AbstractGenerator implements Generator {
     }
 
     // Generate moves to any squares that are set in 'targets'
-    protected void generateInterpositions (GameState g, List<Integer> moves, int side, int depth,
-                                 long targets)
+    protected void generateInterpositions (List<Integer> moves, int side, long targets)
     {
-        //TODO: finished this function...now just call it from
-        //      GenerateInCheckMoves() where appropriate.
         if(!Util.bool(targets))
         {
             return;
@@ -174,9 +171,15 @@ public abstract class AbstractGenerator implements Generator {
         }
     }
 
-    public boolean isAttacked(GameState g, int side, int sq)
+    public boolean isAttacked(GameState g, int sideUnderAttack, int square)
     {
-        return Util.bool(attackers(g, side, sq));
+        return Util.bool(attackers(g, sideUnderAttack, square));
+    }
+
+    public boolean isNotAttacked(int square, GameState g)
+    {
+        int sideUnderAttack = g.isWhiteToMove()?0:1;
+        return !isAttacked(g, sideUnderAttack, square);
     }
 
     public long attackers(GameState g, int sideUnderAttack, int squareUnderAttack)
@@ -201,60 +204,60 @@ public abstract class AbstractGenerator implements Generator {
     }
 
     @Override
-    public boolean canWhiteShortCastle(GameState g, int side){
+    public boolean canWhiteShortCastle(GameState g){
         Position position = g.getPosition();
         if (g.hasShortCastleOption()
             && position.isEmpty(F1)
             && position.isEmpty(G1) 
-            && !isAttacked (g, side, E1)
-            && !isAttacked (g, side, F1)
-            && !isAttacked (g, side, G1)
-            && !isAttacked (g, side, H1)) {
+            && isNotAttacked(E1, g)
+            && isNotAttacked(F1, g)
+            && isNotAttacked(G1, g)
+            && isNotAttacked(H1, g)) {
             return true;
         }
         return false;
     }
 
-    public boolean canWhiteLongCastle(GameState g, int side){
+    public boolean canWhiteLongCastle(GameState g){
         Position position = g.getPosition();
         if (g.hasLongCastleOption() &&
             position.isEmpty(D1)
             && position.isEmpty(C1)
             && position.isEmpty(B1) 
-            && !isAttacked (g, side, E1)
-            && !isAttacked (g, side, D1)
-            && !isAttacked (g, side, C1)
-            && !isAttacked (g, side, B1)
-            && !isAttacked (g, side, A1)) {
+            && isNotAttacked(E1, g)
+            && isNotAttacked(D1, g)
+            && isNotAttacked(C1, g)
+            && isNotAttacked(B1, g)
+            && isNotAttacked(A1, g)) {
             return true;
         }
         return false;
     }
 
-    public boolean canBlackShortCastle(GameState g, int side){
+    public boolean canBlackShortCastle(GameState g){
         Position position = g.getPosition();
         if (g.hasShortCastleOption()
             && position.isEmpty(F8)
             && position.isEmpty(G8) 
-            && !isAttacked (g, side, E8)
-            && !isAttacked (g, side, F8)
-            && !isAttacked (g, side, G8)
-            && !isAttacked (g, side, H8)) {
+            && isNotAttacked(E8, g)
+            && isNotAttacked(F8, g)
+            && isNotAttacked(G8, g)
+            && isNotAttacked(H8, g)) {
             return true;
         }
         return false;
     }
     
-    public boolean canBlackLongCastle(GameState g, int side){
+    public boolean canBlackLongCastle(GameState g){
         Position position = g.getPosition();
         if (g.hasShortCastleOption()
             && position.isEmpty(D8)
             && position.isEmpty(C8)
             && position.isEmpty(B8) 
-            && !isAttacked (g, side, E8)
-            && !isAttacked (g, side, D8)
-            && !isAttacked (g, side, C8)
-            && !isAttacked (g, side, A8)) {
+            && isNotAttacked(E8, g)
+            && isNotAttacked(D8, g)
+            && isNotAttacked(C8, g)
+            && isNotAttacked(A8, g)) {
             return true;
         }
         return false;  

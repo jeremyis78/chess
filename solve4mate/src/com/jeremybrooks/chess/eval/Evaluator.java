@@ -195,7 +195,7 @@ public class Evaluator {
     {
         //Does king have legal moves?
         List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateKingEscapes(moves, side, depth);
+        mg.generateKingEscapes(moves, side);
         //number of moves may be helpful for evaluation tuning because 1 or 2 moves
         //limits the branching factor so that could be use to feed into the overall evaluation score
         Position position = g.getPosition();

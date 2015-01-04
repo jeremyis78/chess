@@ -17,11 +17,10 @@ public interface Generator {
      * 
      * @param moves the move list that will be populated with generated moves
      * @param side the side to move
-     * @param depth the depth at which these moves will be generated
      */
-    public void generate(List<Integer> moves, int side, int depth);
+    public void generate(List<Integer> moves, int side);
 
-    public boolean isAttacked(GameState g, int side, int sq);
+    public boolean isAttacked(GameState g, int sideUnderAttack, int squareUnderAttack);
     
     // Returns a bitbrd of the pieces (excluding the king) attacking 
     // "square".  "side" represents the color/side whose pieces we want to
@@ -37,13 +36,13 @@ public interface Generator {
     //NOTE: the king is not included in the attackers
     public long attackers(GameState g, int sideUnderAttack, int squareUnderAttack);
 
-    public boolean canWhiteShortCastle(GameState g, int side);
+    public boolean canWhiteShortCastle(GameState g);
 
-    public boolean canWhiteLongCastle(GameState g, int side);
+    public boolean canWhiteLongCastle(GameState g);
 
-    public boolean canBlackShortCastle(GameState g, int side);
+    public boolean canBlackShortCastle(GameState g);
 
-    public boolean canBlackLongCastle(GameState g, int side);
+    public boolean canBlackLongCastle(GameState g);
 
     public void setGameState(GameState gameState);
 }

@@ -373,8 +373,8 @@ public class MoveGeneratorTest {
             displayBoardAndSideToMove();
             int depth = 0;
             List<Integer> moves = DefaultGenerator.newMoveList();
-            mg.generateCaptures(moves, g.isWhiteToMove()?0:1, depth);
-            mg.generateNonCaptures(moves, g.isWhiteToMove()?0:1, depth);
+            mg.generateCaptures(moves, g.isWhiteToMove()?0:1);
+            mg.generateNonCaptures(moves, g.isWhiteToMove()?0:1);
             Set<String> generatedMoves = toCoordinateMoveSet(moves);
             
             String allMoves = "blah"; 
@@ -386,10 +386,9 @@ public class MoveGeneratorTest {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
-        int depth = 0;
         List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateCaptures(moves, side, depth);
-        mg.generateNonCaptures(moves, side, depth);
+        mg.generateCaptures(moves, side);
+        mg.generateNonCaptures(moves, side);
         return toCoordinateMoveSet(moves);
     }
 
@@ -397,9 +396,8 @@ public class MoveGeneratorTest {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
-        int depth = 0;
         List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateCaptures(moves, side, depth);
+        mg.generateCaptures(moves, side);
         return toCoordinateMoveSet(moves);
     }
     
@@ -407,9 +405,8 @@ public class MoveGeneratorTest {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
-        int depth = 0;
         List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateNonCaptures(moves, side, depth);
+        mg.generateNonCaptures(moves, side);
         return toCoordinateMoveSet(moves);
     }
     
@@ -417,9 +414,8 @@ public class MoveGeneratorTest {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         displayBoardAndSideToMove();
-        int depth = 0;
         List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateKingEscapes(moves, side, depth);
+        mg.generateKingEscapes(moves, side);
         return toCoordinateMoveSet(moves);
     }
 

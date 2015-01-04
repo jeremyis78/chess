@@ -298,7 +298,7 @@ public class Search {
             return score;
         }
 
-        List<Integer> moves = generateLegalMoves(side, depth);
+        List<Integer> moves = generateLegalMoves(side);
         int numMoves = moves.size();
         if(isTrace)
             log.trace("max player: num moves at depth " + depth + ": "+numMoves);
@@ -388,7 +388,7 @@ public class Search {
             return score;
         }
 
-        List<Integer> moves = generateLegalMoves(side, depth);
+        List<Integer> moves = generateLegalMoves(side);
         int numMoves = moves.size();
         if(isTrace)
             log.trace("min player: num moves at depth " + depth + ": "+numMoves);
@@ -434,8 +434,8 @@ public class Search {
         return isMaxDepth || numMoves == 0;
     }
 
-    protected List<Integer> generateLegalMoves(int side, int depth) {
-        return moveGenerator.generateMoves(side, depth);
+    protected List<Integer> generateLegalMoves(int side) {
+        return moveGenerator.generateMoves(side);
     }
 
     //

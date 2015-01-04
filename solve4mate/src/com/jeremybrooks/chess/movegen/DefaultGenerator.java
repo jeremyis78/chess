@@ -37,31 +37,31 @@ public class DefaultGenerator {
         return capturesGenerator;
     }
     
-    public List<Integer> generateMoves(int side, int depth) {
+    public List<Integer> generateMoves(int side) {
         // Generate legal moves from this position
         List<Integer> moves = DefaultGenerator.newMoveList();
         if (!getBaseMoveGenerator().isAttacked(g, side, g.getPosition().getKingSquare(side))){
-            generateCaptures(moves, side, depth);
-            generateNonCaptures(moves, side, depth);
+            generateCaptures(moves, side);
+            generateNonCaptures(moves, side);
         } else {
-            generateKingEscapes(moves, side, depth);
+            generateKingEscapes(moves, side);
         }
         return moves;
     }
     
-    public void generateCaptures(List<Integer> moves, int side, int depth)
+    public void generateCaptures(List<Integer> moves, int side)
     {
-        capturesGenerator.generate(moves, side, depth);
+        capturesGenerator.generate(moves, side);
     }
 
-    public void generateNonCaptures(List<Integer> moves, int side, int depth)
+    public void generateNonCaptures(List<Integer> moves, int side)
     {
-        nonCapturesGenerator.generate(moves, side, depth);
+        nonCapturesGenerator.generate(moves, side);
     }
     
-    public void generateKingEscapes(List<Integer> moves, int side, int depth)
+    public void generateKingEscapes(List<Integer> moves, int side)
     {
-        escapeGenerator.generate(moves, side, depth);
+        escapeGenerator.generate(moves, side);
     }
 
     public boolean isAttacked(GameState g2, int side, int square) {

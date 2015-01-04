@@ -16,7 +16,7 @@ import com.jeremybrooks.chess.util.Util;
 public class NonCaptureGenerator extends AbstractGenerator {
 
     @Override
-    public void  generate(List<Integer> moves, int side, int depth) {
+    public void  generate(List<Integer> moves, int side) {
         long pieces;
         long pMoves = 0;
         long advanceTwo = 0;
@@ -115,22 +115,27 @@ public class NonCaptureGenerator extends AbstractGenerator {
         //***************************************************************************
         switch (side) {
         case Bitmap.WHITE:
-            if(canWhiteShortCastle(g, side)){
-                moves.add(Util.EncodeMove(E1,G1,PIECE[KING],0,0));
+            if(canWhiteShortCastle(g)){
+                moves.add(castleMove(E1,G1));
             }
-            if(canWhiteLongCastle(g, side)){
-                moves.add(Util.EncodeMove(E1,C1,PIECE[KING],0,0));
+            if(canWhiteLongCastle(g)){
+                moves.add(castleMove(E1,C1));
             }
             break;
         case Bitmap.BLACK:
-            if(canBlackShortCastle(g, side)){
-                moves.add(Util.EncodeMove(E8,G8,PIECE[KING],0,0));
+            if(canBlackShortCastle(g)){
+                moves.add(castleMove(E8,G8));
             }
-            if(canBlackLongCastle(g, side)){
-                moves.add(Util.EncodeMove(E8,C8,PIECE[KING],0,0));
+            if(canBlackLongCastle(g)){
+                moves.add(castleMove(E8,C8));
             }
             break;
         }
+    }
+    
+    private static int castleMove(int fromSquare, int toSquare)
+    {
+        return Util.EncodeMove(fromSquare,toSquare,PIECE[KING],0,0);
     }
 
 }

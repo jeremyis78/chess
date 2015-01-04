@@ -12,7 +12,7 @@ import com.jeremybrooks.chess.util.Util;
 public class CaptureGenerator extends AbstractGenerator {
 
     @Override
-    public void generate(List<Integer> moves, int side, int depth) {
+    public void generate(List<Integer> moves, int side) {
         // This includes pawns that capture to promote to a Q,R,B,N
 
         int to = 0;

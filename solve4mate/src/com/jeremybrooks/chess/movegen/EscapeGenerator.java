@@ -11,7 +11,7 @@ import com.jeremybrooks.chess.util.Util;
 public class EscapeGenerator extends AbstractGenerator {
 
     @Override
-    public void generate(List<Integer> moves, int side, int depth) {
+    public void generate(List<Integer> moves, int side) {
         int checker;
         int from = 0;
         int to = 0;
@@ -171,7 +171,7 @@ public class EscapeGenerator extends AbstractGenerator {
                     interpose = att.plus7[kingSq] & att.minus7[checker];
                 }
                 //DisplayBoard(interpose);
-                generateInterpositions (g, moves, side, depth, interpose);
+                generateInterpositions (moves, side, interpose);
             }
         } else if (Util.bitCount (checkers) == 2) {  //Two pieces checking the king
         // Add king moves that would capture either checking piece
