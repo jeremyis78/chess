@@ -2,9 +2,7 @@ package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.base.Bitmap.BLACK;
 import static com.jeremybrooks.chess.base.Bitmap.WHITE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,10 +40,15 @@ public class EvaluatorTest {
         boolean isWhiteToMove = setupState(gameState, queenRookMate);
         int searchDepth = 0;
         int materialAdvantage = 1475 + (13 * 5); //white is up a queen and a rook (plus rook bonus for no pawns)
-        int whiteMatesBlackScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
-        int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
-        assertEquals(whiteMatesBlackScore, actualScore);
-        assertTrue("white mates black should be a negative score", actualScore > 0);
+//        int whiteMatesBlackScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
+        try {
+            int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
+            fail("should not allow eval'ing a check or mate situation");
+        } catch (IllegalStateException e) {
+            //pass
+        }
+//        assertEquals(whiteMatesBlackScore, actualScore);
+//        assertTrue("white mates black should be a negative score", actualScore > 0);
     }
     
     @Test
@@ -55,10 +58,15 @@ public class EvaluatorTest {
         boolean isWhiteToMove = setupState(gameState, backRankMate);
         int searchDepth = 0;
         int materialAdvantage = 675; //black: queen(1 * 975) minus white: pawn(3 * 100)   
-        int blackMatesWhiteScore = -1 * (Evaluator.CHECKMATE - searchDepth + materialAdvantage);
-        int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
-        assertEquals(blackMatesWhiteScore, actualScore);
-        assertFalse("black mates white should be a negative score", actualScore >= 0);
+//        int blackMatesWhiteScore = -1 * (Evaluator.CHECKMATE - searchDepth + materialAdvantage);
+        try {
+            int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
+            fail("should not allow eval'ing a check or mate situation");
+        } catch (IllegalStateException e) {
+            //pass
+        }
+//        assertEquals(blackMatesWhiteScore, actualScore);
+//        assertFalse("black mates white should be a negative score", actualScore >= 0);
     }
 
     @Test
@@ -67,12 +75,18 @@ public class EvaluatorTest {
         String fen = "8/8/8/8/5K2/pP6/8/Q4k2 b - - 0 1"; //     #Polgar #307"
         boolean isWhiteToMove = setupState(gameState, fen);
         int searchDepth = 0;
-        int materialAdvantage = 975; //white is up a queen
-        int mateScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
-        int expectedScore = materialAdvantage;
-        int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
-        assertTrue("king has flight squares so it should not be a mate score", actualScore < mateScore);
-        assertEquals(expectedScore, actualScore);
+//        int materialAdvantage = 975; //white is up a queen
+//        int mateScore = Evaluator.CHECKMATE - searchDepth + materialAdvantage;
+//        int expectedScore = materialAdvantage;
+//        int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
+        try {
+            int actualScore = evaluate(gameState, isWhiteToMove, searchDepth);
+            fail("should not allow eval'ing a check or mate situation");
+        } catch (IllegalStateException e) {
+            //pass
+        }
+//      assertTrue("king has flight squares so it should not be a mate score", actualScore < mateScore);
+//        assertEquals(expectedScore, actualScore);
     }
 
     @Test
@@ -176,8 +190,6 @@ public class EvaluatorTest {
     public static Evaluator getEvaluator()
     {
         Evaluator e = new Evaluator();
-        DefaultGenerator moveGenerator = new DefaultGenerator();
-        e.setMoveGenerator(moveGenerator);
         return e;
 
     }

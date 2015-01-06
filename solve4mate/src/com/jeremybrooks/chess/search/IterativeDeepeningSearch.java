@@ -22,14 +22,14 @@ public class IterativeDeepeningSearch extends Search {
         int elapsedTimeMillis = 0;
         startTime = Util.milliTime();
         for(int depth=1;
-                depth<=getStackSize();
+                depth<=maxDepthLimit;
                 depth++)
         {
             //UciDriver.sendResponse("info depth %d time %d", depth, (Util.milliTime() - startTime));
             minimax = super.search(side, depth);
             String pvLine = getPVMoveLine();
             if(log.isDebugEnabled())
-                log.debug(depth + "-ply in " + (Util.milliTime() - startTime) + "ms" + 
+                log.debug(depth + "/" + effectiveDepth + " ply in " + (Util.milliTime() - startTime) + "ms and " + nodeCount + " nodes, " + 
                         " yielded (" + minimax + ") " + pvLine);
             if(!timer.hasTimeLeft(side, startTime)){
                 log.debug("time's up; stopping search");
@@ -38,7 +38,7 @@ public class IterativeDeepeningSearch extends Search {
             
         }
         elapsedTimeMillis = Util.milliTime() - startTime;
-        boolean mate = Math.abs(minimax) > Evaluator.CHECKMATE / 2;
+        boolean mate = Math.abs(minimax) > Search.CHECKMATE / 2;
         String solutionMoves = getPVMoveLine();
         String scoredRootMoves = getScoredRootMoves();
         info = new SearchInfo();

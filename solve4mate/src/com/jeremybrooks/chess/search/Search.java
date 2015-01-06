@@ -27,7 +27,8 @@ public class Search {
     private static final Logger log = Logger.getLogger(Search.class);
     private static transient final boolean isTrace = log.isTraceEnabled();
     private static transient final boolean showPvUpdates = false; //logs principle variation changes
-
+    private static final int MAX_STACK_SIZE  = 150; //max ply
+    
     public static final boolean SEARCH_DEBUG = false; //SEARCH_DB 
     public static final boolean DEBUG = false; //DB
     public static final boolean EVAL = false;
@@ -48,17 +49,23 @@ public class Search {
     /* 
      * Initialize search's stack depth to this value
      */
-    private int stackSize = 0;
+    protected int stackSize = 0;
+    
+    /*
+     * Maximum allowable depth limit (e.g. for a call to search(side, depthLimit))
+     */
+    protected int maxDepthLimit;
     
     /*
      * Stop the search (ie, call eval()) when the depth reaches this limit 
      */
     private int depthLimit = 0;
-    
+
+
     /*
      * The number of nodes expanded during the search (doesn't include leaf nodes currently) 
      */
-    private long nodeCount;
+    protected long nodeCount;
     
     /*
      * The line of play currently being searched, indexed by depth 
@@ -88,10 +95,21 @@ public class Search {
      * Time we started searching
      */
     protected int startTime;
+    protected int effectiveDepth;
+    
+    
 
 
     public Search() {
         super();
+        assert MAX_STACK_SIZE >= 75;
+        stackSize = MAX_STACK_SIZE;
+        maxDepthLimit = (int) (stackSize * 0.8);
+        log.debug("set stack size    to " + stackSize);
+        log.debug("set maxDepthLimit to " + maxDepthLimit);
+        pvLine = new ScoredMove[this.stackSize];
+        currentMove = new int[this.stackSize];
+        rootMove = new ScoredMove[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
     }
     
     public Search(TimeMgmt timer)
@@ -100,11 +118,6 @@ public class Search {
         this.timer = timer;
     }
     
-    public Search(int stackSize) {
-        super();
-        setStackSize(stackSize);
-    }
-
     public long getNodeCount() {
         return nodeCount;
     }
@@ -117,26 +130,10 @@ public class Search {
         this.g = gameState;
     }
 
-    public int getStackSize()
-    {
-        return stackSize;
-    }
-    
-    public void setStackSize(int size) {
-        this.stackSize = size;
-        pvLine = new ScoredMove[this.stackSize];
-        currentMove = new int[this.stackSize];
-        rootMove = new ScoredMove[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
-    }
-    
-    public int getDepthLimit() {
-        return depthLimit;
-    }
-
-    public void setDepthLimit(int depthLimit)
-    {
-        this.depthLimit = depthLimit;
-    }
+//    public void setStackSize(int size) {
+//        log.debug("set search stack size to " + size);
+//        this.stackSize = size;
+//    }
     
     public void setMoveGenerator(DefaultGenerator defaultGenerator) {
         this.moveGenerator = defaultGenerator;
@@ -207,7 +204,7 @@ public class Search {
      * @return the minimax value of the search
      */
     public int search(int side){
-        return search(side, stackSize);
+        return search(side, maxDepthLimit);
     }
 
     /**
@@ -217,8 +214,12 @@ public class Search {
      *
      * @return the minimax value of the search
      */
-    public int search(int side, int depthLimit){
-        setDepthLimit(depthLimit);
+    public int search(int side, int depthLimit)
+    {
+        if(depthLimit > maxDepthLimit)
+            throw new IllegalArgumentException("depthLimit " + depthLimit 
+                    + " cannot exceed " + maxDepthLimit);
+        this.depthLimit = depthLimit;
         int minimax = alphabetaMaxWindow(side);
         return minimax;
     }
@@ -261,10 +262,11 @@ public class Search {
         int minimaxValue;
         int depth = 0;
         moveGenerator.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
+        boolean quiescentSearch = false;
         if(side == Bitmap.WHITE){
-          minimaxValue = max(alpha, beta, side, depth);
+          minimaxValue = max(alpha, beta, side, depth, quiescentSearch);
         } else {
-          minimaxValue = min(alpha, beta, side, depth);
+          minimaxValue = min(alpha, beta, side, depth, quiescentSearch);
         }
         return minimaxValue;
     }
@@ -287,7 +289,7 @@ public class Search {
     //           }
     //           return alpha;
     //        }
-    protected int max(int alpha, int beta, int side, int depth){
+    protected int max(int alpha, int beta, int side, int depth, boolean quiescentSearch){
         long nodeKey = g.fullZobristKey();
         Precision nodePrecision = Precision.LOWER_BOUND;
         ScoredMove node = lookup(nodeKey);
@@ -298,13 +300,21 @@ public class Search {
             return score;
         }
 
-        List<Integer> moves = generateLegalMoves(side);
+        if(isMaxDepth(depth) && !quiescentSearch){
+            return quiescentSearch(alpha, beta, side, depth);
+        }
+        boolean dangerousMovesOnly = quiescentSearch ? true : false;
+        List<Integer> moves = generateLegalMoves(side, dangerousMovesOnly);
         int numMoves = moves.size();
         if(isTrace)
-            log.trace("max player: num moves at depth " + depth + ": "+numMoves);
-        if(isMaxDepthOrHasNoMoves(depth, numMoves)){
-            return evaluate(side, depth);
+            log.debug("max player: num moves at depth " + depth + ": "+numMoves);
+        if(quiescentSearch && 0 == numMoves)
+        {
+            effectiveDepth = depth;
+            return g.inCheck() ? CHECKMATE - depth
+                    : evaluate(side, depth); //recursion base case, a quiet position (no captures, checks or promotions)
         }
+        
         for(int i=0; i<numMoves /* && timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves.get(i);
@@ -315,7 +325,7 @@ public class Search {
             }
             currentMove[depth] = move;
             g.makeMove(move, side==WHITE);
-            int val = min(alpha,beta,Util.opposing(side),depth+1); //recurse!
+            int val = min(alpha,beta,Util.opposing(side),depth+1,quiescentSearch); //recurse!
             g.undoMove(move, side==WHITE);
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
@@ -334,8 +344,41 @@ public class Search {
                 updatePrincipalVariationLine(g, depth, val, move);
             }
         }
+        alpha = (0 == numMoves 
+                ? scoreForNoMoves(depth, side) 
+                : alpha);
         store(nodeKey, alpha, nodePrecision, depth);
         return alpha;
+    }
+
+    private int quiescentSearch(int alpha, int beta, int side, int depth) {
+        boolean quiescentSearch = true;
+        int minimaxValue;
+        if(side == Bitmap.WHITE){
+          minimaxValue = max(alpha, beta, side, depth, quiescentSearch);
+        } else {
+          minimaxValue = min(alpha, beta, side, depth, quiescentSearch);
+        }
+        return minimaxValue;
+    }
+
+//    private int quiescentMax(int alpha, int beta, int side, int depth) {
+//        boolean searchUntilQuiescence = true;
+//        return max(alpha, beta, side, depth, searchUntilQuiescence);
+//    }
+
+    private int scoreForNoMoves(int depth, int side) 
+    {
+        //With no moves, we have either mate or stalemate
+        if(g.inCheck())
+            return scoreForMateIn(depth, side); 
+        else 
+            return 0; //drawScore, TODO what value should it be?
+    }
+
+    public int scoreForMateIn(int depth, int side) {
+        //Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
+        return (CHECKMATE - depth) * (side==WHITE?-1:+1);
     }
 
     protected void updatePrincipalVariationLine(GameState g, int depth, int score, int move) {
@@ -377,7 +420,7 @@ public class Search {
     //           }
     //           return beta;
     //        }
-    protected int min(int alpha, int beta, int side, int depth){
+    protected int min(int alpha, int beta, int side, int depth, boolean quiescentSearch){
         long nodeKey = g.fullZobristKey();
         Precision nodePrecision = Precision.UPPER_BOUND;
         ScoredMove node = lookup(nodeKey);
@@ -388,13 +431,21 @@ public class Search {
             return score;
         }
 
-        List<Integer> moves = generateLegalMoves(side);
+        if(isMaxDepth(depth) && !quiescentSearch){
+            return quiescentSearch(alpha, beta, side, depth);
+        }
+        boolean dangerousMovesOnly = quiescentSearch ? true : false;
+        List<Integer> moves = generateLegalMoves(side, dangerousMovesOnly);
         int numMoves = moves.size();
         if(isTrace)
-            log.trace("min player: num moves at depth " + depth + ": "+numMoves);
-        if(isMaxDepthOrHasNoMoves(depth, numMoves)){
-            return evaluate(side, depth);
+            log.debug("min player: num moves at depth " + depth + ": "+numMoves);
+        if(quiescentSearch && 0 == numMoves)
+        {
+            effectiveDepth = depth;
+            return g.inCheck() ? CHECKMATE - depth
+                    : evaluate(side, depth); //recursion base case, a quiet position (no captures, checks or promotions)
         }
+        
         for(int i=0; i<numMoves /*&& timer.hasTimeLeft(side, startTime, params)*/; i++){
             nodeCount++;
             int move = moves.get(i);
@@ -405,7 +456,7 @@ public class Search {
             }
             currentMove[depth] = move;
             g.makeMove(move, side==WHITE);
-            int val = max(alpha,beta,Util.opposing(side),depth+1);  //recurse!
+            int val = max(alpha,beta,Util.opposing(side),depth+1,quiescentSearch);  //recurse!
             g.undoMove(move, side==WHITE);
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
@@ -424,18 +475,26 @@ public class Search {
                 updatePrincipalVariationLine(g, depth, val, move);
             }
         }
+        beta = (0 == numMoves 
+               ? scoreForNoMoves(depth, side) 
+               : beta);
         store(nodeKey, beta, nodePrecision, depth);
         return beta;
     }
 
-    protected boolean isMaxDepthOrHasNoMoves(int depth, int numMoves) {
+//    private int quiescentMin(int alpha, int beta, int side, int depth) {
+//        boolean searchUntilQuiescence = true;
+//        return min(alpha, beta, side, depth, searchUntilQuiescence);
+//    }
+
+    protected boolean isMaxDepth(int depth) {
         boolean isMaxDepth = (depth == depthLimit);
-//        if(isMaxDepth) log.debug("max depth reached: " + depth);
-        return isMaxDepth || numMoves == 0;
+        //if(isMaxDepth) log.debug("max depth reached: " + depth);
+        return isMaxDepth;
     }
 
-    protected List<Integer> generateLegalMoves(int side) {
-        return moveGenerator.generateMoves(side);
+    protected List<Integer> generateLegalMoves(int side, boolean dangerousMovesOnly) {
+        return moveGenerator.generateMoves(side, dangerousMovesOnly);
     }
 
     //

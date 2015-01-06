@@ -24,7 +24,6 @@ public class Solver {
     public Solver() {
         DefaultGenerator mg = new DefaultGenerator();
         Evaluator eval = new Evaluator();
-        eval.setMoveGenerator(mg);
         setMoveGenerator(mg);
         setEvaluator(eval);
         search = new IterativeDeepeningSearch();
@@ -37,7 +36,6 @@ public class Solver {
     {
         assert(maxDepth <= GameState.MAX_NUM_MOVES_MADE);
         
-        search.setStackSize(maxDepth + 1);
         search.setGameState(g);
         search.setParams(searchParams);
 
@@ -50,9 +48,6 @@ public class Solver {
     public SearchInfo solve(Puzzle puzzle)
     {
         int movesToMate = puzzle.getMovesToMate();
-        int pliesForMovesToMate = getPliesToMate(movesToMate);
-        int stackSize = getStackSize(pliesForMovesToMate);
-        search.setStackSize(stackSize);
         GameState g = new GameState();
         search.setGameState(g);
         search.setParams(searchParams);
@@ -129,10 +124,6 @@ public class Solver {
 
     public void setEvaluator(Evaluator evaluator) {
         this.evaluator = evaluator;
-    }
-
-    private void setMaxSearchDepth(int maxSearchDepth) {
-        search.setStackSize(maxSearchDepth);
     }
 
     public void setSearchParams(SearchParams params) {

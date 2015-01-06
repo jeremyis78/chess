@@ -5,19 +5,17 @@ import static com.jeremybrooks.chess.base.Bitmap.PAWN;
 import static com.jeremybrooks.chess.base.Bitmap.QUEEN;
 import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.UciDriver;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
-import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 public class Evaluator {
     private static final Logger log = Logger.getLogger(Evaluator.class);
-    public static final int CHECKMATE = 100000;    //value for checkmate
+//    public static final int CHECKMATE = 100000;    //value for checkmate
     public static final int PIECE_VALUE[] = 
     {
         100, // White Pawn
@@ -104,17 +102,6 @@ public class Evaluator {
     };
 
 
-    private DefaultGenerator mg;
-
-
-    public DefaultGenerator getMoveGenerator() {
-        return mg;
-    }
-
-    public void setMoveGenerator(DefaultGenerator mg) {
-        this.mg = mg;
-    }
-
     /**
      * 
      * Returns an evaluation score for the side to move 'side'
@@ -133,14 +120,14 @@ public class Evaluator {
     public int evaluate(GameState g, int side, int depth, int[] currentMove, boolean isSearchDebug, boolean isEval){
         int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
         int mateScore = 0;
-        mg.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
+        assert g.inCheck() == false;
+        if(g.inCheck()) 
+        {
+            System.out.println(UciDriver.toDiagram(g));
+            throw new IllegalStateException("can't statically evaluate the check or mate position");
+        }
         
         Position position = g.getPosition();
-        if (isCheckMated(g, side, depth))
-        {
-                //Mate-in-1 > Mate-in-2 > Mate-in-3 > ... etc  (white is mated is negative, black is 
-                mateScore = (CHECKMATE - depth) * (side==WHITE?-1:+1);  
-        }
 
         // Compute material value
         int[][] count = new int[2][5];
@@ -189,21 +176,6 @@ public class Evaluator {
 //            log.debug("mate score : "+ mateScore);
 //        }
         return finalScore;
-    }
-
-    boolean isCheckMated(GameState g, int side, int depth)
-    {
-        //Does king have legal moves?
-        List<Integer> moves = DefaultGenerator.newMoveList();
-        mg.generateKingEscapes(moves, side);
-        //number of moves may be helpful for evaluation tuning because 1 or 2 moves
-        //limits the branching factor so that could be use to feed into the overall evaluation score
-        Position position = g.getPosition();
-        if (moves.size() == 0 && mg.isAttacked(g, side, position.getKingSquare(side)))
-        {
-            return true;
-        }
-        return false;
     }
 
 }

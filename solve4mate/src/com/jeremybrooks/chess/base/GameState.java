@@ -10,6 +10,7 @@ import static com.jeremybrooks.chess.util.Util.opposing;
 
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.movegen.Attacks;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.FenParser;
 import com.jeremybrooks.chess.util.Util;
@@ -526,5 +527,10 @@ public class GameState {
 
     private boolean isEnPassantCapture(int moving, int to, int captured) {
         return moving == PAWN && captured == PAWN && to == getEnPassantSquare();
+    }
+
+    public boolean inCheck() {
+        int side = isWhiteToMove()?0:1;
+        return Util.bool(Attacks.attackers(this, side, pos.getKingSquare(side)));
     }
 }

@@ -111,7 +111,7 @@ public class UciDriver {
                 break;
             case "d":
             case "diagram":
-                display();
+                out.println(toDiagram(gameState));
                 break;
             case "quit":
                 System.exit(0);
@@ -126,13 +126,12 @@ public class UciDriver {
         }
     }
 
-    public void display() {
-        if(gameState != null)
-        {
-            AbstractDisplayer displayer = new Displayer();
-            Position position = gameState.getPosition();
-            out.println(displayer.formatBoard(position));
-        }
+    public static String toDiagram(GameState g) {
+        if(g == null)
+            throw new NullPointerException("cannot display null gamestate");
+        AbstractDisplayer displayer = new Displayer();
+        Position position = g.getPosition();
+        return displayer.formatBoard(position);
     }
 
     private static int parseTimeLimit(String token) {

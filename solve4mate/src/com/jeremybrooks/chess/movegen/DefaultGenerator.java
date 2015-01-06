@@ -37,12 +37,13 @@ public class DefaultGenerator {
         return capturesGenerator;
     }
     
-    public List<Integer> generateMoves(int side) {
+    public List<Integer> generateMoves(int side, boolean dangerousMovesOnly) {
         // Generate legal moves from this position
         List<Integer> moves = DefaultGenerator.newMoveList();
         if (!getBaseMoveGenerator().isAttacked(g, side, g.getPosition().getKingSquare(side))){
             generateCaptures(moves, side);
-            generateNonCaptures(moves, side);
+            if(!dangerousMovesOnly) 
+                generateNonCaptures(moves, side);
         } else {
             generateKingEscapes(moves, side);
         }
