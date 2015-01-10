@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.search.Search;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 
@@ -22,6 +24,38 @@ public class SolverTest {
         solver.setSearchParams(new SearchParams(oneMinuteMillis));
         puzzle = new Puzzle();
     }
+
+    @Test
+    public void givenBlacksMoveAndIsAlreadyMated() {
+        String fen = "4R1k1/5ppp/8/8/8/8/5PPP/3R2K1 b - - 0 1";
+        String expectedSolution = "<none>";
+        int expectedScore = Search.MATED;
+        int depthDoesntMatter = 0;
+        GameState gameState = new GameState();
+        gameState.set(fen);
+        SearchInfo info = solver.search(gameState , depthDoesntMatter);
+        boolean isMate = info.isMate();
+        String solution = info.getBestLineFormatted();
+        assertEquals(expectedSolution, solution);
+        assertEquals(expectedScore, info.getScore());
+        assertEquals("its still mate even if we're getting mated", true, isMate);
+    }
+
+    @Test
+    public void givenWhitesMoveAndIsAlreadyMated() {
+        String fen = "6k1/5ppp/8/8/8/8/5PPP/3r2K1 w - - 0 1";
+        String expectedSolution = "<none>";
+        int expectedScore = Search.MATED;
+        int depthDoesntMatter = 0;
+        GameState gameState = new GameState();
+        gameState.set(fen);
+        SearchInfo info = solver.search(gameState , depthDoesntMatter); //fails because there's no root move initialized when already mated!  FIX IT!
+        boolean isMate = info.isMate();
+        String solution = info.getBestLineFormatted();
+        assertEquals(expectedScore, info.getScore());
+        assertEquals(expectedSolution, solution);
+        assertEquals("it's still a mate result even if WE are getting mated", true, isMate);
+    }
     
     @Test
     public void testSolveMateInOne() {
@@ -31,34 +65,36 @@ public class SolverTest {
         puzzle.setMovesToMate(1);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
         assertTrue(isMate);
         assertTrue(solution.startsWith(expectedSolution));
     }
 
     @Test
-    public void testSolveForWhiteWhereBlackMatesIfWhiteMovesOffBackRank() {
+    public void givenBlackMatesIfWhiteMovesOffBackRank() {
         String fen = "6k1/4rppp/8/8/8/8/5PPP/3R2K1 w - - 0 1  #Burgess #1";
         String expectedSolution = "Rd1-d8 Re7-e8 Rd8xe8";
-        puzzle.setFen(fen);
-        puzzle.setMovesToMate(2);
-        SearchInfo info = solver.solve(puzzle);
+        int depthDoesntMatter = 0;
+        GameState gameState = new GameState();
+        gameState.set(fen);
+        SearchInfo info = solver.search(gameState, depthDoesntMatter);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
-        System.out.println(solution);
+        String solution = info.getBestLineFormatted();
+        System.out.println("expected " + expectedSolution);
+        System.out.println("  actual " + solution);
         assertTrue(isMate);
-        assertTrue(solution.startsWith(expectedSolution));
+        assertEquals(expectedSolution, solution);
     }
 
     @Test
-    public void testSolveForMate1() {
+    public void testSolveForMateIn2() {
         String fen = "4K1k1/6pp/2NN4/8/8/8/8/8 w - - 0 1 #Mammoth Book of Chess  Graham Burgess #4";
         String expectedSolution = "Nc6-e7 Kg8-h8 Nd6-f7";
         puzzle.setFen(fen);
         puzzle.setMovesToMate(2);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
         System.out.println(solution);
         assertTrue(isMate);
         assertTrue(solution.startsWith(expectedSolution));
@@ -72,7 +108,7 @@ public class SolverTest {
         puzzle.setMovesToMate(2);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
         System.out.println(solution);
         assertTrue(isMate);
         assertTrue(solution.startsWith(expectedSolution));
@@ -87,7 +123,8 @@ public class SolverTest {
         puzzle.setMovesToMate(2);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
+        System.out.println(expectedSolution);
         System.out.println(solution);
         assertTrue(isMate);
         assertTrue(solution.startsWith(expectedSolution));
@@ -101,13 +138,13 @@ public class SolverTest {
         puzzle.setMovesToMate(2);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
         System.out.println(solution);
         assertTrue(isMate);
         assertTrue(solution.startsWith(expectedSolution));
     }
     
-    //@Test -- FIXME: currently fails to find this double sacrifice mate 3 moves out
+    //@Test //-- FIXME: currently fails to find this double sacrifice mate 3 moves out
     //This will probably be easily fixed once move ordering is implemented and checks 
     //are higher priority to search.
     public void givenMateInThreeWithTrickyDoubleSacrifice () {
@@ -117,10 +154,10 @@ public class SolverTest {
         puzzle.setMovesToMate(3);
         SearchInfo info = solver.solve(puzzle);
         boolean isMate = info.isMate();
-        String solution = info.getSolutionMoves();
+        String solution = info.getBestLineFormatted();
         System.out.println(solution);
-        assertTrue(isMate);
         assertEquals(expectedSolution, solution);
+        assertTrue(isMate);
     }
     
     

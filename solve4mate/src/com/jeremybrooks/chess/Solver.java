@@ -6,12 +6,10 @@ import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.search.IterativeDeepeningSearch;
-import com.jeremybrooks.chess.search.ScoredMove;
 import com.jeremybrooks.chess.search.Search;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.search.TimeMgmt;
-import com.jeremybrooks.chess.util.Util;
 
 public class Solver {
     private static final Logger log = Logger.getLogger(Solver.class);
@@ -26,7 +24,7 @@ public class Solver {
         Evaluator eval = new Evaluator();
         setMoveGenerator(mg);
         setEvaluator(eval);
-        search = new IterativeDeepeningSearch();
+        search = new IterativeDeepeningSearch(8);
         search.setEvaluator(evaluator);
         search.setMoveGenerator(moveGenerator);
         search.setTimer(new TimeMgmt());
@@ -37,10 +35,8 @@ public class Solver {
         assert(maxDepth <= GameState.MAX_NUM_MOVES_MADE);
         
         search.setGameState(g);
-        search.setParams(searchParams);
-
         log.debug("Searching...");
-        search.search(g.isWhiteToMove()?0:1);
+        search.search(searchParams);
         SearchInfo info = search.getInfo();
         return info;
     }
@@ -51,72 +47,13 @@ public class Solver {
         GameState g = new GameState();
         search.setGameState(g);
         search.setParams(searchParams);
-//        FenParser parser = new FenParser();
-//        parser.init(puzzle.getFen());
-//        parser.parse();
-//        g.setWhiteToMove(parser.isWhiteToMove());
-//        g.setMoveNumber(parser.getCurrentMoveNumber());
         g.set(puzzle.getFen());
 
         log.debug("Searching for mate in "+movesToMate+"...");
-        search.search(g.isWhiteToMove()?0:1);
+        search.search(searchParams);
         SearchInfo solveInfo = search.getInfo();
         return solveInfo;
     }
-
-    private String getScoredRootMoves() {
-        StringBuilder sb = new StringBuilder("\n");
-        for(ScoredMove sm: search.getRootMove())
-        {
-            if(sm == null) break;
-            sb.append(Util.displayMoveStr(sm.getMove(),false,false));
-            sb.append("("+sm.getScore()+")\n");
-        }
-        return sb.toString();
-    }
-
-    // So given a position in which white mates in 2,
-    // depth = getDepthToMate(2) = 2 + (2-1) = 3
-    // 
-    private static int getPliesToMate(int mateInN){
-        /*
-         * mateIn    depth
-         * 1        1            1+1-1 = 1
-         * 2        3           2+2-1 = 3
-         * 3        5           3+3-1 = 5
-         * 4        7
-         * 5        9
-         */
-        int depth=0;
-        switch(mateInN)
-        {
-        case 1: 
-            depth = 2;
-            break;
-        case 2: 
-            depth = 4;
-            break;
-        case 3: 
-            depth = 6;
-            break;
-        case 4: 
-            depth = 7;
-            break;
-        case 5: 
-            depth = 10;
-            break;
-        default: 
-            depth = (2 * mateInN) - 1;
-            break;
-        }
-        log.debug("mate in "+mateInN+" requires stack depth of "+depth);
-        return depth;
-    }
-
-    private static int getStackSize(int depthForMovesToMate) {
-        return depthForMovesToMate-1; //-1 so we can eval and set flags and such for the next level in the graph/tree.
-    }
-
 
     public void setMoveGenerator(DefaultGenerator moveGenerator) {
         this.moveGenerator = moveGenerator;

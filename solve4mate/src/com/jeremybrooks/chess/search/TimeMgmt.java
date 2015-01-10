@@ -16,6 +16,7 @@ public class TimeMgmt
         int timePerMove = params.getTime(color) / movesToGo();
         int now = Util.milliTime();
         hasTime = (now - startTime) < timePerMove;
+//        System.out.println("time/move: " + timePerMove  + "\ntime left: " + (now - startTime));
         return hasTime;
     }
     

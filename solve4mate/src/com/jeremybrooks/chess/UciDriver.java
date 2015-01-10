@@ -7,10 +7,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
-
-import org.apache.log4j.BasicConfigurator;
+import java.util.List;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Empty;
@@ -18,7 +16,6 @@ import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
-import com.jeremybrooks.chess.search.ScoredMove;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
@@ -36,7 +33,6 @@ public class UciDriver {
     private PrintStream out;
     private GameState gameState;
     private Solver engine;
-    private String fen;
     
     public static void main(String[] args) throws Exception
     {
@@ -55,7 +51,8 @@ public class UciDriver {
     {
         setIn(in);
         setOut(out);
-        engine = new Solver(); //initialize engine (ie, Attacks instance)   
+        engine = new Solver(); //initialize engine (ie, Attacks instance)
+        gameState = new GameState();
     }
     
     public void start() throws Exception
@@ -134,21 +131,21 @@ public class UciDriver {
         return displayer.formatBoard(position);
     }
 
-    private static int parseTimeLimit(String token) {
-        boolean isSeconds = true;
-        int millisPerSecond = 1000;
-        String tmp = "";
-        if(token.endsWith("ms"))
-        {
-            isSeconds = false;
-            tmp = token.substring(0, token.length()-2);
-        } else {
-            tmp = token;
-        }
-        int limitMillis = readInt(tmp);
-        if(isSeconds) limitMillis *= millisPerSecond;
-        return limitMillis;
-    }
+//    private static int parseTimeLimit(String token) {
+//        boolean isSeconds = true;
+//        int millisPerSecond = 1000;
+//        String tmp = "";
+//        if(token.endsWith("ms"))
+//        {
+//            isSeconds = false;
+//            tmp = token.substring(0, token.length()-2);
+//        } else {
+//            tmp = token;
+//        }
+//        int limitMillis = readInt(tmp);
+//        if(isSeconds) limitMillis *= millisPerSecond;
+//        return limitMillis;
+//    }
 
     public void setPosition(String[] cmd, int argIndex) {
         String token;
@@ -169,7 +166,7 @@ public class UciDriver {
         } else {
             throw new IllegalArgumentException(token + " is not allowed; only fen or startpos are allowed.");
         }
-        gameState = new GameState();
+        gameState = new GameState(); //can we just clear this instead of a brand new one?
         gameState.set(fen.trim());
         if(argIndex < cmd.length)
             token = cmd[argIndex++]; //read "moves" token
@@ -259,12 +256,13 @@ public class UciDriver {
 
     public void startSearch(int depth) throws IOException {
         SearchInfo info = engine.search(gameState, depth);
-        ScoredMove bestMove = info.getBestLine()[0];
+        int bestMove = info.getBestLine().get(0);
         String uciBestMove = toUciMove(bestMove);
         String uciPvMoves = toUciMoves(info.getBestLine());
-        String fmt = "info depth %d time %d nodes %d nps %.0f pv %s";
+        String fmt = "info depth %d score %s time %d nodes %d nps %.0f pv %s";
         sendResponse(fmt,
                 depth,
+                toUciScore(info),
                 info.getElapsedTime(),
                 info.getNodeCount(),
                 info.getNodesPerSecond(),
@@ -273,27 +271,71 @@ public class UciDriver {
 //        respond("info bestline " + info.getSolutionMoves());
     }
 
-    private static String toUciMoves(ScoredMove[] bestLine) {
-        StringBuilder pvLine = new StringBuilder();
-        for(ScoredMove move: bestLine)
+    private static String toUciMoves(List<Integer> bestLine) {
+        StringBuilder uciMoves = new StringBuilder();
+        for(int move: bestLine)
         {
             String uciMove = toUciMove(move);
-            pvLine.append(uciMove);
-            pvLine.append(" ");
+            uciMoves.append(uciMove);
+            uciMoves.append(" ");
         }
-        return pvLine.toString();
+        return uciMoves.toString();
     }
 
-    private static String toUciMove(ScoredMove move)
-    {
-        return toUciMove(move.getMove());
-    }
-    
     private static String toUciMove(int move) {
         int fromSquare = move & 0x3F;
         int toSquare = (move >> 6) & 0x3F;
+        if(fromSquare==toSquare && fromSquare==0)
+            return "<none>"; //or "0000" ???
         return named(fromSquare) + named(toSquare);
     }
+    
+    private static String toUciScore(SearchInfo info)
+    {
+        //constructs everything after "score "
+//        
+//      * score
+//          * cp <x>
+//              the score from the engine's point of view in centipawns.
+//          * mate <y>
+//            mate in y moves, not plies.
+//              If the engine is getting mated use negative values for y.
+//          * lowerbound
+//              the score is just a lower bound.
+//          * upperbound
+//               the score is just an upper bound.
+
+        StringBuilder desc = new StringBuilder();
+        int centipawnScore = info.getScore();
+        if(info.isMateOrMated())
+        {
+            int depth = info.getPliesInBestLine();
+            boolean givingMate = centipawnScore > 0;
+            if(givingMate != (depth %2 == 1))
+                    throw new IllegalArgumentException("score and depth are out of sync (at odd depths we should be giving mate which means a positive score)");
+            int mateInXMoves = toMateInXMoves(depth); 
+            desc.append("mate ");
+            desc.append(givingMate?"":"-");
+            desc.append(mateInXMoves);
+            return desc.toString();
+        }
+        
+        if(info.isLowerBound())
+            desc.append("lowerbound ");
+        else if(info.isUpperBound())
+            desc.append("upperbound ");
+        
+        desc.append("cp ").append(centipawnScore);
+        return desc.toString();
+    }
+
+    private static int toMateInXMoves(int depth) {
+        boolean givingMate = (depth % 2 == 1); //at odd depths
+        if(givingMate)
+            return (depth+1)/2;
+        return depth/2;
+    }
+
 
     private int parseUciMove(GameState gameState2, String uciMove) {
         /*        

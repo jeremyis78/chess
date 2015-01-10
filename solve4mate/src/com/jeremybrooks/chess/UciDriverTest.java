@@ -1,23 +1,19 @@
 package com.jeremybrooks.chess;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.util.OutputBuilder;
 
 public class UciDriverTest {
 
-    private static PrintStream oldOut = System.out;
-    private static PrintStream oldErr = System.err;
     private static final String NO_OUTPUT = "";
     private ByteArrayOutputStream out;
     private ByteArrayOutputStream err;

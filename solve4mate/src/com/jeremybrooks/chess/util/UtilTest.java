@@ -50,6 +50,18 @@ public class UtilTest extends TestCase {
         }
     }
 
+    public void testDisplayMoveStrWithNoMove() {
+        int from = 0; //ie, Bitmap.A1;
+        int to   = 0; //ie, Bitmap.A1
+        boolean check = false;
+        boolean mate = false;
+        
+        int move = getPawnMove(from, to);
+        assertEquals("<none>", Util.displayMoveStr(move, check, mate));
+        
+        move = 0; //noMove placeholder
+        assertEquals("<none>", Util.displayMoveStr(move, check, mate));
+    }
     public void testDisplayMoveStrIncludesCheckAndMateFlags() {
         int from = Bitmap.A2;
         int to = Bitmap.A4;

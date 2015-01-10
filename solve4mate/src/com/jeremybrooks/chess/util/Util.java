@@ -57,12 +57,14 @@ public class Util {
     }
     
     public static String displayMoveStr(int m, boolean check, boolean mate){
-        int from, to, mov, cap, pro;
-        from = m & 0x3F;  //grab from square (6 bits)
-        to = (m >> 6) & 0x3F; //grab to square (6 bits)
-        mov = (m >> 12) & 0x7; //grab moving piece (3bits)
-        cap = (m >> 15) & 0x7; //grab captured piece (3bits)
-        pro = (m >> 18) & 0x7; //grab promotion piece (3bits)
+        int from = m & 0x3F;  //grab from square (6 bits)
+        int to = (m >> 6) & 0x3F; //grab to square (6 bits)
+        if(to == from && to == 0)
+            return "<none>"; //noMove placeholder;
+        int mov = (m >> 12) & 0x7; //grab moving piece (3bits)
+        int cap = (m >> 15) & 0x7; //grab captured piece (3bits)
+        int pro = (m >> 18) & 0x7; //grab promotion piece (3bits)
+
 
         char pieceChar[] = {' ','P','N','K',' ','B','R','Q'};
         StringBuilder coordStr = new StringBuilder(); 

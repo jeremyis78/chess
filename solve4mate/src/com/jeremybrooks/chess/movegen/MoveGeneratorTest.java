@@ -371,7 +371,6 @@ public class MoveGeneratorTest {
         {
             g.set(position);
             displayBoardAndSideToMove();
-            int depth = 0;
             List<Integer> moves = DefaultGenerator.newMoveList();
             mg.generateCaptures(moves, g.isWhiteToMove()?0:1);
             mg.generateNonCaptures(moves, g.isWhiteToMove()?0:1);

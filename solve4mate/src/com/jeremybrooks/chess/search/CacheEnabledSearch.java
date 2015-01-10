@@ -19,8 +19,8 @@ public class CacheEnabledSearch extends IterativeDeepeningSearch {
     
 
 
-    public CacheEnabledSearch() {
-        super();
+    public CacheEnabledSearch(int maxDepth) {
+        super(maxDepth);
         cache = new HashMap<>(INITIAL_CACHE_SIZE);
     }
 

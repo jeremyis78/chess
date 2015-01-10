@@ -98,7 +98,7 @@ public class SolveForMate {
         double solveTimeMillis = solveInfo.getElapsedTime();
         result.append(EOL);
         result.append("Score     : ").append(solveInfo.getScore() + EOL);
-        result.append("Best line : ").append(solveInfo.getSolutionMoves() + EOL);
+        result.append("Best line : ").append(solveInfo.getOldSolutionMoves() + EOL);
         result.append("Is mate?  : ").append(solveInfo.isMate() + EOL);
         result.append("Nodes     : ").append(totalNodes + EOL);
         result.append("Time(ms)  : ").append(solveTimeMillis + EOL); 
