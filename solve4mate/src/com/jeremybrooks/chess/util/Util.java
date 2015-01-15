@@ -5,6 +5,7 @@
 package com.jeremybrooks.chess.util;
 
 import java.io.PrintStream;
+import java.util.List;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Square;
@@ -54,6 +55,23 @@ public class Util {
     public static int bitCount(long pieces)
     {
         return Long.bitCount(pieces);
+    }
+    
+    /**
+     * Return string of moves in Full Algebraic Notation (f2-f4, Qd1xd8, etc)
+     * @param moves the list of moves to format
+     * @return
+     */
+    public static String toFan(List<Integer> moves)
+    {
+        StringBuilder fan = new StringBuilder();
+        for(int move: moves)
+        {
+            fan.append(displayMoveStr(move, false, false));
+            fan.append(" ");
+        }
+        fan.deleteCharAt(fan.length() - 1);
+        return fan.toString();
     }
     
     public static String displayMoveStr(int m, boolean check, boolean mate){
@@ -112,13 +130,13 @@ public class Util {
         }
         
         //Print the moves in coordinate notation and SAN (TODO: SAN doesn't account for ambiguous moves yet!)
-        if ('K' == pieceChar[mov]){
-            if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
-                coordStr.append(" 0-0");
-            } else if ((from == Bitmap.E1 && to == Bitmap.C1) || (from == Bitmap.E8 && to == Bitmap.C8)){
-                coordStr.append(" 0-0-0");
-            } 
-        }
+//        if ('K' == pieceChar[mov]){
+//            if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
+//                coordStr.append(" 0-0");
+//            } else if ((from == Bitmap.E1 && to == Bitmap.C1) || (from == Bitmap.E8 && to == Bitmap.C8)){
+//                coordStr.append(" 0-0-0");
+//            } 
+//        }
         return coordStr.toString();
     }
    

@@ -24,7 +24,7 @@ public class Solver {
         Evaluator eval = new Evaluator();
         setMoveGenerator(mg);
         setEvaluator(eval);
-        search = new IterativeDeepeningSearch(8);
+        search = new IterativeDeepeningSearch(80);
         search.setEvaluator(evaluator);
         search.setMoveGenerator(moveGenerator);
         search.setTimer(new TimeMgmt());
@@ -35,6 +35,7 @@ public class Solver {
         assert(maxDepth <= GameState.MAX_NUM_MOVES_MADE);
         
         search.setGameState(g);
+        moveGenerator.setGameState(g);
         log.debug("Searching...");
         search.search(searchParams);
         SearchInfo info = search.getInfo();
@@ -47,6 +48,7 @@ public class Solver {
         GameState g = new GameState();
         search.setGameState(g);
         search.setParams(searchParams);
+        moveGenerator.setGameState(g);
         g.set(puzzle.getFen());
 
         log.debug("Searching for mate in "+movesToMate+"...");

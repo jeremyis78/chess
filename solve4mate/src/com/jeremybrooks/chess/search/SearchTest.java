@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
+import com.jeremybrooks.chess.util.Util;
 
 public class SearchTest {
 
@@ -26,10 +27,10 @@ public class SearchTest {
         params = new SearchParams(THREE_SECONDS_REMAINING);
         DefaultGenerator generator = new DefaultGenerator();
         Evaluator evaluator = new Evaluator();
+        generator.setGameState(gameState);
         search.setEvaluator(evaluator);
         search.setMoveGenerator(generator);
         search.setTimer(new TimeMgmt());
-
     }
 
     @After
@@ -47,8 +48,8 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo();
         assertEquals(Search.MATED,          info.getScore());
-        assertEquals("<none>",              info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals("<none>",              Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
 
     @Test
@@ -57,8 +58,8 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo(); 
         assertEquals(Search.MATED,          info.getScore());
-        assertEquals("<none>",              info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals("<none>",              Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
 
     @Test
@@ -69,8 +70,8 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo(); 
         assertEquals(expectedScore,         info.getScore());
-        assertEquals(expectedBestLine,      info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
 
     @Test
@@ -81,8 +82,8 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo(); 
         assertEquals(expectedScore,         info.getScore());
-        assertEquals(expectedBestLine,      info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
     
     @Test
@@ -94,8 +95,8 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo(); 
         assertEquals(expectedScore,         info.getScore());
-        assertEquals(expectedBestLine,      info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
 
     @Test
@@ -107,19 +108,33 @@ public class SearchTest {
         search.search(params);
         SearchInfo info = search.getInfo(); 
         assertEquals(expectedScore,         info.getScore());
-        assertEquals(expectedBestLine,      info.getBestLineFormatted());
-        assertEquals(true,                  info.isMate());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(true,                  info.isMateOrMated());
     }
 
-//    @Test
-//    public void givenDrawByStalemateWhiteToMove() {
-//        fail("Not yet implemented");
-//    }
-//
-//    @Test
-//    public void givenDrawByStalemateBlackToMove() {
-//        fail("Not yet implemented");
-//    }
+    @Test
+    public void givenDrawByStalemateWhiteToMove() {
+        setupPosition("8/8/8/8/8/6k1/5q2/7K w - - 0 1");
+        String expectedBestLine = "<none>";
+        int expectedScore       = 0;
+        search.search(params);
+        SearchInfo info = search.getInfo(); 
+        assertEquals(expectedScore,         info.getScore());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(false,                 info.isMateOrMated());
+    }
+
+    @Test
+    public void givenDrawByStalemateBlackToMove() {
+        setupPosition("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1");
+        String expectedBestLine = "<none>";
+        int expectedScore       = 0;
+        search.search(params);
+        SearchInfo info = search.getInfo(); 
+        assertEquals(expectedScore,         info.getScore());
+        assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
+        assertEquals(false,                 info.isMateOrMated());
+    }
 //
 //    @Test
 //    public void givenDrawBy3FoldRepetitionWhiteToMove() {

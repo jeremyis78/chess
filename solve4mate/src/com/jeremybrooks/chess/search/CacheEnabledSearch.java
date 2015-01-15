@@ -42,7 +42,8 @@ public class CacheEnabledSearch extends IterativeDeepeningSearch {
     }
 
     private int bestMove(int depth) {
-        return pvLine[depth].getMove();
+        System.err.println("TODO: return the best move at depth " + depth + " here, or pass the move in to store(), not 0");
+        return 0;
     }
     
     @Override

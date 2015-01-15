@@ -123,7 +123,7 @@ public class Evaluator {
         assert g.inCheck() == false;
         if(g.inCheck()) 
         {
-            System.out.println(UciDriver.toDiagram(g));
+            //System.out.println(UciDriver.toDiagram(g));
             throw new IllegalStateException("can't statically evaluate the check or mate position");
         }
         

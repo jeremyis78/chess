@@ -22,24 +22,26 @@ public class IterativeDeepeningSearch extends Search {
         log.debug("blackTime " + params.getTime(Bitmap.BLACK));
         log.debug("movesToGo " + params.getMovesToGo());
 
+        RootMove bestRootMove = new RootMove(0, Search.LOWER_BOUND);
         boolean mate = false;
         int elapsedTimeMillis = 0;
         startTime = Util.milliTime();
-        for(int depth=1;  //TODO: why are we starting at 1?....in super.search(params) we start at 0!!
-                depth<=maxDepthLimit;
-                depth++)
+        for(int maxDepth=1;  //TODO: why are we starting at 1?....in super.search(params) we start at 0!!
+                maxDepth<=maxDepthLimit;
+                maxDepth++)
         {
             //UciDriver.sendResponse("info depth %d time %d", depth, (Util.milliTime() - startTime));
             int side = g.isWhiteToMove()?0:1;
-            minimax = super.search(side, depth);
-            String pvLine = getPVMoveLine();
+            minimax = super.search(side, maxDepth);
+            int iterationTimeMillis = Util.milliTime() - startTime;
+            sortRootMoves();
+            bestRootMove = getBestRootMove();
             if(log.isDebugEnabled()) {
-                int searchTimeMillis = Util.milliTime() - startTime;
-                int nodesPerSecond = (int)(nodeCount / (searchTimeMillis/1000.0));
-                log.debug(depth + "/" + effectiveDepth + " ply in " + searchTimeMillis + "ms and " + nodeCount + " nodes " + 
-                        "(" + nodesPerSecond + " nps) yielded (" + minimax + ") " + pvLine);
+                int nodesPerSecond = (int)(nodeCount / (iterationTimeMillis/1000.0));
+                log.debug(maxDepth + "/" + effectiveDepth + " ply in " + iterationTimeMillis + "ms and " + nodeCount + " nodes " + 
+                        "(" + nodesPerSecond + " nps) yielded (" + minimax + ") " + Util.toFan(bestRootMove.getPvMoves()));
             }
-            mate = Math.abs(minimax) > Search.CHECKMATE / 2;
+            mate = Math.abs(minimax) >= Search.MIN_MATE;
             if(mate)
             {
                 log.debug("mate found! " + minimax );
@@ -50,19 +52,11 @@ public class IterativeDeepeningSearch extends Search {
                 break;
             }
         }
-        sortRootMoves();
-        RootMove bestRootMove = getBestRootMove();
         log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " " + bestRootMove.getScore() 
-              +" pv " + bestRootMove.toFormattedPvLine());
+              +" pv " + Util.toFan(bestRootMove.getPvMoves()));
         
         elapsedTimeMillis = Util.milliTime() - startTime;
-        String solutionMoves = getPVMoveLine();
-        String scoredRootMoves = getScoredRootMoves();
-        info = new SearchInfo(bestRootMove, mate, getNodeCount(), elapsedTimeMillis);
-        info.setScore(minimax);
-        info.setOldSolutionMoves(solutionMoves);
-        info.setOldBestLine(getPVLine());
-        info.setScoredRootMoves(scoredRootMoves);
+        info = new SearchInfo(bestRootMove, getNodeCount(), elapsedTimeMillis);
     }
     
 }

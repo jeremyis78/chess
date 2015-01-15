@@ -149,7 +149,7 @@ public class MoveGeneratorTest {
     public void testWhiteCastling()
     {
         String positionFen = "k7/8/8/8/8/p6p/P6P/R3K2R w KQ - 0 1";
-        Set<String> expectedMoves = toSet("Ke1-c1 0-0-0,Ke1-d1,Ke1-d2,Ke1-e2,Ke1-f1,Ke1-f2,Ke1-g1 0-0,"
+        Set<String> expectedMoves = toSet("Ke1-c1,Ke1-d1,Ke1-d2,Ke1-e2,Ke1-f1,Ke1-f2,Ke1-g1,"
                 + "Ra1-b1,Ra1-c1,Ra1-d1,Rh1-f1,Rh1-g1"); 
         Set<String> actualMoves = generateMoves(positionFen);
         assertMovesAreEqual(expectedMoves, actualMoves);
@@ -189,8 +189,8 @@ public class MoveGeneratorTest {
     {
         String initialPositions = "r3k2r/p6p/P6P/8/8/8/8/7K b kq - 0 1";
         Set<String> actualMoves = generateMoves(initialPositions);
-        assertTrue(actualMoves.contains("Ke8-c8 0-0-0"));
-        assertTrue(actualMoves.contains("Ke8-g8 0-0"));
+        assertTrue(actualMoves.contains("Ke8-c8"));
+        assertTrue(actualMoves.contains("Ke8-g8"));
     }
 
     @Test
@@ -225,8 +225,8 @@ public class MoveGeneratorTest {
     {
         String bishopAttackingQueenSideRook = "r3k2r/p6p/P6P/8/4B3/8/8/7K b kq - 0 1";
         Set<String> actualMoves = generateMoves(bishopAttackingQueenSideRook);
-        assertFalse(actualMoves.contains("Ke8-c8 0-0-0"));
-        assertTrue(actualMoves.contains("Ke8-g8 0-0"));
+        assertFalse(actualMoves.contains("Ke8-c8"));
+        assertTrue(actualMoves.contains("Ke8-g8"));
     }
 
     @Test
@@ -240,7 +240,7 @@ public class MoveGeneratorTest {
                 "Nh5-f4,Nh5-f6,Nh5-g3,Nh5xg7," +
                 "Ra1-b1,Ra1-c1,Ra1-d1,Rh1-f1,Rh1-g1," +
                 "Qc7-b8,Qc7-c6,Qc7-d6,Qc7-d8,Qc7xb7,Qc7xc5,Qc7xc8,Qc7xd7," +
-                "Ke1-d2,Ke1-f1,Ke1-g1 0-0"); 
+                "Ke1-d2,Ke1-f1,Ke1-g1"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
     
@@ -384,7 +384,6 @@ public class MoveGeneratorTest {
     private Set<String> generateMoves(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
-        displayBoardAndSideToMove();
         List<Integer> moves = DefaultGenerator.newMoveList();
         mg.generateCaptures(moves, side);
         mg.generateNonCaptures(moves, side);
@@ -394,7 +393,6 @@ public class MoveGeneratorTest {
     private Set<String> generateCaptures(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
-        displayBoardAndSideToMove();
         List<Integer> moves = DefaultGenerator.newMoveList();
         mg.generateCaptures(moves, side);
         return toCoordinateMoveSet(moves);
@@ -403,7 +401,6 @@ public class MoveGeneratorTest {
     private Set<String> generateNonCaptures(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
-        displayBoardAndSideToMove();
         List<Integer> moves = DefaultGenerator.newMoveList();
         mg.generateNonCaptures(moves, side);
         return toCoordinateMoveSet(moves);
@@ -412,7 +409,6 @@ public class MoveGeneratorTest {
     private Set<String> generateKingEscapes(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
-        displayBoardAndSideToMove();
         List<Integer> moves = DefaultGenerator.newMoveList();
         mg.generateKingEscapes(moves, side);
         return toCoordinateMoveSet(moves);

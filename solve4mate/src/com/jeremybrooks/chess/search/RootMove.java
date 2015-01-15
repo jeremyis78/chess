@@ -3,8 +3,6 @@ package com.jeremybrooks.chess.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jeremybrooks.chess.util.Util;
-
 public class RootMove implements Comparable<RootMove> {
     private int move;
     private int score;
@@ -32,9 +30,7 @@ public class RootMove implements Comparable<RootMove> {
     public int getPvLength() {
         return pvLength;
     }
-    public void setPvLength(int pvLength) {
-        this.pvLength = pvLength;
-    }
+
     public int getPvMove(int depth)
     {
         return principalVariationMoves.get(depth);
@@ -43,19 +39,28 @@ public class RootMove implements Comparable<RootMove> {
     public void setPvMove(int move, int depth)
     {
         principalVariationMoves.set(depth, move);
+        if(depth >= pvLength)
+            pvLength = depth + 1;
     }
     
-    public String toFormattedPvLine()
+    public List<Integer> getPvMoves()
     {
-        StringBuilder sb = new StringBuilder();
-        for(int pvMove: principalVariationMoves)
+        int pvSize = getPvLength();
+        if(pvSize == 0)
         {
-            if(pvMove == 0 /* NO-MOVE placeholder */) break;
-            sb.append(Util.displayMoveStr(pvMove, false, false)).append(" ");
+            int noMove = 0;
+            List<Integer> list = new ArrayList<>(1);
+            list.add(noMove);
+            return list;
         }
-        return sb.toString();
+        List<Integer> list = new ArrayList<>(pvSize);
+        for(int i=0; i<pvSize; i++)
+        {
+            list.add(getPvMove(i));
+        }
+        return list;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

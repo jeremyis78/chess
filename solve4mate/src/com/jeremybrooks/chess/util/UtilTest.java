@@ -1,8 +1,11 @@
 package com.jeremybrooks.chess.util;
 
-import com.jeremybrooks.chess.base.Bitmap;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
+
+import com.jeremybrooks.chess.base.Bitmap;
 
 public class UtilTest extends TestCase {
 
@@ -43,9 +46,9 @@ public class UtilTest extends TestCase {
 
     public void testBitCount(){
         for (int i=0; i<BIT_COUNT_ITERATIONS; i++){
-            assertEquals(1, Util.bitCount(1L));
-            assertEquals(1, Util.bitCount(0x8000000000000000L));
-            assertEquals(8, Util.bitCount(0x00FF000000000000L));
+            assertEquals( 1, Util.bitCount(1L));
+            assertEquals( 1, Util.bitCount(0x8000000000000000L));
+            assertEquals( 8, Util.bitCount(0x00FF000000000000L));
             assertEquals(64, Util.bitCount(0xFFFFFFFFFFFFFFFFL));
         }
     }
@@ -62,6 +65,7 @@ public class UtilTest extends TestCase {
         move = 0; //noMove placeholder
         assertEquals("<none>", Util.displayMoveStr(move, check, mate));
     }
+    
     public void testDisplayMoveStrIncludesCheckAndMateFlags() {
         int from = Bitmap.A2;
         int to = Bitmap.A4;
@@ -79,10 +83,10 @@ public class UtilTest extends TestCase {
         assertEquals("Pa2xb3", Util.displayMoveStr(a2xb3, check, mate));
     
         int kingSideCastle = getCastleMove(Bitmap.E1, Bitmap.G1); 
-        assertEquals("Ke1-g1 0-0", Util.displayMoveStr(kingSideCastle, check, mate));
+        assertEquals("Ke1-g1", Util.displayMoveStr(kingSideCastle, check, mate));
 
         int queenSideCastle = getCastleMove(Bitmap.E1, Bitmap.C1); 
-        assertEquals("Ke1-c1 0-0-0", Util.displayMoveStr(queenSideCastle, check, mate));
+        assertEquals("Ke1-c1", Util.displayMoveStr(queenSideCastle, check, mate));
 
         int queenCapturesRook = getQueenCaptures(Bitmap.E1, Bitmap.C1, Bitmap.PIECE[Bitmap.QUEEN]);
         check = true;
@@ -99,7 +103,23 @@ public class UtilTest extends TestCase {
         aMove = getMove(from,to,mov,cap,pro);
         assertEquals("Pd7xe8Q#", Util.displayMoveStr(aMove, check, mate));
     }
-    
+
+    public void testToFan() {
+        List<Integer> moves = new ArrayList<>();
+        int a2a4 = getPawnMove(Bitmap.A2, Bitmap.A4);
+        moves.add(a2a4);
+        int a2xb3 = getPawnCapture(Bitmap.A2, Bitmap.B3, Bitmap.PIECE[Bitmap.PAWN]); 
+        moves.add(a2xb3);
+        int kingSideCastle = getCastleMove(Bitmap.E1, Bitmap.G1); 
+        moves.add(kingSideCastle);
+        int queenSideCastle = getCastleMove(Bitmap.E1, Bitmap.C1); 
+        moves.add(queenSideCastle);
+        int queenCapturesRook = getQueenCaptures(Bitmap.E1, Bitmap.C1, Bitmap.PIECE[Bitmap.QUEEN]);
+        moves.add(queenCapturesRook);
+        String expected = "Pa2-a4 Pa2xb3 Ke1-g1 Ke1-c1 Qe1xc1";
+        assertEquals(expected, Util.toFan(moves));
+    }
+
     private int getPawnMove(int from, int to)
     {
         int mov = Bitmap.PIECE[Bitmap.PAWN];

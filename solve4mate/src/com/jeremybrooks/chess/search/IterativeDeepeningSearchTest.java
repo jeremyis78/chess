@@ -1,10 +1,6 @@
 package com.jeremybrooks.chess.search;
 
-import static org.junit.Assert.*;
-
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
@@ -26,6 +22,7 @@ public class IterativeDeepeningSearchTest extends SearchTest {
         params = SearchParams.forOnePosition(3000); //THREE_SECONDS_REMAINING);
         DefaultGenerator generator = new DefaultGenerator();
         Evaluator evaluator = new Evaluator();
+        generator.setGameState(gameState);
         search.setEvaluator(evaluator);
         search.setMoveGenerator(generator);
         search.setTimer(new TimeMgmt());

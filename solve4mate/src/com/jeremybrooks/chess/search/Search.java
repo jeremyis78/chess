@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.eval.Evaluator;
-import com.jeremybrooks.chess.movegen.AbstractGenerator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.search.ScoredMove.Precision;
 import com.jeremybrooks.chess.util.Util;
@@ -39,14 +38,14 @@ public class Search {
     public static final boolean SEARCH_DEBUG = false; //SEARCH_DB 
     public static final boolean DEBUG = false; //DB
     public static final boolean EVAL = false;
-    public static final int MAXWINDOW = 99999;   //To pass to alpha beta for initial window (+inf, -inf)
-    public static final int LOWER_BOUND = -MAXWINDOW;
-    public static final int UPPER_BOUND =  MAXWINDOW;
-    public static final int CHECKMATE = 50000;   //value for sideToMove mates opponent
-    public static final int MATES = CHECKMATE;   //value for sideToMove GIVES mates
-    public static final int MATED = -CHECKMATE;  //value for sideToMove IS mated
-    
-    public static final int DRAW = 0;              //value for draw
+    public static final int MAXWINDOW    = 99999;   //To pass to alpha beta for initial window (+inf, -inf)
+    public static final int LOWER_BOUND  = -MAXWINDOW;
+    public static final int UPPER_BOUND  = MAXWINDOW;
+    public static final int MAX_MATE     = 50000;          //value for sideToMove mates opponent
+    public static final int MIN_MATE     = MAX_MATE / 2;   //values greater indicate a mate score
+    public static final int MATES        = MAX_MATE;       //value for sideToMove GIVES mates
+    public static final int MATED        = -MAX_MATE;      //value for sideToMove IS mated
+    public static final int DRAW         = 0;              //value for draw
 
     private DefaultGenerator moveGenerator = new DefaultGenerator();
     private Evaluator evaluator = new Evaluator();
@@ -73,7 +72,6 @@ public class Search {
      */
     private int depthLimit = 0;
 
-
     /*
      * The number of nodes expanded during the search (doesn't include leaf nodes currently) 
      */
@@ -85,30 +83,9 @@ public class Search {
      */
     private int[] currentMove;
 
-    /*
-     * Holds the best moves found (that is, moves on the principle variation) in ascending order of depth
-     */
-    protected ScoredMove[] pvLine;
-    
-    /*
-     * Holds the current moves at this depth in the search.
-     * If depth is 0, it holds all moves from that position
-     * If depth is 1, it holds all moves available after an initial first move
-     * and so on.
-     */
-    private ScoredMove[] rootMove;    
-    
-    protected List<RootMove> myRootMoves;
-    protected int myRootMoveIndex;
-    
-    /*
-     * Holds results of the search
-     */
+    protected List<RootMove> rootMoves;
+    protected int currentRootMoveIndex;
     protected SearchInfo info;
-    
-    /*
-     * Time we started searching
-     */
     protected int startTime;
     protected int effectiveDepth;
     
@@ -131,10 +108,8 @@ public class Search {
         maxDepthLimit = maxDepth;
         stackSize = maxDepth + 30; //add buffer for quiescent search
         log.debug("set stack size to " + stackSize + " (maxDepth=" + maxDepth + ")");
-        pvLine = new ScoredMove[stackSize];
         currentMove = new int[stackSize];
-        rootMove = new ScoredMove[AbstractGenerator.MAX_NUM_GENERATED_MOVES];
-        myRootMoves = new ArrayList<RootMove>();
+        rootMoves = new ArrayList<RootMove>();
     }
     
     public Search(TimeMgmt timer)
@@ -143,85 +118,6 @@ public class Search {
         this.timer = timer;
     }
     
-    public long getNodeCount() {
-        return nodeCount;
-    }
-
-    public GameState getGameState() {
-        return g;
-    }
-
-    public void setGameState(GameState gameState) {
-        this.g = gameState;
-    }
-
-    public void setMoveGenerator(DefaultGenerator defaultGenerator) {
-        this.moveGenerator = defaultGenerator;
-    }
-
-    public void setEvaluator(Evaluator evaluator) {
-        this.evaluator = evaluator;
-    }
-    
-    public void setParams(SearchParams params) {
-        this.params = params;
-    }
-
-    public void setTimer(TimeMgmt timer) {
-        this.timer = timer;
-    }
-
-    public ScoredMove[] getRootMove() {
-        return rootMove;
-    }
-
-    public void setRootMove(ScoredMove[] rootMove) {
-        this.rootMove = rootMove;
-    }
-    
-    protected String getScoredRootMoves() {
-        StringBuilder sb = new StringBuilder("\n");
-        for(ScoredMove sm: rootMove)
-        {
-            if(sm == null) break;
-            sb.append(Util.displayMoveStr(sm.getMove(),false,false));
-            sb.append("("+sm.getScore()+")\n");
-        }
-        return sb.toString();
-    }
-
-    public String getPVMoveLine()
-    {
-        if(pvLine[0] == null) //catches mate or stalemate where there is no "best" move
-        {
-            return "<none>";
-        }
-        StringBuilder line = new StringBuilder();
-        for(int nodeIndex = 0;
-                nodeIndex < depthLimit;
-                nodeIndex++)
-        {
-            
-            ScoredMove node = pvLine[nodeIndex];
-            line.append(Util.displayMoveStr(node.getMove(), false, false));
-            line.append(" ");
-        }
-        return line.toString();
-    }
-
-    public ScoredMove[] getPVLine()
-    {
-        return pvLine;
-    }
-    
-
-    /**
-     * @return the results of the search
-     */
-    public SearchInfo getInfo() {
-        return info;
-    }
-
     public void search(SearchParams params)
     {
         int minimax = -MAXWINDOW; //we're looking for the largest score possible so we start at the lowest score possible
@@ -231,38 +127,32 @@ public class Search {
 //        log.debug("blackTime " + params.getTime(Bitmap.BLACK));
 //        log.debug("movesToGo " + params.getMovesToGo());
 
-        boolean mate = false;
         int elapsedTimeMillis = 0;
-        startTime = Util.milliTime();
         int upToThisDepth = maxDepthLimit;
         int side = g.isWhiteToMove()?0:1;
         
         //UciDriver.sendResponse("info depth %d time %d", depth, (Util.milliTime() - startTime));
+        startTime = Util.milliTime();
         minimax = search(side, upToThisDepth);
-        String pvLine = getPVMoveLine();
+        elapsedTimeMillis = Util.milliTime() - startTime;
         if(log.isDebugEnabled()) {
-            int searchTimeMillis = Util.milliTime() - startTime;
-            int nodesPerSecond = (int)(nodeCount / (searchTimeMillis/1000.0));
-            log.debug(upToThisDepth + "/" + effectiveDepth + " ply in " + searchTimeMillis + "ms and " + nodeCount + " nodes " + 
-                    "(" + nodesPerSecond + " nps) yielded (" + minimax + ") " + pvLine);
+            int nodesPerSecond = (int)(nodeCount / (elapsedTimeMillis/1000.0));
+            log.debug(upToThisDepth + "/" + effectiveDepth + " ply in " + elapsedTimeMillis + "ms and " + nodeCount + " nodes " + 
+                    "(" + nodesPerSecond + " nps) yielded " + minimax);
         }
-        mate = Math.abs(minimax) > Search.CHECKMATE / 2;
         sortRootMoves();
         RootMove bestRootMove = getBestRootMove();
         log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " " + bestRootMove.getScore() 
-                +" pv " + bestRootMove.toFormattedPvLine());
-        
-        elapsedTimeMillis = Util.milliTime() - startTime;
-        info = new SearchInfo(bestRootMove, mate, getNodeCount(), elapsedTimeMillis);
-        info.setScore(minimax);
+                +" pv " + Util.toFan(bestRootMove.getPvMoves()));
+        info = new SearchInfo(bestRootMove, getNodeCount(), elapsedTimeMillis);
     }
 
     public void sortRootMoves() {
-        Collections.sort(myRootMoves);
-        for(RootMove rm: myRootMoves)
-        {
-            System.out.println(Util.displayMoveStr(rm.getMove(), false, false) + " score: " + rm.getScore() + ", pv " + rm.toFormattedPvLine());
-        }
+        Collections.sort(rootMoves);
+//        for(RootMove rm: rootMoves)
+//        {
+//            System.out.println(Util.displayMoveStr(rm.getMove(), false, false) + " score: " + rm.getScore() + ", pv " + rm.toFormattedPvLine());
+//        }
     }
     
     /**
@@ -332,15 +222,14 @@ public class Search {
     protected int alphabeta(int side, int alpha, int beta){
         int minimaxValue;
         int depth = 0;
-        moveGenerator.setGameState(g); //FIXME: works for now but needs fixing (F1): gross!
         boolean quiescentSearch = false;
         
         //We always start as the max player, despite what side to move
         minimaxValue = max(alpha, beta, side, depth, quiescentSearch); 
-        if(myRootMoves.size() == 0)
+        if(rootMoves.size() == 0)
         {
             //noMove placeholder with value of search
-            myRootMoves.add(new RootMove(0, minimaxValue)); 
+            rootMoves.add(new RootMove(0, minimaxValue)); 
         }
         return minimaxValue;
     }
@@ -393,8 +282,8 @@ public class Search {
             int move = moves.get(i);
             if(depth == 0)
             {
-                myRootMoves.add(new RootMove(move, -MAXWINDOW));
-                myRootMoveIndex = i;
+                rootMoves.add(new RootMove(move, -MAXWINDOW));
+                currentRootMoveIndex = i;
                 String moveStr = Util.displayMoveStr(move, false, false);
                 if(isTrace) 
                     log.debug("checking " + moveStr + " ("+(i+1)+" of "+(numMoves)+")");
@@ -402,8 +291,6 @@ public class Search {
             currentMove[depth] = move;
             g.makeMove(move, side==WHITE);
             int val = min(alpha,beta,Util.opposing(side),depth+1,quiescentSearch); //recurse!
-            if(depth == 0)
-                myRootMoves.get(myRootMoveIndex).setScore(val);
             g.undoMove(move, side==WHITE);
             if(isTrace)
                 logMove(depth, move, val, alpha, beta);
@@ -446,45 +333,26 @@ public class Search {
         if(g.inCheck())
             return scoreForMateAt(depth); 
         else 
-            return 0; //drawScore, TODO what value should it be?
+            return DRAW;
     }
 
     public int scoreForMateAt(int depth) {
         //Mate-at-Depth-One (mate-in-one) > Mate-at-Depth-Three (mate-in-two) ... etc 
         boolean isEvenDepth = (0 == depth % 2);
-        return (CHECKMATE - depth) * (isEvenDepth?-1:+1);  //positive at odd depths, negative at even depths (even 0 depth)
+        return (MAX_MATE - depth) * (isEvenDepth?-1:+1);  //positive at odd depths, negative at even depths (even 0 depth)
     }
 
     protected void updatePrincipalVariationLine(GameState g, int depth, int score, int move) {
-        ScoredMove existingNode = pvLine[depth];
-//        log.debug("update PV at depth " + depth);
-        
-        RootMove rm = myRootMoves.get(myRootMoveIndex);
+        RootMove rm = rootMoves.get(currentRootMoveIndex);
+        rm.setScore(score);
         rm.setPvMove(currentMove[depth], depth);
-        if(depth >= rm.getPvLength())
-        {   
-//            System.out.println("updating root move " + myRootMoveIndex + " length to " + depth);
-            rm.setPvLength(depth + 1); //pvLength is zeroBased
-        }
-        for(int i=0; i<=depth; i++)
+        if(showPvUpdates) 
         {
-            int currentLineMove = currentMove[i]; //next move to copy to PV
-            ScoredMove newNode = new ScoredMove(currentLineMove, score);
-            if(showPvUpdates)
-            {
-                if(existingNode != null)
-                {
-                    log.debug("d="+depth+" replacing PV node "+existingNode+" with "+newNode);
-                } else {
-                    log.debug("d=" + depth + " adding PV["+i+"] node "+newNode);
-                }
-            }
-            pvLine[i] = newNode;
+            StringBuilder pv = new StringBuilder(score+": ");
+            for(int i=0; i<=depth; i++) 
+                pv.append(Util.displayMoveStr(currentMove[i], false, false)).append(" ");
+            log.info("new pv: " + pv.toString());
         }
-        StringBuilder pv = new StringBuilder(pvLine[0].getScore()+": ");
-        for(int i=0; i<=depth; i++) 
-            pv.append(Util.displayMoveStr(pvLine[i].getMove(), false, false)).append(" ");
-        if(showPvUpdates) log.debug("new pv: " + pv.toString());
     }
 
     // min   - returns minimum value from state 'g'
@@ -531,16 +399,14 @@ public class Search {
             int move = moves.get(i);
             if(depth == 0)
             {
-                myRootMoves.add(new RootMove(move, -MAXWINDOW));
-                myRootMoveIndex = i;
+                rootMoves.add(new RootMove(move, -MAXWINDOW));
+                currentRootMoveIndex = i;
                 String moveStr = Util.displayMoveStr(move, false, false);
                 if(isTrace) log.trace("checking " + moveStr + " ("+(i+1)+" of "+(numMoves)+")");
             }
             currentMove[depth] = move;
             g.makeMove(move, side==WHITE);
             int val = max(alpha,beta,Util.opposing(side),depth+1,quiescentSearch);  //recurse!
-            if(depth == 0)
-                myRootMoves.get(myRootMoveIndex).setScore(val);
             g.undoMove(move, side==WHITE);
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
@@ -606,12 +472,48 @@ public class Search {
 
     public RootMove getBestRootMove() 
     {
-        if(myRootMoves.size() == 0)
+        if(rootMoves.size() == 0)
         {
             return new RootMove(0, -MAXWINDOW); //noMove placeholder
         }
-        return myRootMoves.get(0);
+        return rootMoves.get(0);
     }
+
+    /**
+     * @return the results of the search
+     */
+    public SearchInfo getInfo() {
+        return info;
+    }
+    
+    public long getNodeCount() {
+        return nodeCount;
+    }
+
+    public GameState getGameState() {
+        return g;
+    }
+
+    public void setGameState(GameState gameState) {
+        this.g = gameState;
+    }
+
+    public void setMoveGenerator(DefaultGenerator defaultGenerator) {
+        this.moveGenerator = defaultGenerator;
+    }
+
+    public void setEvaluator(Evaluator evaluator) {
+        this.evaluator = evaluator;
+    }
+    
+    public void setParams(SearchParams params) {
+        this.params = params;
+    }
+
+    public void setTimer(TimeMgmt timer) {
+        this.timer = timer;
+    }
+
 
     protected void logMove(int depth, int move, int moveScore, int alpha, int beta) {
             String line = "";

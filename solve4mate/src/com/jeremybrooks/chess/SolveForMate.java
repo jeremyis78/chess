@@ -21,6 +21,7 @@ import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.FenParser;
+import com.jeremybrooks.chess.util.Util;
 
 /**
  * @author jeremy
@@ -98,12 +99,12 @@ public class SolveForMate {
         double solveTimeMillis = solveInfo.getElapsedTime();
         result.append(EOL);
         result.append("Score     : ").append(solveInfo.getScore() + EOL);
-        result.append("Best line : ").append(solveInfo.getOldSolutionMoves() + EOL);
-        result.append("Is mate?  : ").append(solveInfo.isMate() + EOL);
+        result.append("Best line : ").append(Util.toFan(solveInfo.getBestLine()) + EOL);
+        result.append("Is mate?  : ").append(solveInfo.isMateOrMated() + EOL);
         result.append("Nodes     : ").append(totalNodes + EOL);
         result.append("Time(ms)  : ").append(solveTimeMillis + EOL); 
         result.append("Nodes/sec : ").append(((solveTimeMillis > 0) ? totalNodes/solveTimeMillis : "--") + EOL);
-        result.append("Root Moves: ").append(solveInfo.getScoredRootMoves());
+        result.append("Root Moves: ").append("todo:");
         result.append(EOL);
         
 //        // Display the root moves and the best value seen so far in the tree

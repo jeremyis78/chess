@@ -31,7 +31,7 @@ public class TimeMgmtTest {
         TimeMgmt tm = new TimeMgmt();
         tm.setParams(params);
         int timePerMove = params.getTime(WHITE)/50;
-        System.out.println("Time/move: " + timePerMove);
+        //System.out.println("Time/move: " + timePerMove);
         for(int usedTime=0; usedTime<=110; usedTime++)
         {
             int startTime = Util.milliTime() - usedTime;
