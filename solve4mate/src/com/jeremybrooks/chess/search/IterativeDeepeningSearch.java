@@ -18,9 +18,7 @@ public class IterativeDeepeningSearch extends Search {
     {
         int minimax = 0;
         timer.setParams(params);
-        log.debug("whiteTime " + params.getTime(Bitmap.WHITE));
-        log.debug("blackTime " + params.getTime(Bitmap.BLACK));
-        log.debug("movesToGo " + params.getMovesToGo());
+        log.info("id-search whiteTime " + params.getTime(Bitmap.WHITE) + " blackTime " + params.getTime(Bitmap.BLACK) + " movesToGo " + params.getMovesToGo());
 
         RootMove bestRootMove = new RootMove(0, Search.LOWER_BOUND);
         boolean mate = false;
@@ -47,15 +45,14 @@ public class IterativeDeepeningSearch extends Search {
                 log.debug("mate found! " + minimax );
                 break;
             }
-            if(!timer.hasTimeLeft(side, startTime)){
+            if(timer.hasExpired(side, startTime)){
                 log.debug("time's up; stopping search");
                 break;
             }
         }
-        log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " " + bestRootMove.getScore() 
-              +" pv " + Util.toFan(bestRootMove.getPvMoves()));
-        
         elapsedTimeMillis = Util.milliTime() - startTime;
+        log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " score " + bestRootMove.getScore() 
+                +" millis " + elapsedTimeMillis + " pv " + Util.toFan(bestRootMove.getPvMoves()));
         info = new SearchInfo(bestRootMove, getNodeCount(), elapsedTimeMillis);
     }
     

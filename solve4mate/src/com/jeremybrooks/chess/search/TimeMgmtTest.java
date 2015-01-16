@@ -27,17 +27,17 @@ public class TimeMgmtTest {
     public void testTime() {
         params.setMovesToGo(0);
         Assert.assertTrue(params.isSuddenDeath());
-
+        final int bufferTimeMillis = 10;
         TimeMgmt tm = new TimeMgmt();
         tm.setParams(params);
         int timePerMove = params.getTime(WHITE)/50;
-        //System.out.println("Time/move: " + timePerMove);
+        System.out.println("Time/move: " + timePerMove);
         for(int usedTime=0; usedTime<=110; usedTime++)
         {
             int startTime = Util.milliTime() - usedTime;
-            //System.out.println(usedTime + " timeLeft? " + tm.hasTimeLeft(WHITE, startTime, params));
-            if (usedTime < timePerMove) assertTrue( tm.hasTimeLeft(WHITE, startTime));
-            else                        assertFalse(tm.hasTimeLeft(WHITE, startTime));
+//            System.out.println(usedTime + " timeLeft? " + tm.hasTimeLeft(WHITE, startTime));
+            if ((usedTime + bufferTimeMillis) < timePerMove) assertFalse( tm.hasExpired(WHITE, startTime));
+            else                                             assertTrue(tm.hasExpired(WHITE, startTime));
         }
         
         

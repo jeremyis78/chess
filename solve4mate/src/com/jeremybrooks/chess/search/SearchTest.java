@@ -13,7 +13,7 @@ import com.jeremybrooks.chess.util.Util;
 
 public class SearchTest {
 
-    protected static final int THREE_SECONDS_REMAINING = 3;
+    protected static final int FIVE_SECONDS_REMAINING = 5 * 1000;
     protected static final int MAX_DEPTH_THREE = 3;
     protected Search search;
     protected SearchParams params;
@@ -24,7 +24,7 @@ public class SearchTest {
         search = new Search(MAX_DEPTH_THREE);
         gameState = new GameState();
         //Should be able to run all these test searches in under three seconds
-        params = new SearchParams(THREE_SECONDS_REMAINING);
+        params = new SearchParams(FIVE_SECONDS_REMAINING);
         DefaultGenerator generator = new DefaultGenerator();
         Evaluator evaluator = new Evaluator();
         generator.setGameState(gameState);

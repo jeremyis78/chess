@@ -88,6 +88,7 @@ public class Search {
     protected SearchInfo info;
     protected int startTime;
     protected int effectiveDepth;
+    protected volatile boolean hasMoreTime = true;
     
     
 
@@ -122,10 +123,7 @@ public class Search {
     {
         int minimax = -MAXWINDOW; //we're looking for the largest score possible so we start at the lowest score possible
         timer.setParams(params);
-        log.info("search time limits are not enforced");
-//        log.debug("whiteTime " + params.getTime(Bitmap.WHITE));
-//        log.debug("blackTime " + params.getTime(Bitmap.BLACK));
-//        log.debug("movesToGo " + params.getMovesToGo());
+        log.info("ab-search whiteTime " + params.getTime(Bitmap.WHITE) + " blackTime " + params.getTime(Bitmap.BLACK) + " movesToGo " + params.getMovesToGo());
 
         int elapsedTimeMillis = 0;
         int upToThisDepth = maxDepthLimit;
@@ -135,15 +133,15 @@ public class Search {
         startTime = Util.milliTime();
         minimax = search(side, upToThisDepth);
         elapsedTimeMillis = Util.milliTime() - startTime;
+        sortRootMoves();
+        RootMove bestRootMove = getBestRootMove();
         if(log.isDebugEnabled()) {
             int nodesPerSecond = (int)(nodeCount / (elapsedTimeMillis/1000.0));
             log.debug(upToThisDepth + "/" + effectiveDepth + " ply in " + elapsedTimeMillis + "ms and " + nodeCount + " nodes " + 
                     "(" + nodesPerSecond + " nps) yielded " + minimax);
         }
-        sortRootMoves();
-        RootMove bestRootMove = getBestRootMove();
-        log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " " + bestRootMove.getScore() 
-                +" pv " + Util.toFan(bestRootMove.getPvMoves()));
+        log.info("best " + Util.displayMoveStr(bestRootMove.getMove(),false,false) + " score " + bestRootMove.getScore() 
+              +" millis " + elapsedTimeMillis + " pv " + Util.toFan(bestRootMove.getPvMoves()));
         info = new SearchInfo(bestRootMove, getNodeCount(), elapsedTimeMillis);
     }
 
@@ -277,7 +275,7 @@ public class Search {
             if(!g.inCheck()) return evaluate(side, depth); //recursion base case, a quiet position (no captures, checks or promotions)
         }
         
-        for(int i=0; i<numMoves /* && timer.hasTimeLeft(side, startTime, params)*/; i++){
+        for(int i=0; i<numMoves && hasMoreTime; i++){
             nodeCount++;
             int move = moves.get(i);
             if(depth == 0)
@@ -307,6 +305,11 @@ public class Search {
                 alpha = val; // alpha acts like max in MiniMax  (shrinks the window up from -Infinity)
                 nodePrecision = Precision.EXACT;
                 updatePrincipalVariationLine(g, depth, val, move);
+            }
+            if(timer.hasExpired(side, startTime))
+            {
+                hasMoreTime = false;
+                log.info("time's up at depth " + depth);
             }
         }
         alpha = (0 == numMoves 
@@ -394,7 +397,7 @@ public class Search {
             if(!g.inCheck()) return evaluate(side, depth); //recursion base case, a quiet position (no captures, checks or promotions)
         }
         
-        for(int i=0; i<numMoves /*&& timer.hasTimeLeft(side, startTime, params)*/; i++){
+        for(int i=0; i<numMoves && hasMoreTime; i++){
             nodeCount++;
             int move = moves.get(i);
             if(depth == 0)
@@ -423,6 +426,11 @@ public class Search {
                 beta = val; // beta acts like min in MiniMax (shrinks the window down from +Infinity)
                 nodePrecision = Precision.EXACT;
                 updatePrincipalVariationLine(g, depth, val, move);
+            }
+            if(timer.hasExpired(side, startTime))
+            {
+                hasMoreTime = false;
+                log.info("time's up at depth " + depth);
             }
         }
         beta = (0 == numMoves 

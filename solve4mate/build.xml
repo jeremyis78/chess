@@ -138,7 +138,6 @@
 			<batchtest todir="${reports.xml.dir}" unless="testcase">
 				<fileset dir="${src}">
 					<include name="**/*Test.java" />
-					<exclude name="**/AllTests.java" />
 				</fileset>
 			</batchtest>
 		</junit>
