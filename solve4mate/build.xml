@@ -74,6 +74,7 @@
 			            value="com.jeremybrooks.chess.UciDriver"/>
 		    </manifest>
 		</jar>
+		<copy file="${src}/start.bat" todir="${build}"/>
 	</target>
 
 	<target name="clean" description="clean up">
