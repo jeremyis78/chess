@@ -46,7 +46,11 @@ public class CaptureGenerator extends AbstractGenerator {
                         {
                             to = enPassantSquare;
                             cap = PIECE[PAWN];
-                            moves.add(Util.EncodeMove (from, to, PIECE[PAWN], cap, 0));
+                            int move = Util.EncodeMove (from, to, PIECE[PAWN], cap, 0);
+//                            if(isLegal(g, move))
+                            {
+                                moves.add(move);
+                            }
                         }
                     }
                     break;
@@ -66,17 +70,13 @@ public class CaptureGenerator extends AbstractGenerator {
                     if (!Util.bool(pro)) {     //Capture only
                         //TODO: make sure king does not move into check!!!!!
                         int move = Util.EncodeMove(from, to, PIECE[p], cap, 0);  
-                        //if((piece)p == KING && !isAttacked(g, side, to)){
-                        if(p == KING){
-                            if(isLegal(g, move, side)){
-                                moves.add(move);
-                            }
-                        } else {
+                        if(p != KING || (p == KING && isNotAttacked(to, g)))
+                        {
                             moves.add(move);
                         }
                     } else {        //Capture and promotion
                         int move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[QUEEN]);
-                        if(isLegal(g, move, side)) //can't move if pinned
+//                        if(isLegal(g, move)) //can't move if pinned
                         {
                             moves.add(move);
                             //If the queen promotion is legal the other promotion choices will be too

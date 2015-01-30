@@ -4,15 +4,46 @@
  */
 package com.jeremybrooks.chess.base;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
-import static com.jeremybrooks.chess.base.Square.*;
+import static com.jeremybrooks.chess.base.Bitmap.A1;
+import static com.jeremybrooks.chess.base.Bitmap.A8;
+import static com.jeremybrooks.chess.base.Bitmap.BLACK;
+import static com.jeremybrooks.chess.base.Bitmap.C1;
+import static com.jeremybrooks.chess.base.Bitmap.C8;
+import static com.jeremybrooks.chess.base.Bitmap.E1;
+import static com.jeremybrooks.chess.base.Bitmap.E8;
+import static com.jeremybrooks.chess.base.Bitmap.G1;
+import static com.jeremybrooks.chess.base.Bitmap.G8;
+import static com.jeremybrooks.chess.base.Bitmap.H1;
+import static com.jeremybrooks.chess.base.Bitmap.H8;
+import static com.jeremybrooks.chess.base.Bitmap.KING;
+import static com.jeremybrooks.chess.base.Bitmap.NONE;
+import static com.jeremybrooks.chess.base.Bitmap.NOSQUARE;
+import static com.jeremybrooks.chess.base.Bitmap.PAWN;
+import static com.jeremybrooks.chess.base.Bitmap.ROOK;
+import static com.jeremybrooks.chess.base.Bitmap.TO_PIECE;
+import static com.jeremybrooks.chess.base.Bitmap.WHITE;
+import static com.jeremybrooks.chess.base.Square.isOnCFile;
+import static com.jeremybrooks.chess.base.Square.isOnGFile;
+import static com.jeremybrooks.chess.base.Square.named;
+import static com.jeremybrooks.chess.base.Square.squareAhead;
+import static com.jeremybrooks.chess.base.Square.squareBehind;
+import static com.jeremybrooks.chess.base.Square.squareLeftOf;
+import static com.jeremybrooks.chess.base.Square.squareRightOf;
+import static com.jeremybrooks.chess.base.Square.twoSquaresBehind;
 import static com.jeremybrooks.chess.util.Util.opposing;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.movegen.Attacks;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.FenParser;
+import com.jeremybrooks.chess.util.MoveStack;
 import com.jeremybrooks.chess.util.Util;
 import com.jeremybrooks.chess.util.ZobristKey;
 
@@ -67,6 +98,8 @@ public class GameState {
     private int numberOfMovesMade = 0; // N2 !! choose names at appropriate abstraction level
     private int maxNumberOfMovesMade;
     private boolean whiteToMove = true;
+    private Deque<Integer> deque = new ArrayDeque<>();
+    private MoveStack moveStack = new MoveStack();
 
     public GameState()
     {
@@ -218,12 +251,6 @@ public class GameState {
         return numberOfMovesMade;
     }
     
-    @Deprecated
-    public boolean makeMove(int move, int side){
-        boolean isWhitesMove = (WHITE == side);
-        return makeMove(move, isWhitesMove);
-    }
-
     /**
      * Makes the given move and updates the board's state accordingly.
      * 
@@ -235,22 +262,23 @@ public class GameState {
      * @param isWhitesMove flag indicating which side is making the move
      * @return
      */
-    public boolean makeMove(int move, boolean isWhitesMove){
-        if(log.isTraceEnabled()) log.trace(indent() + formatCurrentLine());
+    public boolean makeMove(int move){
+        if(log.isTraceEnabled()) log.trace(indent() + "<todo>");
         if(numberOfMovesMade == maxNumberOfMovesMade)
         {
             throw new IllegalStateException("max number of moves have been made: " + maxNumberOfMovesMade);
         }
-        if(isWhitesMove != whiteToMove)
-        {
-            throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
-        }
-        whiteToMove = isWhitesMove;                        //cache whose move it is
+//        if(isWhitesMove != whiteToMove)
+//        {
+//            throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
+//        }
+        //whiteToMove = isWhitesMove;                        //cache whose move it is
         int from = move & 0x3F;                         //first 6 bits
         int to = (move >> 6) & 0x3F;                    //next 6
         int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
         int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
         int promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
+        try {
         if (moving == KING){
             updateCastlingOptionsWhenKingMoves();
             int rookFrom = correspondingRookIfKingCastled(from, to);
@@ -269,7 +297,7 @@ public class GameState {
         } else {
             if( isEnPassantCapture(moving, to, captured))
             {
-                erasePiece(squareBehind(to, isWhitesMove?0:1));
+                erasePiece(squareBehind(to, whiteToMove?0:1));
                 captured = NONE;
             } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
                 updateEnPassantSquareForNextMove(squareAhead(from, whiteToMove?0:1));
@@ -287,32 +315,37 @@ public class GameState {
         } else {
             placePiece(moving, to);
         }
-
+        } catch (IllegalStateException e) {
+            String msg = "making " + Util.displayMoveStr(move, false, false) +
+                    " on " + get() + " created illegal Position modification: " +
+                    e.getMessage();
+            throw new IllegalStateException(msg, e);
+        }
         if (isIrreversibleMove(moving, captured)){
             resetHalfMoveClock();
         } else {
             incrementHalfMoveClock();
         }
 
-        if(isWhitesMove)
+        if(whiteToMove)
             duplicateFullMoveClock();
         else
             incrementFullMoveClock();
 
-        whiteToMove = !isWhitesMove;
+        whiteToMove = !whiteToMove;
         numberOfMovesMade++;
+        moveStack.push(move);
         
         if(log.isTraceEnabled()) log.trace(indent()+"after make " +  Util.displayMoveStr(move, false, false) + "                   EP is "+named(getEnPassantSquare()));
         return false;
     }
 
-    private String formatCurrentLine() {
-//        StringBuilder current = new StringBuilder();
-//        for(int i=0; i<numberOfMovesMade; i++){
-//            String moveNo = (i%2==0) ? ((i+2)/2) + ". " : "";
-//            current.append(moveNo+Util.displayMoveStr(currentLine[i], false, false)+ " ");
-//        }
-        return "<empty>";// current.toString();
+    public List<Integer> currentLine() {
+        List<Integer> currentLine = new ArrayList<Integer>();
+        Iterator<Integer> it = moveStack.descendingIterator();
+        while(it.hasNext())
+            currentLine.add(new Integer(it.next()));
+        return currentLine;
     }
 
     private boolean isPawnAdvancingTwoSquares(int moving, int from, int to) {
@@ -323,12 +356,6 @@ public class GameState {
         return captured != NONE || moving == PAWN;
     }
 
-    @Deprecated
-    public boolean undoMove(int move, int side){
-        boolean isWhitesMove = (WHITE == side);
-        return undoMove(move, isWhitesMove);
-    }
-
     /**
      * Undoes the given move by the given side on move.
      * 
@@ -337,17 +364,17 @@ public class GameState {
      *
      * All of the flags should (I think) remain untouched because undoing a move
      * is simply decrementing the depth (ie, popping the stack)
-     * 
      * @param move the encoded move to undo
      * @param isWhitesMove flag indicating which side is having their move undone
      * @return
      */
-    public boolean undoMove(int move, boolean isWhitesMove){
+    public boolean undoMove(){
         if(numberOfMovesMade == 0)
         {
             throw new IllegalStateException("no moves to undo; call makeMove() first");
         }
-        whiteToMove = isWhitesMove;
+        int move = moveStack.peek();
+        whiteToMove = !whiteToMove;
         int from = move & 0x3F;                         //first 6 bits
         int to = (move >> 6) & 0x3F;                    //next 6
         int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
@@ -357,7 +384,7 @@ public class GameState {
         
         //Undo the depth
         numberOfMovesMade--;
-        
+        try {
         //Undo the moving piece
         erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
         placePiece(moving, from);
@@ -387,6 +414,15 @@ public class GameState {
         } else if (captured != NONE) { //Normal capture
             placeOpposingPiece(captured, to);
         }
+        } catch (IllegalStateException e) {
+            String msg = "after " + numberOfMovesMade + " moves made and undoing " + Util.displayMoveStr(move, false, false) +
+                    " on " + get() + " created illegal Position modification: " +
+                    e.getMessage() + " moves: ";
+            while(!moveStack.isEmpty())
+                msg += Util.displayMoveStr(deque.removeFirst(), false, false) + " ";
+            throw new IllegalStateException(msg, e);
+        }
+        moveStack.pop();
         if(log.isTraceEnabled()) log.debug(indent()+"after undo " +  Util.displayMoveStr(move, false, false) + "                   EP is "+named(getEnPassantSquare()));
         return false;
     }
@@ -405,6 +441,10 @@ public class GameState {
         return hash;
     }
     
+    public MoveStack getMoveStack()
+    {
+    	return moveStack;
+    }
     
     private String indent() {
         String indent = "";

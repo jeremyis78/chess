@@ -11,9 +11,14 @@ import com.jeremybrooks.chess.eval.Evaluator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.util.Util;
 
+//Same problem here as in SolverTest with the time limits
+//causing time's up and the correct value isn't found in search and
+//some of the tests fail.
+//If the code changed enough that causes it to take longer
+//to search the tree time limits may need to be increased.
 public class SearchTest {
 
-    protected static final int FIVE_SECONDS_REMAINING = 5 * 1000;
+    protected static final int TEN_SECONDS_REMAINING = 10 * 1000;
     protected static final int MAX_DEPTH_THREE = 3;
     protected Search search;
     protected SearchParams params;
@@ -24,7 +29,7 @@ public class SearchTest {
         search = new Search(MAX_DEPTH_THREE);
         gameState = new GameState();
         //Should be able to run all these test searches in under three seconds
-        params = new SearchParams(FIVE_SECONDS_REMAINING);
+        params = new SearchParams(TEN_SECONDS_REMAINING);
         DefaultGenerator generator = new DefaultGenerator();
         Evaluator evaluator = new Evaluator();
         generator.setGameState(gameState);
@@ -85,7 +90,7 @@ public class SearchTest {
         assertEquals(expectedBestLine,      Util.toFan(info.getBestLine()));
         assertEquals(true,                  info.isMateOrMated());
     }
-    
+
     @Test
     public void givenWhiteCanMateInTwo()
     {

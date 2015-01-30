@@ -1,0 +1,34 @@
+# Results of build/start.bat < perft-input.txt
+Perft (1): 48, Time: 0.002 s
+Perft (2): 2039, Time: 0.053 s
+Perft (3): 97862, Time: 0.237 s
+Perft (4): 4075279, Time: 1.766 s
+Perft (5): 193186752, Time: 80.226 s
+Perft (1): 14, Time: 0.000 s
+Perft (2): 191, Time: 0.000 s
+Perft (3): 2812, Time: 0.001 s
+Perft (4): 43223, Time: 0.021 s
+Perft (5): 674358, Time: 0.343 s
+Perft (6): 11020536, Time: 5.099 s
+Perft (7): 178461922, Time: 80.800 s
+Perft (1): 6, Time: 0.000 s
+Perft (2): 270, Time: 0.000 s
+Perft (3): 9683, Time: 0.004 s
+'4' :null                        # behind the scenes this is the "a8(or some square) is already occupied bug"
+'5' :null                        # same
+'6' :null                        # same
+Perft (1): 6, Time: 0.000 s
+Perft (2): 264, Time: 0.000 s
+Perft (3): 9491, Time: 0.004 s
+Perft (4): 423345, Time: 0.175 s
+Perft (5): 15934628, Time: 6.733 s
+Perft (6): 710380547, Time: 296.630 s
+Perft (1): 42, Time: 0.000 s
+Perft (2): 1352, Time: 0.000 s
+Perft (3): 53367, Time: 0.022 s
+Perft (1): 46, Time: 0.000 s
+Perft (2): 2079, Time: 0.000 s
+Perft (3): 89890, Time: 0.038 s
+Perft (4): 3894594, Time: 1.605 s
+Perft (5): 164075547, Time: 68.210 s
+Perft (6): 6923045946, Time: 3658.666 s

@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.jeremybrooks.chess.base.Bishop;
 import com.jeremybrooks.chess.base.Knight;
 import com.jeremybrooks.chess.base.Piece;
-import com.jeremybrooks.chess.base.Piece.Color;
 
 public class ZobristKeyTest {
 

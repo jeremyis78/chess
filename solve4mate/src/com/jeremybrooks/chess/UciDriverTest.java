@@ -48,7 +48,70 @@ public class UciDriverTest {
         expected.append("readyok");
         assertOutputAndNoErr(expected);
     }
-    
+
+    @Test
+    public void givenMovesAsFirstCommand() throws Exception {
+        String input = "moves";
+        driver.execute(input);
+        
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("1 a2a4 (Pa2-a4)");
+        expected.append("2 b2b4 (Pb2-b4)");
+        expected.append("3 c2c4 (Pc2-c4)");
+        expected.append("4 d2d4 (Pd2-d4)");
+        expected.append("5 e2e4 (Pe2-e4)");
+        expected.append("6 f2f4 (Pf2-f4)");
+        expected.append("7 g2g4 (Pg2-g4)");
+        expected.append("8 h2h4 (Ph2-h4)");
+        expected.append("9 a2a3 (Pa2-a3)");
+        expected.append("10 b2b3 (Pb2-b3)");
+        expected.append("11 c2c3 (Pc2-c3)");
+        expected.append("12 d2d3 (Pd2-d3)");
+        expected.append("13 e2e3 (Pe2-e3)");
+        expected.append("14 f2f3 (Pf2-f3)");
+        expected.append("15 g2g3 (Pg2-g3)");
+        expected.append("16 h2h3 (Ph2-h3)");
+        expected.append("17 b1a3 (Nb1-a3)");
+        expected.append("18 b1c3 (Nb1-c3)");
+        expected.append("19 g1f3 (Ng1-f3)");
+        expected.append("20 g1h3 (Ng1-h3)");
+        expected.append("");
+        assertOutputAndNoErr(expected);
+    }
+
+    @Test
+    public void givenDoMoveE4AsFirstCommand() throws Exception {
+        String input = "do 5";
+        driver.execute(input);
+        driver.execute("moves");
+        driver.execute("movestack");
+        
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("1 a7a5 (Pa7-a5)");
+        expected.append("2 b7b5 (Pb7-b5)");
+        expected.append("3 c7c5 (Pc7-c5)");
+        expected.append("4 d7d5 (Pd7-d5)");
+        expected.append("5 e7e5 (Pe7-e5)");
+        expected.append("6 f7f5 (Pf7-f5)");
+        expected.append("7 g7g5 (Pg7-g5)");
+        expected.append("8 h7h5 (Ph7-h5)");
+        expected.append("9 a7a6 (Pa7-a6)");
+        expected.append("10 b7b6 (Pb7-b6)");
+        expected.append("11 c7c6 (Pc7-c6)");
+        expected.append("12 d7d6 (Pd7-d6)");
+        expected.append("13 e7e6 (Pe7-e6)");
+        expected.append("14 f7f6 (Pf7-f6)");
+        expected.append("15 g7g6 (Pg7-g6)");
+        expected.append("16 h7h6 (Ph7-h6)");
+        expected.append("17 b8a6 (Nb8-a6)");
+        expected.append("18 b8c6 (Nb8-c6)");
+        expected.append("19 g8f6 (Ng8-f6)");
+        expected.append("20 g8h6 (Ng8-h6)");
+        expected.append("");
+        expected.append("Pe2-e4");
+        assertOutputAndNoErr(expected);
+    }
+
     @Test
     public void givenPositionStartPos() throws Exception {
         String input = "position startpos";
@@ -68,6 +131,7 @@ public class UciDriverTest {
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
         expected.append("");
+        expected.append("State: w KQkq - 0 1");
         Assert.assertEquals(expected.toString(),out.toString());
     }
 
@@ -104,6 +168,7 @@ public class UciDriverTest {
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
         expected.append("");
+        expected.append("State: w - - 6 8");
         Assert.assertEquals(expected.toString(),out.toString());
     }
 
@@ -149,6 +214,7 @@ public class UciDriverTest {
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
         expected.append("");
+        expected.append("State: w - - 1 15"); 
         Assert.assertEquals(expected.toString(),out.toString());
     }
 

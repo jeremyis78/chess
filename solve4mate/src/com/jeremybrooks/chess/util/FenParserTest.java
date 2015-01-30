@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.Bitmap;
-import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
 
 public class FenParserTest {

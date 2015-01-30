@@ -43,6 +43,8 @@ public interface Generator {
     public boolean canBlackShortCastle(GameState g);
 
     public boolean canBlackLongCastle(GameState g);
+    
+    public boolean isLegal(GameState g, int move);
 
     public void setGameState(GameState gameState);
 }

@@ -23,13 +23,24 @@ public class GameStateTest {
     }
     
     @Test
-    public void testConstructor()
+    public void testConstructorWhiteToMove()
     {
         String expectedState = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
         String actualState = gameState.get();
         assertEquals(expectedState, actualState);
+        assertWhiteToMove();
     }
-    
+
+    @Test
+    public void testConstructorBlackToMove()
+    {
+        String expectedState = "k7/8/8/8/8/8/8/7K b - - 0 1";
+        gameState.set(expectedState);
+        String actualState = gameState.get();
+        assertEquals(expectedState, actualState);
+        assertBlackToMove();
+    }
+
     @Test
     public void testConstructionWithTwoMoveLimit()
     {
@@ -39,8 +50,11 @@ public class GameStateTest {
         int firstMove = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
         String afterFirstMove = "4Q3/8/8/8/8/8/4P3/k6K b - - 0 30";
         boolean isWhitesMove = setupState(beforeMove);
+        assertWhiteToMove();
         assertEquals(afterFirstMove, makeMove(isWhitesMove, firstMove));
         assertEquals(1, gameState.getNumberOfMovesMade());
+        assertEquals(1, gameState.currentLine().size());
+        assertBlackToMove();
         
         int secondMove  = encodeMove(A1, A2, PIECE[KING]);
         String afterSecondMove = "4Q3/8/8/8/8/8/k3P3/7K w - - 1 31";
@@ -184,22 +198,58 @@ public class GameStateTest {
 
         makeMove(isWhitesMove, whiteMove);
         assertEquals(H3, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4", movesMadeInFAN());
+        assertBlackToMove();
         
         makeMove(!isWhitesMove, blackG5);
         assertEquals(G6, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4 Pg7-g5", movesMadeInFAN());
+        assertWhiteToMove();
         undoMove(!isWhitesMove, blackG5);
         assertEquals(H3, gameState.getEnPassantSquare());
-
+        assertEquals("Ph2-h4", movesMadeInFAN());
+        assertBlackToMove();
+        
         makeMove(!isWhitesMove, blackH5);
         assertEquals(H6, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4 Ph7-h5", movesMadeInFAN());
+        assertWhiteToMove();
         undoMove(!isWhitesMove, blackH5);
         assertEquals(H3, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4", movesMadeInFAN());
+        assertBlackToMove();
 
         makeMove(!isWhitesMove, blackB5);
         assertEquals(NOSQUARE, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4 Pb6-b5", movesMadeInFAN());
+        assertWhiteToMove();
         undoMove(!isWhitesMove, blackB5);
         assertEquals(H3, gameState.getEnPassantSquare());
+        assertEquals("Ph2-h4", movesMadeInFAN());
+        assertBlackToMove();
+        
+        undoMove(isWhitesMove, whiteMove);
+        assertEquals("", movesMadeInFAN());
+        assertWhiteToMove();
     }
+
+	private void assertWhiteToMove() {
+		assertEquals(true, gameState.isWhiteToMove());
+	}
+
+	private void assertBlackToMove() {
+		assertEquals(false, gameState.isWhiteToMove());
+	}
+
+	private String movesMadeInFAN() {
+		StringBuilder line = new StringBuilder();
+		for(int move: gameState.currentLine())
+		{
+			line.append(Util.displayMoveStr(move, false, false)).append(" ");
+		}
+		if(line.length()>0) line.deleteCharAt(line.length()-1);
+		return line.toString();
+	}
     
     @Test
     public void testMakeAndUndoWhitePawnCapturesEnPassant() {
@@ -363,9 +413,11 @@ public class GameStateTest {
         String afterMove = "4k2r/8/8/8/8/8/8/r3K2R w KQk - 0 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
+        assertEquals("Ra8xa1", movesMadeInFAN());
         assertEquals(beforeMove, undoMove(isWhitesMove, move));
+        assertTrue(gameState.currentLine().isEmpty());
     }
-    
+     
     @Test
     public void testZobristHash()
     {
@@ -421,6 +473,23 @@ public class GameStateTest {
         move |= (PIECE[Bitmap.QUEEN] << 12);
         makeUndoMakeMove(i%2==0?true:false, move);  //doesn't throw, ugggh.
     }
+    
+    public void testA8AlreadyOccupiedBug()
+    {
+    	//r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1
+        String before = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+        int move1 = encodeMove(D2, D4, PIECE[PAWN]);
+        int move2 = encodeMove(A8, A7, PIECE[ROOK], PIECE[PAWN]);
+
+        String expectedAfter = "4k2r/Rppp1ppp/1b3nbN/nP6/BBPPP3/q4N2/Pp4PP/R2Q1RK1 w kq - 0 1";
+        boolean isWhitesMove = setupState(before);
+        makeMove(isWhitesMove, move1);
+        String afterMove = makeMove(!isWhitesMove, move2);
+        assertEquals(expectedAfter, afterMove);
+        String afterUndoRookMove = undoMove(!isWhitesMove, move2);
+        String expectedAfterUndo = "r3k2r/1ppp1ppp/1b3nbN/nP6/BBPPP3/q4N2/Pp4PP/R2Q1RK1 w kq - 0 1";
+        assertEquals(expectedAfterUndo, afterUndoRookMove);
+    }
 
     private void makeUndoMakeMove(boolean isWhiteToMove, int move) {
         makeMove(isWhiteToMove, move);
@@ -437,13 +506,13 @@ public class GameStateTest {
     }
     
     private String makeMove(boolean isWhitesMove, int move) {
-        gameState.makeMove(move, isWhitesMove);
+        gameState.makeMove(move);
         String stateAfterMove = gameState.get();
         return stateAfterMove;
     }
 
     private String undoMove(boolean isWhitesMove, int move) {
-        gameState.undoMove(move, isWhitesMove);
+        gameState.undoMove();
         String stateAfterUndo = gameState.get();
         return stateAfterUndo;
     }

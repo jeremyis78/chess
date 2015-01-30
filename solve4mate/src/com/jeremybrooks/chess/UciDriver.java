@@ -29,10 +29,13 @@ public class UciDriver {
     //  position fen k7/7P/8/8/8/8/4p3/7K b - - 0 1 moves e2e1q h7h8q a8b7 
     private static final String START_FEN = 
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    
     private InputStream in;
     private PrintStream out;
     private GameState gameState;
     private Solver engine;
+
+    private List<Integer> legalMoves;
     
     public static void main(String[] args) throws Exception
     {
@@ -53,16 +56,19 @@ public class UciDriver {
         setOut(out);
         engine = new Solver(); //initialize engine (ie, Attacks instance)
         gameState = new GameState();
+        gameState.set(START_FEN);
+        legalMoves = engine.getLegalMoves(gameState);
     }
     
     public void start() throws Exception
     {
        String input = "";
        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-       while(true)
+       input = br.readLine();
+       while(input != null)
        {
-           input = br.readLine();
            execute(input);
+           input = br.readLine();
        }
     }
 
@@ -86,6 +92,18 @@ public class UciDriver {
             case "position":
                 setPosition(cmd, argIndex);
                 break;
+            case "moves":
+                 displayLegalMoves();
+                 break;
+            case "do": //do/make this move on the board
+                doMove(cmd, argIndex);
+                break;
+            case "undo": //undo the last move made
+            	undoMove();
+                break;
+            case "movestack":
+            	out.println(toFanMoves(gameState.currentLine()));
+            	break;
             case "go":
                 go(cmd);
                 break;
@@ -110,6 +128,15 @@ public class UciDriver {
             case "diagram":
                 out.println(toDiagram(gameState));
                 break;
+            case "perft":
+                perftCountAllNodes(cmd, argIndex);
+                break;
+            case "perft2":
+                perftCountLeafNodes(cmd, argIndex);
+                break;
+            case "divide":
+            	doDivide(cmd, argIndex);
+                break;
             case "quit":
                 System.exit(0);
             default:
@@ -123,12 +150,107 @@ public class UciDriver {
         }
     }
 
+    private void generateLegalMoves()
+    {
+    	legalMoves = engine.getLegalMoves(gameState);
+    }
+    
+    private void displayLegalMoves() throws IOException {
+    	if(legalMoves == null)
+    		throw new NullPointerException("moves must be generated before displaying");
+        int oneBasedMoveNumber = 1;
+        StringBuilder output = new StringBuilder();
+        String format = "%d %s (%s)%n";
+        for(int move: legalMoves)
+        {
+            Object[] args = new Object[]{oneBasedMoveNumber++,
+                                         toUciMove(move),
+                                         Util.displayMoveStr(move, false, false)
+            };
+            output.append(String.format(format, args));
+        }
+        respond(output.toString());
+    }
+
+    private void doMove(String[] cmd, int argIndex) {
+        try
+        {
+            String token = cmd[argIndex++];
+            if(token != null)
+            {
+                int oneBasedMoveNumber = Integer.parseInt(token);
+                int move = legalMoves.get(oneBasedMoveNumber-1); 
+                gameState.makeMove(move);
+                generateLegalMoves();
+            }
+        } catch (NumberFormatException e) {
+            String format = "do requires an integer argument between 1 and %d";
+            out.println(String.format(format, legalMoves.size()));
+        }
+    }
+
+	private void undoMove() {
+		if(gameState.getNumberOfMovesMade() > 0)
+		{
+			gameState.undoMove();
+			generateLegalMoves();
+		}
+	}
+
+	private void perftCountAllNodes(String[] cmd, int argIndex) {
+		String token = "";
+		try {
+		    token = cmd[argIndex++];
+		    int depth = Integer.parseInt(token);
+		    if(depth > 0)
+		    {
+		        engine.doPerft(gameState, depth, out);
+		    }
+		} catch (Exception e) {
+		    out.println("'"+token+"' :" + e.getMessage()); //needs to be an integer argument greater than 0");
+		}
+	}
+
+	private void perftCountLeafNodes(String[] cmd, int argIndex) {
+		String token = "";
+		try {
+		    token = cmd[argIndex++];
+		    int depth = Integer.parseInt(token);
+		    if(depth > 0)
+		    {
+		        engine.doPerft2(gameState, depth, out);
+		    }
+		} catch (Exception e) {
+		    out.println("perft2 requires an integer argument greater than 0");
+		}
+	}
+
+	private void doDivide(String[] cmd, int argIndex) {
+		String token;
+		try {
+		    token = cmd[argIndex++];
+		    int depth = Integer.parseInt(token);
+		    if(depth > 0)
+		    {
+		        engine.doDivide(gameState, depth, out);
+		    }
+		} catch (Exception e) {
+		    if(e instanceof IllegalArgumentException)
+		        out.println(e.getMessage());
+		    else out.println("divide requires an integer argument greater than 0: " + e.getMessage());
+		}
+	}
+
     public static String toDiagram(GameState g) {
         if(g == null)
             throw new NullPointerException("cannot display null gamestate");
         AbstractDisplayer displayer = new Displayer();
         Position position = g.getPosition();
-        return displayer.formatBoard(position);
+        String board = displayer.formatBoard(position);
+        String fen = g.get();
+        String state = fen.substring(fen.indexOf(" ")+1);
+        String format = "%s%nState: %s";
+        return String.format(format, board, state);
     }
 
 //    private static int parseTimeLimit(String token) {
@@ -166,7 +288,6 @@ public class UciDriver {
         } else {
             throw new IllegalArgumentException(token + " is not allowed; only fen or startpos are allowed.");
         }
-        gameState = new GameState(); //can we just clear this instead of a brand new one?
         gameState.set(fen.trim());
         if(argIndex < cmd.length)
             token = cmd[argIndex++]; //read "moves" token
@@ -175,7 +296,7 @@ public class UciDriver {
         {
             token = cmd[argIndex++];
             int move = parseUciMove(gameState, token);
-            gameState.makeMove(move, isWhitesMove);
+            gameState.makeMove(move);
             isWhitesMove = !isWhitesMove;
         }
     }
@@ -271,6 +392,19 @@ public class UciDriver {
 //        respond("info bestline " + info.getSolutionMoves());
     }
 
+    private static String toFanMoves(List<Integer> bestLine) {
+        StringBuilder fanMoves = new StringBuilder();
+        for(int move: bestLine)
+        {
+            String uciMove = Util.displayMoveStr(move, false, false);
+            fanMoves.append(uciMove);
+            fanMoves.append(" ");
+        }
+        if(fanMoves.length()>0) 
+        	fanMoves.deleteCharAt(fanMoves.length()-1);
+        return fanMoves.toString();
+    }
+
     private static String toUciMoves(List<Integer> bestLine) {
         StringBuilder uciMoves = new StringBuilder();
         for(int move: bestLine)
@@ -282,7 +416,7 @@ public class UciDriver {
         return uciMoves.toString();
     }
 
-    private static String toUciMove(int move) {
+    public static String toUciMove(int move) {
         int fromSquare = move & 0x3F;
         int toSquare = (move >> 6) & 0x3F;
         if(fromSquare==toSquare && fromSquare==0)

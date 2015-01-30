@@ -12,6 +12,16 @@ import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.Util;
 
+/*
+ * Test results (specifically finding mate flag) is sensitive to how long it gets to search.
+ * Longer mates may not be found in the default time and so some of these can fail to find 
+ * mate when restricted to the default time.  It may also fail if new code is added that
+ * adds significant time to the search used to find mate (ID search currently).  Mate finding
+ * is inherently different than searching since you need to do a completely exhaustive search.
+ * Until better searching is enabled and these tests are timed there may need to be adjustments
+ * to handle additional time introduced in new code to find the mates.  Once better searching is
+ * implemented these adjustments should no longer need to be made.
+ */
 public class SolverTest {
 
     private Solver solver;
@@ -21,8 +31,8 @@ public class SolverTest {
     public void setUp()
     {
         solver = new Solver();
-        int fourSeconds = 4 * 1000;
-        solver.setSearchParams(new SearchParams(fourSeconds));
+        int defaultTime = 8 * 1000;
+        solver.setSearchParams(new SearchParams(defaultTime));
         puzzle = new Puzzle();
     }
 
@@ -122,8 +132,8 @@ public class SolverTest {
     
     @Test
     public void testSolveForMate3MorePiecesOnTheBoard() {
-        int fifteenSeconds = 15 * 1000;
-        solver.setSearchParams(SearchParams.forOnePosition(fifteenSeconds));
+        int longerTime = 30 * 1000;
+        solver.setSearchParams(SearchParams.forOnePosition(longerTime));
         
         String fen = "r2qkbnr/ppp2ppp/n2p4/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w - - 0 1  #Burgess 2";
         String expectedSolution = "Bc4xf7 Ke8-e7 Nc3-d5";

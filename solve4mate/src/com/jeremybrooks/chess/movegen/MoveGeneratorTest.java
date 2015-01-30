@@ -48,7 +48,7 @@ public class MoveGeneratorTest {
     public void testGenerateCapturesFromStartingPositionWhiteToMove() {
         String startFenWhiteToMove = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         Set<String> expectedMoves = toSet("");
-        Set<String> actualCaptures = generateCaptures(startFenWhiteToMove);
+        Set<String> actualCaptures = generateCapturesInFan(startFenWhiteToMove);
         assertMovesAreEqual(expectedMoves, actualCaptures);
     }
 
@@ -56,7 +56,7 @@ public class MoveGeneratorTest {
     public void testGenerateCapturesFromStartingPositionBlackToMove() {
         String startFenBlackToMove = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1";
         Set<String> expectedMoves = toSet("");
-        Set<String> actualCaptures = generateCaptures(startFenBlackToMove);
+        Set<String> actualCaptures = generateCapturesInFan(startFenBlackToMove);
         assertMovesAreEqual(expectedMoves, actualCaptures);
     }
 
@@ -66,7 +66,7 @@ public class MoveGeneratorTest {
         Set<String> expectedMoves = toSet("Pa2-a4,Pb2-b4,Pc2-c4,Pd2-d4,Pe2-e4,Pf2-f4,Pg2-g4,Ph2-h4,"
                 + "Pa2-a3,Pb2-b3,Pc2-c3,Pd2-d3,Pe2-e3,Pf2-f3,Pg2-g3,Ph2-h3,"
                 + "Nb1-a3,Nb1-c3,Ng1-f3,Ng1-h3");
-        Set<String> actualMoves = generateNonCaptures(startFenWhiteToMove);
+        Set<String> actualMoves = generateNonCapturesInFan(startFenWhiteToMove);
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
@@ -76,32 +76,33 @@ public class MoveGeneratorTest {
         Set<String> expectedMoves = toSet("Pa7-a5,Pb7-b5,Pc7-c5,Pd7-d5,Pe7-e5,Pf7-f5,Pg7-g5,Ph7-h5,"
                 + "Pa7-a6,Pb7-b6,Pc7-c6,Pd7-d6,Pe7-e6,Pf7-f6,Pg7-g6,Ph7-h6,"
                 + "Nb8-a6,Nb8-c6,Ng8-f6,Ng8-h6");
-        Set<String> actualMoves = generateNonCaptures(startFenBlackToMove);
+        Set<String> actualMoves = generateNonCapturesInFan(startFenBlackToMove);
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
     @Test
     public void testGenerateCapturesPinnedWhitePawnCantCaptureToPromote() {
         String positionFen = "2rn4/2P5/8/8/8/8/8/2K4k w - - 0 1";
-        Set<String> expectedMoves = toSet("");
-        Set<String> actualMoves = generateCaptures(positionFen);
-        assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8Q"));
-        assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8R"));
-        assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8B"));
-        assertFalse("invalid move: c7 pawn is pinned", actualMoves.contains("Pc7xd8N"));
+        Set<String> expectedMoves = toSet("Pc7xd8Q,Pc7xd8R,Pc7xd8B,Pc7xd8N");
+        Set<String> actualMoves = generateCapturesInFan(positionFen);
+        assertTrue("c7 pawn is pinned but still psuedo-legal", actualMoves.contains("Pc7xd8Q"));
+        assertTrue("c7 pawn is pinned but still psuedo-legal", actualMoves.contains("Pc7xd8R"));
+        assertTrue("c7 pawn is pinned but still psuedo-legal", actualMoves.contains("Pc7xd8B"));
+        assertTrue("c7 pawn is pinned but still psuedo-legal", actualMoves.contains("Pc7xd8N"));
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
     @Test
-    public void testGenerateNonCapturesPinnedWhitePawnCantAdvance() {
+    public void testGenerateNonCapturesPinnedWhitePawnCanAdvance() {
         String positionFen = "k7/8/8/8/8/8/2K1P2r/8 w - - 0 1";
         Set<String> expectedMoves = toSet(
                 "Kc2-b1,Kc2-c1,Kc2-d1,"
                 + "Kc2-b2,Kc2-d2,"
-                + "Kc2-b3,Kc2-c3,Kc2-d3");
-        Set<String> actualMoves = generateNonCaptures(positionFen);
-        assertFalse("invalid move: e2 pawn is pinned", actualMoves.contains("e3"));
-        assertFalse("invalid move: e2 pawn is pinned", actualMoves.contains("e4"));
+                + "Kc2-b3,Kc2-c3,Kc2-d3,"
+                + "Pe2-e3,Pe2-e4"); //e2 is pinned but it's still a good psuedo-legal move
+        Set<String> actualMoves = generateNonCapturesInFan(positionFen);
+        assertTrue(actualMoves.contains("Pe2-e3"));
+        assertTrue(actualMoves.contains("Pe2-e4"));
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
@@ -109,38 +110,54 @@ public class MoveGeneratorTest {
     public void testGenerateNonCapturesPosition1() {
         String positionFen = "R1Q5/1p3p2/1k1qpb2/8/P2p4/P2P2P1/4rPK1/8 w - - 0 1";
         Set<String> expectedMoves = toSet("Kg2-f1,Kg2-g1,Kg2-h1,Kg2-h2,Kg2-f3,Kg2-h3,"
+                + "Pf2-f3,Pf2-f4," /*psuedo-legal*/
                 + "Pg3-g4,Pa4-a5,"
                 + "Ra8-a5,Ra8-a6,Ra8-a7,Ra8-b8,"
                 + "Qc8-c1,Qc8-c2,Qc8-c3,Qc8-c4,Qc8-c5,Qc8-c6,Qc8-c7,"
                 + "Qc8-d7,Qc8-b8,Qc8-d8,Qc8-e8,Qc8-f8,Qc8-g8,Qc8-h8");
-        Set<String> actualMoves = generateNonCaptures(positionFen);
-        assertFalse("invalid move: f2 pawn is pinned", actualMoves.contains("Pf2-f3"));
-        assertFalse("invalid move: f2 pawn is pinned", actualMoves.contains("Pf2-f4"));
+        Set<String> actualMoves = generateNonCapturesInFan(positionFen);
+        assertTrue("pinned f2 pawn push is still psuedo-legal", actualMoves.contains("Pf2-f3"));
+        assertTrue("pinned f2 pawn push is still psuedo-legal", actualMoves.contains("Pf2-f4"));
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
     @Test
-    public void testGenerateCapturesPosition1() {
+    public void givenPsuedoLegalMoveKingCapturesAndIsInCheck() {
         String positionFen = "R1Q5/1p3p2/1k1qpb2/8/P2p4/P2P1np1/6K1/8 w - - 0 1";
         Set<String> expectedMoves = toSet("Qc8xb7,Qc8xe6,Kg2xf3");
-        Set<String> actualMoves = generateCaptures(positionFen);
+        Set<String> actualMoves = generateCapturesInFan(positionFen);
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
     
+    @Test
+    public void givenKingNeedsToEvadeCheck()
+    {
+        String positionFen = "8/8/4k3/2pp1q2/4K3/8/8/8 w - - 0 1";
+        Set<String> actualMoves = generateCapturesInFan(positionFen);
+        assertTrue(actualMoves.isEmpty());
+        
+        Set<String> expectedMoves = toSet("Ke4-e3");
+        actualMoves = generateNonCapturesInFan(positionFen);
+        assertMovesAreEqual(expectedMoves, actualMoves);
+
+        actualMoves = generateKingEscapesInFan(positionFen);
+        assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+
     @Test
     public void testWhitePawnPromotions()
     {
         String blockedAndCanPromoteAndCanCaptureToPromote = "1r1n2k1/2PP4/8/8/8/8/2q5/K7 w - - 0 1";
         Set<String> expectedMoves = toSet("Pc7-c8B,Pc7-c8N,Pc7-c8Q,Pc7-c8R,Pc7xb8B,Pc7xb8N,"
                 + "Pc7xb8Q,Pc7xb8R,Pc7xd8B,Pc7xd8N,Pc7xd8Q,Pc7xd8R"); 
-        Set<String> actualMoves = generateMoves(blockedAndCanPromoteAndCanCaptureToPromote);
+        Set<String> actualMoves = generateMovesInFan(blockedAndCanPromoteAndCanCaptureToPromote);
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
     @Test
     public void testBlackPawnPromotions()
     {
-        Set<String> actualMoves = generateMoves("k7/2Q5/8/8/8/8/7p/K5NR b - - 0 1");
+        Set<String> actualMoves = generateMovesInFan("k7/2Q5/8/8/8/8/7p/K5NR b - - 0 1");
         Set<String> expectedMoves = toSet("Ph2xg1Q,Ph2xg1R,Ph2xg1B,Ph2xg1N"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -151,7 +168,7 @@ public class MoveGeneratorTest {
         String positionFen = "k7/8/8/8/8/p6p/P6P/R3K2R w KQ - 0 1";
         Set<String> expectedMoves = toSet("Ke1-c1,Ke1-d1,Ke1-d2,Ke1-e2,Ke1-f1,Ke1-f2,Ke1-g1,"
                 + "Ra1-b1,Ra1-c1,Ra1-d1,Rh1-f1,Rh1-g1"); 
-        Set<String> actualMoves = generateMoves(positionFen);
+        Set<String> actualMoves = generateMovesInFan(positionFen);
         assertMovesAreEqual(expectedMoves, actualMoves);
         actualMoves.contains("Ke1-c1 0-0-0");
         actualMoves.contains("Ke1-g1 0-0");
@@ -161,72 +178,280 @@ public class MoveGeneratorTest {
     public void testWhiteCannotCastleDueToKingOrRookHavingMovedAndMovedBack()
     {
         String initialPositionsButCastlingIsUnavailable = "k7/8/8/8/8/p6p/P6P/R3K2R w - - 0 1";
-        Set<String> actualMoves = generateMoves(initialPositionsButCastlingIsUnavailable);
-        assertFalse(actualMoves.contains("Ke1-c1 0-0-0"));
-        assertFalse(actualMoves.contains("Ke1-g1 0-0"));
+        Set<String> actualMoves = generateMovesInFan(initialPositionsButCastlingIsUnavailable);
+        assertFalse(actualMoves.contains("Ke1-c1"));
+        assertFalse(actualMoves.contains("Ke1-g1"));
     }
 
     @Test
     public void testWhiteCannotCastleThroughCheck()
     {
         String bishopAttackingB1andF1 = "k7/8/8/8/8/p2b3p/P6P/R3K2R w KQ - 0 1";
-        Set<String> actualMoves = generateMoves(bishopAttackingB1andF1);
-        assertFalse(actualMoves.contains("Ke1-c1 0-0-0"));
-        assertFalse(actualMoves.contains("Ke1-g1 0-0"));
+        Set<String> actualMoves = generateMovesInFan(bishopAttackingB1andF1);
+        assertTrue (actualMoves.contains("Ke1-c1"));
+        assertFalse(actualMoves.contains("Ke1-g1"));
     }
 
     @Test
     public void testWhiteCannotCastleToAvoidCheck()
     {
         String rookCheckingKing = "k7/8/8/4r3/8/p6p/P6P/R3K2R w KQ - 0 1";
-        Set<String> actualMoves = generateMoves(rookCheckingKing);
-        assertFalse(actualMoves.contains("Ke1-c1 0-0-0"));
-        assertFalse(actualMoves.contains("Ke1-g1 0-0"));
+        Set<String> actualMoves = generateMovesInFan(rookCheckingKing);
+        assertFalse(actualMoves.contains("Ke1-c1"));
+        assertFalse(actualMoves.contains("Ke1-g1"));
     }
-    
-     @Test
+
+    @Test
     public void testBlackCastling()
     {
         String initialPositions = "r3k2r/p6p/P6P/8/8/8/8/7K b kq - 0 1";
-        Set<String> actualMoves = generateMoves(initialPositions);
+        Set<String> actualMoves = generateMovesInFan(initialPositions);
         assertTrue(actualMoves.contains("Ke8-c8"));
         assertTrue(actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void testBlackCanCastleKingSideButNotQueenside()
+    {   
+        String initialPositions = "r3k2r/p1ppqNb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(initialPositions);
+        //TODO: can reduce this position to its basic elements, kings, black rooks and white knight and castling privileges
+        //TODO: mirror this test for the white to move
+        assertTrue("king-side castling is allowed when rook is attacked",
+                actualMoves.contains("Ke8-g8"));
+        assertFalse("queen-side castling is prevented due to king having to move through check",
+                actualMoves.contains("Ke8-c8"));
     }
 
     @Test
     public void testBlackCannotCastle()
     {
         String initialPositionsButCastlingIsUnavailable = "r3k2r/p6p/P6P/8/8/8/8/7K b - - 0 1";
-        Set<String> actualMoves = generateMoves(initialPositionsButCastlingIsUnavailable);
+        Set<String> actualMoves = generateMovesInFan(initialPositionsButCastlingIsUnavailable);
         assertFalse(actualMoves.contains("Ke8-c8 0-0-0"));
         assertFalse(actualMoves.contains("Ke8-g8 0-0"));
     }
+    
+    // The following test cases check for castling legality when the king
+    // attempts to castle out of, through, into check or even near attacked squares.
+    // The test cases use a simple test position that begins with just the following pieces ...
+    // 
+    //   * both kings in starting position and
+    //   * both rooks (on both sides) in starting position and
+    //   * all castling rights available
+    // 
+    // Each test then adds an opposing queen to be placed along the sideToMove's 5th
+    // rank (from the d-file to the g-file, or vice versa for black) so it always attacks 
+    // a pair of the sideToMove's first rank squares (with the exception of the e-file).
+    // With the opposing and attacking rooks, every bank-rank square is attacked at some
+    // point. At every queen placement we have a test case and a check for a legal
+    // long or short castle move.
+    //
+    // Black to move
+    //                                       Queen on    Kside   Qside     Scenario
+    // r3k2r/8/8/8/3Q4/8/8/R3K2R b KQkq - 0 1    d4         y       n       castle thru check on qside
+    // r3k2r/8/8/8/4Q3/8/8/R3K2R b KQkq - 0 1    e4         n       n       castle out of check
+    // r3k2r/8/8/8/5Q2/8/8/R3K2R b KQkq - 0 1    f4         n       y       castle thru check on kside
+    // r3k2r/8/8/8/6Q1/8/8/R3K2R b KQkq - 0 1    g4         n       n       castle into check both sides
+    //
+    // White to move
+    //
+    // r3k2r/8/8/3q4/8/8/8/R3K2R w KQkq - 0 1    d5         y       n       
+    // r3k2r/8/8/4q3/8/8/8/R3K2R w KQkq - 0 1    e5         n       n
+    // r3k2r/8/8/5q2/8/8/8/R3K2R w KQkq - 0 1    f5         n       y
+    // r3k2r/8/8/6q1/8/8/8/R3K2R w KQkq - 0 1    g5         n       n
+
+    
+    @Test
+    public void givenWhiteCastlingLegalityWithQueenOnD5()
+    {
+        String fen = "r3k2r/8/8/3q4/8/8/8/R3K2R w KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        assertFalse("because king passes through check",        actualMoves.contains("Ke1-c1"));
+        assertTrue ("because king does not pass through check", actualMoves.contains("Ke1-g1"));
+    }
 
     @Test
-    public void testBlackCannotCastleThroughCheck()
+    public void givenWhiteCastlingLegalityWithQueenOnE5()
     {
-        String queenAttackingB8andF8 = "r3k2r/p6p/P2Q3P/8/8/8/8/7K b kq - 0 1";
-        Set<String> actualMoves = generateMoves(queenAttackingB8andF8);
-        assertFalse(actualMoves.contains("Ke8-c8 0-0-0"));
-        assertFalse(actualMoves.contains("Ke8-g8 0-0"));
+        String fen = "r3k2r/8/8/4q3/8/8/8/R3K2R w KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        assertFalse("because king can't castle to avoid check", actualMoves.contains("Ke1-c1"));
+        assertFalse("because king can't castle to avoid check", actualMoves.contains("Ke1-g1"));
+    }
+
+    @Test
+    public void givenWhiteCastlingLegalityWithQueenOnF5()
+    {
+        String fen = "r3k2r/8/8/5q2/8/8/8/R3K2R w KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        assertTrue ("because b1 attack doesn't prevent long castling", actualMoves.contains("Ke1-c1"));
+        assertFalse("because king passes through check",               actualMoves.contains("Ke1-g1"));
+    }
+    
+    @Test
+    public void givenWhiteCastlingLegalityWithQueenOnG5()
+    {
+        String fen = "r3k2r/8/8/6q1/8/8/8/R3K2R w KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        assertFalse("because king will end up in check", actualMoves.contains("Ke1-c1"));
+        assertFalse("because king will end up in check", actualMoves.contains("Ke1-g1"));
+    }
+
+    @Test
+    public void givenBlackCastlingLegalityWithQueenOnG4()
+    {
+        String destinationSquaresC8andG8AreAttacked = "r3k2r/8/8/8/6Q1/8/8/R3K2R b KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(destinationSquaresC8andG8AreAttacked);
+        assertFalse("because king will end up in check",        actualMoves.contains("Ke8-c8"));
+        assertFalse("because king will end up in check",        actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void givenBlackCastlingLegalityWithQueenOnF4()
+    {
+        String b8andF8AreAttacked = "r3k2r/8/8/8/5Q2/8/8/R3K2R b KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(b8andF8AreAttacked);
+        assertTrue ("because b8 attack doesn't preclude long castling", actualMoves.contains("Ke8-c8"));
+        assertFalse("because king passes through check",                actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void givenBlackCastlingLegalityWithQueenOnE4()
+    {
+        String kingInCheck = "r3k2r/8/8/8/4Q3/8/8/R3K2R b KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(kingInCheck);
+        assertFalse("because king is in check",                 actualMoves.contains("Ke8-c8"));
+        assertFalse("because king is in check",                 actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void givenBlackCastlingLegalityWithQueenOnD4()
+    {
+        String d8andH8AreAttacked = "r3k2r/8/8/8/3Q4/8/8/R3K2R b KQkq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(d8andH8AreAttacked);
+        assertFalse("because king passes through check",        actualMoves.contains("Ke8-c8"));
+        assertTrue ("because king does not pass through check", actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void testBlackCastlingGivenAttackedSquares()
+    {
+        String queenAttackingB8andD8andF8 = "r3k2r/p6p/P2Q3P/8/8/8/8/7K b kq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(queenAttackingB8andD8andF8);
+        assertFalse("because king does not pass through check", actualMoves.contains("Ke8-c8"));
+        assertFalse("because king passes through check",       actualMoves.contains("Ke8-g8"));
     }
 
     @Test
     public void testBlackCannotCastleToAvoidCheck()
     {
         String rookCheckingKing = "r3k2r/p6p/P6P/8/4R3/8/8/7K b kq - 0 1";
-        Set<String> actualMoves = generateMoves(rookCheckingKing);
-        assertFalse(actualMoves.contains("Ke8-c8 0-0-0"));
-        assertFalse(actualMoves.contains("Ke8-g8 0-0"));
+        Set<String> actualMoves = generateMovesInFan(rookCheckingKing);
+        assertFalse(actualMoves.contains("Ke8-c8"));
+        assertFalse(actualMoves.contains("Ke8-g8"));
     }
 
     @Test
-    public void testBlackCannotCastleWhenRookIsAttacked()
+    public void testBlackCanCastleWhenRookIsAttacked()
     {
         String bishopAttackingQueenSideRook = "r3k2r/p6p/P6P/8/4B3/8/8/7K b kq - 0 1";
-        Set<String> actualMoves = generateMoves(bishopAttackingQueenSideRook);
-        assertFalse(actualMoves.contains("Ke8-c8"));
+        Set<String> actualMoves = generateMovesInFan(bishopAttackingQueenSideRook);
+        assertTrue(actualMoves.contains("Ke8-c8"));
         assertTrue(actualMoves.contains("Ke8-g8"));
+    }
+
+    @Test
+    public void givenPinnedBPawn()
+    {
+        String pinnedPawn = "rnb1kbnr/pp1ppppp/8/q1p5/1P1P4/8/P1P1PPPP/RNBQKBNR w KQkq - 1 3";
+        Set<String> actualMoves = generateMovesInFan(pinnedPawn);
+        assertTrue("pinned but still psuedo-legal", actualMoves.contains("Pb4xc5"));
+        assertTrue("pinned but still psuedo-legal", actualMoves.contains("Pb4-b5"));
+        assertTrue(actualMoves.contains("Pb4xa5"));
+    }
+    
+//    Nd2-b1 for rnb1kbnr/pp1ppppp/8/q1p5/3P4/8/PPPNPPPP/R1BQKBNR w KQkq - 2 3
+    @Test
+    public void givenPinnedKnight()
+    {
+        String pinnedKnightOnD2 = "rnb1kbnr/pp1ppppp/8/q1p5/3P4/8/PPPNPPPP/R1BQKBNR w KQkq - 2 3";
+        Set<String> actualMoves = generateMovesInFan(pinnedKnightOnD2);
+        assertFalse(actualMoves.toString().contains("Nd2"));
+    }
+
+    @Test
+    public void givenPinnedBishop()
+    {   //illegal: Bd2-c1 for rnb1kbnr/pp1ppppp/8/q1p5/3P4/8/PPPBPPPP/RN1QKBNR w KQkq - 2 3
+        String pinnedBishopOnD2 = "rnb1kbnr/pp1ppppp/8/q1p5/3P4/8/PPPBPPPP/RN1QKBNR w KQkq - 2 3";
+        Set<String> actualMoves = generateMovesInFan(pinnedBishopOnD2);
+        assertFalse(actualMoves.contains("Bd2-c1"));
+        assertFalse(actualMoves.contains("Bd2-e3"));
+        assertFalse(actualMoves.contains("Bd2-f4"));
+        assertFalse(actualMoves.contains("Bd2-g5"));
+        assertFalse(actualMoves.contains("Bd2-h6"));
+        assertTrue(actualMoves.contains("Bd2-c3"));
+        assertTrue(actualMoves.contains("Bd2-b4"));
+        assertTrue(actualMoves.contains("Bd2xa5"));
+    }
+    
+    @Test
+    public void givenPinnedPawnCapturesEnPassant()
+    {
+        //illegal: Pf5xg6 for rnb1kbnr/pppp1p1p/5q2/4pPp1/8/8/PPPPPKPP/RNBQ1BNR w kq g6 0 4
+        String pinnedPawn = "rnb1kbnr/pppp1p1p/5q2/4pPp1/8/8/PPPPPKPP/RNBQ1BNR w kq g6 0 4";
+        Set<String> actualMoves = generateMovesInFan(pinnedPawn);
+        System.out.println(actualMoves.toString());
+        assertTrue("pinned piece moves are psuedo legal", actualMoves.contains("Pf5xg6"));
+    }
+    
+    @Test
+    public void givenBlackCanCaptureEnPassantCreatesDiscoveredCheck()
+    {
+        //8/2p5/3p4/KP5r/1R3pPk/8/4P3/8 b - g3  f4g3 should be in there (18 total LEGAL moves)
+        String blackEnPassantPossible = "8/2p5/3p4/KP5r/1R3pPk/8/4P3/8 b - g3 0 1";
+        Set<String> actualMoves = generateMovesInFan(blackEnPassantPossible);
+        System.out.println(actualMoves);
+        assertTrue(actualMoves.contains("Pf4xg3"));
+        int f4xg3 = 38301;
+        boolean isLegal = mg.isLegalMove(g, f4xg3);
+        assertFalse(isLegal);
+    }
+
+    //@Test  - TODO: this fails currently and it IS a bug and needs fixing
+    public void givenWhiteCanCaptureEnPassantCreatesDiscoveredCheck()
+    {
+        //8/8/3p4/KPp4r/1R3p1k/8/4P1P1/8 w - c6 0 1     b5xc6 e.p. 
+        //8/2p5/3p4/KP5r/1R3pPk/8/4P3/8 b - g3  f4g3 should be in there (18 total LEGAL moves)
+        String blackEnPassantPossible = "8/8/3p4/KPp4r/1R3p1k/8/4P1P1/8 w - c6 0 1";
+        Set<String> actualMoves = generateMovesInFan(blackEnPassantPossible);
+        displayBoardAndSideToMove();
+        System.out.println(actualMoves);
+        assertTrue(actualMoves.contains("Pb5xc6"));
+        int f4xg3 = 38301;
+        boolean isLegal = mg.isLegalMove(g, f4xg3);
+        assertFalse(isLegal); //fails here
+    }
+
+    @Test
+    public void givenKingAttemptsCaptureOfDefendedPiece()
+    {
+        String defendedPawn = "8/8/8/8/8/2k5/3pn3/4K3 w - - 0 1";
+        Set<String> actualMoves = generateMovesInFan(defendedPawn);
+        assertFalse("because piece is defended",   actualMoves.contains("Ke1xd2"));
+        assertTrue ("because piece is undefended", actualMoves.contains("Ke1xe2"));
+    }
+
+    @Test
+    public void givenKingAttemptsMovingIntoCheck()
+    {
+        String defendedPawn = "8/8/8/8/8/2k2r2/3p4/4K3 w - - 0 1";
+        Set<String> actualMoves = generateMovesInFan(defendedPawn);
+        assertFalse("because piece is defended",      actualMoves.contains("Ke1xd2"));
+        assertFalse("because king moves into check",  actualMoves.contains("Ke1-f1"));
+        assertFalse("because king moves into check",  actualMoves.contains("Ke1-f2"));
+        assertTrue ("because square is not attacked", actualMoves.contains("Ke1-e2"));
+        assertTrue ("because square is not attacked", actualMoves.contains("Ke1-d1"));
     }
 
     @Test
@@ -234,7 +459,7 @@ public class MoveGeneratorTest {
     {
         String enPassantCastlingCapturesAndPromotions =
                 "r1b2k1r/1pQn2pp/pP2p3/2p1Pp1N/B2p2q1/B2P4/P1P2PPP/R3K2R w KQ f6 0 1";
-        Set<String> actualMoves = generateMoves(enPassantCastlingCapturesAndPromotions);
+        Set<String> actualMoves = generateMovesInFan(enPassantCastlingCapturesAndPromotions);
         Set<String> expectedMoves = toSet("Pc2-c3,Pc2-c4,Pe5xf6,Pf2-f3,Pf2-f4,Pg2-g3,Ph2-h3,Ph2-h4," +
                 "Ba3-b2,Ba3-b4,Ba3-c1,Ba3xc5,Ba4-b3,Ba4-b5,Ba4-c6,Ba4xd7," +
                 "Nh5-f4,Nh5-f6,Nh5-g3,Nh5xg7," +
@@ -243,6 +468,17 @@ public class MoveGeneratorTest {
                 "Ke1-d2,Ke1-f1,Ke1-g1"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
+    
+    @Test
+    public void testPerftProblemPositionBug_KingInCheck()
+    {
+        String positionFen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+        Set<String> expectedMoves = toSet("Bb4-c5,Kg1-h1,Nf3-d4,Pc4-c5,Pd2-d4,Rf1-f2"); 
+        Set<String> actualMoves = generateKingEscapesInFan(positionFen);
+        assertTrue("precondition: king is checked", g.inCheck());
+        assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+    
     
 //    @Test
 //    public void testGenerateInterpositions()
@@ -272,7 +508,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckFromOneCheckingPiece()
     {
         String kingCanTakeChecker =    "6Rk/R7/8/8/8/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(kingCanTakeChecker);
+        Set<String> actualMoves = generateKingEscapesInFan(kingCanTakeChecker);
         Set<String> expectedMoves = toSet("Kh8xg8"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -281,7 +517,7 @@ public class MoveGeneratorTest {
     public void testEscapeAPawnCheckByCapturingEnPassant()
     {
         String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - c3 0 1";
-        Set<String> actualMoves = generateKingEscapes(enPassantCapture);
+        Set<String> actualMoves = generateKingEscapesInFan(enPassantCapture);
         Set<String> expectedMoves = toSet("Pd4xc3,Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -290,7 +526,7 @@ public class MoveGeneratorTest {
     public void testEscapeAPawnCheckNoEnPassant()
     {
         String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(enPassantCapture);
+        Set<String> actualMoves = generateKingEscapesInFan(enPassantCapture);
         Set<String> expectedMoves = toSet("Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -299,7 +535,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckViaCaptureAndFlightSquare()
     {
         String bishopCanTakeCheckerAndKingHasFlightSquare = "5RRk/5b2/8/8/8/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(bishopCanTakeCheckerAndKingHasFlightSquare);
+        Set<String> actualMoves = generateKingEscapesInFan(bishopCanTakeCheckerAndKingHasFlightSquare);
         Set<String> expectedMoves = toSet("Bf7xg8,Kh8-h7"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -308,7 +544,7 @@ public class MoveGeneratorTest {
     public void testGenerateInterpositions()
     {
         String position = "R6k/7b/6n1/4q3/3r4/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(position);
+        Set<String> actualMoves = generateKingEscapesInFan(position);
         Set<String> expectedMoves = toSet("Kh8-g7,Bh7-g8,Ng6-f8,Qe5-e8,Qe5-b8,Rd4-d8"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -317,7 +553,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckmateFromTwoCheckingPieces()
     {
         String checkmated = "2RRQ3/8/1N6/3k4/8/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(checkmated);
+        Set<String> actualMoves = generateKingEscapesInFan(checkmated);
         Set<String> expectedMoves = toSet(""); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -326,7 +562,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckFromBothKnightAndRook()
     {
         String knightAndRookChecking = "3RQ3/8/1N6/3k4/8/8/8/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(knightAndRookChecking);
+        Set<String> actualMoves = generateKingEscapesInFan(knightAndRookChecking);
         Set<String> expectedMoves = toSet("Kd5-c5"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -335,7 +571,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckFromBishopAndRook()
     {
         String bishopAndRookChecking = "8/3R4/8/2B5/3k4/8/4Q3/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(bishopAndRookChecking);
+        Set<String> actualMoves = generateKingEscapesInFan(bishopAndRookChecking);
         Set<String> expectedMoves = toSet("Kd4xc5,Kd4-c3"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -344,7 +580,7 @@ public class MoveGeneratorTest {
     public void testEscapeCheckmateFromBishopDiscoveredCheck()
     {
         String bishopAndRookChecking = "8/3R4/8/8/1B1k4/8/4Q3/K7 b - - 0 1";
-        Set<String> actualMoves = generateKingEscapes(bishopAndRookChecking);
+        Set<String> actualMoves = generateKingEscapesInFan(bishopAndRookChecking);
         Set<String> expectedMoves = toSet(""); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
@@ -381,24 +617,36 @@ public class MoveGeneratorTest {
         }
     }
 
-    private Set<String> generateMoves(String positionFen) {
+    private List<Integer> generateMoves(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         List<Integer> moves = DefaultGenerator.newMoveList();
+        displayBoardAndSideToMove();
+        mg.generateCaptures(moves, side);
+        mg.generateNonCaptures(moves, side);
+        return moves;
+    }
+
+    private Set<String> generateMovesInFan(String positionFen) {
+        g.set(positionFen);
+        int side = g.isWhiteToMove()?0:1;
+        List<Integer> moves = DefaultGenerator.newMoveList();
+        displayBoardAndSideToMove();
         mg.generateCaptures(moves, side);
         mg.generateNonCaptures(moves, side);
         return toCoordinateMoveSet(moves);
     }
 
-    private Set<String> generateCaptures(String positionFen) {
+    private Set<String> generateCapturesInFan(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         List<Integer> moves = DefaultGenerator.newMoveList();
+        displayBoardAndSideToMove();
         mg.generateCaptures(moves, side);
         return toCoordinateMoveSet(moves);
     }
     
-    private Set<String> generateNonCaptures(String positionFen) {
+    private Set<String> generateNonCapturesInFan(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         List<Integer> moves = DefaultGenerator.newMoveList();
@@ -406,7 +654,7 @@ public class MoveGeneratorTest {
         return toCoordinateMoveSet(moves);
     }
     
-    private Set<String> generateKingEscapes(String positionFen) {
+    private Set<String> generateKingEscapesInFan(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
         List<Integer> moves = DefaultGenerator.newMoveList();

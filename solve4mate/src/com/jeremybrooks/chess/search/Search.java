@@ -4,8 +4,6 @@
  */
 package com.jeremybrooks.chess.search;
 
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +31,7 @@ public class Search {
     private static final Logger log = Logger.getLogger(Search.class);
     private static transient final boolean isTrace = false; //log.isTraceEnabled();
     private static transient final boolean showPvUpdates = false; //logs principle variation changes
-    private static final int MAX_DEPTH_LIMIT  = 120;
+    static final int MAX_DEPTH_LIMIT  = 120;
     
     public static final boolean SEARCH_DEBUG = false; //SEARCH_DB 
     public static final boolean DEBUG = false; //DB
@@ -276,8 +274,9 @@ public class Search {
         }
         
         for(int i=0; i<numMoves && hasMoreTime; i++){
-            nodeCount++;
             int move = moves.get(i);
+            if(!moveGenerator.isLegalMove(g, move)) continue;
+            nodeCount++;
             if(depth == 0)
             {
                 rootMoves.add(new RootMove(move, -MAXWINDOW));
@@ -287,9 +286,9 @@ public class Search {
                     log.debug("checking " + moveStr + " ("+(i+1)+" of "+(numMoves)+")");
             }
             currentMove[depth] = move;
-            g.makeMove(move, side==WHITE);
+            g.makeMove(move);
             int val = min(alpha,beta,Util.opposing(side),depth+1,quiescentSearch); //recurse!
-            g.undoMove(move, side==WHITE);
+            g.undoMove();
             if(isTrace)
                 logMove(depth, move, val, alpha, beta);
             if (val >= beta){
@@ -398,8 +397,9 @@ public class Search {
         }
         
         for(int i=0; i<numMoves && hasMoreTime; i++){
-            nodeCount++;
             int move = moves.get(i);
+            if(!moveGenerator.isLegalMove(g, move)) continue;
+            nodeCount++;
             if(depth == 0)
             {
                 rootMoves.add(new RootMove(move, -MAXWINDOW));
@@ -408,9 +408,9 @@ public class Search {
                 if(isTrace) log.trace("checking " + moveStr + " ("+(i+1)+" of "+(numMoves)+")");
             }
             currentMove[depth] = move;
-            g.makeMove(move, side==WHITE);
+            g.makeMove(move);
             int val = max(alpha,beta,Util.opposing(side),depth+1,quiescentSearch);  //recurse!
-            g.undoMove(move, side==WHITE);
+            g.undoMove();
             if(isTrace) 
                 logMove(depth, move, val, alpha, beta);
             if (val <= alpha){   //Found a cutoff

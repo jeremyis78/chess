@@ -95,7 +95,7 @@ public abstract class AbstractGenerator implements Generator {
 
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-                if (isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0), side))
+                if (isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0)))
                 {    
                     for (int i = QUEEN; i >= KNIGHT; i--)
                     {
@@ -115,7 +115,7 @@ public abstract class AbstractGenerator implements Generator {
 
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-                if(isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0), side)){
+                if(isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0))){
                     moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, 0));
                 }
             }
@@ -132,7 +132,7 @@ public abstract class AbstractGenerator implements Generator {
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
                 int encodedMove = Util.EncodeMove(from, to, PIECE[PAWN], 0, 0);
-                if(isLegal(g, encodedMove, side)){
+                if(isLegal(g, encodedMove)){
                     moves.add(encodedMove);
                 }
             }
@@ -161,7 +161,7 @@ public abstract class AbstractGenerator implements Generator {
                     //Only add an interposer if it's not pinned to the King
                     //if (!isPinned(g, from, to, PIECE[p], 0)){
                     int encodedMove = Util.EncodeMove(from, to, PIECE[p], 0, 0);
-                    if(isLegal(g, encodedMove, side)){
+                    if(isLegal(g, encodedMove)){
                        moves.add(encodedMove);
                     }
                     pMoves = clearBit(pMoves, to);
@@ -211,8 +211,7 @@ public abstract class AbstractGenerator implements Generator {
             && position.isEmpty(G1) 
             && isNotAttacked(E1, g)
             && isNotAttacked(F1, g)
-            && isNotAttacked(G1, g)
-            && isNotAttacked(H1, g)) {
+            && isNotAttacked(G1, g)) {
             return true;
         }
         return false;
@@ -226,9 +225,7 @@ public abstract class AbstractGenerator implements Generator {
             && position.isEmpty(B1) 
             && isNotAttacked(E1, g)
             && isNotAttacked(D1, g)
-            && isNotAttacked(C1, g)
-            && isNotAttacked(B1, g)
-            && isNotAttacked(A1, g)) {
+            && isNotAttacked(C1, g)) {
             return true;
         }
         return false;
@@ -241,8 +238,7 @@ public abstract class AbstractGenerator implements Generator {
             && position.isEmpty(G8) 
             && isNotAttacked(E8, g)
             && isNotAttacked(F8, g)
-            && isNotAttacked(G8, g)
-            && isNotAttacked(H8, g)) {
+            && isNotAttacked(G8, g)) {
             return true;
         }
         return false;
@@ -256,8 +252,7 @@ public abstract class AbstractGenerator implements Generator {
             && position.isEmpty(B8) 
             && isNotAttacked(E8, g)
             && isNotAttacked(D8, g)
-            && isNotAttacked(C8, g)
-            && isNotAttacked(A8, g)) {
+            && isNotAttacked(C8, g)) {
             return true;
         }
         return false;  
@@ -308,14 +303,13 @@ public abstract class AbstractGenerator implements Generator {
     // save the king square upfront...then make the king move with the saved
     // value.
     // Returns false if the king is in check after 'move' is made.
-    boolean isLegal(GameState g, int move, int side){
-        boolean legal;
-
-        //Save the king square in case the king is the moving piece
-        //int kingSq = g.pos.kingSq[side];
-        g.makeMove(move, WHITE==side);
+    public boolean isLegal(GameState g, int move){
+        boolean legal = false;
+        boolean isWhiteToMove = g.isWhiteToMove();
+        int side = isWhiteToMove?WHITE:BLACK;
+        g.makeMove(move);
         legal = !isAttacked(g, side, g.getPosition().getKingSquare(side));  //use the saved king square
-        g.undoMove(move, WHITE==side);
+        g.undoMove();
         return legal;
     }
     

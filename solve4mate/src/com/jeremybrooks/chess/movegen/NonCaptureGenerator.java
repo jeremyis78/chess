@@ -60,7 +60,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
             to = lowestBitNumber(advanceTwo);
             from = twoSquaresBehind(to, side);
             int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
-            if(isLegal(g, move, side)) //can't move if pinned
+//            if(isLegal(g, move)) //can't move if pinned
             {
                 moves.add(move);
             }
@@ -71,7 +71,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
             to = lowestBitNumber(pMoves);
             from = squareBehind(to, side);
             int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
-            if(isLegal(g, move, side)) //can't move if pinned
+//            if(isLegal(g, move)) //can't move if pinned
             {
                 moves.add(move);
             }
@@ -94,12 +94,8 @@ public class NonCaptureGenerator extends AbstractGenerator {
                 while (morePieces(pMoves)) {
                     to = lowestBitNumber(pMoves);
                     int move = Util.EncodeMove(from,to,PIECE[p],0,0);
-                    if (p == KING){
-                        if (!isAttacked(g, side, to)){
-                        //if(isLegal(g, move, side)){
-                            moves.add(move);
-                        }
-                    } else {
+                    if(isLegal(g, move))
+                    {
                         moves.add(move);
                     }
                     pMoves = clearBit(pMoves, to);

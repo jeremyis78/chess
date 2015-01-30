@@ -7,7 +7,6 @@ import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.UciDriver;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.util.FenBuilder;

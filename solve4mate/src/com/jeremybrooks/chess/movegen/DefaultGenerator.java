@@ -69,4 +69,8 @@ public class DefaultGenerator {
         return getBaseMoveGenerator().isAttacked(g2, side, square);
     }
 
+    public boolean isLegalMove(GameState g, int move)
+    {
+        return getBaseMoveGenerator().isLegal(g, move);
+    }
 }

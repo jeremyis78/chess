@@ -1,6 +1,17 @@
 package com.jeremybrooks.chess.movegen;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.EIGHTHRANK;
+import static com.jeremybrooks.chess.base.Bitmap.FIFTHRANK;
+import static com.jeremybrooks.chess.base.Bitmap.FIRSTRANK;
+import static com.jeremybrooks.chess.base.Bitmap.FOURTHRANK;
+import static com.jeremybrooks.chess.base.Bitmap.KING;
+import static com.jeremybrooks.chess.base.Bitmap.KNIGHT;
+import static com.jeremybrooks.chess.base.Bitmap.PAWN;
+import static com.jeremybrooks.chess.base.Bitmap.PIECE;
+import static com.jeremybrooks.chess.base.Bitmap.QUEEN;
+import static com.jeremybrooks.chess.base.Bitmap.TO_PIECE;
+import static com.jeremybrooks.chess.base.Bitmap.clearBit;
+import static com.jeremybrooks.chess.base.Bitmap.lowestBitNumber;
 
 import java.util.List;
 
@@ -87,7 +98,7 @@ public class EscapeGenerator extends AbstractGenerator {
                     // Pawn promotion
                     //if (!isPinned(g, from, checker, mover, cap)){
                     move = Util.EncodeMove(from,checker,mover,cap,0);
-                    if(isLegal(g, move, side)){
+                    if(isLegal(g, move)){ 
 //                        System.err.print("Adding pawn captures and promotes to any piece: ");
 //                        Util.displayMove(move, false, false);
                         for (pro = QUEEN; pro >= KNIGHT; pro--) {
@@ -102,7 +113,7 @@ public class EscapeGenerator extends AbstractGenerator {
                         cap = PIECE[PAWN];
                         move = Util.EncodeMove(from,to,PIECE[PAWN],cap,0);
                         //if (!isPinned(g, from, to, PIECE[PAWN], cap)){
-                        if (isLegal(g, move, side)){
+                        if (isLegal(g, move)){
 //                            System.err.print("Added pawn captures via en-passant: ");
 //                            Util.displayMove(move, false, false);
                             moves.add(move);
@@ -111,7 +122,7 @@ public class EscapeGenerator extends AbstractGenerator {
                 } else {
                     move = Util.EncodeMove(from,checker,mover,cap,pro);
                     //if (!isPinned(g, from, checker, mover, cap)){
-                    if (isLegal(g, move, side)){
+                    if (isLegal(g, move)){
 //                        System.err.print("Added capture the checking piece: ");
 //                        Util.displayMove(move, false, false);
                         moves.add(move);
@@ -180,7 +191,7 @@ public class EscapeGenerator extends AbstractGenerator {
                 to = lowestBitNumber(kingMoves);
                 cap = Math.abs(position.getBoard(to));
                 move = Util.EncodeMove(kingSq, to, PIECE[KING], cap, 0);
-                if (isLegal (g, move, side)) {
+                if (isLegal (g, move)) {
                     //cap = abs (g.pos.board[to]);
 //                    System.err.print("Adding king captures one of two checking pieces: ");
 //                    Util.displayMove(move, false, false);
@@ -203,7 +214,7 @@ public class EscapeGenerator extends AbstractGenerator {
                 cap = 0;
             }
             move = Util.EncodeMove(kingSq, to, PIECE[KING], cap, 0);
-            if ( isLegal(g, move, side)){
+            if ( isLegal(g, move)){
 //                System.err.print("Adding king escapes via flight square: ");
 //                Util.displayMove(move, false, false);
                 moves.add(move);

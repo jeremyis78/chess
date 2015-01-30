@@ -52,6 +52,7 @@ public class PositionTest extends TestCase {
             assertEquals("cannot place white king on b3; already placed on a8; use erasePiece()",
                     expected.getMessage());
         }
+      //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
 
     public void testMovingTheBlackKing()
@@ -120,6 +121,7 @@ public class PositionTest extends TestCase {
         } catch (ArrayIndexOutOfBoundsException e) {
             fail("should not throw if square is already empty");
         }
+        Position.validate(p);
     }
     
     public void testPlaceAndEraseKings() {
@@ -186,6 +188,7 @@ public class PositionTest extends TestCase {
         p.setPieces(Bitmap.WHITE, PAWN, bitmap);
         assertEquals(bitmap, p.getPawns(WHITE));
         assertEquals(bitmap, p.getPieces(WHITE));
+      //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
     
     public void testGettingAnInvalidAllPiecesBitboard()
@@ -266,7 +269,14 @@ public class PositionTest extends TestCase {
         }
 
     }
-
+    
+//    public void testToString()
+//    {
+//        Position p = createStartingPosition();
+//        String expected = "";
+//        assertEquals(expected, p.toString());
+//    }
+    
     private void assertEmptyPosition(Position p) {
         assertEquals(EMPTY_BITBOARD, p.getPieces(WHITE));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Bitmap.WHITE, PAWN));
@@ -309,6 +319,7 @@ public class PositionTest extends TestCase {
         {
             assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(square));
         }
+        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
     
     private static void assertPlaced(Position p, int color, int piece, int sq)
@@ -333,6 +344,7 @@ public class PositionTest extends TestCase {
             assertEquals("king should be placed", Square.named(sq), Square.named(p.getKingSquare(color)));
             assertEquals(bitNotSetMsg, sqMask, p.getKing(color));
         }
+        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
 
     private static void assertErased(Position p, int color, int piece, int sq)
@@ -356,6 +368,7 @@ public class PositionTest extends TestCase {
             assertEquals("king should be unplaced", "", Square.named(p.getKingSquare(color)));
             assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getKing(color) & sqMask);
         }
+        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
     
     private void assertStartingPosition(Position p) {
@@ -372,6 +385,7 @@ public class PositionTest extends TestCase {
         assertEquals("c8 f8 ", toSquares(p, Bitmap.BLACK, BISHOP));
         assertEquals("d8 ", toSquares(p, Bitmap.BLACK, QUEEN));
         assertEquals("e8 ", toSquares(p, Bitmap.BLACK, KING));
+        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
 
     private String toSquares(Position p, int colorIndex, int piecesIndex) {

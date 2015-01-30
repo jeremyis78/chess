@@ -55,7 +55,6 @@ public class SearchInfoTest {
         assertTrue(Search.MIN_MATE > Search.DRAW);
         assertTrue(Search.MATES >  Search.MIN_MATE);
         assertTrue(Search.MATED < -Search.MIN_MATE);
-        assertTrue((Search.MAX_MATE - Search.MIN_MATE) % 2 == 0);
     }
     
     @Test
