@@ -299,6 +299,7 @@ public class UciDriver {
             gameState.makeMove(move);
             isWhitesMove = !isWhitesMove;
         }
+        generateLegalMoves();
     }
 
     public void go(String[] guiArgs) throws IOException {
