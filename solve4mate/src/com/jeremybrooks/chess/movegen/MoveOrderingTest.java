@@ -134,18 +134,18 @@ public class MoveOrderingTest {
         {
             for(Piece captured: victims)
             {
-                if(attacker.index() == PAWN && captured.index() != PAWN) 
+                if(attacker.index() == Piece.PAWN && captured.index() != Piece.PAWN) 
                 {
                     for(Piece promotion: promoters)
                     {
-                        move = myEncodeMove(A1,A1,PIECE[attacker.index()],PIECE[captured.index()],PIECE[promotion.index()]);
+                        move = myEncodeMove(A1,A1,Piece.ENCODED[attacker.index()],Piece.ENCODED[captured.index()],Piece.ENCODED[promotion.index()]);
                         moves[index++] = move;
                     }
                 }
-                move = myEncodeMove(A1,A1,PIECE[attacker.index()],PIECE[captured.index()]);
+                move = myEncodeMove(A1,A1,Piece.ENCODED[attacker.index()],Piece.ENCODED[captured.index()]);
                 moves[index++] = move;
             }
-            move = myEncodeMove(A1,A1,PIECE[attacker.index()]);
+            move = myEncodeMove(A1,A1,Piece.ENCODED[attacker.index()]);
             moves[index++] = move;
         }
         return moves;
@@ -182,7 +182,7 @@ public class MoveOrderingTest {
     private int myEncodeMove(int from, int to, int piece, int capturedPiece, int promotionPiece) {
         //adj and its placement in the encoded move insures capturing moves are ordered with least
         //valuable attacker first (moves capturing a knight would be sorted like: PxN,NxN,BxN,RxN,QxN)
-        int adj = (capturedPiece == 0 ? 0 : PIECE[QUEEN]-piece); 
+        int adj = (capturedPiece == 0 ? 0 : Piece.ENCODED[Piece.QUEEN]-piece); 
         return (promotionPiece << 21) | 
                 (capturedPiece << 18) | 
                 (adj << 15) | 

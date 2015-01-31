@@ -1,6 +1,5 @@
 package com.jeremybrooks.chess;
 
-import static com.jeremybrooks.chess.base.Square.named;
 import static com.jeremybrooks.chess.base.Square.squareOf;
 
 import java.io.BufferedReader;
@@ -10,12 +9,12 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.List;
 
-import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Empty;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.util.AbstractDisplayer;
@@ -164,7 +163,7 @@ public class UciDriver {
         for(int move: legalMoves)
         {
             Object[] args = new Object[]{oneBasedMoveNumber++,
-                                         toUciMove(move),
+                                         Util.toUciMove(move),
                                          Util.displayMoveStr(move, false, false)
             };
             output.append(String.format(format, args));
@@ -176,11 +175,24 @@ public class UciDriver {
         try
         {
             String token = cmd[argIndex++];
-            if(token != null)
+            if(token != null && token.length() > 0)
             {
-                int oneBasedMoveNumber = Integer.parseInt(token);
-                int move = legalMoves.get(oneBasedMoveNumber-1); 
-                gameState.makeMove(move);
+            	if(Character.isDigit(token.charAt(0)))
+            	{
+            		int oneBasedMoveNumber = Integer.parseInt(token);
+            		int move = legalMoves.get(oneBasedMoveNumber-1); 
+            		gameState.makeMove(move);
+            	} else {
+            		int move = Util.parseUciMove(token, gameState);
+            		boolean moveNotFound = true;
+            		for(int legalMove: legalMoves)
+            		{
+            			if(move == legalMove) moveNotFound = false;
+            		}
+            		if(moveNotFound)
+            			throw new IllegalArgumentException(token + ": move not found in computed legal moves; it's a bug if this is a legal move");
+            		gameState.makeMove(move);
+            	}
                 generateLegalMoves();
             }
         } catch (NumberFormatException e) {
@@ -295,7 +307,7 @@ public class UciDriver {
         while(argIndex < cmd.length)
         {
             token = cmd[argIndex++];
-            int move = parseUciMove(gameState, token);
+            int move = Util.parseUciMove(token, gameState);
             gameState.makeMove(move);
             isWhitesMove = !isWhitesMove;
         }
@@ -318,19 +330,19 @@ public class UciDriver {
             {
             case "wtime":
                 token = guiArgs[argIndex++];
-                remainingMillis[Bitmap.WHITE] = readInt(token);
+                remainingMillis[Piece.WHITE] = readInt(token);
                 break;
             case "winc":
                 token = guiArgs[argIndex++];
-                incrementMillis[Bitmap.WHITE] = readInt(token);
+                incrementMillis[Piece.WHITE] = readInt(token);
                 break;
             case "btime":
                 token = guiArgs[argIndex++];
-                remainingMillis[Bitmap.BLACK] = readInt(token);
+                remainingMillis[Piece.BLACK] = readInt(token);
                 break;
             case "binc":
                 token = guiArgs[argIndex++];
-                incrementMillis[Bitmap.BLACK] = readInt(token);
+                incrementMillis[Piece.BLACK] = readInt(token);
                 break;
             case "movestogo":
                 token = guiArgs[argIndex++];
@@ -361,10 +373,10 @@ public class UciDriver {
             }
         }
         SearchParams params = new SearchParams();
-        params.setTime(Bitmap.WHITE, remainingMillis[Bitmap.WHITE]);
-        params.setIncrement(Bitmap.WHITE, incrementMillis[Bitmap.WHITE]);
-        params.setTime(Bitmap.BLACK, remainingMillis[Bitmap.BLACK]);
-        params.setIncrement(Bitmap.BLACK, incrementMillis[Bitmap.BLACK]);
+        params.setTime(Piece.WHITE, remainingMillis[Piece.WHITE]);
+        params.setIncrement(Piece.WHITE, incrementMillis[Piece.WHITE]);
+        params.setTime(Piece.BLACK, remainingMillis[Piece.BLACK]);
+        params.setIncrement(Piece.BLACK, incrementMillis[Piece.BLACK]);
         params.setMovesToGo(movesToGo);
         params.setDepth(depth);
         engine.setSearchParams(params);
@@ -379,7 +391,7 @@ public class UciDriver {
     public void startSearch(int depth) throws IOException {
         SearchInfo info = engine.search(gameState, depth);
         int bestMove = info.getBestLine().get(0);
-        String uciBestMove = toUciMove(bestMove);
+        String uciBestMove = Util.toUciMove(bestMove);
         String uciPvMoves = toUciMoves(info.getBestLine());
         String fmt = "info depth %d score %s time %d nodes %d nps %.0f pv %s";
         sendResponse(fmt,
@@ -410,21 +422,13 @@ public class UciDriver {
         StringBuilder uciMoves = new StringBuilder();
         for(int move: bestLine)
         {
-            String uciMove = toUciMove(move);
+            String uciMove = Util.toUciMove(move);
             uciMoves.append(uciMove);
             uciMoves.append(" ");
         }
         return uciMoves.toString();
     }
 
-    public static String toUciMove(int move) {
-        int fromSquare = move & 0x3F;
-        int toSquare = (move >> 6) & 0x3F;
-        if(fromSquare==toSquare && fromSquare==0)
-            return "<none>"; //or "0000" ???
-        return named(fromSquare) + named(toSquare);
-    }
-    
     private static String toUciScore(SearchInfo info)
     {
         //constructs everything after "score "
@@ -469,35 +473,6 @@ public class UciDriver {
         if(givingMate)
             return (depth+1)/2;
         return depth/2;
-    }
-
-
-    private int parseUciMove(GameState gameState2, String uciMove) {
-        /*        
-         * The move format is in long algebraic notation.
-         * A nullmove from the Engine to the GUI should be sent as 0000.
-         * Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
-         */
-        assert(uciMove.length()>=4);
-        int fromSquare = squareOf(uciMove.substring(0, 2));
-        int toSquare = squareOf(uciMove.substring(2, 4));
-        Piece piece = gameState.getPosition().get(fromSquare);
-        Piece captured = gameState.getPosition().get(toSquare);
-        Piece promoter = new Empty();
-        if(uciMove.length() == 5)
-        {
-            //Color doesn't matter because it's not encoded in the move
-            char promotionChar = uciMove.substring(4,5).charAt(0);
-            promoter = PieceFactory.create(promotionChar); //FenParser.getPieceFromBoardCharacter(promotionChar);
-        }
-        int move = encodeMove(fromSquare, toSquare, piece, captured, promoter);
-        return move;
-    }
-
-    public static int encodeMove(int fromSquare, int toSquare, Piece piece,
-            Piece captured, Piece promoter) {
-        return Util.EncodeMove(fromSquare, toSquare, piece.encoded(), 
-                captured.encoded(),    promoter.encoded());
     }
 
     public void sendResponse(String formatMessage, Object... args) throws IOException

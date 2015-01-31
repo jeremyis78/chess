@@ -2,6 +2,7 @@ package com.jeremybrooks.chess.util;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.PositionValidator;
 import com.jeremybrooks.chess.base.Square;
@@ -27,12 +28,12 @@ public class DefaultPositionValidator implements PositionValidator {
     }
 
     private static boolean areKingsAdjacent(Position position) {
-        return Square.adjacentSquares(position.getKingSquare(WHITE), position.getKingSquare(BLACK));
+        return Square.adjacentSquares(position.getKingSquare(Piece.WHITE), position.getKingSquare(Piece.BLACK));
     }
 
     private static boolean eitherKingIsMissing(Position position) {
-        boolean isWhiteKingMissing = !position.isKingPlaced(WHITE);
-        boolean isBlackKingMissing = !position.isKingPlaced(BLACK);
+        boolean isWhiteKingMissing = !position.isKingPlaced(Piece.WHITE);
+        boolean isBlackKingMissing = !position.isKingPlaced(Piece.BLACK);
         return isWhiteKingMissing || isBlackKingMissing;
     }
 }

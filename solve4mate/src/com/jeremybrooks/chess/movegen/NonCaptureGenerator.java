@@ -5,7 +5,6 @@ import static com.jeremybrooks.chess.base.Square.*;
 
 import java.util.List;
 
-import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Pawn;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
@@ -34,13 +33,13 @@ public class NonCaptureGenerator extends AbstractGenerator {
         long allPiecesByRank = position.getAllPieces(0);
         empty = ~allPiecesByRank;
 
-        Pawn pawn = new Pawn(side==WHITE?Color.W:Color.B);
+        Pawn pawn = new Pawn(side==Piece.WHITE?Color.W:Color.B);
         long advancesOne = pawn.advances(NOSQUARE, position);
         pMoves = advancesOne & ~EIGHTHRANK;
-        advanceTwo = side==WHITE
+        advanceTwo = side==Piece.WHITE
                 ? ((advancesOne & THIRDRANK) << 8) & empty
                 : ((advancesOne & SIXTHRANK) >> 8) & empty;
-        promoters = (side==WHITE
+        promoters = (side==Piece.WHITE
                 ? advancesOne & EIGHTHRANK
                 : advancesOne & FIRSTRANK)
                 & empty;
@@ -48,8 +47,8 @@ public class NonCaptureGenerator extends AbstractGenerator {
         while (morePieces(promoters)) {
             to = lowestBitNumber(promoters);
             from = squareBehind(to, side);
-            for (int i = QUEEN; i >= KNIGHT; i--) {
-                moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]));
+            for (int i = Piece.QUEEN; i >= Piece.KNIGHT; i--) {
+                moves.add(Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], 0, Piece.ENCODED[i]));
                 //g.legalMoves[depth]++;
                 //g.addMove (move);
             }
@@ -59,7 +58,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
         while (morePieces(advanceTwo)) {
             to = lowestBitNumber(advanceTwo);
             from = twoSquaresBehind(to, side);
-            int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
+            int move = Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], 0, 0);
 //            if(isLegal(g, move)) //can't move if pinned
             {
                 moves.add(move);
@@ -70,7 +69,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
         while (morePieces(pMoves)) {
             to = lowestBitNumber(pMoves);
             from = squareBehind(to, side);
-            int move = Util.EncodeMove (from, to, PIECE[PAWN], 0, 0);
+            int move = Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], 0, 0);
 //            if(isLegal(g, move)) //can't move if pinned
             {
                 moves.add(move);
@@ -84,16 +83,16 @@ public class NonCaptureGenerator extends AbstractGenerator {
         //*                                                                         *
         //***************************************************************************
 
-        for (int p = KNIGHT; p <= KING; p++) {
+        for (int p = Piece.KNIGHT; p <= Piece.KING; p++) {
             pieces = position.getPieces (side, p);
-            Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*PIECE[p]);
+            Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*Piece.ENCODED[p]);
             while (morePieces(pieces)) {
                 from = lowestBitNumber(pieces);
                 long advances = piece.advances(from, position);
                 pMoves = advances & empty;
                 while (morePieces(pMoves)) {
                     to = lowestBitNumber(pMoves);
-                    int move = Util.EncodeMove(from,to,PIECE[p],0,0);
+                    int move = Util.EncodeMove(from,to,Piece.ENCODED[p],0,0);
                     if(isLegal(g, move))
                     {
                         moves.add(move);
@@ -110,7 +109,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
         //*                                                                         *
         //***************************************************************************
         switch (side) {
-        case Bitmap.WHITE:
+        case Piece.WHITE:
             if(canWhiteShortCastle(g)){
                 moves.add(castleMove(E1,G1));
             }
@@ -118,7 +117,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
                 moves.add(castleMove(E1,C1));
             }
             break;
-        case Bitmap.BLACK:
+        case Piece.BLACK:
             if(canBlackShortCastle(g)){
                 moves.add(castleMove(E8,G8));
             }
@@ -131,7 +130,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
     
     private static int castleMove(int fromSquare, int toSquare)
     {
-        return Util.EncodeMove(fromSquare,toSquare,PIECE[KING],0,0);
+        return Util.EncodeMove(fromSquare,toSquare,Piece.ENCODED[Piece.KING],0,0);
     }
 
 }

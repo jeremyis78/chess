@@ -31,14 +31,14 @@ public class AttackedSquaresTerm extends EvalTerm {
         {
             Piece piece = position.get(square);
             if(!piece.exists()) continue;
-            int pieceColor = piece.encodedByColor()>0?WHITE:BLACK;
+            int pieceColor = piece.encodedByColor()>0?Piece.WHITE:Piece.BLACK;
             attackedBy[pieceColor] |= piece.attacks(square, position);
         }
-        int wAttacks = Long.bitCount(attackedBy[WHITE]);
-        int bAttacks = Long.bitCount(attackedBy[BLACK]);
+        int wAttacks = Long.bitCount(attackedBy[Piece.WHITE]);
+        int bAttacks = Long.bitCount(attackedBy[Piece.BLACK]);
         log.trace(new Displayer().formatBoard(gameState.getPosition()));
-        log.trace("white attacks: " + wAttacks + "\n" + Bitmap.format(attackedBy[WHITE]));
-        log.trace("black attacks: " + bAttacks + "\n" + Bitmap.format(attackedBy[BLACK]));
+        log.trace("white attacks: " + wAttacks + "\n" + Bitmap.format(attackedBy[Piece.WHITE]));
+        log.trace("black attacks: " + bAttacks + "\n" + Bitmap.format(attackedBy[Piece.BLACK]));
         return wAttacks - bAttacks;
     }
 

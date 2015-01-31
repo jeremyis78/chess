@@ -4,10 +4,16 @@
  */
 package com.jeremybrooks.chess.util;
 
+import static com.jeremybrooks.chess.base.Square.named;
+
 import java.io.PrintStream;
 import java.util.List;
 
 import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Empty;
+import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
+import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Square;
 
 /**
@@ -39,7 +45,7 @@ public class Util {
     public static boolean bool(long i){ return i != 0; }
     
     public static int opposing(int side){
-        return side == Bitmap.WHITE ? Bitmap.BLACK : Bitmap.WHITE;
+        return side == Piece.WHITE ? Piece.BLACK : Piece.WHITE;
     }
 
     public static String displaySquaresStr(long b){
@@ -73,33 +79,55 @@ public class Util {
         fan.deleteCharAt(fan.length() - 1);
         return fan.toString();
     }
+
+    public static String displayMoveStr(int move, boolean check, boolean mate){
+    	return formatMoveInFan(move, null);
+    }
     
-    public static String displayMoveStr(int m, boolean check, boolean mate){
-        int from = m & 0x3F;  //grab from square (6 bits)
-        int to = (m >> 6) & 0x3F; //grab to square (6 bits)
-        if(to == from && to == 0)
+    /**
+     * Format move in Full Algebraic Notation (FAN).
+     * 
+     * Formatted moves look like this:
+     * 		Pe2e4
+     * 		Ke1e2
+     *      Ke1g1   (castling)
+     * 		Bd4xe5  (capture)
+     * 		Pc7c8Q  (promotion)
+     *      Pb2a1R  (capture and promotion)
+     *      
+     * If a non-null GameState is given, valid en passant captures will
+     * format as Pe5xf6 instead of Pe5-f6.
+     *      
+     * @param move the encoded move
+     * @param state the current state of the game
+     * @return
+     */
+    public static String formatMoveInFan(int move, GameState state){
+        int from = move & 0x3F;  //grab from square (6 bits)
+        int to = (move >> 6) & 0x3F; //grab to square (6 bits)
+        if(from == 0 && to == 0)
             return "<none>"; //noMove placeholder;
-        int mov = (m >> 12) & 0x7; //grab moving piece (3bits)
-        int cap = (m >> 15) & 0x7; //grab captured piece (3bits)
-        int pro = (m >> 18) & 0x7; //grab promotion piece (3bits)
-
-
-        char pieceChar[] = {' ','P','N','K',' ','B','R','Q'};
+        int mov = (move >> 12) & 0x7; //grab moving piece (3bits)
+        int cap = (move >> 15) & 0x7; //grab captured piece (3bits)
+        int pro = (move >> 18) & 0x7; //grab promotion piece (3bits)
         StringBuilder coordStr = new StringBuilder(); 
         StringBuilder SANStr = new StringBuilder();
 
         //Add the moving piece
-        coordStr.append(pieceChar[mov]);
+        char movingChar = Piece.uppercase(mov);
+		coordStr.append(movingChar);
         coordStr.append(Square.named(from));
-        if (pieceChar[mov] == 'P' && bool(cap)){ //if pawn capture
+        if (movingChar == 'P' && bool(cap)){ //if pawn capture
             SANStr.append(coordStr.toString().charAt(1)); //the file of the pawn
         } else {
-            SANStr.append(pieceChar[mov]);  //the type of piece
+            SANStr.append(movingChar);  //the type of piece
         }
         
-        //Add 'x' or '-' for capture or noncapture    
-        if (bool(cap)){
-            //coordStr[i++] = SANStr[j++] = 'x';
+        //Add 'x' or '-' for capture or noncapture
+        //With a null state, we won't see 'x' for en passant captures
+        boolean isCapture = bool(cap) || 
+        		(movingChar == 'P' && (state != null && to == state.getEnPassantSquare()));
+        if (isCapture){
             coordStr.append("x");
             SANStr.append("x");
         } else {
@@ -112,23 +140,13 @@ public class Util {
         
         //Add the promotion piece
         if(bool(pro)){
-            if (pieceChar[mov] == 'P'){
-                coordStr.append(pieceChar[pro]);
-                SANStr.append('=');
-                SANStr.append(pieceChar[pro]);
-            } else {
-                err.println("can't promote a piece other than a pawn");
-            }
+            if (movingChar != 'P')
+            	throw new IllegalArgumentException(movingChar + ": promotion is only valid for pawns");
+            coordStr.append(Piece.uppercase(pro));
+            SANStr.append('=');
+            SANStr.append(Piece.uppercase(pro));
         }
 
-        if (mate || (check && mate)){
-            coordStr.append("#");
-            SANStr.append("#");
-        } else if (check){
-            coordStr.append("+");
-            SANStr.append("+");
-        }
-        
         //Print the moves in coordinate notation and SAN (TODO: SAN doesn't account for ambiguous moves yet!)
 //        if ('K' == pieceChar[mov]){
 //            if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
@@ -139,6 +157,69 @@ public class Util {
 //        }
         return coordStr.toString();
     }
+    
+    public static int parseUciMove(String uciMove, GameState state)
+    {
+        /* From UCI specification:        
+         * The move format is in long algebraic notation.
+         * A nullmove from the Engine to the GUI should be sent as 0000.
+         * Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
+         */
+    	if(uciMove == null)
+    		throw new NullPointerException("uciMove is null");
+    	if(state == null)
+    		throw new NullPointerException("state is null");
+    	int numMoveChars = uciMove.length();
+		if(numMoveChars < 4 || numMoveChars > 5)
+    	{
+    		throw new IllegalArgumentException(
+    				String.format("'%s': must be in long algebraic notation (4 or 5 characters)", uciMove));
+    	}
+		int fromSquare = Square.squareOf(uciMove.substring(0, 2));
+		int toSquare   = Square.squareOf(uciMove.substring(2, 4));
+		Piece piece    = state.getPosition().get(fromSquare);
+		if(!piece.exists())
+			throw new IllegalArgumentException(
+					String.format("'%s': no piece exists on %s", uciMove, Square.named(fromSquare)));
+		Piece capturedPiece = state.getPosition().get(toSquare);
+		Piece promotePiece  = null;
+		if(piece.isPawn())
+		{
+			if(Square.isEighthRank(toSquare, piece.side()))
+			{
+				if(numMoveChars != 5)
+					throw new IllegalArgumentException(
+							String.format("'%s': promotion piece not given; add one of [qrnb]", uciMove));
+				char promotionChar = uciMove.charAt(4);
+				promotePiece = PieceFactory.toPromotePiece(promotionChar);
+			} else if (toSquare == state.getEnPassantSquare()) {
+				//We need the captured pawn in the encoded move if we ever want to 
+				//do EXACT comparisons of this move integer with those given by the move generator
+				capturedPiece = state.getPosition().get(Square.squareBehind(toSquare, piece.side()));
+				if(!capturedPiece.isPawn())
+				{
+					String format = "invalid en passant state: ep=%s and %s contains a '%c'";
+					String epSquare = Square.named(state.getEnPassantSquare());
+					String expectedPawnPlacement = Square.named(Square.squareBehind(toSquare, piece.side()));
+					Character actualPiecePlaced = capturedPiece.toChar();
+					Object[] args = new Object[]{epSquare, expectedPawnPlacement, actualPiecePlaced};
+					throw new IllegalStateException(String.format(format, args));
+				}
+			}
+		}
+		return Util.encodeMove(fromSquare, toSquare, piece, capturedPiece, promotePiece);
+    }
+    
+	public static String toUciMove(int move) {
+		//char pieceChar[] = {' ','p','n','k',' ','b','r','q'};
+	    int fromSquare = move & 0x3F;
+	    int toSquare = (move >> 6) & 0x3F;
+	    if(fromSquare == 0 && toSquare == 0)
+	        return "<none>"; //or "0000" ???
+	    int promotePiece = (move >> 18) & 0x7;
+	    String movement = named(fromSquare) + named(toSquare);
+	    return bool(promotePiece) ? movement + Piece.lowercase(promotePiece) : movement;
+	}
    
     /**
      * Pretty print the squares represented within the bitmap.  
@@ -256,6 +337,13 @@ public class Util {
                 formatByteBitmap("attacks : ", (byte)attackBitmap) + "\n";
     }
 
+    public static int encodeMove(int fromSquare, int toSquare, Piece piece,
+    		Piece captured, Piece promoter) {
+    	if(captured == null) captured = new Empty();
+    	if(promoter == null) promoter = new Empty();
+    	return EncodeMove(fromSquare, toSquare,	piece.encoded(), captured.encoded(), promoter.encoded());
+    }
+
     //******************************************************************/
     //              The bits of an EncodedMove                         */
     //******************************************************************/
@@ -271,5 +359,4 @@ public class Util {
     {
         return (from | (to << 6) | (mov << 12) | (cap << 15) | (pro << 18));
     }
-    
 }

@@ -1,20 +1,16 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.base.Bitmap.BISHOP;
-import static com.jeremybrooks.chess.base.Bitmap.PAWN;
-import static com.jeremybrooks.chess.base.Bitmap.QUEEN;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
-
+import static com.jeremybrooks.chess.base.Piece.*;
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 public class Evaluator {
     private static final Logger log = Logger.getLogger(Evaluator.class);
-//    public static final int CHECKMATE = 100000;    //value for checkmate
     public static final int PIECE_VALUE[] = 
     {
         100, // White Pawn
@@ -150,7 +146,7 @@ public class Evaluator {
                 }
 //                System.out.println(color + " - " + piece + ": " + pcScore + " (#" + numPieces+")");
             }
-            if(color==WHITE) wMaterialScore += pieceScore;
+            if(color==Piece.WHITE) wMaterialScore += pieceScore;
             else             bMaterialScore += pieceScore;
         }
 

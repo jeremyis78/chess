@@ -122,7 +122,7 @@ public class Square {
     // the pawn moved to. (pawn advanced one square)
     //
     public static int squareBehind(int currentSquare, int side){
-        return (side == WHITE) ? (currentSquare - 8) : (currentSquare + 8);
+        return (side == Piece.WHITE) ? (currentSquare - 8) : (currentSquare + 8);
     }
 
     // minusTwoRank
@@ -135,7 +135,7 @@ public class Square {
     }
 
     public static int squareAhead(int currentSquare, int side){
-        return (side == WHITE) ? (currentSquare + 8) : (currentSquare - 8);
+        return (side == Piece.WHITE) ? (currentSquare + 8) : (currentSquare - 8);
     }
 
     public static int squareLeftOf(int currentSquare){
@@ -179,4 +179,8 @@ public class Square {
     public static boolean notOnThirdRank(int currentSquare) {
         return (rankNumber(currentSquare) != 2); //zero-based rank
     }
+
+	public static boolean isEighthRank(int currentSquare, int side) {
+		return side == Piece.WHITE ? 7 == rankNumber(currentSquare) : 0 == rankNumber(currentSquare); //zero-based rank 
+	}
 }

@@ -1,8 +1,5 @@
 package com.jeremybrooks.chess.util;
 
-import static com.jeremybrooks.chess.base.Bitmap.BLACK;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
-
 import java.security.SecureRandom;
 
 import com.jeremybrooks.chess.base.Piece;
@@ -40,7 +37,7 @@ public class ZobristKey {
     
     public static long get(Piece piece, int square)
     {
-        int color = (piece.encodedByColor() > 0) ? WHITE : BLACK;
+        int color = (piece.encodedByColor() > 0) ? Piece.WHITE : Piece.BLACK;
         return zobristKey[color][piece.index()][square];
     }
 }

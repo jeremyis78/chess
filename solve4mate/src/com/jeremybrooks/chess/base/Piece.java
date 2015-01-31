@@ -31,17 +31,71 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
  *
  */
 public abstract class Piece {
-
     public static enum Color{W, B}
+    public static final int WHITE = 0;
+    public static final int BLACK = 1;
+
+    public static char[][] PIECE_CHARACTERS = new char[2][];
+    static {
+    	PIECE_CHARACTERS[WHITE] = new char[]{' ','P','N','K',' ','B','R','Q'};
+    	PIECE_CHARACTERS[BLACK] = new char[]{' ','p','n','k',' ','b','r','q'};
+    }
+    public static char lowercase(int encodedPiece){ return PIECE_CHARACTERS[BLACK][encodedPiece]; }
+    public static char uppercase(int encodedPiece){ return PIECE_CHARACTERS[WHITE][encodedPiece]; }
+    public static char asCharacter(int side, int pieceIndex)
+    {
+    	return PIECE_CHARACTERS[side][ENCODED[pieceIndex]];
+    }
+    
+//    public static int encode(int pieceIndex)      { return ENCODED[pieceIndex]; }
+//    public static int unencode(int encoded)       { return TO_PIECE[encoded]; }
+
+    //Piece indexes
+    public static final int PAWN   = 0;
+    public static final int KNIGHT = 1;
+    public static final int BISHOP = 2;
+    public static final int QUEEN  = 4;
+    public static final int ROOK   = 3;
+    public static final int KING   = 5;
+    public static final int NONE   = 6;
+
+    /**
+	 * Returns the encoded value of the piece as it is encoded into 
+	 * the "move" integer (as well as the Position.board array). 
+	 * Indexed by Piece.PAWN, Piece.KNIGHT, etc.
+	 * @see Position.getBoard(int) 
+	 */
+	public static final int ENCODED[] = {
+	    1,  // ENCODED[PAWN  ] = 0x001
+	    2,  // ENCODED[KNIGHT] = 0x010
+	    5,  // ENCODED[BISHOP] = 0x101
+	    6,  // ENCODED[ROOK  ] = 0x110
+	    7,  // ENCODED[QUEEN ] = 0x111
+	    3,  // ENCODED[KING  ] = 0x011 
+	    0   // ENCODED[NONE  ] = 0x000
+	};
+
+	//takes an int index (a board character) and maps it to a corresponding piece
+	
+	/**
+	 * Reverses the operation of ENCODED[] 
+	 */
+	public static final int TO_PIECE[] = {
+	    NONE,       // 0 (no piece)
+	    PAWN,       // 1
+	    KNIGHT,     // 2
+	    KING,       // 3
+	    NONE,       // 4 (no piece)
+	    BISHOP,     // 5
+	    ROOK,       // 6
+	    QUEEN
+	};
+
 
     protected Color color;
     protected int index;
     protected char displayCh;
-    
-    public Piece()
-    {
-        super();
-    }
+
 
     public Piece(Color pieceColor, int pieceIndex, char displayCharacter)
     {
@@ -67,13 +121,23 @@ public abstract class Piece {
      */
     public int index() { return index; }
     
+    public boolean isPawn()  { return index == PAWN;   }
+    public boolean isKnight(){ return index == KNIGHT; }
+    public boolean isBishop(){ return index == BISHOP; }
+    public boolean isRook()  { return index == ROOK;   }
+    public boolean isQueen() { return index == QUEEN;  }
+    public boolean isKing()  { return index == KING;   }
+    public boolean isNone()  { return index == NONE;   }
+    
+    public int side() { return (color == Color.W ? WHITE : BLACK); }
+    
     /**
      * Gets the piece encoded for or retrieved from a 'move' int.
      * The encoded value only represents the type of piece; the color is not encoded.
      * 
      * @return the encoded piece
      */
-    public int encoded() { return PIECE[index()]; }
+    public int encoded() { return ENCODED[index()]; }
     
     /**
      * Gets the piece as would be returned from {@link #encoded()} but 

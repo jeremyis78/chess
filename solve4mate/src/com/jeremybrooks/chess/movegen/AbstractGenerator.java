@@ -8,7 +8,6 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import java.util.List;
 
-import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Piece.Color;
@@ -95,11 +94,11 @@ public abstract class AbstractGenerator implements Generator {
 
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-                if (isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0)))
+                if (isLegal(g, Util.EncodeMove(from, to, Piece.ENCODED[Piece.PAWN], 0, 0)))
                 {    
-                    for (int i = QUEEN; i >= KNIGHT; i--)
+                    for (int i = Piece.QUEEN; i >= Piece.KNIGHT; i--)
                     {
-                        moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, PIECE[i]));
+                        moves.add(Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], 0, Piece.ENCODED[i]));
                     }
                 }
             }
@@ -115,8 +114,8 @@ public abstract class AbstractGenerator implements Generator {
 
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-                if(isLegal(g, Util.EncodeMove(from, to, PIECE[PAWN], 0, 0))){
-                    moves.add(Util.EncodeMove (from, to, PIECE[PAWN], 0, 0));
+                if(isLegal(g, Util.EncodeMove(from, to, Piece.ENCODED[Piece.PAWN], 0, 0))){
+                    moves.add(Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], 0, 0));
                 }
             }
             advanceTwo = clearBit(advanceTwo, to);
@@ -131,7 +130,7 @@ public abstract class AbstractGenerator implements Generator {
 
                 //Only add an interposer if it's not pinned to the King
                 //if (!isPinned(g, from, to, PIECE[PAWN], 0)){
-                int encodedMove = Util.EncodeMove(from, to, PIECE[PAWN], 0, 0);
+                int encodedMove = Util.EncodeMove(from, to, Piece.ENCODED[Piece.PAWN], 0, 0);
                 if(isLegal(g, encodedMove)){
                     moves.add(encodedMove);
                 }
@@ -145,13 +144,13 @@ public abstract class AbstractGenerator implements Generator {
         //* check)                                                                  *
         //***************************************************************************
 
-        for (int p = KNIGHT; p <= QUEEN; p++) {
+        for (int p = Piece.KNIGHT; p <= Piece.QUEEN; p++) {
             pieces = position.getPieces (side, p);
             while (morePieces(pieces)) {
                 from = lowestBitNumber(pieces);
                 //now make pMoves only those moves which will interpose
                 //between the king and the checker (by ANDing with targets).
-                Piece thePiece = PieceFactory.fromIndex(side==WHITE?Color.W:Color.B, p);
+                Piece thePiece = PieceFactory.fromIndex(side==Piece.WHITE?Color.W:Color.B, p);
                 pMoves = Attacks.forPiece(thePiece, from, position) & empty & targets;
                 while (morePieces(pMoves)) {
                     to = lowestBitNumber(pMoves);
@@ -160,7 +159,7 @@ public abstract class AbstractGenerator implements Generator {
 
                     //Only add an interposer if it's not pinned to the King
                     //if (!isPinned(g, from, to, PIECE[p], 0)){
-                    int encodedMove = Util.EncodeMove(from, to, PIECE[p], 0, 0);
+                    int encodedMove = Util.EncodeMove(from, to, Piece.ENCODED[p], 0, 0);
                     if(isLegal(g, encodedMove)){
                        moves.add(encodedMove);
                     }
@@ -189,12 +188,12 @@ public abstract class AbstractGenerator implements Generator {
 
     static int isPawnPromotion(int side, int from){
         switch(side){
-        case Bitmap.WHITE:
+        case Piece.WHITE:
             if(from + 8 >= A8){
                 return 1;
             }
             break;
-        case Bitmap.BLACK:
+        case Piece.BLACK:
             if(from - 8 <= H1){
                 return 1;
             }
@@ -306,7 +305,7 @@ public abstract class AbstractGenerator implements Generator {
     public boolean isLegal(GameState g, int move){
         boolean legal = false;
         boolean isWhiteToMove = g.isWhiteToMove();
-        int side = isWhiteToMove?WHITE:BLACK;
+        int side = isWhiteToMove?Piece.WHITE:Piece.BLACK;
         g.makeMove(move);
         legal = !isAttacked(g, side, g.getPosition().getKingSquare(side));  //use the saved king square
         g.undoMove();
@@ -322,11 +321,11 @@ public abstract class AbstractGenerator implements Generator {
         empty = ~position.getAllPieces(0);
 
         switch (side) {
-        case Bitmap.WHITE:
+        case Piece.WHITE:
             advOne = (position.getPawns(side) << 8) & empty & ~EIGHTHRANK;
             // 'advOne' is all moves except those to the eighth rank
             break;
-        case Bitmap.BLACK:
+        case Piece.BLACK:
             advOne = (position.getPawns(side) >> 8) & empty & ~FIRSTRANK;
             // 'advOne' is all moves except those to the first rank
             break;
@@ -343,12 +342,12 @@ public abstract class AbstractGenerator implements Generator {
         empty = ~position.getAllPieces(0);// all[ALL];
 
         switch (side) {
-        case Bitmap.WHITE:
+        case Piece.WHITE:
             advTwo = position.getPawns(side) & SECONDRANK;
             advTwo = (advTwo << 8) & empty;
             advTwo = (advTwo << 8) & empty;
             break;
-        case Bitmap.BLACK:
+        case Piece.BLACK:
             advTwo = position.getPawns(side) & SEVENTHRANK;
             advTwo = (advTwo >> 8) & empty;
             advTwo = (advTwo >> 8) & empty;
@@ -366,11 +365,11 @@ public abstract class AbstractGenerator implements Generator {
         empty = ~position.getAllPieces(0);
 
         switch (side) {
-        case Bitmap.WHITE:
+        case Piece.WHITE:
             prom = (position.getPawns(side) << 8) & empty & EIGHTHRANK;
             // 'prom' is only the moves to the eighth rank
             break;
-        case Bitmap.BLACK:
+        case Piece.BLACK:
             prom = (position.getPawns(side) >> 8) & empty & FIRSTRANK;
             // 'prom' is only the moves to the first rank
             break;

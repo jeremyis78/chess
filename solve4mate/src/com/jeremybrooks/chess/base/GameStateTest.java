@@ -1,6 +1,7 @@
 package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Piece.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +48,7 @@ public class GameStateTest {
         int maxNumberOfMovesToSupport = 2;
         gameState = new GameState(maxNumberOfMovesToSupport);
         String beforeMove = "8/4P3/8/8/8/8/4P3/k6K w - - 5 30";
-        int firstMove = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
+        int firstMove = encodeMove(E7, E8, ENCODED[PAWN], NONE, ENCODED[QUEEN]);
         String afterFirstMove = "4Q3/8/8/8/8/8/4P3/k6K b - - 0 30";
         boolean isWhitesMove = setupState(beforeMove);
         assertWhiteToMove();
@@ -56,7 +57,7 @@ public class GameStateTest {
         assertEquals(1, gameState.currentLine().size());
         assertBlackToMove();
         
-        int secondMove  = encodeMove(A1, A2, PIECE[KING]);
+        int secondMove  = encodeMove(A1, A2, ENCODED[KING]);
         String afterSecondMove = "4Q3/8/8/8/8/8/k3P3/7K w - - 1 31";
         assertEquals(afterSecondMove , makeMove(!isWhitesMove, secondMove));
         assertEquals(maxNumberOfMovesToSupport, gameState.getNumberOfMovesMade());
@@ -64,7 +65,7 @@ public class GameStateTest {
         assertEquals(1, gameState.getNumberOfMovesMade());
         assertEquals(afterSecondMove , makeMove(!isWhitesMove, secondMove));
         
-        int thirdMove  = encodeMove(E2, E3, PIECE[PAWN]);
+        int thirdMove  = encodeMove(E2, E3, ENCODED[PAWN]);
         try {
             makeMove(isWhitesMove, thirdMove);
         } catch (IllegalStateException e) {
@@ -84,7 +85,7 @@ public class GameStateTest {
     @Test
     public void testUndoMoveWithNoMovesToUndo()
     {
-        int move  = encodeMove(E2, E3, PIECE[PAWN]);
+        int move  = encodeMove(E2, E3, ENCODED[PAWN]);
         boolean isWhitesMove = setupState("8/4P3/8/8/8/8/4P3/k6K w - - 5 30");
         try {
             undoMove(isWhitesMove, move);
@@ -149,7 +150,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhitePieceMoves() {
         String beforeMove = GameState.FEN_START;
-        int moveE4 = encodeMove(E2, E4, PIECE[PAWN]);
+        int moveE4 = encodeMove(E2, E4, ENCODED[PAWN]);
         String afterMove = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, moveE4));
@@ -163,7 +164,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackPieceCaptures() {
         String beforeMove = "rnbqkb1r/pppppppp/5n2/8/4P3/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 2";
-        int moveKnightTakeE4 = encodeMove(F6, E4, PIECE[KNIGHT], PIECE[PAWN]);
+        int moveKnightTakeE4 = encodeMove(F6, E4, ENCODED[KNIGHT], ENCODED[PAWN]);
         String afterMove = "rnbqkb1r/pppppppp/8/8/4n3/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 3";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, moveKnightTakeE4));
@@ -173,7 +174,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhitePawnCapturesNoEnPassant() {
         String beforeMove = "4k3/8/4p3/3P4/8/8/8/4K3 w - d6 2 23";
-        int move = encodeMove(D5, E6, PIECE[PAWN], PIECE[PAWN]);
+        int move = encodeMove(D5, E6, ENCODED[PAWN], ENCODED[PAWN]);
         String afterMove = "4k3/8/4P3/8/8/8/8/4K3 b - - 0 23";
         boolean isWhitesMove = setupState(beforeMove);
         assertTrue(gameState.hasEnPassantOption());
@@ -191,10 +192,10 @@ public class GameStateTest {
     public void testMakeAndUndoBlackPawnAdvanceTwoUndoesEnpassantSquare() {
         String mateIn5 = "1rqn3k/6pp/1pn5/4P3/1P2bNP1/1Q2N3/4BR1P/6K1 w - - 0 1";
         boolean isWhitesMove = setupState(mateIn5);
-        int whiteMove = encodeMove(H2, H4, PIECE[PAWN]);
-        int blackG5 = encodeMove(G7, G5, PIECE[PAWN]);
-        int blackH5 = encodeMove(H7, H5, PIECE[PAWN]);
-        int blackB5 = encodeMove(B6, B5, PIECE[PAWN]);
+        int whiteMove = encodeMove(H2, H4, ENCODED[PAWN]);
+        int blackG5 = encodeMove(G7, G5, ENCODED[PAWN]);
+        int blackH5 = encodeMove(H7, H5, ENCODED[PAWN]);
+        int blackB5 = encodeMove(B6, B5, ENCODED[PAWN]);
 
         makeMove(isWhitesMove, whiteMove);
         assertEquals(H3, gameState.getEnPassantSquare());
@@ -254,7 +255,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhitePawnCapturesEnPassant() {
         String beforeMove = "4k3/8/8/3pP3/8/8/8/4K3 w - d6 2 23";
-        int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, PIECE[PAWN], PIECE[PAWN]);
+        int movePawnOnE5CapturesOnD6 = encodeMove(E5, D6, ENCODED[PAWN], ENCODED[PAWN]);
         String afterMove = "4k3/8/3P4/8/8/8/8/4K3 b - - 0 23";
         boolean isWhitesMove = setupState(beforeMove);
         assertTrue(gameState.hasEnPassantOption());
@@ -267,7 +268,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackPawnCapturesEnPassant() {
         String beforeMove = "4k3/8/8/8/4pP2/8/8/4K3 b - f3 0 23";
-        int pawnOnE4CapturesOnF3 = encodeMove(E4, F3, PIECE[PAWN], PIECE[PAWN]);
+        int pawnOnE4CapturesOnF3 = encodeMove(E4, F3, ENCODED[PAWN], ENCODED[PAWN]);
         String afterMove = "4k3/8/8/8/8/5p2/8/4K3 w - - 0 24";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, pawnOnE4CapturesOnF3));
@@ -277,7 +278,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhitePawnPromotes() {
         String beforeMove = "8/4P3/8/8/8/8/8/k6K w - - 5 30";
-        int movePawnPromotesOnE8 = encodeMove(E7, E8, PIECE[PAWN], NONE, PIECE[QUEEN]);
+        int movePawnPromotesOnE8 = encodeMove(E7, E8, ENCODED[PAWN], NONE, ENCODED[QUEEN]);
         String afterMove = "4Q3/8/8/8/8/8/8/k6K b - - 0 30";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, movePawnPromotesOnE8));
@@ -287,7 +288,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackPawnPromotes() {
         String beforeMove = "k6K/8/8/8/8/8/7p/8 b - - 2 30";
-        int pawnPromotesOnH1 = encodeMove(H2, H1, PIECE[PAWN], NONE, PIECE[ROOK]);
+        int pawnPromotesOnH1 = encodeMove(H2, H1, ENCODED[PAWN], NONE, ENCODED[ROOK]);
         String afterMove = "k6K/8/8/8/8/8/8/7r w - - 0 31";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, pawnPromotesOnH1));
@@ -297,7 +298,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhitePawnCapturesAndPromotes() {
         String beforeMove = "3r4/4P3/8/8/8/8/8/k6K w - - 5 30";
-        int movePawnCapturesAndPromotesOnD8 = encodeMove(E7, D8, PIECE[PAWN], PIECE[ROOK], PIECE[KNIGHT]);
+        int movePawnCapturesAndPromotesOnD8 = encodeMove(E7, D8, ENCODED[PAWN], ENCODED[ROOK], ENCODED[KNIGHT]);
         String afterMove = "3N4/8/8/8/8/8/8/k6K b - - 0 30";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, movePawnCapturesAndPromotesOnD8));
@@ -308,7 +309,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackPawnCapturesAndPromotes() {
         String beforeMove = "kK6/8/8/8/8/8/p7/1Q6 b - - 5 30";
-        int pawnCapturesAndPromotesOnB1 = encodeMove(A2, B1, PIECE[PAWN], PIECE[QUEEN], PIECE[BISHOP]);
+        int pawnCapturesAndPromotesOnB1 = encodeMove(A2, B1, ENCODED[PAWN], ENCODED[QUEEN], ENCODED[BISHOP]);
         String afterMove = "kK6/8/8/8/8/8/8/1b6 w - - 0 31";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, pawnCapturesAndPromotesOnB1));
@@ -319,7 +320,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhiteShortCastles() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-        int move = encodeMove(E1, G1, PIECE[KING]);
+        int move = encodeMove(E1, G1, ENCODED[KING]);
         String afterMove = "r3k2r/8/8/8/8/8/8/R4RK1 b kq - 1 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -329,7 +330,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackShortCastles() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-        int move = encodeMove(E8, G8, PIECE[KING]);
+        int move = encodeMove(E8, G8, ENCODED[KING]);
         String afterMove = "r4rk1/8/8/8/8/8/8/R3K2R w KQ - 1 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -339,7 +340,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhiteLosesCastlePrivilegeWhenKingMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-        int move = encodeMove(E1, F1, PIECE[KING]);
+        int move = encodeMove(E1, F1, ENCODED[KING]);
         String afterMove = "r3k2r/8/8/8/8/8/8/R4K1R b kq - 1 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -349,7 +350,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackLosesCastlePrivilegeWhenKingMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-        int move = encodeMove(E8, D8, PIECE[KING]);
+        int move = encodeMove(E8, D8, ENCODED[KING]);
         String afterMove = "r2k3r/8/8/8/8/8/8/R3K2R w KQ - 1 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -359,7 +360,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhiteLosesShortCastlePrivilegeWhenRookMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-        int move = encodeMove(H1, G1, PIECE[ROOK]);
+        int move = encodeMove(H1, G1, ENCODED[ROOK]);
         String afterMove = "r3k2r/8/8/8/8/8/8/R3K1R1 b Qkq - 1 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -369,7 +370,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackLosesShortCastlePrivilegeWhenRookMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-        int move = encodeMove(H8, F8, PIECE[ROOK]);
+        int move = encodeMove(H8, F8, ENCODED[ROOK]);
         String afterMove = "r3kr2/8/8/8/8/8/8/R3K2R w KQq - 1 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -379,7 +380,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhiteLongCastles() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-        int move = encodeMove(E1, C1, PIECE[KING]);
+        int move = encodeMove(E1, C1, ENCODED[KING]);
         String afterMove = "r3k2r/8/8/8/8/8/8/2KR3R b kq - 1 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -389,7 +390,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoWhiteLosesLongCastlePrivilegeWhenRookMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1";
-        int move = encodeMove(A1, A2, PIECE[ROOK]);
+        int move = encodeMove(A1, A2, ENCODED[ROOK]);
         String afterMove = "r3k2r/8/8/8/8/8/R7/4K2R b Kkq - 1 1";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -399,7 +400,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackLongCastles() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-        int move = encodeMove(E8, C8, PIECE[KING]);
+        int move = encodeMove(E8, C8, ENCODED[KING]);
         String afterMove = "2kr3r/8/8/8/8/8/8/R3K2R w KQ - 1 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -409,7 +410,7 @@ public class GameStateTest {
     @Test
     public void testMakeAndUndoBlackLosesLongCastlePrivilegeWhenRookMoves() {
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
-        int move = encodeMove(A8, A1, PIECE[ROOK], PIECE[ROOK]);
+        int move = encodeMove(A8, A1, ENCODED[ROOK], ENCODED[ROOK]);
         String afterMove = "4k2r/8/8/8/8/8/8/r3K2R w KQk - 0 2";
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
@@ -470,7 +471,7 @@ public class GameStateTest {
         int move = 0;
         move = Bitmap.D8;
         move |= (Bitmap.A8 << 6);
-        move |= (PIECE[Bitmap.QUEEN] << 12);
+        move |= (ENCODED[QUEEN] << 12);
         makeUndoMakeMove(i%2==0?true:false, move);  //doesn't throw, ugggh.
     }
     
@@ -478,8 +479,8 @@ public class GameStateTest {
     {
     	//r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1
         String before = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
-        int move1 = encodeMove(D2, D4, PIECE[PAWN]);
-        int move2 = encodeMove(A8, A7, PIECE[ROOK], PIECE[PAWN]);
+        int move1 = encodeMove(D2, D4, ENCODED[PAWN]);
+        int move2 = encodeMove(A8, A7, ENCODED[ROOK], ENCODED[PAWN]);
 
         String expectedAfter = "4k2r/Rppp1ppp/1b3nbN/nP6/BBPPP3/q4N2/Pp4PP/R2Q1RK1 w kq - 0 1";
         boolean isWhitesMove = setupState(before);

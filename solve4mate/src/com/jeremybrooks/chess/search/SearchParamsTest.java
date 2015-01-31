@@ -5,16 +5,18 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import org.junit.Test;
 
+import com.jeremybrooks.chess.base.Piece;
+
 public class SearchParamsTest {
 
     @Test
     public void givenGameInOneHour() {
         SearchParams c = new SearchParams(SearchParams.ONE_HOUR);
 
-        assertEquals(SearchParams.ONE_HOUR, c.getTime(WHITE));
-        assertEquals(0,                     c.getIncrement(WHITE));
-        assertEquals(c.getTime(WHITE),      c.getTime(BLACK));
-        assertEquals(c.getIncrement(WHITE), c.getIncrement(BLACK));
+        assertEquals(SearchParams.ONE_HOUR, c.getTime(Piece.WHITE));
+        assertEquals(0,                     c.getIncrement(Piece.WHITE));
+        assertEquals(c.getTime(Piece.WHITE),      c.getTime(Piece.BLACK));
+        assertEquals(c.getIncrement(Piece.WHITE), c.getIncrement(Piece.BLACK));
         assertEquals(0,                     c.getMovesToGo());
         assertTrue(c.isSuddenDeath());
     }
@@ -25,10 +27,10 @@ public class SearchParamsTest {
         
         assertEquals(false,                   p.isSuddenDeath());
         assertEquals(1,                       p.getMovesToGo());
-        assertEquals(SearchParams.ONE_MINUTE, p.getTime(WHITE));
-        assertEquals(SearchParams.ONE_MINUTE, p.getTime(BLACK));
-        assertEquals(0,                       p.getIncrement(WHITE));
-        assertEquals(0,                       p.getIncrement(BLACK));
+        assertEquals(SearchParams.ONE_MINUTE, p.getTime(Piece.WHITE));
+        assertEquals(SearchParams.ONE_MINUTE, p.getTime(Piece.BLACK));
+        assertEquals(0,                       p.getIncrement(Piece.WHITE));
+        assertEquals(0,                       p.getIncrement(Piece.BLACK));
     }
 
     @Test
@@ -37,10 +39,10 @@ public class SearchParamsTest {
         final int withSixSecondIncrementPerMove = 6*SearchParams.ONE_SECOND;
         SearchParams c = new SearchParams(0, twoMinutesForGame, withSixSecondIncrementPerMove);
         
-        assertEquals(twoMinutesForGame,             c.getTime(WHITE));
-        assertEquals(withSixSecondIncrementPerMove, c.getIncrement(WHITE));
-        assertEquals(c.getTime(WHITE),              c.getTime(BLACK));
-        assertEquals(c.getIncrement(WHITE),         c.getIncrement(BLACK));
+        assertEquals(twoMinutesForGame,             c.getTime(Piece.WHITE));
+        assertEquals(withSixSecondIncrementPerMove, c.getIncrement(Piece.WHITE));
+        assertEquals(c.getTime(Piece.WHITE),              c.getTime(Piece.BLACK));
+        assertEquals(c.getIncrement(Piece.WHITE),         c.getIncrement(Piece.BLACK));
         assertEquals(0,                             c.getMovesToGo());
         assertTrue(c.isSuddenDeath());
     }
@@ -48,15 +50,15 @@ public class SearchParamsTest {
     @Test
     public void givenSuddenDeathGameInProgressWithTimeOdds() {
         SearchParams c = new SearchParams();
-        c.setTime(WHITE, 54321);
-        c.setIncrement(WHITE, 2000);
-        c.setTime(BLACK, 98765);
-        c.setIncrement(BLACK, 1000);
+        c.setTime(Piece.WHITE, 54321);
+        c.setIncrement(Piece.WHITE, 2000);
+        c.setTime(Piece.BLACK, 98765);
+        c.setIncrement(Piece.BLACK, 1000);
         
-        assertEquals(54321, c.getTime(WHITE));
-        assertEquals(2000,  c.getIncrement(WHITE));
-        assertEquals(98765, c.getTime(BLACK));
-        assertEquals(1000,  c.getIncrement(BLACK));
+        assertEquals(54321, c.getTime(Piece.WHITE));
+        assertEquals(2000,  c.getIncrement(Piece.WHITE));
+        assertEquals(98765, c.getTime(Piece.BLACK));
+        assertEquals(1000,  c.getIncrement(Piece.BLACK));
         assertTrue(c.isSuddenDeath());
     }
 
@@ -67,10 +69,10 @@ public class SearchParamsTest {
         int withNoIncrementPerMove = 0;
         SearchParams c = new SearchParams(fortyMoves, inTwoHours, withNoIncrementPerMove);
         
-        assertEquals(inTwoHours,            c.getTime(WHITE));
-        assertEquals(0,                     c.getIncrement(WHITE));
-        assertEquals(c.getTime(WHITE),      c.getTime(BLACK));
-        assertEquals(c.getIncrement(WHITE), c.getIncrement(BLACK));
+        assertEquals(inTwoHours,            c.getTime(Piece.WHITE));
+        assertEquals(0,                     c.getIncrement(Piece.WHITE));
+        assertEquals(c.getTime(Piece.WHITE),      c.getTime(Piece.BLACK));
+        assertEquals(c.getIncrement(Piece.WHITE), c.getIncrement(Piece.BLACK));
         assertEquals(fortyMoves,            c.getMovesToGo());
         assertFalse(c.isSuddenDeath());
     }

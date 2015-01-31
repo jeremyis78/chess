@@ -1,11 +1,9 @@
 package com.jeremybrooks.chess.base;
 
-import static com.jeremybrooks.chess.base.Bitmap.BISHOP;
-
 public class Bishop extends SlidingPiece {
 
     public Bishop(Color color) { 
-        super(color, BISHOP, 'B');
+        super(color, Piece.BISHOP, 'B');
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.jeremybrooks.chess.search;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
+
+import com.jeremybrooks.chess.base.Piece;
 /**
  * Holds the constraints of the search (time remaining, moves to go, depth, etc)
  * 
@@ -41,26 +43,26 @@ public class SearchParams {
     public SearchParams(int remainingMillis)
     {
          //sudden death
-        setTime(WHITE, remainingMillis);
-        setTime(BLACK, remainingMillis);
+        setTime(Piece.WHITE, remainingMillis);
+        setTime(Piece.BLACK, remainingMillis);
     }    
     public SearchParams(int movesToGo, int remainingMillis)
     {
         //sudden death
         setMovesToGo(movesToGo);
-        setTime(WHITE, remainingMillis);
-        setIncrement(WHITE, 0);
-        setTime(BLACK, remainingMillis);
-        setIncrement(BLACK, 0);
+        setTime(Piece.WHITE, remainingMillis);
+        setIncrement(Piece.WHITE, 0);
+        setTime(Piece.BLACK, remainingMillis);
+        setIncrement(Piece.BLACK, 0);
     }
     public SearchParams(int movesToGo, int remainingMillis, int incrementMillis)
     {
         //X moves in Y time
         setMovesToGo(movesToGo);
-        setTime(WHITE, remainingMillis);
-        setIncrement(WHITE, incrementMillis);
-        setTime(BLACK, remainingMillis);
-        setIncrement(BLACK, incrementMillis);
+        setTime(Piece.WHITE, remainingMillis);
+        setIncrement(Piece.WHITE, incrementMillis);
+        setTime(Piece.BLACK, remainingMillis);
+        setIncrement(Piece.BLACK, incrementMillis);
     }    
     public int getTime(int color) {
         return remainingMillis[color];

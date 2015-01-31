@@ -2,7 +2,7 @@ package com.jeremybrooks.chess.search;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.util.Util;
 
 public class IterativeDeepeningSearch extends Search {
@@ -18,7 +18,7 @@ public class IterativeDeepeningSearch extends Search {
     {
         int minimax = 0;
         timer.setParams(params);
-        log.info("id-search whiteTime " + params.getTime(Bitmap.WHITE) + " blackTime " + params.getTime(Bitmap.BLACK) + " movesToGo " + params.getMovesToGo());
+        log.info("id-search whiteTime " + params.getTime(Piece.WHITE) + " blackTime " + params.getTime(Piece.BLACK) + " movesToGo " + params.getMovesToGo());
 
         RootMove bestRootMove = new RootMove(0, Search.LOWER_BOUND);
         boolean mate = false;

@@ -1,9 +1,7 @@
 package com.jeremybrooks.chess.util;
 
-import static com.jeremybrooks.chess.base.Bitmap.BLACK;
-import static com.jeremybrooks.chess.base.Bitmap.KING;
+import static com.jeremybrooks.chess.base.Piece.KING;
 import static com.jeremybrooks.chess.base.Bitmap.NOSQUARE;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 import static com.jeremybrooks.chess.util.FenBuilder.*;
 
 import java.util.Map;
@@ -12,6 +10,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.Square;
@@ -108,7 +107,7 @@ public class FenParser {
     private String[] field;
     /* provide reasonable defaults, empty board, white to move, no castling, first move */
     private Position position                      = new Position();
-    private int playerOnMove                       = WHITE;
+    private int playerOnMove                       = Piece.WHITE;
     private String castlingOptions                 = ""+FenBuilder.UNSET;
     private int enPassantSquare                    = NOSQUARE;
     private Map<String,Object> opMap               = new TreeMap<>();
@@ -278,10 +277,10 @@ public class FenParser {
                     currentSquare += (boardCharacter - '0');
                     log.trace("  " + boardCharacter + " empty squares");
                 } else {
-                    int color = (Character.isUpperCase(boardCharacter)) ? WHITE : BLACK;
+                    int color = (Character.isUpperCase(boardCharacter)) ? Piece.WHITE : Piece.BLACK;
                     int piece = PieceFactory.create(boardCharacter).index();
-                    if(piece == KING && color == WHITE) numWhiteKingsPlaced++;
-                    if(piece == KING && color == BLACK) numBlackKingsPlaced++;
+                    if(piece == KING && color == Piece.WHITE) numWhiteKingsPlaced++;
+                    if(piece == KING && color == Piece.BLACK) numBlackKingsPlaced++;
                     validateOneKingPerColorOrThrow(numWhiteKingsPlaced, numBlackKingsPlaced);
                     position.placePiece(color, piece, currentSquare);
                     log.trace("  " + boardCharacter + " add at " + Square.named(currentSquare));
@@ -328,8 +327,8 @@ public class FenParser {
     private void parseOnMove() {
         String toParse = field[ON_MOVE_FIELD].trim();
         char onMove = toParse.charAt(0);
-        if (WHITE_ON_MOVE == onMove) playerOnMove = WHITE;
-        else if (BLACK_ON_MOVE == onMove) playerOnMove = BLACK;
+        if (WHITE_ON_MOVE == onMove) playerOnMove = Piece.WHITE;
+        else if (BLACK_ON_MOVE == onMove) playerOnMove = Piece.BLACK;
         else 
             throw new IllegalArgumentException("onMove '"+toParse+"' is invalid; "
                 + "use 'w' for white or 'b' for black");
@@ -394,7 +393,7 @@ public class FenParser {
     }
 
     public boolean isWhiteToMove() {
-        return playerOnMove == WHITE;
+        return playerOnMove == Piece.WHITE;
     }
 
     public String getCastlingOptions() {

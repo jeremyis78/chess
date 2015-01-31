@@ -162,6 +162,31 @@ public class SquareTest {
         assertEquals("right of h-file wraps to square on next rank", Bitmap.A8, Square.squareRightOf(Bitmap.H7));
         assertEquals(Bitmap.B1, Square.squareRightOf(Bitmap.A1));
     }
+    
+    @Test
+    public void testIsEighthRank()
+    {
+    	int white = Piece.WHITE;
+    	for(int square = Bitmap.A1; square < Bitmap.A2; square++)
+    	{
+    		assertFalse(Square.isEighthRank(square, white));
+    		assertTrue (Square.isEighthRank(square, ~white));
+    	}
+    	for(int square = Bitmap.A2; square < Bitmap.A8; square++)
+    	{
+    		assertFalse(Square.isEighthRank(square, white));
+    		assertFalse(Square.isEighthRank(square, ~white));
+    	}
+    	for(int square = Bitmap.A8; square <= Bitmap.H8; square++)
+    	{
+    		assertTrue (Square.isEighthRank(square, white));
+    		assertFalse(Square.isEighthRank(square, ~white));
+    	}
+    	assertFalse(Square.isEighthRank(Bitmap.MAXSQ, white));
+    	assertFalse(Square.isEighthRank(Bitmap.MAXSQ, ~white));
+    	assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, white));
+    	assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, ~white));
+    }
 
     private void assertSquareIsUnoccupied() {
         assertFalse(square.isOccupied());

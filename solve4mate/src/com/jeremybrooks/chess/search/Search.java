@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.eval.Evaluator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.search.ScoredMove.Precision;
@@ -121,7 +121,7 @@ public class Search {
     {
         int minimax = -MAXWINDOW; //we're looking for the largest score possible so we start at the lowest score possible
         timer.setParams(params);
-        log.info("ab-search whiteTime " + params.getTime(Bitmap.WHITE) + " blackTime " + params.getTime(Bitmap.BLACK) + " movesToGo " + params.getMovesToGo());
+        log.info("ab-search whiteTime " + params.getTime(Piece.WHITE) + " blackTime " + params.getTime(Piece.BLACK) + " movesToGo " + params.getMovesToGo());
 
         int elapsedTimeMillis = 0;
         int upToThisDepth = maxDepthLimit;
@@ -321,7 +321,7 @@ public class Search {
     private int quiescentSearch(int alpha, int beta, int side, int depth) {
         boolean quiescentSearch = true;
         int minimaxValue;
-        if(side == Bitmap.WHITE){
+        if(side == Piece.WHITE){
           minimaxValue = max(alpha, beta, side, depth, quiescentSearch);
         } else {
           minimaxValue = min(alpha, beta, side, depth, quiescentSearch);

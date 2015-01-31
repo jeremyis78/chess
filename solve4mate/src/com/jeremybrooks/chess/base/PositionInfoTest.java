@@ -96,44 +96,44 @@ public class PositionInfoTest {
 	public void givenShortCastleOptionsForWhite() {
 		String hasIt = "K";
         info.setCastleOptionsFromFen(hasIt);
-		assertEquals(true, info.hasShortCastleOption(Bitmap.WHITE));
+		assertEquals(true, info.hasShortCastleOption(Piece.WHITE));
 		
 		String doesntHaveIt = "Qkq";
         info.setCastleOptionsFromFen(doesntHaveIt);
-		assertEquals(false, info.hasShortCastleOption(Bitmap.WHITE));
+		assertEquals(false, info.hasShortCastleOption(Piece.WHITE));
 	}
 
 	@Test
 	public void givenShortCastleOptionsForBlack() {
 		String hasIt = "k";
         info.setCastleOptionsFromFen(hasIt);
-		assertEquals(true, info.hasShortCastleOption(Bitmap.BLACK));
+		assertEquals(true, info.hasShortCastleOption(Piece.BLACK));
 		
 		String doesntHaveIt = "KQq";
         info.setCastleOptionsFromFen(doesntHaveIt);
-		assertEquals(false, info.hasShortCastleOption(Bitmap.BLACK));
+		assertEquals(false, info.hasShortCastleOption(Piece.BLACK));
 	}
 
 	@Test
 	public void givenLongCastleOptionsForWhite() {
 		String hasIt = "Q";
         info.setCastleOptionsFromFen(hasIt);
-		assertEquals(true, info.hasLongCastleOption(Bitmap.WHITE));
+		assertEquals(true, info.hasLongCastleOption(Piece.WHITE));
 		
 		String doesntHaveIt = "Kkq";
         info.setCastleOptionsFromFen(doesntHaveIt);
-		assertEquals(false, info.hasLongCastleOption(Bitmap.WHITE));
+		assertEquals(false, info.hasLongCastleOption(Piece.WHITE));
 	}
 
 	@Test
 	public void givenLongCastleOptionsForBlack() {
 		String hasIt = "q";
         info.setCastleOptionsFromFen(hasIt);
-		assertEquals(true, info.hasLongCastleOption(Bitmap.BLACK));
+		assertEquals(true, info.hasLongCastleOption(Piece.BLACK));
 		
 		String doesntHaveIt = "KQk";
         info.setCastleOptionsFromFen(doesntHaveIt);
-		assertEquals(false, info.hasLongCastleOption(Bitmap.BLACK));
+		assertEquals(false, info.hasLongCastleOption(Piece.BLACK));
 	}
 	
 	@Test
@@ -142,19 +142,19 @@ public class PositionInfoTest {
 	    int options = GameState.W_SHORT_CASTLE|GameState.W_LONG_CASTLE
 	                 |GameState.B_SHORT_CASTLE|GameState.B_LONG_CASTLE;
 	    assertEquals(options, info.getCastleOptions());
-	    assertTrue(info.hasShortCastleOption(WHITE));
-	    assertTrue(info.hasLongCastleOption(WHITE));
-	    assertTrue(info.hasShortCastleOption(BLACK));
-	    assertTrue(info.hasLongCastleOption(BLACK));
+	    assertTrue(info.hasShortCastleOption(Piece.WHITE));
+	    assertTrue(info.hasLongCastleOption(Piece.WHITE));
+	    assertTrue(info.hasShortCastleOption(Piece.BLACK));
+	    assertTrue(info.hasLongCastleOption(Piece.BLACK));
 	    
 	    options &= ~(GameState.W_LONG_CASTLE|GameState.B_SHORT_CASTLE);
-	    info.removeLongCastleOption(WHITE);
-	    info.removeShortCastleOption(BLACK);
+	    info.removeLongCastleOption(Piece.WHITE);
+	    info.removeShortCastleOption(Piece.BLACK);
 	    assertEquals(options, info.getCastleOptions());
-	    assertTrue(info.hasShortCastleOption(WHITE));
-        assertFalse(info.hasLongCastleOption(WHITE));
-        assertFalse(info.hasShortCastleOption(BLACK));
-        assertTrue(info.hasLongCastleOption(BLACK));
+	    assertTrue(info.hasShortCastleOption(Piece.WHITE));
+        assertFalse(info.hasLongCastleOption(Piece.WHITE));
+        assertFalse(info.hasShortCastleOption(Piece.BLACK));
+        assertTrue(info.hasLongCastleOption(Piece.BLACK));
 	}
 	
     @Test
@@ -216,10 +216,10 @@ public class PositionInfoTest {
 	{
 	    assertEquals(expectedMoveNumber, info.getMoveNumber());
 	    assertEquals(511, info.getReversiblePlies());
-	    assertEquals(true, info.hasShortCastleOption(WHITE));
-	    assertEquals(true, info.hasShortCastleOption(BLACK));
-        assertEquals(true, info.hasLongCastleOption(WHITE));
-        assertEquals(true, info.hasLongCastleOption(BLACK));
+	    assertEquals(true, info.hasShortCastleOption(Piece.WHITE));
+	    assertEquals(true, info.hasShortCastleOption(Piece.BLACK));
+        assertEquals(true, info.hasLongCastleOption(Piece.WHITE));
+        assertEquals(true, info.hasLongCastleOption(Piece.BLACK));
 	    assertEquals(42, info.getEnPassantSquare());
 	}
 
@@ -227,10 +227,10 @@ public class PositionInfoTest {
 	{
 	    assertEquals(511, info.getMoveNumber());
 	    assertEquals(expectedRevPlies, info.getReversiblePlies());
-	    assertEquals(true, info.hasShortCastleOption(WHITE));
-	    assertEquals(true, info.hasShortCastleOption(BLACK));
-	    assertEquals(true, info.hasLongCastleOption(WHITE));
-	    assertEquals(true, info.hasLongCastleOption(BLACK));
+	    assertEquals(true, info.hasShortCastleOption(Piece.WHITE));
+	    assertEquals(true, info.hasShortCastleOption(Piece.BLACK));
+	    assertEquals(true, info.hasLongCastleOption(Piece.WHITE));
+	    assertEquals(true, info.hasLongCastleOption(Piece.BLACK));
 	    assertEquals(42, info.getEnPassantSquare());
 	}
 

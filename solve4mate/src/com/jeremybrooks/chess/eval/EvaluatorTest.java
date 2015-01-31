@@ -1,13 +1,12 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.base.Bitmap.BLACK;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 
 public class EvaluatorTest {
 
@@ -26,7 +25,7 @@ public class EvaluatorTest {
     public void givenStartPositionEvaluation() {
         String initialPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         gameState.set(initialPosition);
-        int scoreAtStartOfGame = eval.evaluate(gameState, WHITE, 0, false, true);
+        int scoreAtStartOfGame = eval.evaluate(gameState, Piece.WHITE, 0, false, true);
         assertFalse("white should have no advantage", scoreAtStartOfGame > 0);
         assertFalse("black should have no advantage", scoreAtStartOfGame < 0);
         assertEquals(0, scoreAtStartOfGame);
@@ -104,7 +103,7 @@ public class EvaluatorTest {
     public void givenTwoBlackKnightsEightPawns() {
         String initialPosition = "1n2k1n1/pppppppp/8/8/8/8/8/4K3 b kq - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, BLACK, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.BLACK, 0, false, false);
         int startingScore = (325 * 2) + (100 * 8);
         int knightAdjustmentGivenEightPawns = (6 * 3) * 2;
         int startingBlackScore = -1 * (startingScore + knightAdjustmentGivenEightPawns);
@@ -115,7 +114,7 @@ public class EvaluatorTest {
     public void givenOneBlackKnightFourPawns() {
         String initialPosition = "1n2k3/pppp4/8/8/8/8/8/4K3 b - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, BLACK, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.BLACK, 0, false, false);
         int knightFourPawnsScore = 325 + (100 * 4);
         int knightAdjustmentGivenFourPawns = -6;
         int startingBlackScore = -1 * (knightFourPawnsScore + knightAdjustmentGivenFourPawns);
@@ -126,7 +125,7 @@ public class EvaluatorTest {
     public void givenTwoWhiteKnightEightPawns() {
         String initialPosition = "4k3/8/8/8/8/8/PPPPPPPP/1N2K1N1 w - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, WHITE, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.WHITE, 0, false, false);
         int twoKnightsEightPawnsScore = (325 * 2) + (100 * 8);
         int knightAdjustmentGivenAllPawns = 6 * 3 * 2; //bonus * 3 pawns * 2 knights
         int startingBlackScore = twoKnightsEightPawnsScore + knightAdjustmentGivenAllPawns;
@@ -138,7 +137,7 @@ public class EvaluatorTest {
         //Boundary condition for knight adjustment is at 5 pawns
         String initialPosition = "1n2k3/ppppp3/8/8/8/8/8/4K3 b - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, BLACK, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.BLACK, 0, false, false);
         int knightFivePawnsScore = 325 + (100 * 5);
         int knightAdjustmentGivenFivePawns = 0;
         int expectedScore = -1 * (knightFivePawnsScore + knightAdjustmentGivenFivePawns);
@@ -149,7 +148,7 @@ public class EvaluatorTest {
     public void givenOneBlackRookFourPawns() {
         String initialPosition = "r3k3/pppp4/8/8/8/8/8/4K3 b - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, BLACK, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.BLACK, 0, false, false);
         int rookFourPawnsScore = 500 + (100 * 4);
         int rookAdjustmentGivenFourPawns = 13;
         int startingBlackScore = -1 * (rookFourPawnsScore + rookAdjustmentGivenFourPawns);
@@ -160,7 +159,7 @@ public class EvaluatorTest {
     public void givenTwoWhiteRooksSevenPawns() {
         String initialPosition = "4k3/8/8/8/8/8/1PPPPPPP/R3K2R w - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, WHITE, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.WHITE, 0, false, false);
         int twoRooksSevenPawnsScore = (500 * 2) + (100 * 7);
         int rookAdjustmentGivenSevenPawns = 2 * (-13 * 2); //2 rooks * adjustment * pawns over 5
         int startingBlackScore = twoRooksSevenPawnsScore + rookAdjustmentGivenSevenPawns;
@@ -171,7 +170,7 @@ public class EvaluatorTest {
     public void givenWhiteRookFivePawns() {
         String initialPosition = "4k3/8/8/8/8/8/3PPPPP/R3K3 w - - 0 1";
         gameState.set(initialPosition);
-        int score = eval.evaluate(gameState, WHITE, 0, false, false);
+        int score = eval.evaluate(gameState, Piece.WHITE, 0, false, false);
         int twoRooksSevenPawnsScore = (500 * 1) + (100 * 5);
         int rookAdjustmentGivenSevenPawns = 0;
         int startingBlackScore = twoRooksSevenPawnsScore + rookAdjustmentGivenSevenPawns;

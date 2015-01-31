@@ -1,7 +1,5 @@
 package com.jeremybrooks.chess.base;
 
-import static com.jeremybrooks.chess.base.Bitmap.KING;
-
 import com.jeremybrooks.chess.movegen.Attacks;
 import com.jeremybrooks.chess.util.Util;
 
@@ -9,7 +7,7 @@ public class King extends Piece {
 
     public King(Color color) 
     { 
-        super(color, KING, 'K');
+        super(color, Piece.KING, 'K');
     }
 
     @Override

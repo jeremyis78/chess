@@ -1,13 +1,11 @@
 package com.jeremybrooks.chess.base;
 
-import static com.jeremybrooks.chess.base.Bitmap.KNIGHT;
-
 import com.jeremybrooks.chess.movegen.Attacks;
 
 public class Knight extends Piece {
     
     public Knight(Color color) {
-        super(color, KNIGHT, 'N');
+        super(color, Piece.KNIGHT, 'N');
     }
     
     @Override

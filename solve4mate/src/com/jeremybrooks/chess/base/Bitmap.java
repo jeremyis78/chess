@@ -171,9 +171,6 @@ public class Bitmap {
     public enum Rank { RANK1, RANK2, RANK3, RANK4, RANK5, RANK6, RANK7, RANK8 };
     public enum File { FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, FILE7, FILE8 };
 
-    public static final int WHITE = 0;
-    public static final int BLACK = 1;
-    
     //TODO: still needs to be defined somewhere better
     //    public enum XXXXX {ALL, ALL90, ALL45L, ALL45R, MAXALL};
     public static final int ALL = 0;
@@ -186,50 +183,6 @@ public class Bitmap {
     //For g.pos.board[]
     public static final char BOARD_EMPTY_SQUARE = ' ';
     
-    public static final char BOARD_PIECE[] = {
-        'P','N','B','R','Q','K',
-        'p','n','b','r','q','k'    
-    };
-
-
-    //For accessing the constant PIECE and PIECE_VALUE arrays below
-    public static final int PAWN = 0;
-    public static final int KNIGHT = 1;
-    public static final int BISHOP = 2;
-    public static final int ROOK = 3;
-    public static final int QUEEN = 4;
-    public static final int KING = 5;
-    public static final int NONE = 6;
-    
-    
-    /**
-     * Returns the piece as it is encoded into the "move" integer
-     * and encoded in the Position.board array.
-     * Use appropriate constants above for the index
-     * @see Position.getBoard(int) 
-     */
-    public static final int PIECE[] = {
-        /*  pawn   001 */    1,
-        /*  knight 010 */    2,
-        /*  bishop 101 */    5,
-        /*  rook   110 */    6,
-        /*  queen  111 */    7,
-        /*  king   011 */    3,
-        /*  none   100 */   0 
-    };
-
-    //takes an int index (a board character) and maps it to a corresponding piece
-    public static final int TO_PIECE[] = {
-        NONE,       // 0 (no piece)
-        PAWN,       // 1
-        KNIGHT,     // 2
-        KING,       // 3
-        NONE,       // 4 (no piece)
-        BISHOP,     // 5
-        ROOK,       // 6
-        QUEEN       // 7
-    };
-
 
     //********************************************************************
     //*    Given a square (A1-H8) the following SQ2BIT??? arrays will       *

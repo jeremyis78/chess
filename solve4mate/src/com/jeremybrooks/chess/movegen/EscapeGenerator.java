@@ -4,18 +4,13 @@ import static com.jeremybrooks.chess.base.Bitmap.EIGHTHRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FIFTHRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FIRSTRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FOURTHRANK;
-import static com.jeremybrooks.chess.base.Bitmap.KING;
-import static com.jeremybrooks.chess.base.Bitmap.KNIGHT;
-import static com.jeremybrooks.chess.base.Bitmap.PAWN;
-import static com.jeremybrooks.chess.base.Bitmap.PIECE;
-import static com.jeremybrooks.chess.base.Bitmap.QUEEN;
-import static com.jeremybrooks.chess.base.Bitmap.TO_PIECE;
+import static com.jeremybrooks.chess.base.Piece.*;
 import static com.jeremybrooks.chess.base.Bitmap.clearBit;
 import static com.jeremybrooks.chess.base.Bitmap.lowestBitNumber;
 
 import java.util.List;
 
-import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.util.Util;
 
@@ -43,11 +38,11 @@ public class EscapeGenerator extends AbstractGenerator {
         kingSq = position.getKingSquare(side);
         checkers = attackers(g, side, position.getKingSquare(side));
         switch (side) {
-            case Bitmap.WHITE:
+            case Piece.WHITE:
                 promoteRank = EIGHTHRANK;
                 enPassantRank = FIFTHRANK;
                 break;
-            case Bitmap.BLACK:
+            case Piece.BLACK:
                 promoteRank = FIRSTRANK;
                 enPassantRank = FOURTHRANK;
                 break;
@@ -102,7 +97,7 @@ public class EscapeGenerator extends AbstractGenerator {
 //                        System.err.print("Adding pawn captures and promotes to any piece: ");
 //                        Util.displayMove(move, false, false);
                         for (pro = QUEEN; pro >= KNIGHT; pro--) {
-                            moves.add(Util.EncodeMove(from,checker, mover,cap,PIECE[pro]));
+                            moves.add(Util.EncodeMove(from,checker, mover,cap,ENCODED[pro]));
                         }
                     }
                 } else if (TO_PIECE[mover] == PAWN && g.hasEnPassantOption()){
@@ -110,8 +105,8 @@ public class EscapeGenerator extends AbstractGenerator {
                     if (Util.bool(attackers & (1L << enPassantSquare))){
                         // Pawn captures en Passant
                         to = enPassantSquare;
-                        cap = PIECE[PAWN];
-                        move = Util.EncodeMove(from,to,PIECE[PAWN],cap,0);
+                        cap = ENCODED[PAWN];
+                        move = Util.EncodeMove(from,to,ENCODED[PAWN],cap,0);
                         //if (!isPinned(g, from, to, PIECE[PAWN], cap)){
                         if (isLegal(g, move)){
 //                            System.err.print("Added pawn captures via en-passant: ");
@@ -190,7 +185,7 @@ public class EscapeGenerator extends AbstractGenerator {
             while (morePieces(kingMoves)){
                 to = lowestBitNumber(kingMoves);
                 cap = Math.abs(position.getBoard(to));
-                move = Util.EncodeMove(kingSq, to, PIECE[KING], cap, 0);
+                move = Util.EncodeMove(kingSq, to, ENCODED[Piece.KING], cap, 0);
                 if (isLegal (g, move)) {
                     //cap = abs (g.pos.board[to]);
 //                    System.err.print("Adding king captures one of two checking pieces: ");
@@ -213,7 +208,7 @@ public class EscapeGenerator extends AbstractGenerator {
             } else {
                 cap = 0;
             }
-            move = Util.EncodeMove(kingSq, to, PIECE[KING], cap, 0);
+            move = Util.EncodeMove(kingSq, to, ENCODED[Piece.KING], cap, 0);
             if ( isLegal(g, move)){
 //                System.err.print("Adding king escapes via flight square: ");
 //                Util.displayMove(move, false, false);

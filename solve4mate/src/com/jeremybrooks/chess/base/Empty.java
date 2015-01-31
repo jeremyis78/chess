@@ -6,7 +6,7 @@ public class Empty extends Piece {
 
     public Empty()
     {
-        super(Piece.Color.W, NONE, BOARD_EMPTY_SQUARE);
+        super(Piece.Color.W, Piece.NONE, BOARD_EMPTY_SQUARE);
     }
     
     @Override

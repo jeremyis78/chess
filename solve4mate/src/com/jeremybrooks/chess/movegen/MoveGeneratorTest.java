@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.Util;
 
@@ -32,9 +33,9 @@ public class MoveGeneratorTest {
     {
         int fromSquare = B7;
         int toSquare = C8;
-        int movingPiece = PIECE[TO_PIECE[PAWN]];
-        int capturedPiece = PIECE[TO_PIECE[BISHOP]];
-        int promotedPiece = PIECE[TO_PIECE[QUEEN]];
+        int movingPiece = Piece.ENCODED[Piece.TO_PIECE[Piece.PAWN]];
+        int capturedPiece = Piece.ENCODED[Piece.TO_PIECE[Piece.BISHOP]];
+        int promotedPiece = Piece.ENCODED[Piece.TO_PIECE[Piece.QUEEN]];
         int encodedMove = Util.EncodeMove(fromSquare, toSquare, movingPiece, capturedPiece, promotedPiece);
         
         assertEquals(fromSquare, encodedMove & 0x3F);

@@ -10,8 +10,8 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.eval.Evaluator;
 import com.jeremybrooks.chess.movegen.DefaultGenerator;
 import com.jeremybrooks.chess.search.IterativeDeepeningSearch;
@@ -19,6 +19,7 @@ import com.jeremybrooks.chess.search.Search;
 import com.jeremybrooks.chess.search.SearchInfo;
 import com.jeremybrooks.chess.search.SearchParams;
 import com.jeremybrooks.chess.search.TimeMgmt;
+import com.jeremybrooks.chess.util.Util;
 
 public class Solver {
     private static final int MILLIS_PER_SEC = 1000;
@@ -111,13 +112,13 @@ public class Solver {
         {
             if(!moveGenerator.isLegalMove(state, move))
             {
-                System.err.println("illegal: " + UciDriver.toUciMove(move) + " (as int) " +move);
+                System.err.println("illegal: " + Util.toUciMove(move) + " (as int) " +move);
                 continue;
             }
             long nodeCountForMove = 0;
             moveCount++;
             try { //make
-//                System.out.println(String.format("make %s", Util.displayMoveStr(move, false, false)));
+                System.out.println(String.format("make %s", Util.displayMoveStr(move, false, false)));
                 state.makeMove(move);
                 deque.addFirst(move);
             } catch (IllegalStateException e) {
@@ -127,7 +128,7 @@ public class Solver {
             }
             nodeCountForMove += perft(state, depth-1);
             nodeCountTotal += nodeCountForMove;
-            System.out.println(UciDriver.toUciMove(move) + " " + nodeCountForMove); // + " " + state.get());
+            System.out.println(Util.toUciMove(move) + " " + nodeCountForMove); // + " " + state.get());
             try { //undo
 //                System.out.println(String.format("undo %s", Util.displayMoveStr(move, false, false)));
                 state.undoMove();
@@ -169,7 +170,7 @@ public class Solver {
     public List<Integer> getLegalMoves(GameState g) {
         
         moveGenerator.setGameState(g);
-        int side = g.isWhiteToMove()?Bitmap.WHITE:Bitmap.BLACK;
+        int side = g.isWhiteToMove()?Piece.WHITE:Piece.BLACK;
         boolean onlyDangerousMoves = false;
         List<Integer> moves = moveGenerator.generateMoves(side, onlyDangerousMoves);
         List<Integer> legalMoves = new ArrayList<Integer>(256);

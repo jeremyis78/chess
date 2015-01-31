@@ -3,6 +3,7 @@ package com.jeremybrooks.chess.eval;
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.util.Util;
 
@@ -24,7 +25,7 @@ public class MaterialAdjustmentTerm extends EvalTerm {
         int[][] count = new int[2][5];
         int[][] pieceValue = new int[2][5];
         for(int color = 0; color<2; color++){
-            for (int piece = PAWN; piece <= QUEEN; piece++){
+            for (int piece = Piece.PAWN; piece <= Piece.QUEEN; piece++){
                 int numPieces = Util.bitCount(position.getPieces(color,piece));
                 int pcScore = Evaluator.PIECE_VALUE[piece] * numPieces;
                 count[color][piece] = numPieces;
@@ -32,11 +33,11 @@ public class MaterialAdjustmentTerm extends EvalTerm {
             }
         }
         int score = 0;
-        int wKnightAdjustment = knightAdjustment(count[WHITE][KNIGHT], count[WHITE][PAWN]);
-        int bKnightAdjustment = knightAdjustment(count[BLACK][KNIGHT], count[BLACK][PAWN]);
+        int wKnightAdjustment = knightAdjustment(count[Piece.WHITE][Piece.KNIGHT], count[Piece.WHITE][Piece.PAWN]);
+        int bKnightAdjustment = knightAdjustment(count[Piece.BLACK][Piece.KNIGHT], count[Piece.BLACK][Piece.PAWN]);
         score += wKnightAdjustment - bKnightAdjustment;
-        int wRookAdjustment = rookAdjustment(count[WHITE][ROOK], count[WHITE][PAWN]);
-        int bRookAdjustment = rookAdjustment(count[BLACK][ROOK], count[BLACK][PAWN]);
+        int wRookAdjustment = rookAdjustment(count[Piece.WHITE][Piece.ROOK], count[Piece.WHITE][Piece.PAWN]);
+        int bRookAdjustment = rookAdjustment(count[Piece.BLACK][Piece.ROOK], count[Piece.BLACK][Piece.PAWN]);
         score += wRookAdjustment - bRookAdjustment;
         return score;
     }

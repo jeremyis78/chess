@@ -17,7 +17,7 @@ public class RookTest {
         rook = new Rook(Color.W);
         assertRook();
         assertEquals('R', rook.toChar());
-        assertEquals(PIECE[ROOK], rook.encodedByColor());
+        assertEquals(Piece.ENCODED[Piece.ROOK], rook.encodedByColor());
     }
 
     @Test
@@ -25,13 +25,13 @@ public class RookTest {
         rook = new Rook(Color.B);
         assertRook();
         assertEquals('r', rook.toChar());
-        assertEquals(-1 * PIECE[ROOK], rook.encodedByColor());
+        assertEquals(-1 * Piece.ENCODED[Piece.ROOK], rook.encodedByColor());
     }
 
     private void assertRook() {
         assertTrue(rook.exists());
-        assertEquals(ROOK, rook.index());
-        assertEquals(PIECE[ROOK], rook.encoded());
+        assertEquals(Piece.ROOK, rook.index());
+        assertEquals(Piece.ENCODED[Piece.ROOK], rook.encoded());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class RookTest {
         rook = new Rook(Color.W);
         int rookSquare = B3;
         Position p = new Position();
-        p.placePiece(BLACK, ROOK, rookSquare);
+        p.placePiece(Piece.BLACK, Piece.ROOK, rookSquare);
 
         long emptySquares = ~p.getAllPieces(0);
         long advances = rook.advances(rookSquare, p) & emptySquares;
@@ -61,18 +61,18 @@ public class RookTest {
         rook = new Rook(Color.B);
         int rookSquare = B3;
         Position p = occupiedPositionWithRookOn(rookSquare);
-        long opponentPieces = p.getOpponentPiecesExceptKing(BLACK);
+        long opponentPieces = p.getOpponentPiecesExceptKing(Piece.BLACK);
         long captures = rook.advances(rookSquare, p) & opponentPieces;
         assertEquals("b2 a3 b7 ", Util.displaySquaresStr(captures));
     }
 
     private Position occupiedPositionWithRookOn(int rookSquare) {
         Position p = new Position();
-        p.placePiece(BLACK, ROOK, rookSquare);
-        p.placePiece(WHITE, PAWN, A3);
-        p.placePiece(WHITE, BISHOP, B7);
-        p.placePiece(BLACK, ROOK, H3);
-        p.placePiece(WHITE, QUEEN, B2);
+        p.placePiece(Piece.BLACK, Piece.ROOK, rookSquare);
+        p.placePiece(Piece.WHITE, Piece.PAWN, A3);
+        p.placePiece(Piece.WHITE, Piece.BISHOP, B7);
+        p.placePiece(Piece.BLACK, Piece.ROOK, H3);
+        p.placePiece(Piece.WHITE, Piece.QUEEN, B2);
         return p;
     }
 

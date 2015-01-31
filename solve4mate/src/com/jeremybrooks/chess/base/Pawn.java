@@ -6,7 +6,7 @@ import com.jeremybrooks.chess.movegen.Attacks;
 public class Pawn extends Piece {
     
     public Pawn(Color color){ 
-        super(color, PAWN, 'P');
+        super(color, Piece.PAWN, 'P');
     }
 
     @Override
@@ -16,15 +16,15 @@ public class Pawn extends Piece {
     
     @Override
     public long advances(int fromSquare, Position position) {
-        int side = (color==Color.W?WHITE:BLACK);
+        int side = (color==Color.W?Piece.WHITE:Piece.BLACK);
         long occupiedSquares = position.getAllPieces(0);
         long emptySquares = ~occupiedSquares;
         long pawnsMoveOne = 0;
-        if (side == Bitmap.WHITE) {
-            long whitePawns = position.getPawns(Bitmap.WHITE);
+        if (side == Piece.WHITE) {
+            long whitePawns = position.getPawns(Piece.WHITE);
             pawnsMoveOne = (whitePawns << 8) & emptySquares;
         } else {
-            long blackPawns = position.getPawns(Bitmap.BLACK);
+            long blackPawns = position.getPawns(Piece.BLACK);
             pawnsMoveOne = (blackPawns >> 8) & emptySquares;
         }
         return pawnsMoveOne;

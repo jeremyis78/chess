@@ -17,7 +17,7 @@ public class KnightTest {
         knight = new Knight(Color.W);
         assertKnight();
         assertEquals('N', knight.toChar());
-        assertEquals(PIECE[KNIGHT], knight.encodedByColor());
+        assertEquals(Piece.ENCODED[Piece.KNIGHT], knight.encodedByColor());
     }
 
     @Test
@@ -25,13 +25,13 @@ public class KnightTest {
         knight = new Knight(Color.B);
         assertKnight();
         assertEquals('n', knight.toChar());
-        assertEquals(-1 * PIECE[KNIGHT], knight.encodedByColor());
+        assertEquals(-1 * Piece.ENCODED[Piece.KNIGHT], knight.encodedByColor());
     }
 
     private void assertKnight() {
         assertTrue(knight.exists());
-        assertEquals(KNIGHT, knight.index());
-        assertEquals(PIECE[KNIGHT], knight.encoded());
+        assertEquals(Piece.KNIGHT, knight.index());
+        assertEquals(Piece.ENCODED[Piece.KNIGHT], knight.encoded());
     }
 
     @Test
@@ -57,19 +57,19 @@ public class KnightTest {
         knight = new Knight(Color.W);
         int knightSquare = F3;
         Position p = occupiedPositionWithKnightOn(knightSquare);
-        long opponentPieces = p.getOpponentPiecesExceptKing(WHITE);
+        long opponentPieces = p.getOpponentPiecesExceptKing(Piece.WHITE);
         long captures = knight.advances(knightSquare, p) & opponentPieces;
         assertEquals("d4 g5 ", Util.displaySquaresStr(captures));
     }
 
     private Position occupiedPositionWithKnightOn(int knightSquare) {
         Position p = new Position();
-        p.placePiece(WHITE, KNIGHT, knightSquare);
-        p.placePiece(WHITE, KING, E1);
-        p.placePiece(WHITE, ROOK, G1);
-        p.placePiece(WHITE, PAWN, H2);
-        p.placePiece(BLACK, QUEEN, D4);
-        p.placePiece(BLACK, BISHOP, G5);
+        p.placePiece(Piece.WHITE, Piece.KNIGHT, knightSquare);
+        p.placePiece(Piece.WHITE, Piece.KING, E1);
+        p.placePiece(Piece.WHITE, Piece.ROOK, G1);
+        p.placePiece(Piece.WHITE, Piece.PAWN, H2);
+        p.placePiece(Piece.BLACK, Piece.QUEEN, D4);
+        p.placePiece(Piece.BLACK, Piece.BISHOP, G5);
         return p;
     }
 

@@ -47,27 +47,27 @@ public class PositionInfo {
 	}
 	
 	public boolean hasShortCastleOption(int side) { 
-		int rightShiftedBy = side==Bitmap.WHITE?19:21; //19th or 21st bit
+		int rightShiftedBy = side==Piece.WHITE?19:21; //19th or 21st bit
 		int bitmask = 0x1;
 		int rightShiftedValue = infoBits >> rightShiftedBy;
 		return 1==(rightShiftedValue & bitmask);
 	}
 	
 	public void removeShortCastleOption(int side) {
-	    int leftShiftedBy = side==Bitmap.WHITE?19:21;
+	    int leftShiftedBy = side==Piece.WHITE?19:21;
 	    int bitmask = 1 << leftShiftedBy;
 	    infoBits &= ~(bitmask);
 	}
 
 	public boolean hasLongCastleOption(int side) { 
-		int rightShiftedBy = side==Bitmap.WHITE?20:22; //20th or 22nd bit
+		int rightShiftedBy = side==Piece.WHITE?20:22; //20th or 22nd bit
 		int bitmask = 0x1;
 		int rightShiftedValue = infoBits >> rightShiftedBy;
 		return 1==(rightShiftedValue & bitmask);
 	}
 	
 	public void removeLongCastleOption(int side) {
-	    int leftShiftedBy = side==Bitmap.WHITE?20:22;
+	    int leftShiftedBy = side==Piece.WHITE?20:22;
 	    int bitmask = 1 << leftShiftedBy;
 	    infoBits &= ~(bitmask);
 	}

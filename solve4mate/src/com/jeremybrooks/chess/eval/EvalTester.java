@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.Piece;
 
 public class EvalTester {
 
@@ -97,7 +98,7 @@ public class EvalTester {
     }
 
     private static int evaluate(GameState g, boolean isWhiteToMove, int searchDepth) {
-        return eval.evaluate(g, isWhiteToMove?WHITE:BLACK, searchDepth, false, false);
+        return eval.evaluate(g, isWhiteToMove?Piece.WHITE:Piece.BLACK, searchDepth, false, false);
     }
 
 }

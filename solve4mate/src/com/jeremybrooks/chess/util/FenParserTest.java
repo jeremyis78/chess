@@ -7,17 +7,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 
 public class FenParserTest {
 
     //use these to compare to what is returned from Position.getBoard(int)
-    private static final int WHITE_PAWN   = PIECE[PAWN];
-    private static final int WHITE_KNIGHT = PIECE[KNIGHT];
-    private static final int WHITE_BISHOP = PIECE[BISHOP];
-    private static final int WHITE_ROOK   = PIECE[ROOK];
-    private static final int WHITE_QUEEN  = PIECE[QUEEN];
-    private static final int WHITE_KING   = PIECE[KING];
+    private static final int WHITE_PAWN   = Piece.ENCODED[Piece.PAWN];
+    private static final int WHITE_KNIGHT = Piece.ENCODED[Piece.KNIGHT];
+    private static final int WHITE_BISHOP = Piece.ENCODED[Piece.BISHOP];
+    private static final int WHITE_ROOK   = Piece.ENCODED[Piece.ROOK];
+    private static final int WHITE_QUEEN  = Piece.ENCODED[Piece.QUEEN];
+    private static final int WHITE_KING   = Piece.ENCODED[Piece.KING];
     private static final int BLACK_PAWN   = -WHITE_PAWN;
     private static final int BLACK_KNIGHT = -WHITE_KNIGHT;
     private static final int BLACK_BISHOP = -WHITE_BISHOP;
@@ -295,7 +296,7 @@ public class FenParserTest {
     public void testSetUnknownPiece()
     {
         String invalidPiece = "k6K/8/8/8/8/8/8/7z w - - 0 1";
-        assertInvalid(invalidPiece, "board contains invalid piece 'z'; allowed piece characters are: KkQqRrBbNnPp");
+        assertInvalid(invalidPiece, "piece is invalid 'z'; allowed piece characters are: KkQqRrBbNnPp");
     }
     
     @Test

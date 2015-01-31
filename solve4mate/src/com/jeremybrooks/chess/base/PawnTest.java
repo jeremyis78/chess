@@ -17,7 +17,7 @@ public class PawnTest {
         pawn = new Pawn(Color.W);
         assertPawn();
         assertEquals('P', pawn.toChar());
-        assertEquals(PIECE[PAWN], pawn.encodedByColor());
+        assertEquals(Piece.ENCODED[Piece.PAWN], pawn.encodedByColor());
     }
 
     @Test
@@ -25,13 +25,13 @@ public class PawnTest {
         pawn = new Pawn(Color.B);
         assertPawn();
         assertEquals('p', pawn.toChar());
-        assertEquals(-1 * PIECE[PAWN], pawn.encodedByColor());
+        assertEquals(-1 * Piece.ENCODED[Piece.PAWN], pawn.encodedByColor());
     }
 
     private void assertPawn() {
         assertTrue(pawn.exists());
-        assertEquals(PAWN, pawn.index());
-        assertEquals(PIECE[PAWN], pawn.encoded());
+        assertEquals(Piece.PAWN, pawn.index());
+        assertEquals(Piece.ENCODED[Piece.PAWN], pawn.encoded());
     }
 
     @Test
@@ -39,7 +39,7 @@ public class PawnTest {
         Pawn myPawn = new Pawn(Color.W);
         pawn = myPawn;
         Position p = new Position();
-        p.placePiece(WHITE, PAWN, E2);
+        p.placePiece(Piece.WHITE, Piece.PAWN, E2);
         long emptySquares = ~p.getAllPieces(0);
         long attacks = pawn.attacks(E2, p);
         long advances = pawn.advances(E2, p);
@@ -54,7 +54,7 @@ public class PawnTest {
         Pawn myPawn = new Pawn(Color.B); 
         pawn = myPawn;
         Position p = new Position();
-        p.placePiece(BLACK, PAWN, H7);
+        p.placePiece(Piece.BLACK, Piece.PAWN, H7);
         long emptySquares = ~p.getAllPieces(0);
         long attacks = pawn.attacks(H7, p);
         long advances = pawn.advances(H7, p);
@@ -71,7 +71,7 @@ public class PawnTest {
         Position p = new Position();
         for(int square=A2; square <= H2; square++)
         {
-            p.placePiece(WHITE, PAWN, square);
+            p.placePiece(Piece.WHITE, Piece.PAWN, square);
         }
         long emptySquares = ~p.getAllPieces(0);
         long pushes = myPawn.advances(NOSQUARE, p);
@@ -87,7 +87,7 @@ public class PawnTest {
         Position p = new Position();
         for(int square=A7; square <= H7; square++)
         {
-            p.placePiece(WHITE, PAWN, square);
+            p.placePiece(Piece.WHITE, Piece.PAWN, square);
         }
         long emptySquares = ~p.getAllPieces(0);
         long pushes = myPawn.advances(NOSQUARE, p);
@@ -101,7 +101,7 @@ public class PawnTest {
     public void givenSomeBlackPawnsOnSecondRank() {
         Pawn myPawn = new Pawn(Color.B);
         pawn = myPawn;
-        Position p = pawnsFor(BLACK, "a2 d2 f2");
+        Position p = pawnsFor(Piece.BLACK, "a2 d2 f2");
         long emptySquares = ~p.getAllPieces(0);
         long pushes = myPawn.advances(NOSQUARE, p);
         long promoters = pushes & FIRSTRANK & emptySquares;
@@ -114,7 +114,7 @@ public class PawnTest {
     public void givenDoubledBlackPawns() {
         Pawn myPawn = new Pawn(Color.B);
         pawn = myPawn;
-        Position p = pawnsFor(BLACK, "b7 b6 d7");
+        Position p = pawnsFor(Piece.BLACK, "b7 b6 d7");
         
         long pushes = myPawn.advances(NOSQUARE, p);
         String expectedPushes = "b5 d6 ";
@@ -126,7 +126,7 @@ public class PawnTest {
         String[] square = onSquares.split(" ");
         for(String sq: square)
         {
-            p.placePiece(side, PAWN, Square.squareOf(sq));
+            p.placePiece(side, Piece.PAWN, Square.squareOf(sq));
         }
         return p;
     }

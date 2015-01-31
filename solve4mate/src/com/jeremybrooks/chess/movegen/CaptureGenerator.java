@@ -24,8 +24,8 @@ public class CaptureGenerator extends AbstractGenerator {
         long pieceAttacks = 0;    //must be zeroed
         long attackedPieces;      //as in "the enemy pieces that are attacked"
 
-        for (int p = PAWN; p <= KING; p++) {
-            mover = PIECE[p];
+        for (int p = Piece.PAWN; p <= Piece.KING; p++) {
+            mover = Piece.ENCODED[p];
             Position position = g.getPosition();
             pieces = position.getPieces (side, p);
             Piece piece = PieceFactory.fromBoardPiece((side==0?1:-1)*mover);
@@ -34,7 +34,7 @@ public class CaptureGenerator extends AbstractGenerator {
                 pro = 0;
                 pieceAttacks = 0;
                 switch (p) {
-                case PAWN:
+                case Piece.PAWN:
                     pieceAttacks = piece.attacks(from, position);
                     pro = isPawnPromotion(side, from);
 
@@ -45,8 +45,8 @@ public class CaptureGenerator extends AbstractGenerator {
                         if (Util.bool(pieceAttacks & (1L << enPassantSquare)))
                         {
                             to = enPassantSquare;
-                            cap = PIECE[PAWN];
-                            int move = Util.EncodeMove (from, to, PIECE[PAWN], cap, 0);
+                            cap = Piece.ENCODED[Piece.PAWN];
+                            int move = Util.EncodeMove (from, to, Piece.ENCODED[Piece.PAWN], cap, 0);
 //                            if(isLegal(g, move))
                             {
                                 moves.add(move);
@@ -54,11 +54,11 @@ public class CaptureGenerator extends AbstractGenerator {
                         }
                     }
                     break;
-                case KNIGHT:   //fall through
-                case BISHOP:   //fall through
-                case ROOK:     //fall through
-                case QUEEN:   //fall through
-                case KING:
+                case Piece.KNIGHT:   //fall through
+                case Piece.BISHOP:   //fall through
+                case Piece.ROOK:     //fall through
+                case Piece.QUEEN:   //fall through
+                case Piece.KING:
                     pieceAttacks = piece.advances(from, position);
                     break;
                 }
@@ -69,19 +69,19 @@ public class CaptureGenerator extends AbstractGenerator {
                     cap = Math.abs(position.getBoard(to));
                     if (!Util.bool(pro)) {     //Capture only
                         //TODO: make sure king does not move into check!!!!!
-                        int move = Util.EncodeMove(from, to, PIECE[p], cap, 0);  
-                        if(p != KING || (p == KING && isNotAttacked(to, g)))
+                        int move = Util.EncodeMove(from, to, Piece.ENCODED[p], cap, 0);  
+                        if(p != Piece.KING || (p == Piece.KING && isNotAttacked(to, g)))
                         {
                             moves.add(move);
                         }
                     } else {        //Capture and promotion
-                        int move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[QUEEN]);
+                        int move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[Piece.QUEEN]);
 //                        if(isLegal(g, move)) //can't move if pinned
                         {
                             moves.add(move);
                             //If the queen promotion is legal the other promotion choices will be too
-                            for (int i = ROOK; i >= KNIGHT; i--) {
-                                move = Util.EncodeMove (from, to, PIECE[p], cap, PIECE[i]);
+                            for (int i = Piece.ROOK; i >= Piece.KNIGHT; i--) {
+                                move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[i]);
                                 moves.add(move);
                             }
                         }

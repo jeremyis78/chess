@@ -132,7 +132,7 @@ public class Position
 
     public long getPieces(int side){
         long oneSidesPieces = 0L;
-        for(int piece=PAWN; piece<=QUEEN; piece++)
+        for(int piece=Piece.PAWN; piece<=Piece.QUEEN; piece++)
         {
             oneSidesPieces |= pieces[side][piece];
         }
@@ -144,7 +144,7 @@ public class Position
 
     public long getOpponentPiecesExceptKing(int color)
     {
-        int opponentColor = (color == Bitmap.WHITE) ? Bitmap.BLACK : Bitmap.WHITE;
+        int opponentColor = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
         return pieces[opponentColor][ALLPIECES];
     }
 
@@ -166,7 +166,7 @@ public class Position
     }
 
     private boolean isNotTheKing(int p) {
-        return p <= QUEEN;
+        return p <= Piece.QUEEN;
     }
 
     public boolean isKingPlaced(int side) {
@@ -194,9 +194,9 @@ public class Position
     }
 
     public void clear(){
-        kingSq[Bitmap.WHITE] = KING_NOT_PLACED;
-        kingSq[Bitmap.BLACK] = KING_NOT_PLACED;
-        for (int i = Bitmap.WHITE; i <= Bitmap.BLACK; i++){
+        kingSq[Piece.WHITE] = KING_NOT_PLACED;
+        kingSq[Piece.BLACK] = KING_NOT_PLACED;
+        for (int i = Piece.WHITE; i <= Piece.BLACK; i++){
             pieces[i][PAWNS] = 0L;
             pieces[i][KNIGHTS] = 0L;
             pieces[i][BISHOPS] = 0L;
@@ -223,9 +223,9 @@ public class Position
      * @param sq the square to place the piece on
      */
     public void placePiece(int c, int p, int sq){
-        if(p == KING && kingSq[c] != KING_NOT_PLACED)
+        if(p == Piece.KING && kingSq[c] != KING_NOT_PLACED)
         {
-            throw new IllegalStateException("cannot place " + (c==WHITE?"white":"black") +
+            throw new IllegalStateException("cannot place " + (c==Piece.WHITE?"white":"black") +
                     " king on "+ named(sq)+"; already placed on " +
                     named(kingSq[c])+ "; use erasePiece()");
         }
@@ -235,16 +235,16 @@ public class Position
             throw new IllegalStateException(named(sq)+ " is already occupied");
         }
         if(log.isTraceEnabled()) 
-            log.trace("placing "+(c==WHITE?"white":"black")+" "+p+" on " +named(sq));
+            log.trace("placing "+(c==Piece.WHITE?"white":"black")+" "+p+" on " +named(sq));
         long mask = 1L << sq;
         all[ALL] |= mask;
         all[ALL90] |= 1L << SQ2BIT90R[sq];
         all[ALL45L] |= 1L << SQ2BIT45L[sq];
         all[ALL45R] |= 1L << SQ2BIT45R[sq];
-        Color color = c==Bitmap.WHITE?Color.W:Color.B;
+        Color color = c==Piece.WHITE?Color.W:Color.B;
         board[sq].set(PieceFactory.fromIndex(color, p));
     
-        if (p == KING){
+        if (p == Piece.KING){
                 kingSq[c] = sq;
         } else {
             pieces[c][p] |= mask;
@@ -263,17 +263,17 @@ public class Position
         {
             return; //already empty
         }
-        int color = (boardPiece > 0) ? WHITE : BLACK;
-        int piece = TO_PIECE[Math.abs(boardPiece)];
+        int color = (boardPiece > 0) ? Piece.WHITE : Piece.BLACK;
+        int piece = Piece.TO_PIECE[Math.abs(boardPiece)];
         if(log.isTraceEnabled()) 
-            log.trace("erasing "+(color==WHITE?"white":"black")+" piece on " + named(square));
+            log.trace("erasing "+(color==Piece.WHITE?"white":"black")+" piece on " + named(square));
         long mask = 1L << square;
         all[Bitmap.ALL] ^= mask;
         all[ALL90] ^= 1L << SQ2BIT90R[square];
         all[ALL45L] ^= 1L << SQ2BIT45L[square];
         all[ALL45R] ^= 1L << SQ2BIT45R[square];
         board[square].clear();
-        if (piece == KING)
+        if (piece == Piece.KING)
         {
             kingSq[color] = KING_NOT_PLACED;
         }  else {
@@ -304,7 +304,7 @@ public class Position
     			bitboardPieceCount[side][piece] = Long.bitCount(pcs);
     		}
     	}
-    	long kingsAND = p.getKing(WHITE) & p.getKing(BLACK);
+    	long kingsAND = p.getKing(Piece.WHITE) & p.getKing(Piece.BLACK);
     	long bitboardPiecesANDkings = bitboardPiecesAND & kingsAND;
     	assertValid(0 == bitboardPiecesAND); 
 		assertValid(0 == bitboardPiecesANDkings);
@@ -312,10 +312,10 @@ public class Position
 		//
     	// 2. Verify that the summary bitboard of each side's pieces is accurate
 		//
-		System.out.println("computed: " + Util.displaySquaresStr(bitboardAllPiecesOR[WHITE]));
-		System.out.println("actual  : " + Util.displaySquaresStr(p.getPieces(WHITE,ALLPIECES)));
-    	assertValid(p.getPieces(WHITE,ALLPIECES) == bitboardAllPiecesOR[WHITE]);
-    	assertValid(p.getPieces(BLACK,ALLPIECES) == bitboardAllPiecesOR[BLACK]);
+		System.out.println("computed: " + Util.displaySquaresStr(bitboardAllPiecesOR[Piece.WHITE]));
+		System.out.println("actual  : " + Util.displaySquaresStr(p.getPieces(Piece.WHITE,ALLPIECES)));
+    	assertValid(p.getPieces(Piece.WHITE,ALLPIECES) == bitboardAllPiecesOR[Piece.WHITE]);
+    	assertValid(p.getPieces(Piece.BLACK,ALLPIECES) == bitboardAllPiecesOR[Piece.BLACK]);
 
     	//
     	// 3. Verify the occupied bitboards (and rotations) are in sync with the piece bitboards
@@ -326,8 +326,8 @@ public class Position
     	// occupied bitboard but not to the rotated boards.  Errors where the rotated bitboard has 
     	// the same number of bits--but bits in the wrong spot (wrong value)--will NOT be caught here.
     	//
-    	long kingsOR = p.getKing(WHITE) | p.getKing(BLACK);
-    	long allPiecesWithKings = p.getPieces(WHITE,ALLPIECES) | p.getPieces(BLACK,ALLPIECES) | kingsOR;
+    	long kingsOR = p.getKing(Piece.WHITE) | p.getKing(Piece.BLACK);
+    	long allPiecesWithKings = p.getPieces(Piece.WHITE,ALLPIECES) | p.getPieces(Piece.BLACK,ALLPIECES) | kingsOR;
     	bitboardPiecesOR |= kingsOR;
     	assertValid(p.getAllPieces(0)  == bitboardPiecesOR);
     	assertValid(allPiecesWithKings == bitboardPiecesOR);
@@ -354,7 +354,7 @@ public class Position
     		if(piece.exists())
     		{
     			//Piece piece = sq.get();
-    			int side = Character.isUpperCase(piece.toChar())?WHITE:BLACK;
+    			int side = Character.isUpperCase(piece.toChar())?Piece.WHITE:Piece.BLACK;
     			if('K' == Character.toUpperCase(piece.toChar()))
     			{
     				boardArrayKing[side] = squareNo;
@@ -371,7 +371,7 @@ public class Position
 				assertValid(!existsInOccupiedBitboard); //bitboard piece must NOT exist
     		}
     	}
-    	int side = WHITE;
+    	int side = Piece.WHITE;
     	if(p.isKingPlaced(side))
     		assertValid(p.getKing(side)               == boardArrayKing[side]);
     	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
@@ -379,7 +379,7 @@ public class Position
     	assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
     	assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
     	assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
-    	side = BLACK;
+    	side = Piece.BLACK;
     	if(p.isKingPlaced(side))
     		assertValid(p.getKing(side)               == boardArrayKing[side]);
     	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
@@ -399,11 +399,11 @@ public class Position
 	public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("wking: "+Square.named(kingSq[Bitmap.WHITE])).append("\n");
-        sb.append("bking: "+Square.named(kingSq[Bitmap.BLACK])).append("\n");
+        sb.append("wking: "+Square.named(kingSq[Piece.WHITE])).append("\n");
+        sb.append("bking: "+Square.named(kingSq[Piece.BLACK])).append("\n");
         sb.append("piece bitboards:\n");
-        for (int i = Bitmap.WHITE; i <= Bitmap.BLACK; i++){
-            String color = (i==Bitmap.WHITE?"w":"b");
+        for (int i = Piece.WHITE; i <= Piece.BLACK; i++){
+            String color = (i==Piece.WHITE?"w":"b");
             sb.append(color + "p  : " + Util.displaySquaresStr(pieces[i][PAWNS])).append("\n");
             sb.append(color + "n  : " + Util.displaySquaresStr(pieces[i][KNIGHTS])).append("\n");
             sb.append(color + "b  : " + Util.displaySquaresStr(pieces[i][BISHOPS])).append("\n");
@@ -434,7 +434,7 @@ public class Position
     
     public static boolean isSameColor(int c, int p)
     {
-        if ( (p > 0 && c == Bitmap.WHITE) || (p < 0 && c == Bitmap.BLACK) )
+        if ( (p > 0 && c == Piece.WHITE) || (p < 0 && c == Piece.BLACK) )
                 return true;
         return false;
     }

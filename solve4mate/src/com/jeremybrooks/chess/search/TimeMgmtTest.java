@@ -1,13 +1,12 @@
 package com.jeremybrooks.chess.search;
 
-import static com.jeremybrooks.chess.base.Bitmap.BLACK;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 import static org.junit.Assert.*;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.util.Util;
 
 public class TimeMgmtTest {
@@ -19,8 +18,8 @@ public class TimeMgmtTest {
     public void setUp()
     {
         params = new SearchParams(5000, 5000);
-        params.setIncrement(WHITE, 0);
-        params.setIncrement(BLACK, 0);
+        params.setIncrement(Piece.WHITE, 0);
+        params.setIncrement(Piece.BLACK, 0);
     }
     
     @Test
@@ -30,14 +29,14 @@ public class TimeMgmtTest {
         final int bufferTimeMillis = 10;
         TimeMgmt tm = new TimeMgmt();
         tm.setParams(params);
-        int timePerMove = params.getTime(WHITE)/50;
+        int timePerMove = params.getTime(Piece.WHITE)/50;
         System.out.println("Time/move: " + timePerMove);
         for(int usedTime=0; usedTime<=110; usedTime++)
         {
             int startTime = Util.milliTime() - usedTime;
 //            System.out.println(usedTime + " timeLeft? " + tm.hasTimeLeft(WHITE, startTime));
-            if ((usedTime + bufferTimeMillis) < timePerMove) assertFalse( tm.hasExpired(WHITE, startTime));
-            else                                             assertTrue(tm.hasExpired(WHITE, startTime));
+            if ((usedTime + bufferTimeMillis) < timePerMove) assertFalse( tm.hasExpired(Piece.WHITE, startTime));
+            else                                             assertTrue(tm.hasExpired(Piece.WHITE, startTime));
         }
         
         

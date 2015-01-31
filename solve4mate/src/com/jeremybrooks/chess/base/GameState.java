@@ -6,7 +6,6 @@ package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.A1;
 import static com.jeremybrooks.chess.base.Bitmap.A8;
-import static com.jeremybrooks.chess.base.Bitmap.BLACK;
 import static com.jeremybrooks.chess.base.Bitmap.C1;
 import static com.jeremybrooks.chess.base.Bitmap.C8;
 import static com.jeremybrooks.chess.base.Bitmap.E1;
@@ -15,13 +14,8 @@ import static com.jeremybrooks.chess.base.Bitmap.G1;
 import static com.jeremybrooks.chess.base.Bitmap.G8;
 import static com.jeremybrooks.chess.base.Bitmap.H1;
 import static com.jeremybrooks.chess.base.Bitmap.H8;
-import static com.jeremybrooks.chess.base.Bitmap.KING;
-import static com.jeremybrooks.chess.base.Bitmap.NONE;
+import static com.jeremybrooks.chess.base.Piece.*;
 import static com.jeremybrooks.chess.base.Bitmap.NOSQUARE;
-import static com.jeremybrooks.chess.base.Bitmap.PAWN;
-import static com.jeremybrooks.chess.base.Bitmap.ROOK;
-import static com.jeremybrooks.chess.base.Bitmap.TO_PIECE;
-import static com.jeremybrooks.chess.base.Bitmap.WHITE;
 import static com.jeremybrooks.chess.base.Square.isOnCFile;
 import static com.jeremybrooks.chess.base.Square.isOnGFile;
 import static com.jeremybrooks.chess.base.Square.named;
@@ -566,7 +560,7 @@ public class GameState {
     }
 
     private boolean isEnPassantCapture(int moving, int to, int captured) {
-        return moving == PAWN && captured == PAWN && to == getEnPassantSquare();
+        return moving == PAWN && /* captured == PAWN && */ to == getEnPassantSquare();
     }
 
     public boolean inCheck() {

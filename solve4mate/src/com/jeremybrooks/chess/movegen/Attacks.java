@@ -72,21 +72,21 @@ public class Attacks {
     public static final long forPiece(Piece piece, int onSquare, Position position)
     {
         long pseudoAttacks = 0L;
-        int color = piece.encodedByColor() > 0 ? WHITE : BLACK;
+        int color = piece.encodedByColor() > 0 ? Piece.WHITE : Piece.BLACK;
         switch(piece.index())
         {
-        case PAWN:
+        case Piece.PAWN:
             pseudoAttacks = INSTANCE.pawn[color][onSquare]; //TODO: is it cleaner to index by piece, aka INSTANCE.attacks[color][piece.index()][onSquare] ??
             break;
-        case KNIGHT:
+        case Piece.KNIGHT:
             pseudoAttacks = INSTANCE.knight[onSquare];
             break;
-        case KING:
+        case Piece.KING:
             pseudoAttacks = INSTANCE.king[onSquare];
             break;
-        case BISHOP:
-        case ROOK:
-        case QUEEN:
+        case Piece.BISHOP:
+        case Piece.ROOK:
+        case Piece.QUEEN:
             SlidingPiece slider = (SlidingPiece) piece;
             if (slider.slidesOnDiagonals())
             {
@@ -160,7 +160,7 @@ public class Attacks {
 
         Position position = g.getPosition();
         switch (sideUnderAttack) {
-             case Bitmap.WHITE:
+             case Piece.WHITE:
                  attackers |= INSTANCE.whitepawn[squareUnderAttack] & position.getOpponentPawns(sideUnderAttack);
 
 //                  if (g.enPassantSq[depth] != NOSQUARE){
@@ -182,7 +182,7 @@ public class Attacks {
                  bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= diagAtt & bishopsQueens;
                  break;
-            case Bitmap.BLACK:
+            case Piece.BLACK:
                  attackers |= INSTANCE.blackpawn[squareUnderAttack] & position.getOpponentPawns(sideUnderAttack);
 //                  if (g.enPassantSq[depth] != NOSQUARE){
 //                      attackers |= INSTANCE.pawn[side][from] &
