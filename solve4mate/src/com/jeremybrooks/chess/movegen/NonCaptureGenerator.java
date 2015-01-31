@@ -30,7 +30,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
         //***************************************************************************
 
         Position position = g.getPosition();
-        long allPiecesByRank = position.getAllPieces(0);
+        long allPiecesByRank = position.getOccupied(0);
         empty = ~allPiecesByRank;
 
         Pawn pawn = new Pawn(side==Piece.WHITE?Color.W:Color.B);

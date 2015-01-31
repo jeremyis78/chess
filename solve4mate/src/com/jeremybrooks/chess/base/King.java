@@ -21,7 +21,7 @@ public class King extends Piece {
     @Override
     public long advances(int fromSquare, Position position) {
         int mySide = (color==Color.W?0:1);
-        long notMyPieces = ~position.getPieces(mySide);
+        long notMyPieces = ~position.getAllPiecesAndKing(mySide);
         long advances = attacks(fromSquare, position) & notMyPieces;
 
         //exclude moves that are attacked by opponent's king

@@ -35,18 +35,24 @@ public abstract class Piece {
     public static final int WHITE = 0;
     public static final int BLACK = 1;
 
-    public static char[][] PIECE_CHARACTERS = new char[2][];
+    public static final char[][] CHAR = new char[2][];
+    public static final String[] NAME =new String[]{"pawn","knight","bishop","rook","queen","king","none"};
     static {
-    	PIECE_CHARACTERS[WHITE] = new char[]{' ','P','N','K',' ','B','R','Q'};
-    	PIECE_CHARACTERS[BLACK] = new char[]{' ','p','n','k',' ','b','r','q'};
+    	CHAR[WHITE] = new char[]{' ','P','N','K',' ','B','R','Q'};
+    	CHAR[BLACK] = new char[]{' ','p','n','k',' ','b','r','q'};
     }
-    public static char lowercase(int encodedPiece){ return PIECE_CHARACTERS[BLACK][encodedPiece]; }
-    public static char uppercase(int encodedPiece){ return PIECE_CHARACTERS[WHITE][encodedPiece]; }
+    public static char lowercase(int encodedPiece){ return CHAR[BLACK][encodedPiece]; }
+    public static char uppercase(int encodedPiece){ return CHAR[WHITE][encodedPiece]; }
     public static char asCharacter(int side, int pieceIndex)
     {
-    	return PIECE_CHARACTERS[side][ENCODED[pieceIndex]];
+    	return CHAR[side][ENCODED[pieceIndex]];
     }
-    
+
+    public static String asString(int side, int pieceIndex)
+    {
+    	return (side == WHITE ? "white " : "black ") + NAME[pieceIndex];
+    }
+
 //    public static int encode(int pieceIndex)      { return ENCODED[pieceIndex]; }
 //    public static int unencode(int encoded)       { return TO_PIECE[encoded]; }
 
@@ -54,8 +60,8 @@ public abstract class Piece {
     public static final int PAWN   = 0;
     public static final int KNIGHT = 1;
     public static final int BISHOP = 2;
-    public static final int QUEEN  = 4;
     public static final int ROOK   = 3;
+    public static final int QUEEN  = 4;
     public static final int KING   = 5;
     public static final int NONE   = 6;
 

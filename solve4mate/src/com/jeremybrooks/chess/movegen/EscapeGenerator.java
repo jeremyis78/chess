@@ -197,7 +197,7 @@ public class EscapeGenerator extends AbstractGenerator {
         } 
 
         // Add king moves to flight squares (and captures)
-        kingMoves = att.king[kingSq] & ~position.getAllPieces(0);
+        kingMoves = att.king[kingSq] & ~position.getOccupied(0);
         while (morePieces(kingMoves)){
             to = lowestBitNumber(kingMoves);
             //Same reason as above...hafta make sure the king doesn't just

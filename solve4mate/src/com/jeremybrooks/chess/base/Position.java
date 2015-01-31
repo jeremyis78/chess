@@ -2,6 +2,7 @@ package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
 import static com.jeremybrooks.chess.base.Square.*;
+import static com.jeremybrooks.chess.base.Piece.*;
 
 import org.apache.log4j.Logger;
 
@@ -27,11 +28,10 @@ public class Position
     private static final int BISHOPS = 2;
     private static final int ROOKS = 3;
     private static final int QUEENS = 4;
-    private static final int ALLPIECES = 5;
-
     private static final int KING_NOT_PLACED = -1;
 
-    private long pieces[][] = new long[2][6];
+    private long pieces[][] = new long[2][5];
+    private long allPieces[] = new long[2]; //all pieces except king for a side
     private long all[] = new long[MAXALL];
     private Square board[] = new Square[64];
     private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
@@ -111,44 +111,32 @@ public class Position
         return kingSq[side];
     }
 
-    public long getPieces(int side, int piece){
-        if (isNotTheKing(piece)) {
-            return pieces[side][piece];
+    public long getPieces(int side, int pieceIndex){
+    	if(pieceIndex < 0 || pieceIndex > pieces[0].length)
+    		throw new IllegalArgumentException("pieceIndex must be between 0 (pawn) and 5 (king)");
+        if (isNotTheKing(pieceIndex)) {
+            return pieces[side][pieceIndex];
         } else if(isKingPlaced(side)) {
             return 1L << kingSq[side];
         }
-        return 0L;
+        return 0L; //value for king isn't placed
     }
 
-    public void setPieces(int side, int piece, long bitmap) {
-        int squareOfPiece = 0;
-        while(bitmap != 0)
-        {
-            squareOfPiece = Bitmap.lowestBitNumber(bitmap);
-            placePiece(side, piece, squareOfPiece);
-            bitmap = Bitmap.clearBit(bitmap, squareOfPiece);
-        }
+    public long getAllPiecesExceptKing(int side){
+    	return allPieces[side];
     }
 
-    public long getPieces(int side){
-        long oneSidesPieces = 0L;
-        for(int piece=Piece.PAWN; piece<=Piece.QUEEN; piece++)
-        {
-            oneSidesPieces |= pieces[side][piece];
-        }
-        if(isKingPlaced(side)) {
-            oneSidesPieces |= 1L << kingSq[side];
-        }
-        return oneSidesPieces;
+    public long getAllPiecesAndKing(int side){
+        return allPieces[side] | getKing(side);
     }
 
     public long getOpponentPiecesExceptKing(int color)
     {
         int opponentColor = (color == Piece.WHITE) ? Piece.BLACK : Piece.WHITE;
-        return pieces[opponentColor][ALLPIECES];
+        return allPieces[opponentColor];
     }
 
-    public long getAllPieces(int rotationInDegrees)
+    public long getOccupied(int rotationInDegrees)
     {
         switch(rotationInDegrees)
         {
@@ -202,7 +190,7 @@ public class Position
             pieces[i][BISHOPS] = 0L;
             pieces[i][ROOKS] = 0L;
             pieces[i][QUEENS] = 0L;
-            pieces[i][ALLPIECES] = 0L;
+            allPieces[i] = 0L;
         }
         all[ALL] = 0L;
         all[ALL90] = 0L;
@@ -231,11 +219,11 @@ public class Position
         }
         if(isNotEmpty(sq))
         {
-            System.err.println(toString());
+            //System.err.println(toString());
             throw new IllegalStateException(named(sq)+ " is already occupied");
         }
         if(log.isTraceEnabled()) 
-            log.trace("placing "+(c==Piece.WHITE?"white":"black")+" "+p+" on " +named(sq));
+            log.trace(String.format("placing %s on %s", Piece.asString(c, p), named(sq)));
         long mask = 1L << sq;
         all[ALL] |= mask;
         all[ALL90] |= 1L << SQ2BIT90R[sq];
@@ -248,7 +236,7 @@ public class Position
                 kingSq[c] = sq;
         } else {
             pieces[c][p] |= mask;
-            pieces[c][ALLPIECES] |= mask;
+            allPieces[c] |= mask;
         }
     }
     
@@ -263,10 +251,10 @@ public class Position
         {
             return; //already empty
         }
-        int color = (boardPiece > 0) ? Piece.WHITE : Piece.BLACK;
+        int color = (boardPiece > 0) ? WHITE : BLACK;
         int piece = Piece.TO_PIECE[Math.abs(boardPiece)];
         if(log.isTraceEnabled()) 
-            log.trace("erasing "+(color==Piece.WHITE?"white":"black")+" piece on " + named(square));
+        	log.trace(String.format("erasing %s on %s", Piece.asString(color, piece), named(square)));
         long mask = 1L << square;
         all[Bitmap.ALL] ^= mask;
         all[ALL90] ^= 1L << SQ2BIT90R[square];
@@ -278,7 +266,7 @@ public class Position
             kingSq[color] = KING_NOT_PLACED;
         }  else {
             pieces[color][piece] ^= mask;
-            pieces[color][ALLPIECES] ^= mask;
+            allPieces[color]     ^= mask;
         }
     }
 
@@ -290,7 +278,6 @@ public class Position
     	// 1. Verify the piece bitboards as well as king squares do not overlap
     	//
     	long bitboardPiecesOR = 0;
-    	long bitboardPiecesAND = 0;
     	long bitboardAllPiecesOR[] = new long[2];
     	int bitboardPieceCount[][] = new int[2][6];
     	for(int side=0; side < 2; side++)
@@ -298,24 +285,30 @@ public class Position
     		for(int piece=PAWNS; piece<=QUEENS; piece++)
     		{
     			long pcs = p.getPieces(side, piece);
-				bitboardPiecesAND         &= pcs;
     			bitboardPiecesOR          |= pcs;
     			bitboardAllPiecesOR[side] |= pcs;
     			bitboardPieceCount[side][piece] = Long.bitCount(pcs);
     		}
     	}
-    	long kingsAND = p.getKing(Piece.WHITE) & p.getKing(Piece.BLACK);
-    	long bitboardPiecesANDkings = bitboardPiecesAND & kingsAND;
-    	assertValid(0 == bitboardPiecesAND); 
-		assertValid(0 == bitboardPiecesANDkings);
+    	long whitePiecesOverlap = p.getPawns(WHITE) & p.getKnights(WHITE) & p.getBishops(WHITE)
+    			 & p.getRooks(WHITE) & p.getQueens(WHITE);
+    	long blackPiecesOverlap = p.getPawns(BLACK) & p.getKnights(BLACK) & p.getBishops(BLACK)
+    			 & p.getRooks(BLACK) & p.getQueens(BLACK);
+    	long whitePiecesPlusKingOverlap = whitePiecesOverlap & p.getKing(WHITE);
+    	long blackPiecesPlusKingOverlap = blackPiecesOverlap & p.getKing(BLACK);
+    	long whiteBlackWithKingsOverlap = whitePiecesPlusKingOverlap & blackPiecesPlusKingOverlap;
+    	assertValid(0 == whitePiecesOverlap);  //pieces overlap
+    	assertValid(0 == blackPiecesOverlap);  //pieces overlap
+    	assertValid(0 == (whitePiecesOverlap & blackPiecesOverlap)); //white/black pieces overlap
+    	assertValid(0 == whitePiecesPlusKingOverlap); //pieces and kings overlap
+    	assertValid(0 == blackPiecesPlusKingOverlap); //pieces and kings overlap
+    	assertValid(0 == whiteBlackWithKingsOverlap);
     	
 		//
     	// 2. Verify that the summary bitboard of each side's pieces is accurate
 		//
-		System.out.println("computed: " + Util.displaySquaresStr(bitboardAllPiecesOR[Piece.WHITE]));
-		System.out.println("actual  : " + Util.displaySquaresStr(p.getPieces(Piece.WHITE,ALLPIECES)));
-    	assertValid(p.getPieces(Piece.WHITE,ALLPIECES) == bitboardAllPiecesOR[Piece.WHITE]);
-    	assertValid(p.getPieces(Piece.BLACK,ALLPIECES) == bitboardAllPiecesOR[Piece.BLACK]);
+    	assertValid(p.getAllPiecesExceptKing(WHITE) == bitboardAllPiecesOR[WHITE]);
+    	assertValid(p.getAllPiecesExceptKing(BLACK) == bitboardAllPiecesOR[BLACK]);
 
     	//
     	// 3. Verify the occupied bitboards (and rotations) are in sync with the piece bitboards
@@ -326,15 +319,15 @@ public class Position
     	// occupied bitboard but not to the rotated boards.  Errors where the rotated bitboard has 
     	// the same number of bits--but bits in the wrong spot (wrong value)--will NOT be caught here.
     	//
-    	long kingsOR = p.getKing(Piece.WHITE) | p.getKing(Piece.BLACK);
-    	long allPiecesWithKings = p.getPieces(Piece.WHITE,ALLPIECES) | p.getPieces(Piece.BLACK,ALLPIECES) | kingsOR;
+    	long kingsOR = p.getKing(WHITE) | p.getKing(BLACK);
+    	long allPiecesWithKings = p.getAllPiecesExceptKing(WHITE) | p.getAllPiecesExceptKing(BLACK) | kingsOR;
     	bitboardPiecesOR |= kingsOR;
-    	assertValid(p.getAllPieces(0)  == bitboardPiecesOR);
+    	assertValid(p.getOccupied(0)  == bitboardPiecesOR);
     	assertValid(allPiecesWithKings == bitboardPiecesOR);
-    	int occupiedBitCount     = Long.bitCount(p.getAllPieces(0));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getAllPieces(90)));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getAllPieces(-45)));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getAllPieces(45)));
+    	int occupiedBitCount     = Long.bitCount(p.getOccupied(0));
+    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(90)));
+    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(-45)));
+    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(45)));
     	
     	//
     	// 4. Verify the array of board squares/pieces (of what piece is on each square) 
@@ -350,11 +343,11 @@ public class Position
     	for(int squareNo=0; squareNo<64; squareNo++)
     	{
     		Piece piece = p.get(squareNo);
-    		boolean existsInOccupiedBitboard = Util.bool(1L<<squareNo & p.getAllPieces(0));
+    		boolean existsInOccupiedBitboard = Util.bool(1L<<squareNo & p.getOccupied(0));
     		if(piece.exists())
     		{
     			//Piece piece = sq.get();
-    			int side = Character.isUpperCase(piece.toChar())?Piece.WHITE:Piece.BLACK;
+    			int side = Character.isUpperCase(piece.toChar())?WHITE:BLACK;
     			if('K' == Character.toUpperCase(piece.toChar()))
     			{
     				boardArrayKing[side] = squareNo;
@@ -371,22 +364,15 @@ public class Position
 				assertValid(!existsInOccupiedBitboard); //bitboard piece must NOT exist
     		}
     	}
-    	int side = Piece.WHITE;
-    	if(p.isKingPlaced(side))
-    		assertValid(p.getKing(side)               == boardArrayKing[side]);
-    	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
-    	assertValid(bitboardPieceCount[side][KNIGHTS] == boardArrayPieceCount[side][KNIGHTS]);
-    	assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
-    	assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
-    	assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
-    	side = Piece.BLACK;
-    	if(p.isKingPlaced(side))
-    		assertValid(p.getKing(side)               == boardArrayKing[side]);
-    	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
-    	assertValid(bitboardPieceCount[side][KNIGHTS] == boardArrayPieceCount[side][KNIGHTS]);
-    	assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
-    	assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
-    	assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
+    	for (int side = WHITE; side <= BLACK; side++){
+	    	if(p.isKingPlaced(side))
+	    		assertValid(p.getKingSquare(side)         == boardArrayKing[side]);
+	    	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
+	    	assertValid(bitboardPieceCount[side][KNIGHTS] == boardArrayPieceCount[side][KNIGHTS]);
+	    	assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
+	    	assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
+	    	assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
+    	}
 	}
 
 	private static void assertValid(boolean condition)
@@ -399,17 +385,17 @@ public class Position
 	public String toString()
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("wking: "+Square.named(kingSq[Piece.WHITE])).append("\n");
-        sb.append("bking: "+Square.named(kingSq[Piece.BLACK])).append("\n");
+        sb.append("wking: "+Square.named(kingSq[WHITE])).append("\n");
+        sb.append("bking: "+Square.named(kingSq[BLACK])).append("\n");
         sb.append("piece bitboards:\n");
-        for (int i = Piece.WHITE; i <= Piece.BLACK; i++){
-            String color = (i==Piece.WHITE?"w":"b");
+        for (int i = WHITE; i <= BLACK; i++){
+            String color = (i==WHITE?"w":"b");
             sb.append(color + "p  : " + Util.displaySquaresStr(pieces[i][PAWNS])).append("\n");
             sb.append(color + "n  : " + Util.displaySquaresStr(pieces[i][KNIGHTS])).append("\n");
             sb.append(color + "b  : " + Util.displaySquaresStr(pieces[i][BISHOPS])).append("\n");
             sb.append(color + "r  : " + Util.displaySquaresStr(pieces[i][ROOKS])).append("\n");
             sb.append(color + "q  : " + Util.displaySquaresStr(pieces[i][QUEENS])).append("\n");
-            sb.append(color + "All: " + Util.displaySquaresStr(pieces[i][ALLPIECES])).append("\n");
+            sb.append(color + "All: " + Util.displaySquaresStr(allPieces[i])).append("\n");
         }
         sb.append("occupied bitboards:\n");
         sb.append("all00x: " + Util.displaySquaresStr(all[ALL])).append("\n");
@@ -434,7 +420,7 @@ public class Position
     
     public static boolean isSameColor(int c, int p)
     {
-        if ( (p > 0 && c == Piece.WHITE) || (p < 0 && c == Piece.BLACK) )
+        if ( (p > 0 && c == WHITE) || (p < 0 && c == BLACK) )
                 return true;
         return false;
     }

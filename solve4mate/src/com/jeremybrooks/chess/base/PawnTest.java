@@ -40,7 +40,7 @@ public class PawnTest {
         pawn = myPawn;
         Position p = new Position();
         p.placePiece(Piece.WHITE, Piece.PAWN, E2);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long attacks = pawn.attacks(E2, p);
         long advances = pawn.advances(E2, p);
         long pushesTwo = ((advances & THIRDRANK) << 8) & emptySquares;
@@ -55,7 +55,7 @@ public class PawnTest {
         pawn = myPawn;
         Position p = new Position();
         p.placePiece(Piece.BLACK, Piece.PAWN, H7);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long attacks = pawn.attacks(H7, p);
         long advances = pawn.advances(H7, p);
         long pushesTwo = ((advances & SIXTHRANK) >> 8) & emptySquares;
@@ -73,7 +73,7 @@ public class PawnTest {
         {
             p.placePiece(Piece.WHITE, Piece.PAWN, square);
         }
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long pushes = myPawn.advances(NOSQUARE, p);
         long pushesTwo = ((pushes & THIRDRANK) << 8) & emptySquares;
         assertEquals("a3 b3 c3 d3 e3 f3 g3 h3 ", Util.displaySquaresStr(pushes));
@@ -89,7 +89,7 @@ public class PawnTest {
         {
             p.placePiece(Piece.WHITE, Piece.PAWN, square);
         }
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long pushes = myPawn.advances(NOSQUARE, p);
         long promoters = pushes & EIGHTHRANK & emptySquares;
         String expectedPushesAndPromoters = "a8 b8 c8 d8 e8 f8 g8 h8 ";
@@ -102,7 +102,7 @@ public class PawnTest {
         Pawn myPawn = new Pawn(Color.B);
         pawn = myPawn;
         Position p = pawnsFor(Piece.BLACK, "a2 d2 f2");
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long pushes = myPawn.advances(NOSQUARE, p);
         long promoters = pushes & FIRSTRANK & emptySquares;
         String expectedPushesAndPromoters = "a1 d1 f1 ";

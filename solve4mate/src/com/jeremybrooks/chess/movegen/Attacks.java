@@ -90,14 +90,14 @@ public class Attacks {
             SlidingPiece slider = (SlidingPiece) piece;
             if (slider.slidesOnDiagonals())
             {
-                long allPieces45Left = position.getAllPieces(-45);
-                long allPieces45Right = position.getAllPieces(45);
+                long allPieces45Left = position.getOccupied(-45);
+                long allPieces45Right = position.getOccupied(45);
                 pseudoAttacks |= bishopAttacks(onSquare, allPieces45Left, allPieces45Right);
             }
             if (slider.slidesLaterally())
             {
-                long allPiecesByRank = position.getAllPieces(0);
-                long allPiecesByFile = position.getAllPieces(90);
+                long allPiecesByRank = position.getOccupied(0);
+                long allPiecesByFile = position.getOccupied(90);
                 pseudoAttacks |= rookAttacks(onSquare, allPiecesByRank, allPiecesByFile);
             }
         }
@@ -172,13 +172,13 @@ public class Attacks {
                  attackers |= INSTANCE.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
                  attackers |= INSTANCE.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getAllPieces(0), squareUnderAttack)] |
-                     INSTANCE.file[squareUnderAttack][status90 (position.getAllPieces(90), squareUnderAttack)];
+                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] |
+                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
                  rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= rankFileAtt & rooksQueens;
 
-                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getAllPieces(-45), squareUnderAttack)] |
-                     INSTANCE.R45[squareUnderAttack][status45R (position.getAllPieces(45), squareUnderAttack)];
+                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
+                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
                  bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= diagAtt & bishopsQueens;
                  break;
@@ -191,13 +191,13 @@ public class Attacks {
                  attackers |= INSTANCE.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
                  attackers |= INSTANCE.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getAllPieces(0), squareUnderAttack)] | 
-                     INSTANCE.file[squareUnderAttack][status90 (position.getAllPieces(90), squareUnderAttack)];
+                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] | 
+                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
                  rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= rankFileAtt & rooksQueens;
 
-                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getAllPieces(-45), squareUnderAttack)] |
-                     INSTANCE.R45[squareUnderAttack][status45R (position.getAllPieces(45), squareUnderAttack)];
+                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
+                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
                  bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= diagAtt & bishopsQueens;
                  break;

@@ -47,7 +47,7 @@ public class KnightTest {
         knight = new Knight(Color.W);
         int knightSquare = F3;
         Position p = occupiedPositionWithKnightOn(knightSquare);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long noncaptures = knight.advances(knightSquare, p) & emptySquares;
         assertEquals("d2 h4 e5 ", Util.displaySquaresStr(noncaptures));
     }

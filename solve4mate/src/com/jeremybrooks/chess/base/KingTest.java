@@ -38,7 +38,7 @@ public class KingTest {
     public void givenEmptyBoardNoOpposingKing() {
         king = new King(Color.W);
         Position p = new Position();
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long advances = king.advances(E1, p) & emptySquares;
         assertEquals("d1 f1 d2 e2 f2 ", Util.displaySquaresStr(advances));
     }
@@ -48,7 +48,7 @@ public class KingTest {
         king = new King(Color.W);
         Position p = new Position();
         p.placePiece(Piece.BLACK, Piece.KING, C3);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long advances = king.advances(E1, p) & emptySquares;
         assertEquals("d1 f1 e2 f2 ", Util.displaySquaresStr(advances));
     }
@@ -58,7 +58,7 @@ public class KingTest {
         king = new King(Color.B);
         int kingSquare = F4;
         Position p = occupiedPositionGivenKingOn(kingSquare);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long advances = king.advances(kingSquare, p) & emptySquares;
         long attacks = king.attacks(kingSquare, p);
         assertEquals("e3 f3 g3 g4 e5 f5 ", Util.displaySquaresStr(advances));

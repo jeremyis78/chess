@@ -17,7 +17,7 @@ public class Pawn extends Piece {
     @Override
     public long advances(int fromSquare, Position position) {
         int side = (color==Color.W?Piece.WHITE:Piece.BLACK);
-        long occupiedSquares = position.getAllPieces(0);
+        long occupiedSquares = position.getOccupied(0);
         long emptySquares = ~occupiedSquares;
         long pawnsMoveOne = 0;
         if (side == Piece.WHITE) {

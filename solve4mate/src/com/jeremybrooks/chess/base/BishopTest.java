@@ -53,7 +53,7 @@ public class BishopTest {
         p.placePiece(Piece.WHITE, Piece.ROOK, A1);
         p.placePiece(Piece.WHITE, Piece.PAWN, B2);
         p.placePiece(Piece.BLACK, Piece.PAWN, C7);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long noncaptures = bishop.advances(bishopSquare, p) & emptySquares;
         assertEquals("h2 c3 g3 d4 f4 d6 f6 g7 h8 ", Util.displaySquaresStr(noncaptures));
     }

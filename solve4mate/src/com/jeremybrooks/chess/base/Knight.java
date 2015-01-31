@@ -17,7 +17,7 @@ public class Knight extends Piece {
     public long advances(int fromSquare, Position position)
     {
         int mySide = (color==Color.W?0:1);
-        long notMyPieces = ~position.getPieces(mySide);
+        long notMyPieces = ~position.getAllPiecesAndKing(mySide);
         return attacks(fromSquare, position) & notMyPieces;
     }
     

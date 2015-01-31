@@ -35,7 +35,7 @@ public class PositionTest extends TestCase {
         assertTrue(0 != p.getKingSquare(Piece.BLACK));
         assertEquals(Piece.ROOK, p.get(A1).index());
         assertTrue(Piece.ENCODED[Piece.ROOK] == p.getBoard(Bitmap.A1));
-        assertEquals(0xFFFF00000000FFFFL, p.getAllPieces(0));// .all[ALL]);
+        assertEquals(0xFFFF00000000FFFFL, p.getOccupied(0));// .all[ALL]);
         
         //now clear them
         p.clear();
@@ -138,10 +138,10 @@ public class PositionTest extends TestCase {
         long sqMask45L = 1L << SQ2BIT45L[sq];
         long sqMask45R = 1L << SQ2BIT45R[sq];
 
-        assertEquals(sqMask, p.getAllPieces(0));
-        assertEquals(sqMask90, p.getAllPieces(90));
-        assertEquals(sqMask45L, p.getAllPieces(-45));
-        assertEquals(sqMask45R, p.getAllPieces(45));
+        assertEquals(sqMask, p.getOccupied(0));
+        assertEquals(sqMask90, p.getOccupied(90));
+        assertEquals(sqMask45L, p.getOccupied(-45));
+        assertEquals(sqMask45R, p.getOccupied(45));
 
         p.erasePiece(sq);
 
@@ -157,10 +157,10 @@ public class PositionTest extends TestCase {
         sqMask45L = 1L << SQ2BIT45L[sq];
         sqMask45R = 1L << SQ2BIT45R[sq];
 
-        assertEquals(sqMask, p.getAllPieces(0));
-        assertEquals(sqMask90, p.getAllPieces(90));
-        assertEquals(sqMask45L, p.getAllPieces(-45));
-        assertEquals(sqMask45R, p.getAllPieces(45));
+        assertEquals(sqMask, p.getOccupied(0));
+        assertEquals(sqMask90, p.getOccupied(90));
+        assertEquals(sqMask45L, p.getOccupied(-45));
+        assertEquals(sqMask45R, p.getOccupied(45));
     }
 
     public void testPlaceAndErasePieces()
@@ -181,21 +181,11 @@ public class PositionTest extends TestCase {
 
     }
 
-    public void testSetPieces()
-    {
-        long bitmap = 6L;
-        Position p = new Position();
-        p.setPieces(Piece.WHITE, Piece.PAWN, bitmap);
-        assertEquals(bitmap, p.getPawns(Piece.WHITE));
-        assertEquals(bitmap, p.getPieces(Piece.WHITE));
-      //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
-    }
-    
     public void testGettingAnInvalidAllPiecesBitboard()
     {
         Position p = new Position();
         try {
-            p.getAllPieces(37);
+            p.getOccupied(37);
         } catch (IllegalArgumentException expected) {
             assertEquals("invalid rotation 37; rotation must be -45, 0, 45 or 90", expected.getMessage());
         }
@@ -278,7 +268,7 @@ public class PositionTest extends TestCase {
 //    }
     
     private void assertEmptyPosition(Position p) {
-        assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.WHITE));
+        assertEquals(EMPTY_BITBOARD, p.getAllPiecesAndKing(Piece.WHITE));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.WHITE, Piece.PAWN));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.WHITE, Piece.KNIGHT));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.WHITE, Piece.BISHOP));
@@ -292,7 +282,7 @@ public class PositionTest extends TestCase {
         assertEquals(EMPTY_BITBOARD, p.getQueens(Piece.WHITE));
         assertEquals(EMPTY_BITBOARD, p.getKing(Piece.WHITE));
 
-        assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.BLACK));
+        assertEquals(EMPTY_BITBOARD, p.getAllPiecesAndKing(Piece.BLACK));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.BLACK, Piece.PAWN));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.BLACK, Piece.KNIGHT));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.BLACK, Piece.BISHOP));
@@ -310,16 +300,16 @@ public class PositionTest extends TestCase {
         assertEquals(-1, p.getKingSquare(Piece.WHITE));
         assertFalse(p.isKingPlaced(Piece.BLACK));
         assertEquals(-1, p.getKingSquare(Piece.BLACK));
-        assertEquals(EMPTY_BITBOARD, p.getAllPieces(0));
-        assertEquals(EMPTY_BITBOARD, p.getAllPieces(90));
-        assertEquals(EMPTY_BITBOARD, p.getAllPieces(45));
-        assertEquals(EMPTY_BITBOARD, p.getAllPieces(-45));
+        assertEquals(EMPTY_BITBOARD, p.getOccupied(0));
+        assertEquals(EMPTY_BITBOARD, p.getOccupied(90));
+        assertEquals(EMPTY_BITBOARD, p.getOccupied(45));
+        assertEquals(EMPTY_BITBOARD, p.getOccupied(-45));
         
         for(int square = Bitmap.A1; square <= Bitmap.H8; square++)
         {
             assertEquals(BOARD_EMPTY_SQUARE, p.getBoard(square));
         }
-        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
+        Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
     
     private static void assertPlaced(Position p, int color, int piece, int sq)
@@ -334,17 +324,17 @@ public class PositionTest extends TestCase {
         long sqMask45R = 1L << SQ2BIT45R[sq];
         String bitNotSetMsg = "bit "+sq+" was not set";
         assertEquals(bitNotSetMsg, sqMask, p.getPieces(color,piece) & sqMask);
-        assertEquals(bitNotSetMsg, sqMask, p.getPieces(color) & sqMask);
-        assertEquals(bitNotSetMsg, sqMask, p.getAllPieces(0) & sqMask);
-        assertEquals(bitNotSetMsg, sqMask90, p.getAllPieces(90) & sqMask90);
-        assertEquals(bitNotSetMsg, sqMask45L, p.getAllPieces(-45) & sqMask45L);
-        assertEquals(bitNotSetMsg, sqMask45R, p.getAllPieces(45) & sqMask45R);
+        assertEquals(bitNotSetMsg, sqMask, p.getAllPiecesAndKing(color) & sqMask);
+        assertEquals(bitNotSetMsg, sqMask, p.getOccupied(0) & sqMask);
+        assertEquals(bitNotSetMsg, sqMask90, p.getOccupied(90) & sqMask90);
+        assertEquals(bitNotSetMsg, sqMask45L, p.getOccupied(-45) & sqMask45L);
+        assertEquals(bitNotSetMsg, sqMask45R, p.getOccupied(45) & sqMask45R);
         if(piece == Piece.KING)
         {
             assertEquals("king should be placed", Square.named(sq), Square.named(p.getKingSquare(color)));
             assertEquals(bitNotSetMsg, sqMask, p.getKing(color));
         }
-        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
+        Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
 
     private static void assertErased(Position p, int color, int piece, int sq)
@@ -358,17 +348,17 @@ public class PositionTest extends TestCase {
         long sqMask45R = 1L << SQ2BIT45R[sq];
         String bitNotClearedMsg = "bit "+sq+" was not cleared";
         assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getPieces(color,piece) & sqMask);
-        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getPieces(color) & sqMask);
-        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(0) & sqMask);
-        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(90) & sqMask90);
-        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(-45) & sqMask45L);
-        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPieces(45) & sqMask45R);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getAllPiecesAndKing(color) & sqMask);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getOccupied(0) & sqMask);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getOccupied(90) & sqMask90);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getOccupied(-45) & sqMask45L);
+        assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getOccupied(45) & sqMask45R);
         if(piece == Piece.KING)
         {
             assertEquals("king should be unplaced", "", Square.named(p.getKingSquare(color)));
             assertEquals(bitNotClearedMsg, EMPTY_BITBOARD, p.getKing(color) & sqMask);
         }
-        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
+        Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
     
     private void assertStartingPosition(Position p) {
@@ -385,7 +375,7 @@ public class PositionTest extends TestCase {
         assertEquals("c8 f8 ", toSquares(p, Piece.BLACK, Piece.BISHOP));
         assertEquals("d8 ", toSquares(p, Piece.BLACK, Piece.QUEEN));
         assertEquals("e8 ", toSquares(p, Piece.BLACK, Piece.KING));
-        //Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
+        Position.validate(p); //TODO: I believe this exposes bugs so don't enable this until I can troubleshoot.
     }
 
     private String toSquares(Position p, int colorIndex, int piecesIndex) {

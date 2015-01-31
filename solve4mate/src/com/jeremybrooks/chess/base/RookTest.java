@@ -41,7 +41,7 @@ public class RookTest {
         Position p = new Position();
         p.placePiece(Piece.BLACK, Piece.ROOK, rookSquare);
 
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long advances = rook.advances(rookSquare, p) & emptySquares;
         assertEquals("b1 b2 a3 c3 d3 e3 f3 g3 h3 b4 b5 b6 b7 b8 ", Util.displaySquaresStr(advances));
     }
@@ -51,7 +51,7 @@ public class RookTest {
         rook = new Rook(Color.B);
         int rookSquare = B3;
         Position p = occupiedPositionWithRookOn(rookSquare);
-        long emptySquares = ~p.getAllPieces(0);
+        long emptySquares = ~p.getOccupied(0);
         long nonCaptures = rook.advances(rookSquare, p) & emptySquares;
         assertEquals("c3 d3 e3 f3 g3 b4 b5 b6 ", Util.displaySquaresStr(nonCaptures));
     }

@@ -68,7 +68,7 @@ public abstract class AbstractGenerator implements Generator {
         //***************************************************************************
 
         Position position = g.getPosition();
-        long allPiecesByRank = position.getAllPieces(0);
+        long allPiecesByRank = position.getOccupied(0);
         empty = ~allPiecesByRank;
 
         //getPawnMoves(g, side, pMoves, promoters, advanceTwo);
@@ -318,7 +318,7 @@ public abstract class AbstractGenerator implements Generator {
         long empty;
 
         Position position = g.getPosition();
-        empty = ~position.getAllPieces(0);
+        empty = ~position.getOccupied(0);
 
         switch (side) {
         case Piece.WHITE:
@@ -339,7 +339,7 @@ public abstract class AbstractGenerator implements Generator {
         long empty;
 
         Position position = g.getPosition();
-        empty = ~position.getAllPieces(0);// all[ALL];
+        empty = ~position.getOccupied(0);// all[ALL];
 
         switch (side) {
         case Piece.WHITE:
@@ -362,7 +362,7 @@ public abstract class AbstractGenerator implements Generator {
         long empty;
 
         Position position = g.getPosition();
-        empty = ~position.getAllPieces(0);
+        empty = ~position.getOccupied(0);
 
         switch (side) {
         case Piece.WHITE:
