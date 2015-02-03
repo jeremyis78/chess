@@ -245,7 +245,7 @@ public abstract class AbstractGenerator implements Generator {
     
     public boolean canBlackLongCastle(GameState g){
         Position position = g.getPosition();
-        if (g.hasShortCastleOption()
+        if (g.hasLongCastleOption()
             && position.isEmpty(D8)
             && position.isEmpty(C8)
             && position.isEmpty(B8) 

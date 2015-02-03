@@ -12,7 +12,10 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jeremybrooks.chess.base.Bitmap;
+import com.jeremybrooks.chess.base.Empty;
 import com.jeremybrooks.chess.base.GameState;
+import com.jeremybrooks.chess.base.King;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.Util;
@@ -232,7 +235,16 @@ public class MoveGeneratorTest {
         assertFalse(actualMoves.contains("Ke8-c8 0-0-0"));
         assertFalse(actualMoves.contains("Ke8-g8 0-0"));
     }
-    
+
+    @Test
+    public void testBlackCannotCastleBug()
+    {
+        String longCastleUnavailable = "4k2r/rppp1ppp/1b3nbN/nP6/B1PPP3/B4N2/Pp4PP/R2Q1RK1 b k - 0 2";
+        Set<String> actualMoves = generateMovesInFan(longCastleUnavailable);
+        assertFalse(actualMoves.contains("Ke8-c8"));
+        assertFalse(actualMoves.contains("Ke8-g8")); //bishop attacks f8
+    }
+
     // The following test cases check for castling legality when the king
     // attempts to castle out of, through, into check or even near attacked squares.
     // The test cases use a simple test position that begins with just the following pieces ...
@@ -469,17 +481,6 @@ public class MoveGeneratorTest {
                 "Ke1-d2,Ke1-f1,Ke1-g1"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
-    
-    @Test
-    public void testPerftProblemPositionBug_KingInCheck()
-    {
-        String positionFen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
-        Set<String> expectedMoves = toSet("Bb4-c5,Kg1-h1,Nf3-d4,Pc4-c5,Pd2-d4,Rf1-f2"); 
-        Set<String> actualMoves = generateKingEscapesInFan(positionFen);
-        assertTrue("precondition: king is checked", g.inCheck());
-        assertMovesAreEqual(expectedMoves, actualMoves);
-    }
-    
     
 //    @Test
 //    public void testGenerateInterpositions()
