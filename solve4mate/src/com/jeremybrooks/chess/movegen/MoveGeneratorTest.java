@@ -244,6 +244,24 @@ public class MoveGeneratorTest {
         assertFalse(actualMoves.contains("Ke8-c8"));
         assertFalse(actualMoves.contains("Ke8-g8")); //bishop attacks f8
     }
+    
+    @Test
+    public void testPromotionsIncludePromotionPiece()
+    {
+        String longCastleUnavailable = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq - 0 1";
+        Set<String> actualMoves = generateMovesInFan(longCastleUnavailable);
+        assertFalse(actualMoves.contains("Pb2-b1"));
+        assertTrue (actualMoves.contains("Pb2-b1Q"));
+        assertTrue (actualMoves.contains("Pb2-b1R"));
+        assertTrue (actualMoves.contains("Pb2-b1B"));
+        assertTrue (actualMoves.contains("Pb2-b1N"));
+
+        assertFalse(actualMoves.contains("Pb2xa1"));
+        assertTrue (actualMoves.contains("Pb2xa1Q"));
+        assertTrue (actualMoves.contains("Pb2xa1R"));
+        assertTrue (actualMoves.contains("Pb2xa1B"));
+        assertTrue (actualMoves.contains("Pb2xa1N"));
+    }
 
     // The following test cases check for castling legality when the king
     // attempts to castle out of, through, into check or even near attacked squares.

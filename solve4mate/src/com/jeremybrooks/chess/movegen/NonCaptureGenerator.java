@@ -10,6 +10,7 @@ import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.Piece.Color;
+import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Util;
 
 public class NonCaptureGenerator extends AbstractGenerator {
@@ -35,7 +36,7 @@ public class NonCaptureGenerator extends AbstractGenerator {
 
         Pawn pawn = new Pawn(side==Piece.WHITE?Color.W:Color.B);
         long advancesOne = pawn.advances(NOSQUARE, position);
-        pMoves = advancesOne & ~EIGHTHRANK;
+        pMoves = advancesOne & ~(side==Piece.WHITE?EIGHTHRANK:FIRSTRANK);
         advanceTwo = side==Piece.WHITE
                 ? ((advancesOne & THIRDRANK) << 8) & empty
                 : ((advancesOne & SIXTHRANK) >> 8) & empty;
