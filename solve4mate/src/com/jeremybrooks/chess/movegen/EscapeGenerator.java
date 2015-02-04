@@ -4,17 +4,25 @@ import static com.jeremybrooks.chess.base.Bitmap.EIGHTHRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FIFTHRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FIRSTRANK;
 import static com.jeremybrooks.chess.base.Bitmap.FOURTHRANK;
-import static com.jeremybrooks.chess.base.Piece.*;
 import static com.jeremybrooks.chess.base.Bitmap.clearBit;
 import static com.jeremybrooks.chess.base.Bitmap.lowestBitNumber;
+import static com.jeremybrooks.chess.base.Piece.ENCODED;
+import static com.jeremybrooks.chess.base.Piece.KNIGHT;
+import static com.jeremybrooks.chess.base.Piece.PAWN;
+import static com.jeremybrooks.chess.base.Piece.QUEEN;
+import static com.jeremybrooks.chess.base.Piece.TO_PIECE;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Util;
 
 public class EscapeGenerator extends AbstractGenerator {
+	private static final Logger log = Logger.getLogger(EscapeGenerator.class);
 
     @Override
     public void generate(List<Integer> moves, int side) {
@@ -37,6 +45,10 @@ public class EscapeGenerator extends AbstractGenerator {
         Position position = g.getPosition();
         kingSq = position.getKingSquare(side);
         checkers = attackers(g, side, position.getKingSquare(side));
+        if(log.isDebugEnabled())
+        {
+        	log.debug("gen escapes for "+Piece.asString(side, Piece.KING)+" on " + Square.named(kingSq));
+        }
         switch (side) {
             case Piece.WHITE:
                 promoteRank = EIGHTHRANK;
@@ -64,9 +76,14 @@ public class EscapeGenerator extends AbstractGenerator {
         //***************************************************************************
 
 
-        if (Util.bitCount(checkers) == 1) {
+        int numCheckers = Util.bitCount(checkers);
+		if (numCheckers == 1) {
             checker = lowestBitNumber(checkers);
             cap = Math.abs(position.getBoard(checker));
+            if(log.isDebugEnabled())
+            {
+            	log.debug("checker: "+Piece.asString(Util.opposing(side), TO_PIECE[cap])+" on " + Square.named(checker));
+            }
 
             //Generate captures to checker's square
             capturers = attackers (g, Util.opposing(side), checker);
@@ -84,6 +101,10 @@ public class EscapeGenerator extends AbstractGenerator {
                     capturers = capturers | att.mask[checker+1];
                 }
             }
+            if(log.isDebugEnabled())
+            {
+            	log.debug("capturers on: "+Util.formatSquares(capturers));
+            }
 
             while (morePieces(capturers)) {
                 from = lowestBitNumber(capturers);
@@ -93,9 +114,11 @@ public class EscapeGenerator extends AbstractGenerator {
                     // Pawn promotion
                     //if (!isPinned(g, from, checker, mover, cap)){
                     move = Util.EncodeMove(from,checker,mover,cap,0);
-                    if(isLegal(g, move)){ 
-//                        System.err.print("Adding pawn captures and promotes to any piece: ");
-//                        Util.displayMove(move, false, false);
+                    if(isLegal(g, move)){
+                        if(log.isDebugEnabled())
+                        {
+                        	log.debug("add pawn captures checker and promotes to QRBN: "+Util.formatMoveInFan(move, g));
+                        }
                         for (pro = QUEEN; pro >= KNIGHT; pro--) {
                             moves.add(Util.EncodeMove(from,checker, mover,cap,ENCODED[pro]));
                         }
@@ -109,8 +132,10 @@ public class EscapeGenerator extends AbstractGenerator {
                         move = Util.EncodeMove(from,to,ENCODED[PAWN],cap,0);
                         //if (!isPinned(g, from, to, PIECE[PAWN], cap)){
                         if (isLegal(g, move)){
-//                            System.err.print("Added pawn captures via en-passant: ");
-//                            Util.displayMove(move, false, false);
+                            if(log.isDebugEnabled())
+                            {
+                            	log.debug("add e.p. capture of checker: "+Util.formatMoveInFan(move, g));
+                            }
                             moves.add(move);
                         }
                     }                
@@ -118,8 +143,10 @@ public class EscapeGenerator extends AbstractGenerator {
                     move = Util.EncodeMove(from,checker,mover,cap,pro);
                     //if (!isPinned(g, from, checker, mover, cap)){
                     if (isLegal(g, move)){
-//                        System.err.print("Added capture the checking piece: ");
-//                        Util.displayMove(move, false, false);
+                        if(log.isDebugEnabled())
+                        {
+                        	log.debug("add capture checker: "+Util.formatMoveInFan(move, g));
+                        }
                         moves.add(move);
                     }
                 }
@@ -177,9 +204,14 @@ public class EscapeGenerator extends AbstractGenerator {
                     interpose = att.plus7[kingSq] & att.minus7[checker];
                 }
                 //DisplayBoard(interpose);
+                if(log.isDebugEnabled())
+                {
+                	log.debug("interposing candidate squares: "+Util.formatSquares(interpose));
+                }
                 generateInterpositions (moves, side, interpose);
             }
-        } else if (Util.bitCount (checkers) == 2) {  //Two pieces checking the king
+        } 
+        if (numCheckers == 2) {  //Two pieces checking the king
         // Add king moves that would capture either checking piece
             kingMoves = att.king[kingSq] & checkers;
             while (morePieces(kingMoves)){
@@ -187,9 +219,10 @@ public class EscapeGenerator extends AbstractGenerator {
                 cap = Math.abs(position.getBoard(to));
                 move = Util.EncodeMove(kingSq, to, ENCODED[Piece.KING], cap, 0);
                 if (isLegal (g, move)) {
-                    //cap = abs (g.pos.board[to]);
-//                    System.err.print("Adding king captures one of two checking pieces: ");
-//                    Util.displayMove(move, false, false);
+                    if(log.isDebugEnabled())
+                    {
+                    	log.debug("add king captures checker: "+Util.formatMoveInFan(move, g));
+                    }
                     moves.add(move);
                 }
                 kingMoves = clearBit(kingMoves, to);
@@ -197,7 +230,17 @@ public class EscapeGenerator extends AbstractGenerator {
         } 
 
         // Add king moves to flight squares (and captures)
-        kingMoves = att.king[kingSq] & ~position.getOccupied(0);
+        //Candidates include empty squares or any opposing piece that's NOT a checker
+        //Moves capturing the checker have already been added above (we don't want to generate the same move twice
+        //so we exclude them here)
+        long emptySquares = ~position.getOccupied(0);
+        long opposingPiecesNotCheckingUs = ~checkers & position.getAllPiecesExceptKing(Util.opposing(side));
+		long candidateSquares = emptySquares | opposingPiecesNotCheckingUs;
+        kingMoves = att.king[kingSq] & candidateSquares;
+        if(log.isDebugEnabled())
+        {
+        	log.debug("king candidate flight/capture squares: "+Util.formatSquares(kingMoves));
+        }
         while (morePieces(kingMoves)){
             to = lowestBitNumber(kingMoves);
             //Same reason as above...hafta make sure the king doesn't just
@@ -210,8 +253,10 @@ public class EscapeGenerator extends AbstractGenerator {
             }
             move = Util.EncodeMove(kingSq, to, ENCODED[Piece.KING], cap, 0);
             if ( isLegal(g, move)){
-//                System.err.print("Adding king escapes via flight square: ");
-//                Util.displayMove(move, false, false);
+                if(log.isDebugEnabled())
+                {
+                	log.debug("add king flight/capture: "+Util.formatMoveInFan(move, g));
+                }
                 moves.add(move);
             }
             kingMoves = clearBit(kingMoves, to);

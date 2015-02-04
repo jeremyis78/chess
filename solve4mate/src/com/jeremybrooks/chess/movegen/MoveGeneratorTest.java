@@ -246,7 +246,7 @@ public class MoveGeneratorTest {
     }
     
     @Test
-    public void testPromotionsIncludePromotionPiece()
+    public void testPromotionsIncludePromotionPieceBug()
     {
         String longCastleUnavailable = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 b kq - 0 1";
         Set<String> actualMoves = generateMovesInFan(longCastleUnavailable);
@@ -261,6 +261,50 @@ public class MoveGeneratorTest {
         assertTrue (actualMoves.contains("Pb2xa1R"));
         assertTrue (actualMoves.contains("Pb2xa1B"));
         assertTrue (actualMoves.contains("Pb2xa1N"));
+    }
+    
+    /*
+     * Kf1xf2 (f1f2) is not generated
+		position fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1 moves f1f2 b6f2 g1f1 a3d3
+		
+		 
+		d
+   		   -----------------
+		8 | r - - - k - - r |
+		7 | P p p p - p p p |
+		6 | - - - - - n b N |
+		5 | n P - - - - - - |
+		4 | B B P - P - - - |
+		3 | - - - q - N - - |
+		2 | P p - P - b P P |
+		1 | R - - Q - K - - |
+   		   -----------------
+    		a b c d e f g h
+
+		State: w - - 2 3
+		"r3k2r/Pppp1ppp/5nbN/nP6/BBP1P3/3q1N2/Pp1P1bPP/R2Q1K2 w kq - 2 3"
+     */
+    @Test
+    public void testKingCanEscapeByCapturingUnprotectedPieceBug()
+    {
+        String fen = "r3k2r/Pppp1ppp/5nbN/nP6/BBP1P3/3q1N2/Pp1P1bPP/R2Q1K2 w kq - 2 3";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        assertTrue(actualMoves.contains("Qd1-e2"));
+        assertTrue(actualMoves.contains("Kf1xf2"));
+
+        actualMoves = generateKingEscapesInFan(fen);
+        assertTrue(actualMoves.contains("Qd1-e2"));
+        assertTrue(actualMoves.contains("Kf1xf2"));
+    }
+    
+    //duplicate move generated g1f2 (Kg1xf2): r3k2r/Pppp1ppp/5nbN/nP6/BBP1P3/q4N2/Pp1P1bPP/R2Q2K1 w KQkq - 0 2
+    @Test
+    public void testKingEscapesDontGenerateSameMoveMoreThanOnceBug()
+    {
+        String fen = "r3k2r/Pppp1ppp/5nbN/nP6/BBP1P3/q4N2/Pp1P1bPP/R2Q2K1 w KQkq - 0 2";
+        Set<String> actualMoves = generateMovesInFan(fen);
+        Set<String> expectedMoves = toSet("Kg1-f1,Kg1-h1,Kg1xf2");
+        assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
     // The following test cases check for castling legality when the king
@@ -534,20 +578,62 @@ public class MoveGeneratorTest {
     }
 
     @Test
-    public void testEscapeAPawnCheckByCapturingEnPassant()
-    {
-        String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - c3 0 1";
-        Set<String> actualMoves = generateKingEscapesInFan(enPassantCapture);
-        Set<String> expectedMoves = toSet("Pd4xc3,Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
-        assertMovesAreEqual(expectedMoves, actualMoves);
-    }
-
-    @Test
-    public void testEscapeAPawnCheckNoEnPassant()
+    public void testEscapeCheckWithoutEnPassantOption()
     {
         String enPassantCapture = "R7/8/8/1k6/2Pp4/8/8/K7 b - - 0 1";
         Set<String> actualMoves = generateKingEscapesInFan(enPassantCapture);
         Set<String> expectedMoves = toSet("Kb5xc4,Kb5-b4,Kb5-c5,Kb5-b6,Kb5-c6"); 
+        assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+    
+    @Test
+    public void testEscapeCheckByEnPassantCaptureOnSixthRank()
+    {
+    	String whiteCaptureEPLeft = "8/5p2/8/3pP3/4K3/8/8/7k w - d6 0 1";
+    	Set<String> actualMoves = generateKingEscapesInFan(whiteCaptureEPLeft);
+    	Set<String> expectedMoves = toSet("Pe5xd6,Ke4xd5,Ke4-d3,Ke4-e3,Ke4-f3,Ke4-d4,Ke4-f4,Ke4-f5"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+    	
+    	String whiteCaptureEPRight = "8/3p4/8/4Pp2/4K3/8/8/7k w - f6 0 1";
+    	actualMoves = generateKingEscapesInFan(whiteCaptureEPRight);
+    	expectedMoves = toSet("Pe5xf6,Ke4xf5,Ke4-d3,Ke4-e3,Ke4-f3,Ke4-d4,Ke4-f4,Ke4-d5"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+
+    @Test
+    public void testEscapeCheckByEnPassantCaptureOnThirdRank()
+    {
+    	String blackCaptureEPLeft = "8/8/8/4k3/3Pp3/8/5P2/7K b - d3 0 1";
+    	Set<String> actualMoves = generateKingEscapesInFan(blackCaptureEPLeft);
+    	Set<String> expectedMoves = toSet("Pe4xd3,Ke5xd4,Ke5-f4,Ke5-d5,Ke5-f5,Ke5-d6,Ke5-e6,Ke5-f6"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+    	
+    	String blackCaptureEPRight = "8/8/8/4k3/4pP2/8/3P4/7K b - f3 0 1";
+    	actualMoves = generateKingEscapesInFan(blackCaptureEPRight);
+    	expectedMoves = toSet("Pe4xf3,Ke5xf4,Ke5-d4,Ke5-d5,Ke5-f5,Ke5-d6,Ke5-e6,Ke5-f6"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+
+    	String blackWithoutEPCaptureOption = "8/8/8/3k4/2P1p3/8/8/7K b - c3 0 1";
+    	actualMoves = generateKingEscapesInFan(blackWithoutEPCaptureOption);
+    	expectedMoves = toSet("Kd5xc4,Kd5-d4,Kd5-c5,Kd5-e5,Kd5-c6,Kd5-d6,Kd5-e6"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+
+    @Test
+    public void testEscapeCheckByPawnCapturePromotionOnEighthRank()
+    {
+    	String whiteCanPromote = "K6r/6P1/8/8/3k4/8/8/8 w - - 0 1";
+    	Set<String> actualMoves = generateKingEscapesInFan(whiteCanPromote);
+    	Set<String> expectedMoves = toSet("Ka8-a7,Ka8-b7,Pg7xh8Q,Pg7xh8R,Pg7xh8B,Pg7xh8N,Pg7-g8Q,Pg7-g8R,Pg7-g8B,Pg7-g8N"); 
+    	assertMovesAreEqual(expectedMoves, actualMoves);
+    }
+
+    @Test
+    public void testEscapeCheckByPawnCapturePromotionOnFirstRank()
+    {
+        String blackCanPromote = "8/8/8/8/3K4/8/6p1/k6R b - - 0 1";
+        Set<String> actualMoves = generateKingEscapesInFan(blackCanPromote);
+        Set<String> expectedMoves = toSet("Ka1-a2,Ka1-b2,Pg2xh1Q,Pg2xh1R,Pg2xh1B,Pg2xh1N,Pg2-g1Q,Pg2-g1R,Pg2-g1B,Pg2-g1N"); 
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
@@ -605,6 +691,8 @@ public class MoveGeneratorTest {
         assertMovesAreEqual(expectedMoves, actualMoves);
     }
 
+
+    
 //    @Test
 //    public void testKingFlightSquaresFromCheckingPiece()
 //    {
@@ -650,10 +738,11 @@ public class MoveGeneratorTest {
     private Set<String> generateMovesInFan(String positionFen) {
         g.set(positionFen);
         int side = g.isWhiteToMove()?0:1;
-        List<Integer> moves = DefaultGenerator.newMoveList();
+//        List<Integer> moves = DefaultGenerator.newMoveList();
         displayBoardAndSideToMove();
-        mg.generateCaptures(moves, side);
-        mg.generateNonCaptures(moves, side);
+//        mg.generateCaptures(moves, side);
+//        mg.generateNonCaptures(moves, side);
+        List<Integer> moves = mg.generateMoves(side, false);
         return toCoordinateMoveSet(moves);
     }
 
