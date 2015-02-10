@@ -12,7 +12,7 @@
 	<property name="compile.debug" value="true" />
 	<property name="compile.deprecation" value="true" />
 	<property name="classes.dir" value="${build}/classes" />
-	<property name="instrumented.dir" value="build/instrumented" />
+	<property name="instrumented.dir" value="${build}/instrumented" />
 	
 	<property name="cobertura.datafile"      value="cobertura.ser"/>
 	<property name="reports.xml.dir"         value="${reports}/junit-xml" />
@@ -86,7 +86,7 @@
 	<target name="instrument" depends="init,compile">
 		
 		<!-- Remove the coverage data file and any old instrumentation. -->
-		<delete file="${cobertura.datafile}" />
+		<!--delete file="${cobertura.datafile}" /-->
 		<delete dir="${instrumented.dir}" />
 
 		<!--
@@ -116,9 +116,12 @@
 	<target name="prepare-test" depends="init">
 		<mkdir dir="${reports}" />
 	</target>
+
+	<target name="test-all" depends="test, test-movegen-short"
+		description="Run unit tests and do quick movegen verification"/> 
 	
 	<target name="test" depends="init,compile,prepare-test">
-		<junit fork="yes" dir="${basedir}"> <!--   failureProperty="test.failed">-->
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
 			<!--
 				Note the classpath order: instrumented classes are before the
 				original (uninstrumented) classes.  This is important.
@@ -163,6 +166,33 @@
        </java>
 	</target>
 
+	<target name="test-movegen-short" depends="init,dist,prepare-test" unless="${test.failed}"
+		description="Run a quick (3 min) move generator verification test">
+		<property name="movegen-testcase" value="movegen-short"/>
+		<path id="input.test"   location="data/${movegen-testcase}.txt"/>
+		<path id="expected.out" location="data/${movegen-testcase}-expected.txt"/>
+		<path id="results.out"  location="${build}/${movegen-testcase}-out.txt"/>
+		<path id="results.err"  location="${build}/${movegen-testcase}-err.txt"/>
+		<echo>Computing results (roughly 3 minutes to compute)...</echo>
+		<java jar="${build}/engine.jar"
+		           fork="true"
+		           failonerror="true"
+		           maxmemory="128m"
+				   input="${toString:input.test}"
+			       output="${toString:results.out}"
+				   error="${toString:results.err}">
+		</java>
+		<echo>Verify results match the expected results...</echo>
+		<!-- assume Windows, include line numbers and ignore whitespace -->
+		<property name="diffCmd" value="fc"/>
+		<property name="diffCmdOptions" value="/n /w"/>
+		<exec dir="${build}" executable="${diffCmd}">
+			<arg line="${diffCmdOptions} ${toString:expected.out} ${toString:results.out}"/>
+		</exec>
+		<loadfile srcFile="${toString:results.err}" property="stderr"/>
+		<echo message="stderr from the engine:${line.separator}${stderr}"/>
+	</target>
+	
 	<target name="coverage-check">
 		<cobertura-check branchrate="34" totallinerate="100" />
 	</target>

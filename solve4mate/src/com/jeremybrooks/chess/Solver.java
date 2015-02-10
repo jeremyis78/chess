@@ -69,6 +69,12 @@ public class Solver {
         return solveInfo;
     }
 
+    public long computePerft(GameState state, int depth)
+    {
+        moveGenerator.setGameState(state);
+        return perft(state, depth);
+    }
+
     public void doPerft(GameState state, int depth, PrintStream out)
     {
         moveGenerator.setGameState(state);
@@ -117,27 +123,11 @@ public class Solver {
             }
             long nodeCountForMove = 0;
             moveCount++;
-            try { //make
-                System.out.println(String.format("make %s", Util.displayMoveStr(move, false, false)));
-                state.makeMove(move);
-                deque.addFirst(move);
-            } catch (IllegalStateException e) {
-                System.out.println("move stack: " + deque.toArray());
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
+            state.makeMove(move);
             nodeCountForMove += perft(state, depth-1);
             nodeCountTotal += nodeCountForMove;
             System.out.println(Util.toUciMove(move) + " " + nodeCountForMove); // + " " + state.get());
-            try { //undo
-//                System.out.println(String.format("undo %s", Util.displayMoveStr(move, false, false)));
-                state.undoMove();
-                deque.removeFirst();
-            } catch (IllegalStateException e) {
-                System.out.println("move stack: " + deque.toArray());
-                System.out.println(e.getMessage());
-                System.exit(1);
-            }
+            state.undoMove();
         }
         long elapsedMillis = (System.nanoTime() - start) / NANOS_PER_MILLI;
         StringBuilder sb = new StringBuilder();

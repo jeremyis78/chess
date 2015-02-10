@@ -103,6 +103,9 @@ public class UciDriver {
             case "movestack":
             	out.println(toFanMoves(gameState.currentLine()));
             	break;
+            case "fen":
+            	out.println(gameState.get());
+            	break;
             case "go":
                 go(cmd);
                 break;
@@ -127,6 +130,9 @@ public class UciDriver {
             case "diagram":
                 out.println(toDiagram(gameState));
                 break;
+            case "perftnodes": //no timing info
+            	printPerftNodeCount(cmd, argIndex);
+            	break;
             case "perft":
                 perftCountAllNodes(cmd, argIndex);
                 break;
@@ -206,6 +212,22 @@ public class UciDriver {
 		{
 			gameState.undoMove();
 			generateLegalMoves();
+		}
+	}
+
+	private void printPerftNodeCount(String[] cmd, int argIndex) {
+		String token = "";
+		int depth = 0;
+		try {
+		    token = cmd[argIndex++];
+		    depth = Integer.parseInt(token);
+		} catch (Exception e) {
+			out.println("'"+token+"' : needs to be an integer argument greater than 0");
+		}
+		if(depth > 0)
+		{
+			long nodeCount = engine.computePerft(gameState, depth);
+			out.println(String.format("perft(%d): %,d", depth, nodeCount));
 		}
 	}
 
