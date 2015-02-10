@@ -1,8 +1,15 @@
 package com.jeremybrooks.chess.movegen;
 
-import static org.junit.Assert.*;
-import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.B7;
+import static com.jeremybrooks.chess.base.Bitmap.C8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,10 +19,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jeremybrooks.chess.base.Bitmap;
-import com.jeremybrooks.chess.base.Empty;
 import com.jeremybrooks.chess.base.GameState;
-import com.jeremybrooks.chess.base.King;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.Util;
@@ -335,6 +339,11 @@ public class MoveGeneratorTest {
     // r3k2r/8/8/4q3/8/8/8/R3K2R w KQkq - 0 1    e5         n       n
     // r3k2r/8/8/5q2/8/8/8/R3K2R w KQkq - 0 1    f5         n       y
     // r3k2r/8/8/6q1/8/8/8/R3K2R w KQkq - 0 1    g5         n       n
+    //
+    // Additionally, a second test position is used--the same as the first but with a bishop
+    // instead of a queen. Tests check for legality after the bishop captures one of the 
+    // involved rooks. We also verify that even with a castling right specified that isn't 
+    // legal given the initial rook position (or existence) that the given castle right is revoked.
 
     
     @Test
@@ -374,6 +383,38 @@ public class MoveGeneratorTest {
     }
 
     @Test
+    public void givenWhiteCastlingLegalityNoQueenButBishopJustTookKingSideRook()
+    {
+    	String correctCastlingRights = "r3k2r/8/8/8/8/8/8/R3K2b w Qkq - 0 1";
+		String invalidCastlingRights = "r3k2r/8/8/8/8/8/8/R3K2b w KQkq - 0 1";
+		String fens[] = new String[]{correctCastlingRights,
+    							     invalidCastlingRights};
+    	//Correct moves should be generated in both cases
+    	for(String fen: fens)
+    	{
+    		Set<String> actualMoves = generateMovesInFan(fen);
+    		assertTrue ("because king is safe",                 actualMoves.contains("Ke1-c1"));
+    		assertFalse("because of capture of king side rook", actualMoves.contains("Ke1-g1"));
+    	}
+    }
+
+    @Test
+    public void givenWhiteCastlingLegalityNoQueenButBishopJustTookQueenSideRook()
+    {
+    	String correctCastlingRights = "r3k2r/8/8/8/8/8/8/b3K2R w Kkq - 0 1";
+		String invalidCastlingRights = "r3k2r/8/8/8/8/8/8/b3K2R w KQkq - 0 1";
+		String fens[] = new String[]{correctCastlingRights,
+    								 invalidCastlingRights};
+    	//Correct moves should be generated in both cases
+    	for(String fen: fens)
+    	{
+    		Set<String> actualMoves = generateMovesInFan(fen);
+    		assertFalse("because of capture of queen side rook", actualMoves.contains("Ke1-c1"));
+    		assertTrue ("because king is safe",                  actualMoves.contains("Ke1-g1"));
+    	}
+    }
+
+    @Test
     public void givenBlackCastlingLegalityWithQueenOnG4()
     {
         String destinationSquaresC8andG8AreAttacked = "r3k2r/8/8/8/6Q1/8/8/R3K2R b KQkq - 0 1";
@@ -407,6 +448,38 @@ public class MoveGeneratorTest {
         Set<String> actualMoves = generateMovesInFan(d8andH8AreAttacked);
         assertFalse("because king passes through check",        actualMoves.contains("Ke8-c8"));
         assertTrue ("because king does not pass through check", actualMoves.contains("Ke8-g8"));
+    }
+    
+    @Test
+    public void givenBlackCastlingLegalityNoQueenButBishopJustTookKingSideRook()
+    {
+    	String correctCastlingRights = "r3k2B/8/8/8/8/8/8/R3K2R b KQq - 0 1";
+		String invalidCastlingRights = "r3k2B/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		String fens[] = new String[]{correctCastlingRights,
+      		   						 invalidCastlingRights};
+		//Correct moves should be generated in both cases
+    	for(String fen: fens)
+    	{
+    		Set<String> actualMoves = generateMovesInFan(fen);
+    		assertTrue ("because king is safe",                 actualMoves.contains("Ke8-c8"));
+    		assertFalse("because of capture of king side rook", actualMoves.contains("Ke8-g8"));
+    	}
+    }
+
+    @Test
+    public void givenBlackCastlingLegalityNoQueenButBishopJustTookQueenSideRook()
+    {
+    	String correctCastleRights = "B3k2r/8/8/8/8/8/8/R3K2R b KQk - 0 1";
+		String invalidCastleRights = "B3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1";
+		String fens[] = new String[]{correctCastleRights,
+    			                     invalidCastleRights};
+		//Correct moves should be generated in both cases
+    	for(String fen: fens)
+    	{
+    		Set<String> actualMoves = generateMovesInFan(fen);
+    		assertFalse("because of capture of king side rook", actualMoves.contains("Ke8-c8"));
+    		assertTrue ("because king is safe",                 actualMoves.contains("Ke8-g8"));
+    	}
     }
 
     @Test

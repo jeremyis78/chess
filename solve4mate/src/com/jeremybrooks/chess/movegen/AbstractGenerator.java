@@ -205,7 +205,10 @@ public abstract class AbstractGenerator implements Generator {
     @Override
     public boolean canWhiteShortCastle(GameState g){
         Position position = g.getPosition();
+        //Without the rook in initial position it's not possible
+        //even if castling right (erroneously) says its OK.
         if (g.hasShortCastleOption()
+        	&& position.get(H1).toChar() == 'R'
             && position.isEmpty(F1)
             && position.isEmpty(G1) 
             && isNotAttacked(E1, g)
@@ -218,8 +221,11 @@ public abstract class AbstractGenerator implements Generator {
 
     public boolean canWhiteLongCastle(GameState g){
         Position position = g.getPosition();
-        if (g.hasLongCastleOption() &&
-            position.isEmpty(D1)
+        //Without the rook in initial position it's not possible
+        //even if castling right (erroneously) says its OK.
+        if (g.hasLongCastleOption()
+        	&& position.get(A1).toChar() == 'R'
+            && position.isEmpty(D1)
             && position.isEmpty(C1)
             && position.isEmpty(B1) 
             && isNotAttacked(E1, g)
@@ -232,7 +238,10 @@ public abstract class AbstractGenerator implements Generator {
 
     public boolean canBlackShortCastle(GameState g){
         Position position = g.getPosition();
+        //Without the rook in initial position it's not possible
+        //even if castling right (erroneously) says its OK.
         if (g.hasShortCastleOption()
+       		&& position.get(H8).toChar() == 'r'
             && position.isEmpty(F8)
             && position.isEmpty(G8) 
             && isNotAttacked(E8, g)
@@ -245,7 +254,10 @@ public abstract class AbstractGenerator implements Generator {
     
     public boolean canBlackLongCastle(GameState g){
         Position position = g.getPosition();
+        //Without the rook in initial position it's not possible
+        //even if castling right (erroneously) says its OK.
         if (g.hasLongCastleOption()
+        	&& position.get(A8).toChar() == 'r'
             && position.isEmpty(D8)
             && position.isEmpty(C8)
             && position.isEmpty(B8) 

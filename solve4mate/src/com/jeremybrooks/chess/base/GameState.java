@@ -524,11 +524,13 @@ public class GameState {
                 removeCastlingOptionForNextMove(W_SHORT_CASTLE);
             else if (hasLongCastleOption() && rookFromSquare == A1)
                 removeCastlingOptionForNextMove(W_LONG_CASTLE);
+            else duplicateCastlingFlags();
         } else {
             if (hasShortCastleOption() && rookFromSquare == H8)
                 removeCastlingOptionForNextMove(B_SHORT_CASTLE);
             else if (hasLongCastleOption() && rookFromSquare == A8)
                 removeCastlingOptionForNextMove(B_LONG_CASTLE);
+            else duplicateCastlingFlags();
         }
     }
 
