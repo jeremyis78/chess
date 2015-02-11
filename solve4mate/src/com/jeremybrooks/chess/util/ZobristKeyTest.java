@@ -1,8 +1,6 @@
 package com.jeremybrooks.chess.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -12,17 +10,15 @@ import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.PieceFactory;
 import com.jeremybrooks.chess.base.Square;
 
-public class ZobristKeyTest {
+public class ZobristKeyTest extends KeyTestBase {
 
     @Test
     public void givenAllKeys()
     {
     	//assert they are all unique (no overlaps or collisions between hash keys)
-    	HashMap<Long,Integer> keyMapper = new HashMap<>(1000); //bigger than 2*6*64
-    	
     	long blackToMoveKey = ZobristKey.forBlackToMove();
-    	assertKeyIsUnique(blackToMoveKey, keyMapper);
-    	addKey(blackToMoveKey, keyMapper);
+    	assertKeyIsUnique(blackToMoveKey);
+    	addKey(blackToMoveKey);
 
     	//piece-square keys
     	for(int color=0; color < 2; color ++)
@@ -44,8 +40,8 @@ public class ZobristKeyTest {
     					}
     				} else {
     					long key = ZobristKey.forPieceOnSquare(piece, square);
-    					assertKeyIsUnique(key, keyMapper);
-    					addKey(key, keyMapper);
+    					assertKeyIsUnique(key);
+    					addKey(key);
     				}
     			}
     		}
@@ -53,14 +49,14 @@ public class ZobristKeyTest {
     	for(int castlingOptions=0; castlingOptions<16; castlingOptions++)
     	{
     		long key = ZobristKey.forCastlingOptions(castlingOptions);
-    		assertKeyIsUnique(key, keyMapper);
-			addKey(key, keyMapper);
+    		assertKeyIsUnique(key);
+			addKey(key);
     	}
     	for(int enPassantFileNumber=0; enPassantFileNumber<8; enPassantFileNumber++)
     	{
     		long key = ZobristKey.forEnPassantTargetFile(enPassantFileNumber);
-    		assertKeyIsUnique(key, keyMapper);
-    		addKey(key, keyMapper);
+    		assertKeyIsUnique(key);
+    		addKey(key);
     	}
     	int totalKeyCount = 0;
     	totalKeyCount += 1;      //black to move
@@ -102,16 +98,4 @@ public class ZobristKeyTest {
     		}
     	}
     }
-
-	private static void addKey(long key, HashMap<Long, Integer> keyMapper) {
-		keyMapper.put(key, 1);
-	}
-
-	private static void assertKeyIsUnique(long key, HashMap<Long, Integer> keyMapper) {
-		boolean keyAlreadyUsed = keyMapper.get(key) != null;
-		if(keyAlreadyUsed)
-		{
-			fail("each hash key must be unique; the key "+key+" was used twice");
-		}
-	}
 }

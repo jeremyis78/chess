@@ -1,17 +1,64 @@
 package com.jeremybrooks.chess.base;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
-import static com.jeremybrooks.chess.base.Piece.*;
+import static com.jeremybrooks.chess.base.Bitmap.A1;
+import static com.jeremybrooks.chess.base.Bitmap.A2;
+import static com.jeremybrooks.chess.base.Bitmap.A8;
+import static com.jeremybrooks.chess.base.Bitmap.B1;
+import static com.jeremybrooks.chess.base.Bitmap.B5;
+import static com.jeremybrooks.chess.base.Bitmap.B6;
+import static com.jeremybrooks.chess.base.Bitmap.C1;
+import static com.jeremybrooks.chess.base.Bitmap.C8;
+import static com.jeremybrooks.chess.base.Bitmap.D5;
+import static com.jeremybrooks.chess.base.Bitmap.D6;
+import static com.jeremybrooks.chess.base.Bitmap.D8;
+import static com.jeremybrooks.chess.base.Bitmap.E1;
+import static com.jeremybrooks.chess.base.Bitmap.E2;
+import static com.jeremybrooks.chess.base.Bitmap.E3;
+import static com.jeremybrooks.chess.base.Bitmap.E4;
+import static com.jeremybrooks.chess.base.Bitmap.E5;
+import static com.jeremybrooks.chess.base.Bitmap.E6;
+import static com.jeremybrooks.chess.base.Bitmap.E7;
+import static com.jeremybrooks.chess.base.Bitmap.E8;
+import static com.jeremybrooks.chess.base.Bitmap.F1;
+import static com.jeremybrooks.chess.base.Bitmap.F3;
+import static com.jeremybrooks.chess.base.Bitmap.F6;
+import static com.jeremybrooks.chess.base.Bitmap.F8;
+import static com.jeremybrooks.chess.base.Bitmap.G1;
+import static com.jeremybrooks.chess.base.Bitmap.G5;
+import static com.jeremybrooks.chess.base.Bitmap.G6;
+import static com.jeremybrooks.chess.base.Bitmap.G7;
+import static com.jeremybrooks.chess.base.Bitmap.G8;
+import static com.jeremybrooks.chess.base.Bitmap.H1;
+import static com.jeremybrooks.chess.base.Bitmap.H2;
+import static com.jeremybrooks.chess.base.Bitmap.H3;
+import static com.jeremybrooks.chess.base.Bitmap.H4;
+import static com.jeremybrooks.chess.base.Bitmap.H5;
+import static com.jeremybrooks.chess.base.Bitmap.H6;
+import static com.jeremybrooks.chess.base.Bitmap.H7;
+import static com.jeremybrooks.chess.base.Bitmap.H8;
+import static com.jeremybrooks.chess.base.Bitmap.NOSQUARE;
+import static com.jeremybrooks.chess.base.Piece.BISHOP;
+import static com.jeremybrooks.chess.base.Piece.ENCODED;
+import static com.jeremybrooks.chess.base.Piece.KING;
+import static com.jeremybrooks.chess.base.Piece.KNIGHT;
+import static com.jeremybrooks.chess.base.Piece.PAWN;
+import static com.jeremybrooks.chess.base.Piece.QUEEN;
+import static com.jeremybrooks.chess.base.Piece.ROOK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.List;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.jeremybrooks.chess.util.KeyTestBase;
 import com.jeremybrooks.chess.util.Util;
 
-public class GameStateTest {
+public class GameStateTest extends KeyTestBase {
 
     private static final int NONE = 0;
     private GameState gameState;
@@ -438,6 +485,70 @@ public class GameStateTest {
         boolean isWhitesMove = setupState(beforeMove);
         assertEquals(afterMove, makeMove(isWhitesMove, move));
         assertEquals(beforeMove, undoMove(isWhitesMove, move));
+    }
+    
+    @Test
+    public void givenHashingForSameStateButBlackToMove()
+    {
+    	String whiteToMove = GameState.FEN_START;
+    	setupState(whiteToMove);
+    	long wKey = gameState.fullZobristKey();
+
+    	String blackToMove = whiteToMove.replace(" w ", " b ");
+    	setupState(blackToMove);
+    	long bKey = gameState.fullZobristKey();
+    	Assert.assertNotEquals(wKey, bKey);
+    }
+    
+    @Test
+    public void givenHashingForCastlingOptions()
+    {
+    	//While these positions are invalid, they provide differences
+    	//in the castling options and for testing the purpose of whether 
+    	//or not they are included in the hash, it's still a valid test
+    	String initialFen = GameState.FEN_START;
+    	for(String castlingOptions: PositionInfoTest.CASTLING_OPTIONS)
+        {
+        	String nextFen = initialFen.replace(" KQkq ", " "+castlingOptions+" ");
+        	System.out.println(nextFen);
+    		setupState(nextFen);
+    		long key = gameState.fullZobristKey();
+    		addKeyOrFailIfNotUnique(key);
+        }
+    }
+
+    
+    @Test
+    public void givenHashingForEnPassantTargetSquare()
+    {
+    	//Requires valid positions because GameState wipes out the enpassant square if it
+    	//conflicts with the board position
+    	String[] fens = new String[]{
+    			"rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq a3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq b3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq f3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq g3 0 1",
+    			"rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq h3 0 1",
+    			"rnbqkbnr/1ppppppp/8/p7/P7/8/1PPPPPPP/RNBQKBNR w KQkq a6 0 2",
+    			"rnbqkbnr/p1pppppp/8/1p6/P7/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 2",
+    			"rnbqkbnr/pp1ppppp/8/2p5/P7/8/1PPPPPPP/RNBQKBNR w KQkq c6 0 2",
+    			"rnbqkbnr/ppp1pppp/8/3p4/P7/8/1PPPPPPP/RNBQKBNR w KQkq d6 0 2",
+    			"rnbqkbnr/pppp1ppp/8/4p3/P7/8/1PPPPPPP/RNBQKBNR w KQkq e6 0 2",
+    			"rnbqkbnr/ppppp1pp/8/5p2/P7/8/1PPPPPPP/RNBQKBNR w KQkq f6 0 2",
+    			"rnbqkbnr/pppppp1p/8/6p1/P7/8/1PPPPPPP/RNBQKBNR w KQkq g6 0 2",
+    			"rnbqkbnr/ppppppp1/8/7p/P7/8/1PPPPPPP/RNBQKBNR w KQkq h6 0 2",
+    			"rnbqkb1r/pppppppp/7n/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 1 2"
+    	};
+    	for(String fen: fens)
+        {
+        	System.out.println(fen);
+    		setupState(fen);
+    		long key = gameState.fullZobristKey();
+    		addKeyOrFailIfNotUnique(key);
+        }
     }
 
     private boolean setupState(String startState) {

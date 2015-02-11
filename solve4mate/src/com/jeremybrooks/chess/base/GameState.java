@@ -424,6 +424,8 @@ public class GameState {
     public long fullZobristKey()
     {
         long hash = 0L;
+        if(!whiteToMove)
+        	hash ^= ZobristKey.forBlackToMove();
         for(int square = A1; square <= H8; square++)
         {
             Piece piece = pos.get(square);
@@ -432,6 +434,13 @@ public class GameState {
                 hash ^= ZobristKey.forPieceOnSquare(piece, square);
             }
         }
+        int castlingOptions = posInfo[numberOfMovesMade].getCastleOptions();
+		hash ^= ZobristKey.forCastlingOptions(castlingOptions);
+		if(hasEnPassantOption())
+		{
+			int targetFile = Bitmap.fileNumber(getEnPassantSquare());
+			hash ^= ZobristKey.forEnPassantTargetFile(targetFile);
+		}
         return hash;
     }
     

@@ -9,6 +9,13 @@ import org.junit.Test;
 
 public class PositionInfoTest {
 
+    public static final String[] CASTLING_OPTIONS = new String[]{
+    	    "-",   "K",   "Q",   "KQ",   //  0,  1,  2,  3 
+            "k",  "Kk",  "Qk",  "KQk",   //  4,  5,  6,  7
+            "q",  "Kq",  "Qq",  "KQq",   //  8,  9, 10, 11
+            "kq", "Kkq", "Qkq", "KQkq"}; // 12, 13, 14, 15
+
+	
 	private PositionInfo info;
 	
 	@Before
@@ -159,12 +166,8 @@ public class PositionInfoTest {
 	
     @Test
     public void givenEveryCombinationOfCastlingOptions() {
-        String[] options = new String[]{"-",   "K",   "Q",   "KQ",   //  0,  1,  2,  3 
-                                        "k",  "Kk",  "Qk",  "KQk",   //  4,  5,  6,  7
-                                        "q",  "Kq",  "Qq",  "KQq",   //  8,  9, 10, 11
-                                        "kq", "Kkq", "Qkq", "KQkq"}; // 12, 13, 14, 15
         int expectedCastlingOptions = 0;
-        for(String option: options)
+        for(String option: CASTLING_OPTIONS)
         {
             info.setCastleOptionsFromFen(option);
             assertEquals(expectedCastlingOptions, info.getCastleOptions());
