@@ -429,7 +429,7 @@ public class GameState {
             Piece piece = pos.get(square);
             if(piece.exists())
             {
-                hash ^= ZobristKey.get(piece, square);
+                hash ^= ZobristKey.forPieceOnSquare(piece, square);
             }
         }
         return hash;
