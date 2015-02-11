@@ -139,6 +139,9 @@ public class UciDriver {
             case "perft2":
                 perftCountLeafNodes(cmd, argIndex);
                 break;
+            case "perftfens":
+                printPerftFens(cmd, argIndex);
+                break;
             case "divide":
             	doDivide(cmd, argIndex);
                 break;
@@ -256,6 +259,21 @@ public class UciDriver {
 		    }
 		} catch (Exception e) {
 		    out.println("perft2 requires an integer argument greater than 0");
+		}
+	}
+
+	private void printPerftFens(String[] cmd, int argIndex) {
+		String token = "";
+		int depth = 0;
+		try {
+		    token = cmd[argIndex++];
+		    depth = Integer.parseInt(token);
+		} catch (Exception e) {
+			out.println("'"+token+"' : needs to be an integer argument greater than 0");
+		}
+		if(depth > 0)
+		{
+			engine.doPrintPerftFens(gameState, depth, out);
 		}
 	}
 

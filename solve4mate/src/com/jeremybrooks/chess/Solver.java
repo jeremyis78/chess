@@ -42,12 +42,12 @@ public class Solver {
         search.setTimer(new TimeMgmt());
     }
 
-    public SearchInfo search(GameState g, int maxDepth)
+    public SearchInfo search(GameState state, int maxDepth)
     {
         assert(maxDepth <= GameState.MAX_NUM_MOVES_MADE);
         
-        search.setGameState(g);
-        moveGenerator.setGameState(g);
+        search.setGameState(state);
+        moveGenerator.setGameState(state);
         log.debug("Searching...");
         search.search(searchParams);
         SearchInfo info = search.getInfo();
@@ -104,6 +104,14 @@ public class Solver {
 //        out.println("nodes (all)  : " + nodeCount);
 //        out.println("nodes/second : " + (nodeCount * MILLIS_PER_SEC / elapsedMillis));
     }
+    
+    public void doPrintPerftFens(GameState state, int depth, PrintStream out)
+    {
+    	if(out == null)
+    		throw new NullPointerException("out is null");
+    	moveGenerator.setGameState(state);
+    	perftFens(state, depth, out);
+    }
 
     public void doDivide(GameState state, int depth, PrintStream out) {
         Deque<Integer> deque = new ArrayDeque<>();
@@ -139,6 +147,22 @@ public class Solver {
             out.println("Nodes : " + nodeCountTotal);
 //        out.println("time (ms)    : " + elapsedMillis);
 //        out.println("nodes/second : " + (nodeCountTotal * MILLIS_PER_SEC / elapsedMillis));
+    }
+
+    private void perftFens(GameState state, int depth, PrintStream out) {
+        if(depth == 0)
+            return;
+        int sideToMove = state.isWhiteToMove()?0:1;
+        List<Integer> moves = moveGenerator.generateMoves(sideToMove, false);
+        for(int move: moves)
+        {
+            if(!moveGenerator.isLegalMove(state, move)) continue;
+            state.makeMove(move);
+            if(out != null) 
+            	out.println(state.get());
+            perftFens(state, depth-1, out);
+            state.undoMove();
+        }
     }
 
     private long perft(GameState state, int depth) {
