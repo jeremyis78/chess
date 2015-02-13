@@ -4,7 +4,9 @@ import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,7 +31,41 @@ public class Solver {
     private Evaluator evaluator;
     private Search search;
     private SearchParams searchParams;
-
+    private Map<CacheKey,Long> nodeCountCache = new HashMap<>(1000000); //maps zobristHashes to nodeCount 
+    
+    private static final class CacheKey {
+    	private final long key;
+    	private final int depth;
+    	
+    	public CacheKey(long key, int depth)
+    	{
+    		this.key = key;
+    		this.depth = depth;
+    	}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + depth;
+			result = prime * result + (int) (key ^ (key >>> 32));
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CacheKey other = (CacheKey) obj;
+			if (depth != other.depth)
+				return false;
+			if (key != other.key)
+				return false;
+			return true;
+		}
+    }
     
     public Solver() {
         DefaultGenerator mg = new DefaultGenerator();
@@ -75,37 +111,31 @@ public class Solver {
         return perft(state, depth);
     }
 
-    public void doPerft(GameState state, int depth, PrintStream out)
+    public void printPerft(GameState state, int depth, PrintStream out)
     {
         moveGenerator.setGameState(state);
         long start = System.nanoTime();
         long nodeCount = perft(state, depth);
         long elapsedMillis = (System.nanoTime() - start) / NANOS_PER_MILLI;
-        String format = "Perft (%d): %d, Time: %4.3f s";
+        String format = "Perft(%d): %,d, Time: %4.3f s";
         Object[] args = new Object[]{depth, nodeCount, elapsedMillis / 1000.0};
         out.println(String.format(format, args));
-//        out.println("time (ms)    : " + elapsedMillis);
-//        out.println("nodes (all)  : " + nodeCount);
-//        out.println("nodes/second : " + (nodeCount * MILLIS_PER_SEC / elapsedMillis));
     }
 
-    public void doPerft2(GameState state, int depth, PrintStream out)
+    public void printPerft2(GameState state, int depth, PrintStream out)
     {
         moveGenerator.setGameState(state);
         long start = System.nanoTime();
         //There must be a faster algorithm to count leaf nodes...
-        long nodeCountAtD         = perft(state, depth);
         long nodeCountAtDminusOne = perft(state, depth-1);
+        long nodeCountAtD         = perft(state, depth);
         long elapsedMillis = (System.nanoTime() - start) / NANOS_PER_MILLI;
-        String format = "Perft (%d): %d, Time: %4.3f s";
+        String format = "Perft(%d): %,d, Time: %4.3f s";
         Object[] args = new Object[]{depth, nodeCountAtD - nodeCountAtDminusOne, elapsedMillis / 1000.0};
         out.println(String.format(format, args));
-//        out.println("time (ms)    : " + elapsedMillis);
-//        out.println("nodes (all)  : " + nodeCount);
-//        out.println("nodes/second : " + (nodeCount * MILLIS_PER_SEC / elapsedMillis));
     }
     
-    public void doPrintPerftFens(GameState state, int depth, PrintStream out)
+    public void printPerftFens(GameState state, int depth, PrintStream out)
     {
     	if(out == null)
     		throw new NullPointerException("out is null");
@@ -114,13 +144,11 @@ public class Solver {
     }
 
     public void doDivide(GameState state, int depth, PrintStream out) {
-        Deque<Integer> deque = new ArrayDeque<>();
         moveGenerator.setGameState(state);
         SortedSet<String> moveSet = new TreeSet<String>();
         int sideToMove = state.isWhiteToMove()?0:1;
         int nodeCountTotal = 0;
         int moveCount = 0;
-        long start = System.nanoTime();
         List<Integer> moves = moveGenerator.generateMoves(sideToMove, false);
         for(int move: moves)
         {
@@ -137,7 +165,6 @@ public class Solver {
             System.out.println(Util.toUciMove(move) + " " + nodeCountForMove); // + " " + state.get());
             state.undoMove();
         }
-        long elapsedMillis = (System.nanoTime() - start) / NANOS_PER_MILLI;
         StringBuilder sb = new StringBuilder();
         for(String moveLine: moveSet)
             sb.append(moveLine).append("\n");
@@ -145,8 +172,6 @@ public class Solver {
         out.println("Moves : " + moveCount);
         if(depth > 1) 
             out.println("Nodes : " + nodeCountTotal);
-//        out.println("time (ms)    : " + elapsedMillis);
-//        out.println("nodes/second : " + (nodeCountTotal * MILLIS_PER_SEC / elapsedMillis));
     }
 
     private void perftFens(GameState state, int depth, PrintStream out) {
@@ -168,6 +193,14 @@ public class Solver {
     private long perft(GameState state, int depth) {
         if(depth == 0)
             return 1;
+        long hash = state.fullZobristKey();
+		CacheKey key = new CacheKey(hash, depth);
+		if(nodeCountCache.containsKey(key))
+        {
+			//System.out.println("cache hit for " + state.get());
+        	return nodeCountCache.get(key);
+        }
+		//System.out.println("cache miss for " + state.get());
         int sideToMove = state.isWhiteToMove()?0:1;
         long nodeCount = 0;
         List<Integer> moves = moveGenerator.generateMoves(sideToMove, false);
@@ -178,6 +211,7 @@ public class Solver {
             nodeCount += perft(state, depth-1);
             state.undoMove();
         }
+        nodeCountCache.put(key, nodeCount);
         return nodeCount;
     }
 

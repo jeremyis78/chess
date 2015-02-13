@@ -241,7 +241,7 @@ public class UciDriver {
 		    int depth = Integer.parseInt(token);
 		    if(depth > 0)
 		    {
-		        engine.doPerft(gameState, depth, out);
+		        engine.printPerft(gameState, depth, out);
 		    }
 		} catch (Exception e) {
 		    out.println("'"+token+"' :" + e.getMessage()); //needs to be an integer argument greater than 0");
@@ -255,7 +255,7 @@ public class UciDriver {
 		    int depth = Integer.parseInt(token);
 		    if(depth > 0)
 		    {
-		        engine.doPerft2(gameState, depth, out);
+		        engine.printPerft2(gameState, depth, out);
 		    }
 		} catch (Exception e) {
 		    out.println("perft2 requires an integer argument greater than 0");
@@ -273,7 +273,7 @@ public class UciDriver {
 		}
 		if(depth > 0)
 		{
-			engine.doPrintPerftFens(gameState, depth, out);
+			engine.printPerftFens(gameState, depth, out);
 		}
 	}
 
