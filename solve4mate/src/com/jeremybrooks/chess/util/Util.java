@@ -6,7 +6,6 @@ package com.jeremybrooks.chess.util;
 
 import static com.jeremybrooks.chess.base.Square.named;
 
-import java.io.PrintStream;
 import java.util.List;
 
 import com.jeremybrooks.chess.base.Bitmap;
@@ -21,8 +20,6 @@ import com.jeremybrooks.chess.base.Square;
  *
  */
 public class Util {
-
-    private static PrintStream err = System.err;
 
     /**
      * Give current time in milliseconds (as an int, not a long).
@@ -45,7 +42,7 @@ public class Util {
     public static boolean bool(long i){ return i != 0; }
     
     public static int opposing(int side){
-        return side == Piece.WHITE ? Piece.BLACK : Piece.WHITE;
+        return side == Piece.WHITE ? Piece.BLACK : Piece.WHITE; //it could be: side ^ 1
     }
 
     public static String displaySquaresStr(long b){
@@ -146,15 +143,6 @@ public class Util {
             SANStr.append('=');
             SANStr.append(Piece.uppercase(pro));
         }
-
-        //Print the moves in coordinate notation and SAN (TODO: SAN doesn't account for ambiguous moves yet!)
-//        if ('K' == pieceChar[mov]){
-//            if ((from == Bitmap.E1 && to == Bitmap.G1) || (from == Bitmap.E8 && to == Bitmap.G8)){
-//                coordStr.append(" 0-0");
-//            } else if ((from == Bitmap.E1 && to == Bitmap.C1) || (from == Bitmap.E8 && to == Bitmap.C8)){
-//                coordStr.append(" 0-0-0");
-//            } 
-//        }
         return coordStr.toString();
     }
     
@@ -211,7 +199,6 @@ public class Util {
     }
     
 	public static String toUciMove(int move) {
-		//char pieceChar[] = {' ','p','n','k',' ','b','r','q'};
 	    int fromSquare = move & 0x3F;
 	    int toSquare = (move >> 6) & 0x3F;
 	    if(fromSquare == 0 && toSquare == 0)
@@ -220,8 +207,8 @@ public class Util {
 	    String movement = named(fromSquare) + named(toSquare);
 	    return bool(promotePiece) ? movement + Piece.lowercase(promotePiece) : movement;
 	}
-   
-    /**
+	
+	/**
      * Pretty print the squares represented within the bitmap.  
      * If no squares (bits) are found, then "NONE" is returned.
      * 
