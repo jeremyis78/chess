@@ -136,6 +136,11 @@ public class Position
         return allPieces[opponentColor];
     }
 
+    public long getOccupied()
+    {
+    	return getOccupied(0);
+    }
+    
     public long getOccupied(int rotationInDegrees)
     {
         switch(rotationInDegrees)
@@ -152,6 +157,27 @@ public class Position
             throw new IllegalArgumentException("invalid rotation "+rotationInDegrees+"; rotation must be -45, 0, 45 or 90");
         }
     }
+    
+    /**
+     * Get the square number for the "least valuable" piece found in targetPieces.
+     * Least valuable assumes: pawn < knight < bishop < rook < queen < king
+     * 
+     * @param targetPieces a bitboard set of pieces we're interested in
+     * @param sideToMove the side on the move
+     * @return the square number containing the least valuable piece or NOSQUARE if there's none found
+     */
+    public int getSquareOfLeastValuablePiece(long targetPieces, int sideToMove) {
+    	for(int pieceIndex = Piece.PAWN; pieceIndex <= Piece.KING; pieceIndex++)
+    	{
+    		long pieceBitboard = targetPieces & getPieces(sideToMove, pieceIndex);
+    		if(Util.bool(pieceBitboard))
+    		{
+    			long leastValuable = pieceBitboard & -pieceBitboard;
+    			return Bitmap.lowestBitNumber(leastValuable);
+    		}
+    	}
+    	return NOSQUARE;
+	}
 
     private boolean isNotTheKing(int p) {
         return p <= Piece.QUEEN;

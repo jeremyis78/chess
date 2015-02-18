@@ -260,6 +260,53 @@ public class PositionTest extends TestCase {
 
     }
     
+    public void testGetSquareOfLeastValuablePieceWhite()
+    {
+    	Position pos = createStartingPosition();
+    	long rank1 = Bitmap.FIRSTRANK;
+    	long rank2 = Bitmap.SECONDRANK;
+    	long targetSquares = rank2;
+    	int side = Piece.WHITE;
+		assertSquareEquals(A2, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	targetSquares = rank1 | rank2;
+    	assertSquareEquals(A2, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	targetSquares &= ~pos.getPawns(side); //erase the pawns from targets
+    	assertSquareEquals(B1, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	int erasedSquare[]   = new int[]{B1,G1,F1,C1,A1,H1,D1,E1};
+    	int expectedSquare[] = new int[]{G1,C1,C1,A1,H1,D1,E1,NOSQUARE};
+    	for(int index=0; index<expectedSquare.length; index++)
+    	{
+    		targetSquares &= ~(1L << erasedSquare[index]);
+    		int actualSquare = pos.getSquareOfLeastValuablePiece(targetSquares, side);
+    		assertSquareEquals(expectedSquare[index], actualSquare);
+    	}
+    }
+    
+    public void testGetSquareOfLeastValuablePieceBlack()
+    {
+    	Position pos = createStartingPosition();
+    	long rank8 = Bitmap.EIGHTHRANK;
+    	long rank7 = Bitmap.SEVENTHRANK;
+    	System.out.println("rank8: " +Util.displaySquaresStr(rank8));
+    	System.out.println("rank7: " +Util.displaySquaresStr(rank7));
+    	long targetSquares = rank7;
+    	int side = Piece.BLACK;
+		assertSquareEquals(A7, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	targetSquares = rank8 | rank7;
+    	assertSquareEquals(A7, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	targetSquares &= ~pos.getPawns(side); //erase the pawns from targets
+    	assertSquareEquals(B8, pos.getSquareOfLeastValuablePiece(targetSquares, side));
+    	int erasedSquare[]   = new int[]{B8,G8,F8,C8,A8,H8,D8,E8};
+    	int expectedSquare[] = new int[]{G8,C8,C8,A8,H8,D8,E8,NOSQUARE};
+    	for(int index=0; index<expectedSquare.length; index++)
+    	{
+    		targetSquares &= ~(1L << erasedSquare[index]);
+    		int actualSquare = pos.getSquareOfLeastValuablePiece(targetSquares, side);
+    		assertSquareEquals(expectedSquare[index], actualSquare);
+    	}
+    }
+
+    
 //    public void testToString()
 //    {
 //        Position p = createStartingPosition();
@@ -267,6 +314,10 @@ public class PositionTest extends TestCase {
 //        assertEquals(expected, p.toString());
 //    }
     
+    private void assertSquareEquals(int expectedSquare, int actualSquare) {
+    	assertEquals(Square.named(expectedSquare), Square.named(actualSquare));
+	}
+
     private void assertEmptyPosition(Position p) {
         assertEquals(EMPTY_BITBOARD, p.getAllPiecesAndKing(Piece.WHITE));
         assertEquals(EMPTY_BITBOARD, p.getPieces(Piece.WHITE, Piece.PAWN));
