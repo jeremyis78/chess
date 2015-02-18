@@ -67,23 +67,23 @@ public class CaptureGenerator extends AbstractGenerator {
                 while (morePieces(attackedPieces)) {
                     to = lowestBitNumber(attackedPieces);
                     cap = Math.abs(position.getBoard(to));
-                    if (!Util.bool(pro)) {     //Capture only
-                        //TODO: make sure king does not move into check!!!!!
+                    if (Util.bool(pro)) {  //Capture and promotion
+                    	int move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[Piece.QUEEN]);
+                    	//                      if(isLegal(g, move)) //can't move if pinned
+                    	{
+                    		moves.add(move);
+                    		//If the queen promotion is legal the other promotion choices will be too
+                    		for (int i = Piece.ROOK; i >= Piece.KNIGHT; i--) {
+                    			move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[i]);
+                    			moves.add(move);
+                    		}
+                    	}
+                    } else {     //Capture only
+                    	//TODO: make sure king does not move into check!!!!!
                         int move = Util.EncodeMove(from, to, Piece.ENCODED[p], cap, 0);  
                         if(p != Piece.KING || (p == Piece.KING && isNotAttacked(to, g)))
                         {
                             moves.add(move);
-                        }
-                    } else {        //Capture and promotion
-                        int move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[Piece.QUEEN]);
-//                        if(isLegal(g, move)) //can't move if pinned
-                        {
-                            moves.add(move);
-                            //If the queen promotion is legal the other promotion choices will be too
-                            for (int i = Piece.ROOK; i >= Piece.KNIGHT; i--) {
-                                move = Util.EncodeMove (from, to, Piece.ENCODED[p], cap, Piece.ENCODED[i]);
-                                moves.add(move);
-                            }
                         }
                     }
                     attackedPieces = clearBit(attackedPieces, to);
