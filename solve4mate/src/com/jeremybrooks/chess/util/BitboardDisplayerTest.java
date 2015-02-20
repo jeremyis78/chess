@@ -10,12 +10,7 @@ import com.jeremybrooks.chess.base.Position;
 
 public class BitboardDisplayerTest {
 
-    private BitboardDisplayer bitboardDisplayer;
-
-    @Before
-    public void init() {
-        bitboardDisplayer = new BitboardDisplayer();
-    }
+    private BitboardDisplayer displayer;
 
     @Test
     public void testStartingPosition()
@@ -35,7 +30,7 @@ public class BitboardDisplayerTest {
         expected.append("1 | R N B Q - B N R |");
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
-        assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
+        assertEquals(expected.toString(), formatPosition(p));
     }
 
     @Test
@@ -55,7 +50,7 @@ public class BitboardDisplayerTest {
         expected.append("1 | R N B Q - B N R |");
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
-        Assert.assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
+        Assert.assertEquals(expected.toString(), formatPosition(p));
     }
 
     @Test
@@ -75,6 +70,15 @@ public class BitboardDisplayerTest {
         expected.append("1 | - - - - - - - R |");
         expected.append("   -----------------");
         expected.append("    a b c d e f g h");
-        Assert.assertEquals(expected.toString(), bitboardDisplayer.formatBoard(p));
+        Assert.assertEquals(expected.toString(), formatPosition(p));
+    }
+    
+    private String formatPosition(Position pos)
+    {
+    	displayer = new BitboardDisplayer();
+    	displayer.setPosition(pos);
+    	BitboardDisplayer constructedDisplayer = new BitboardDisplayer(pos);
+    	assertEquals(displayer.formatBoard(), constructedDisplayer.formatBoard());
+    	return displayer.formatBoard();
     }
 }

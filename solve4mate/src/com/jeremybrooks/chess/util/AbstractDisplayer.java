@@ -4,7 +4,6 @@ import static com.jeremybrooks.chess.base.Bitmap.A1;
 import static com.jeremybrooks.chess.base.Bitmap.A8;
 
 import com.jeremybrooks.chess.base.Bitmap;
-import com.jeremybrooks.chess.base.Position;
 
 public abstract class AbstractDisplayer {
 
@@ -15,7 +14,7 @@ public abstract class AbstractDisplayer {
         super();
     }
 
-    public String formatBoard(Position position) {
+    public String formatBoard() {
         display = new StringBuilder();
         appendBorder();
         for (int firstSquareOnRank = A8;
@@ -29,7 +28,7 @@ public abstract class AbstractDisplayer {
                     currentSquare < lastSquareOnRank;
                     currentSquare++)
             {
-                appendPiece(position, currentSquare);
+                appendPiece(currentSquare);
                 appendDelimiter();
             }
             appendRankSuffix();
@@ -60,5 +59,5 @@ public abstract class AbstractDisplayer {
         display.append("    a b c d e f g h"+EOL);
     }
 
-    abstract void appendPiece(Position position, int currentSquare);
+    abstract void appendPiece(int currentSquare);
 }

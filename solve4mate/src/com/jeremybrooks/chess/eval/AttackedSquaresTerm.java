@@ -36,7 +36,7 @@ public class AttackedSquaresTerm extends EvalTerm {
         }
         int wAttacks = Long.bitCount(attackedBy[Piece.WHITE]);
         int bAttacks = Long.bitCount(attackedBy[Piece.BLACK]);
-        log.trace(new Displayer().formatBoard(gameState.getPosition()));
+        log.trace(new Displayer(gameState.getPosition()).formatBoard());
         log.trace("white attacks: " + wAttacks + "\n" + Bitmap.format(attackedBy[Piece.WHITE]));
         log.trace("black attacks: " + bAttacks + "\n" + Bitmap.format(attackedBy[Piece.BLACK]));
         return wAttacks - bAttacks;

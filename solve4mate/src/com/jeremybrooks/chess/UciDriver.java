@@ -296,9 +296,9 @@ public class UciDriver {
     public static String toDiagram(GameState g) {
         if(g == null)
             throw new NullPointerException("cannot display null gamestate");
-        AbstractDisplayer displayer = new Displayer();
         Position position = g.getPosition();
-        String board = displayer.formatBoard(position);
+        AbstractDisplayer displayer = new Displayer(position);
+        String board = displayer.formatBoard();
         String fen = g.get();
         String state = fen.substring(fen.indexOf(" ")+1);
         String format = "%s%nState: %s";

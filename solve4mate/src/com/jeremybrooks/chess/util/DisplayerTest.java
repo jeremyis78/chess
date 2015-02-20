@@ -12,11 +12,6 @@ public class DisplayerTest {
 
     Displayer displayer;
     
-    @Before
-    public void init() {
-        displayer = new Displayer();
-    }
-
     @Test
     public void testStartingPosition()
     {
@@ -36,7 +31,7 @@ public class DisplayerTest {
         expectedBoard.append("    a b c d e f g h");
         
         Position p = FenParser.parsePieceBoard(initialBoard);
-        assertEquals(expectedBoard.toString(), displayer.formatBoard(p));
+        assertEquals(expectedBoard.toString(), format(p));
     }
 
     @Test
@@ -58,7 +53,7 @@ public class DisplayerTest {
         expectedBoard.append("    a b c d e f g h");
         
         Position p = FenParser.parsePieceBoard(pieceBoard);
-        Assert.assertEquals(expectedBoard.toString(), displayer.formatBoard(p));
+        Assert.assertEquals(expectedBoard.toString(), format(p));
     }
     
     @Test
@@ -80,6 +75,15 @@ public class DisplayerTest {
         expectedBoard.append("    a b c d e f g h");
 
         Position position = FenParser.parsePieceBoard(pieceBoard);
-        Assert.assertEquals(expectedBoard.toString(), displayer.formatBoard(position));
+        Assert.assertEquals(expectedBoard.toString(), format(position));
+    }
+    
+    private String format(Position position)
+    {
+    	displayer = new Displayer();
+    	displayer.setPosition(position);
+    	Displayer constructedDisplayer = new Displayer(position);
+    	assertEquals(displayer.formatBoard(), constructedDisplayer.formatBoard());
+    	return displayer.formatBoard();
     }
 }

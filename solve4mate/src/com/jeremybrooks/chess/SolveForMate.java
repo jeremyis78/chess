@@ -88,8 +88,8 @@ public class SolveForMate {
         header.append((isWhiteToMove?"White":"Black") + " to move and force mate in " + puzzle.getMovesToMate());
         header.append(" (" + puzzle.getNotes() + ")");
         header.append(EOL);
-        AbstractDisplayer displayer = new Displayer();
-        header.append(displayer.formatBoard(position));
+        AbstractDisplayer displayer = new Displayer(position);
+        header.append(displayer.formatBoard());
         out.println(header.toString());
     }
     

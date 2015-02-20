@@ -5,8 +5,22 @@ import com.jeremybrooks.chess.base.Position;
 
 public class Displayer extends AbstractDisplayer {
 
-    void appendPiece(Position position, int currentSquare) {
-        Piece piece = position.get(currentSquare);
+	private Position pos;
+	
+	public Displayer() {
+		super();
+	}
+
+	public Displayer(Position position){
+		pos = position;
+	}
+	
+    public void setPosition(Position position) {
+		pos = position;
+	}
+
+	void appendPiece(int currentSquare) {
+        Piece piece = pos.get(currentSquare);
         if(piece.exists())
         {
             display.append(piece.toString());

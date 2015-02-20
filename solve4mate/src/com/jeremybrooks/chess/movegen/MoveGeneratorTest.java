@@ -845,7 +845,7 @@ public class MoveGeneratorTest {
     }
 
     private void displayBoardAndSideToMove() {
-        System.out.println(new Displayer().formatBoard(g.getPosition()));
+        System.out.println(new Displayer(g.getPosition()).formatBoard());
         System.out.println("To Move: " + (g.isWhiteToMove() ? "White" : "Black") + "\n");
     }
 

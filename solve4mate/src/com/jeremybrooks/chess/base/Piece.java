@@ -118,6 +118,7 @@ public abstract class Piece {
             : Character.toLowerCase(displayCh);
     }
 
+    @Override
     public String toString() { return ""+toChar(); }
 
     /**

@@ -254,11 +254,11 @@ public class AttacksTest {
     {
         if(!expectedMoves.equals(actualMoves))
         {
-            Displayer displayer = new Displayer();
-            Position position = FenParser.parsePieceBoard(associatedFEN); //new Position(associatedFEN);
+        	Position position = FenParser.parsePieceBoard(associatedFEN); //new Position(associatedFEN);
+            Displayer displayer = new Displayer(position);
             StringBuilder msgBuilder = new StringBuilder();
             msgBuilder.append("Given this position:\n");
-            msgBuilder.append(displayer.formatBoard(position));
+            msgBuilder.append(displayer.formatBoard());
             msgBuilder.append("\nExpected "+message+" moves are: ").append(expectedMoves);
             msgBuilder.append("\nActual "+message+" moves are  : ").append(actualMoves);
             fail(msgBuilder.toString());

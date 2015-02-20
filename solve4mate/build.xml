@@ -173,7 +173,7 @@
 		<path id="expected.out" location="data/${movegen-testcase}-expected.txt"/>
 		<path id="results.out"  location="${build}/${movegen-testcase}-out.txt"/>
 		<path id="results.err"  location="${build}/${movegen-testcase}-err.txt"/>
-		<echo>Computing results (roughly 3 minutes to compute)...</echo>
+		<echo>Computing results...</echo>
 		<java jar="${build}/engine.jar"
 		           fork="true"
 		           failonerror="true"
