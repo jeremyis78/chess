@@ -3,6 +3,7 @@ package com.jeremybrooks.chess.util;
 import static com.jeremybrooks.chess.base.Bitmap.*;
 
 /**
+ * <pre>
  * An iterator defining the squares within the diagonals
  * that are read (from left to right) from a chess board
  * rotated 45 degrees right.  Square H1 (7) at the bottom, 
@@ -29,6 +30,7 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
  *                     \---/
  *    0                 \7/
  *                       -
+ * </pre>
  */
 public class RightDiagonalIterator extends DiagonalIterator {
 
