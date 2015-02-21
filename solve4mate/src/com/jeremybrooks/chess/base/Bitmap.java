@@ -204,7 +204,11 @@ public class Bitmap {
         48, 49, 50, 51, 52, 53, 54, 55,    // 7th-rank
         56, 57, 58, 59, 60, 61, 62, 63     // 8th-rank
     };
-    public static final int SQ2BIT90R[] = {
+    public static final int SQ2BIT90R[] = { 
+    	// The name is actually incorrect; it's a combination of a rotation and a flip:
+    	// 1) rotated 90 degrees LEFT such that 0=a8, 1=a7, ..., 7=a1
+    	// 2) then vertically flipped such that 0=a1, 1=a2, ..., 7=a8 (so we have ascending order)
+    	// Therefore a better name might be SQ2FILEBIT / SQUARE_TO_FILE_BIT
         0,  8, 16, 24, 32, 40, 48, 56,    // a-file 
         1,  9, 17, 25, 33, 41, 49, 57,    // b-file
         2, 10, 18, 26, 34, 42, 50, 58,    // c-file
@@ -212,7 +216,7 @@ public class Bitmap {
         4, 12, 20, 28, 36, 44, 52, 60,    // e-file
         5, 13, 21, 29, 37, 45, 53, 61,    // f-file
         6, 14, 22, 30, 38, 46, 54, 62,    // g-file
-        7, 15, 23, 31, 39, 47, 55, 63    // h-file
+        7, 15, 23, 31, 39, 47, 55, 63     // h-file
     };
     
     public static final int SQ2BIT45L[] = {
@@ -310,18 +314,6 @@ public class Bitmap {
         return new Bitmap(bits);
     }
 
-    /*
-     * long mask = 1L << sq;
-        all[ALL] |= mask;
-        all[ALL90] |= 1L << SQ2BIT90R[sq];
-        all[ALL45L] |= 1L << SQ2BIT45L[sq];
-        all[ALL45R] |= 1L << SQ2BIT45R[sq];
-        
-        rankBoard.or(Bitboard.rank(E4))
-        fileBoard.or(Bitboard.file(E4))
-        rightBoard.or(Bitboard.right(E4))
-        leftBoard.or(Bitboard.left(E4))
-     */
     /**
      * Returns a bitmap (unrotated) with given bit set.
      * 
@@ -371,7 +363,15 @@ public class Bitmap {
         return hasMore(bitmap);
     }
 
-    public static boolean hasMore(long board)
+    public static long populateBits(int firstBit, int lastBitExcluded, int increment)
+	{	
+		long populated = 0L;
+		for(int bit=firstBit; bit<lastBitExcluded; bit+=increment) 
+			populated |= withOneBitSet(bit);
+		return populated;
+	}
+
+	public static boolean hasMore(long board)
     {
         return board != 0;
     }
