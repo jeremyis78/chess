@@ -370,7 +370,17 @@ public class Bitmap {
 			populated |= withOneBitSet(bit);
 		return populated;
 	}
+    
+    public static boolean isBitSet(int bit, long bitboard)
+    {
+    	return Util.bool(bitboard & withOneBitSet(bit));
+    }
 
+    public static long withNewBitSet(long bitboard, int newBit)
+    {
+    	return bitboard |= withOneBitSet(newBit);
+    }
+    
 	public static boolean hasMore(long board)
     {
         return board != 0;

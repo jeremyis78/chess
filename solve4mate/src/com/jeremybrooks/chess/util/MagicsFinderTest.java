@@ -9,10 +9,18 @@ import com.jeremybrooks.chess.base.Square;
 
 public class MagicsFinderTest {
 
+//	@Test
+//	public void testGenerateOccupancyVariation()
+//	{
+//		MagicsFinder.generateOccupancyCombination(true);
+//		
+//		long a = 32L;
+//		System.out.println(Long.toString(a, 2));
+//	}
 	
 	@Test
 	public void testGenerateRookOccupancyMasks() {
-		long[] masks = MagicsFinder.generateRookOccupancyMasks();
+		long[] masks = MagicsFinder.rookOccupancyMasks;
 		assertTrue(   0x101010101017eL==masks[ 0] && 12==Long.bitCount(masks[ 0])); //R@a1
 		assertTrue(   0x202020202027cL==masks[ 1] && 11==Long.bitCount(masks[ 1])); //R@b1
 		assertTrue(   0x404040404047aL==masks[ 2] && 11==Long.bitCount(masks[ 2])); //R@c1
@@ -77,11 +85,26 @@ public class MagicsFinderTest {
 		assertTrue(0x5e20202020202000L==masks[61] && 11==Long.bitCount(masks[61])); //R@f8
 		assertTrue(0x3e40404040404000L==masks[62] && 11==Long.bitCount(masks[62])); //R@g8
 		assertTrue(0x7e80808080808000L==masks[63] && 12==Long.bitCount(masks[63])); //R@h8
+		int bitCountSum = 0;
+		int maxBitCount = 0;
+		for(int square=0; square<64; square++)
+		{
+			int bitCount = Long.bitCount(masks[square]);
+			bitCountSum += bitCount;
+			if(bitCount > maxBitCount) {
+				maxBitCount = bitCount;
+			}
+		}
+		assertEquals(672, bitCountSum);
+		int expectedIndexTableSize = MagicsFinder.twoToPowerOf(12);
+		int actualIndexTableSize   = MagicsFinder.twoToPowerOf(maxBitCount);
+		assertEquals(expectedIndexTableSize, actualIndexTableSize);
+
 	}
 	
 	@Test
 	public void testGenerateBishopOccupancyMasks() {
-		long[] masks = MagicsFinder.generateBishopOccupancyMasks();
+		long[] masks = MagicsFinder.bishOccupancyMasks;
         assertTrue(0x40201008040200L==masks[ 0] && 6==Long.bitCount(masks[ 0])); //B@a1
         assertTrue(  0x402010080400L==masks[ 1] && 5==Long.bitCount(masks[ 1])); //B@b1
         assertTrue(    0x4020100a00L==masks[ 2] && 5==Long.bitCount(masks[ 2])); //B@c1
@@ -146,13 +169,35 @@ public class MagicsFinderTest {
         assertTrue(0x50080402000000L==masks[61] && 5==Long.bitCount(masks[61])); //B@f8
         assertTrue(0x20100804020000L==masks[62] && 5==Long.bitCount(masks[62])); //B@g8
         assertTrue(0x40201008040200L==masks[63] && 6==Long.bitCount(masks[63])); //B@h8
+		int bitCountSum = 0;
+		int maxBitCount = 0;
+		for(int square=0; square<64; square++)
+		{
+			int bitCount = Long.bitCount(masks[square]);
+			bitCountSum += bitCount;
+			if(bitCount > maxBitCount) {
+				maxBitCount = bitCount;
+			}
+		}
+		assertEquals(364, bitCountSum);
+		int expectedIndexTableSize = MagicsFinder.twoToPowerOf(9);
+		int actualIndexTableSize   = MagicsFinder.twoToPowerOf(maxBitCount);
+		assertEquals(expectedIndexTableSize, actualIndexTableSize);
 	}
-
+	@Test
+	public void testPowerOfTwo()
+	{
+		assertEquals(1, MagicsFinder.twoToPowerOf(0));
+		assertEquals(2, MagicsFinder.twoToPowerOf(1));
+		assertEquals(4, MagicsFinder.twoToPowerOf(2));
+		assertEquals(8, MagicsFinder.twoToPowerOf(3));
+	}
+	
 	@Test
 	public void testSetBitsArray() {
 		for(int mask=0; mask<64; mask++)
 		{
-			int[] actualBit = MagicsFinder.toSetBitsArray(mask);
+			int[] actualBit = MagicsFinder.toArrayOfBitsSetIn(mask);
 			int actualMask = 0;
 			for(int index=0; 
 					index < actualBit.length && actualBit[index] != Bitmap.NOSQUARE; 
@@ -167,7 +212,7 @@ public class MagicsFinderTest {
 	public static void main(String[] args)
 	{
 		System.out.println("rook occupancy masks test code generation:");
-		long[] masks = MagicsFinder.generateRookOccupancyMasks();
+		long[] masks = MagicsFinder.rookOccupancyMasks;
 		for(int square=0; square<64; square++)
 		{
 			long mask = masks[square];
@@ -175,7 +220,7 @@ public class MagicsFinderTest {
 			System.out.println(String.format("assertTrue(  %#16xL==masks[%2d] && %d==Long.bitCount(masks[%2d])); //R@%s",mask, square, bitCount, square, Square.named(square)));
 		}
 		System.out.println("bishop occupancy mask test code generation:");
-		masks = MagicsFinder.generateBishopOccupancyMasks();
+		masks = MagicsFinder.bishOccupancyMasks;
         for(int square=0; square<64; square++)
         {
 			long mask = masks[square];
