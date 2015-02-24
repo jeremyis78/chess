@@ -4,19 +4,16 @@ import java.util.Random;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Square;
+import com.jeremybrooks.chess.movegen.Attacks;
 
 public class MagicsFinder {
 
-	private static class MagicEntry {
-		long number;
-		int shift;
-		long numAttempts;
-		long seed;
+	private static class MagicEntry extends Attacks.Magic {
+		public long numAttempts;
+		public long seed;
 
 		public MagicEntry(long magicNumber, int shift, long numAttempts, long seed) {
-			super();
-			this.number = magicNumber;
-			this.shift = shift;
+			super(magicNumber, shift);
 			this.numAttempts = numAttempts;
 			this.seed = seed;
 		}
@@ -55,18 +52,23 @@ public class MagicsFinder {
 	{
 		int maxBitsUsed = 0;
 		String pieceName = isRook?"rook":"bishop";
-		Object[] args = {pieceName, "magic", "Shift", "BitsUsed", "Seed", "NumTrialsToFindMagicNumber"};
-		String headerFormat = "//%s Magics %-18s\t%s\t%s\t%-18s\t%s";
-		String rowFormat    = "%sMagics[%d]=0x%016xL;\t// %d\t%-8d\t0x%016xL\t%d";
-		System.out.println(String.format(headerFormat, args));//, isRook?"Rook":"Bishop", "Magics", )(isRook?"Rook":"Bishop") +" Magics:\nPlacement\tMagic\tShift\tMaxIndex\tTrials");
+		Object[] args = {pieceName, "Bits/Used", "Seed", "NumTrialsToFindMagicNumber"};
+		String headerFormat = "//%s Magics initialization\t\t\t\t\t%s\t%-18s\t%s";
+		String rowFormat    = "%sMagics[%d]=new Magic(0x%016xL, %d);\t// \t%-9s%s\t0x%016xL\t%d";
+		System.out.println(String.format(headerFormat, args));
 		int numBitsOnBoard = 64;
+//		int bit = 14;
 		for(int bit=0; bit<numBitsOnBoard; bit++)
 		{
 			MagicEntry me = isRook ? finder.rookMagics[bit] : finder.bishopMagics[bit];
 			int bitsUsed = ((int) numBitsOnBoard-me.shift);
-			if(bitsUsed > maxBitsUsed) maxBitsUsed = bitsUsed;
+			if(bitsUsed > maxBitsUsed) 
+				maxBitsUsed = bitsUsed;
+			int totalBits = Long.bitCount(isRook ? rookOccupancyMasks[bit] : bishOccupancyMasks[bit]);
+			boolean minimizedMagic = bitsUsed < totalBits;
+			String sBitsUsed = totalBits + "/" + bitsUsed;
 			System.out.println(String.format(rowFormat, 
-					pieceName, bit, me.number, me.shift, bitsUsed, me.seed, me.numAttempts));
+					pieceName, bit, me.number, me.shift, sBitsUsed, (minimizedMagic?"*":""), me.seed, me.numAttempts));
 		}
 		int maxIndex = twoToPowerOf(maxBitsUsed);
 		int arraySizeKB = 8 * numBitsOnBoard * maxIndex / 1024;
@@ -74,180 +76,59 @@ public class MagicsFinder {
 		System.out.println(String.format(fmt,pieceName, numBitsOnBoard,maxIndex,maxBitsUsed,arraySizeKB));
 	}
 	
-	public void generateMoveDatabase(boolean isRook)
-    {
-        long validMoves;
-        int variationCount, bitCount;
-        int bitRef, variationIndex, j, magicIndex;
-        LongDisplayer d = new LongDisplayer();
- 
-        for (bitRef=1; bitRef<=63; bitRef++)  //goes from 0 to 63 inclusive
-        {
-            bitCount = isRook ? Long.bitCount(rookOccupancyMasks[bitRef]) : Long.bitCount(bishOccupancyMasks[bitRef]);
-            variationCount = (int)(1L << bitCount);
-            MagicEntry magic = isRook ? rookMagics[bitRef] : bishopMagics[bitRef];
-            for (variationIndex=0; 
-            	 variationIndex<variationCount; 
-            	 variationIndex++)
-            {
-                validMoves = 0;
-                long occupied = occupancyVariation[bitRef][variationIndex];
-				if (isRook)
-                {
-                	magic = rookMagics[bitRef];
-                    magicIndex = (int)((occupied * magic.number) >>> magic.shift);
-                    validMoves |= populateToFirstOccupiedBitPlus8(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitMinus8Moves(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitPlus1Moves(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitMinus1Moves(validMoves, bitRef, occupied);
-                    
-                    d.setLong(occupied);
-                    String varAndMoves = d.formatBoard();
-                    d.setLong(validMoves);
-                    varAndMoves += d.formatBoard();
-                    System.out.println(String.format("B@%s, %d:\n%s",Square.named(bitRef), magicIndex, varAndMoves));
-                    magicMovesRook[bitRef][magicIndex] = validMoves;
-                }
-                else
-                {
-                	magic = bishopMagics[bitRef];
-                    magicIndex = (int)((occupied * magic.number) >>> magic.shift);
-                    validMoves |= populateToFirstOccupiedBitPlus9(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitMinus9(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitPlus7(validMoves, bitRef, occupied);
-                    validMoves |= populateToFirstOccupiedBitMinus7(validMoves, bitRef, occupied);
-
-                    d.setLong(occupied);
-                    String varAndMoves = d.formatBoard();
-                    d.setLong(validMoves);
-                    varAndMoves += d.formatBoard();
-                    System.out.println(String.format("B@%s, %d:\n%s",Square.named(bitRef), magicIndex, varAndMoves));
-                    magicMovesBishop[bitRef][magicIndex] = validMoves;
-                }
-            }
-        }
-    }
-
-	private long populateToFirstOccupiedBitMinus7(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit-7; j%8!=0 && j>=0; j-=7) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitPlus7(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit+7; j%8!=7 && j<=63; j+=7) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitMinus9(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit-9; j%8!=7 && j>=0; j-=9)  { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitPlus9(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit+9; j%8!=0 && j<=63; j+=9) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitMinus1Moves(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit-1; j%8!=7 && j>=0; j--) { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitPlus1Moves(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit+1; j%8!=0; j++)         { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitMinus8Moves(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit-8; j>=0; j-=8)          { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-
-	private long populateToFirstOccupiedBitPlus8(long validMoves, int startBit, long occupied) {
-		int j;
-		for (j=startBit+8; j<=63; j+=8)         { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
-		return validMoves;
-	}
-	
 	//http://www.afewmorelines.com/understanding-magic-bitboards-in-chess-programming/ 
 	public void generateMagicNumbers(boolean isRook)
     {
+//		System.out.println("generate magics for " +(isRook?"rook":"bishop"));
 		generateAttackSetBySquareAndOccupancyVariation(isRook);
-        int variationIndex, j, bitRef, variationCount;
  
         long seed = System.nanoTime();
         Random r = new Random(seed);
-        long magicNumber = 0;
-        int testIndex;
-        long occupiedVariation;
-        long attackSet;
         long constructiveCollisions = 0L;
- 
-        for (bitRef=0; bitRef<=63; bitRef++)
+//        int maxSearchTimePerSquare = 5*1000*1000*1000; //10 seconds to start??
+//        boolean hasMoreTime = true;
+        for (int bitRef=0; bitRef<=63; bitRef++)
         {
             int bitCount = Long.bitCount(isRook ? rookOccupancyMasks[bitRef] : bishOccupancyMasks[bitRef]);
-            variationCount = 1 << bitCount;
-            int magicShift = 64-bitCount;
-
-            long usedBy[] = new long[variationCount];
-            boolean indexAlreadyUsed;
-            int attempts = 0;
-			do
-            {
-                magicNumber = r.nextLong() & r.nextLong() & r.nextLong(); // generate a random number with not many bits set
-                for (j=0; j<variationCount; j++) usedBy[j] = 0; //initial condition: none have been used
-                attempts++;
-                indexAlreadyUsed=false;
-                for (variationIndex=0; 
-                	 variationIndex<variationCount; 
-                	 variationIndex++)
-                {
-                    occupiedVariation = occupancyVariation[bitRef][variationIndex];
-                    attackSet = occupancyAttackSet[bitRef][variationIndex];
-                    //compute the index and if the index is used by an attack set that is incorrect for this occupancy variation
-                    //we have to start again with the next magic number
-					testIndex = (int)((occupiedVariation * magicNumber) >>> magicShift);
-					boolean isIndexUsed = usedBy[testIndex] != 0;
-					boolean usedForDifferentAttackSet = usedBy[testIndex] != attackSet;
-					indexAlreadyUsed = isIndexUsed && usedForDifferentAttackSet;
-					if(indexAlreadyUsed) break;
-					if(isIndexUsed && !usedForDifferentAttackSet)
-						constructiveCollisions++;
-                    usedBy[testIndex] = attackSet;
-//                    if(testIndex > maxIndex) maxIndex = testIndex;
-                }
-            } 
-            while (indexAlreadyUsed);
-            MagicEntry magicEntry = new MagicEntry(magicNumber,magicShift,attempts, seed);
+//            int maxBitsUsed = 0;
+            MagicEntry magic;
+            MagicEntry bestMagic = null;
+//            long startTime = System.nanoTime();
+//            do {
+            	magic = findMagicForBit(bitRef, bitCount, r, seed);
+//            	int bitsUsed = 64-magic.shift;
+//            	if(bitsUsed<maxBitsUsed)
+//            	{
+//            		bestMagic = magic;
+//            	}
+//            	seed &= 0x2890014020030e01L; //so we don't start with the same seed
+//            	hasMoreTime = (System.nanoTime() - startTime) < maxSearchTimePerSquare;
+//            	//System.out.println(hasMoreTime);
+//            }  while(maxBitsUsed<=bitCount && hasMoreTime);
+            
 			if (isRook)
-                rookMagics[bitRef] = magicEntry;
+                rookMagics[bitRef] = bestMagic != null ? bestMagic : magic;
             else
-                bishopMagics[bitRef] = magicEntry;
+                bishopMagics[bitRef] = bestMagic != null ? bestMagic : magic;
+//			System.out.println(Square.named(bitRef) + " magic found");
         }
         System.out.println((isRook?"Rook":"Bishop") + " seed="+seed+" constructiveCollisions="+constructiveCollisions);
     }
 	
-	private static MagicEntry generateMagicEntryForBit(int bitRef, int bitCount, Random r, long seed)
+	private static MagicEntry findMagicForBit(int bitRef, int bitCount, Random r, long seed)
 	{
         int variationCount = 1 << bitCount;
         long magicNumber = 0L;
         int magicShift = 64-bitCount;
 
-        long usedBy[] = new long[variationCount];
+        long attackSetUsedBy[] = new long[variationCount];
         boolean indexAlreadyUsed;
         int constructiveCollisions = 0;
         int attempts = 0;
 		do
         {
             magicNumber = r.nextLong() & r.nextLong() & r.nextLong(); // generate a random number with not many bits set
-            for (int j=0; j<variationCount; j++) usedBy[j] = 0; //initial condition: none have been used
+            for (int j=0; j<variationCount; j++) attackSetUsedBy[j] = 0; //initial condition: none have been used
             attempts++;
             indexAlreadyUsed=false;
             for (int variationIndex=0; 
@@ -258,19 +139,33 @@ public class MagicsFinder {
                 long attackSet = occupancyAttackSet[bitRef][variationIndex];
                 //compute the index and if the index is used by an attack set that is incorrect for this occupancy variation
                 //we have to start again with the next magic number
+                
+                //TODO: I think this is how it works (to find the overlapping attack sets, ie dense magics)
+                //Find the blockers in every direction (per piece)
+                //then loop over all already used attackSets looking for one with the same blockers in every direction
+                //and then assign the same attackSet to the testIndex.
+                
 				int testIndex = (int)((occupiedVariation * magicNumber) >>> magicShift);
-				boolean isIndexUsed = usedBy[testIndex] != 0;
-				boolean usedForDifferentAttackSet = usedBy[testIndex] != attackSet;
+				boolean isIndexUsed = attackSetUsedBy[testIndex] != 0;
+				boolean usedForDifferentAttackSet = attackSetUsedBy[testIndex] != attackSet;
 				indexAlreadyUsed = isIndexUsed && usedForDifferentAttackSet;
 				if(indexAlreadyUsed) break;
 				if(isIndexUsed && !usedForDifferentAttackSet)
 					constructiveCollisions++;
-                usedBy[testIndex] = attackSet;
-//                if(testIndex > maxIndex) maxIndex = testIndex;
+                attackSetUsedBy[testIndex] = attackSet;
+                //This is close but not quite right
+//                for(int v=0; v<variationCount; v++)
+//                {
+//                	long existingAttackSet = attackSetUsedBy[v];
+//					if(isSameAttackSet(existingAttackSet,attackSet))
+//                	{
+//                		attackSetUsedBy[testIndex] = existingAttackSet;
+//                	}
+//                }
             }
         } 
         while (indexAlreadyUsed);
-        return new MagicEntry(magicNumber,magicShift,attempts, seed);
+        return new MagicEntry(magicNumber, magicShift, attempts, seed);
 	}
 
 	private static long[] generateRookOccupancyMasks()
@@ -355,7 +250,9 @@ public class MagicsFinder {
             bitCount[bitRef] = Long.bitCount(mask); //Bitboards.countSetBits(mask);
             variationCount = (int)(1L << bitCount[bitRef]);
 //            System.out.println((isRook?"R@":"B@")+Square.named(bitRef)+": bitCount(mask)="+bitCount[bitRef]+ " variationCnt="+variationCount);
-            for (int variationIndex=0; variationIndex<variationCount; variationIndex++) //i={0, 1, 2, 3}
+            for (int variationIndex=0; 
+            	 variationIndex<variationCount;
+            	 variationIndex++)
             {
                 occupancyVariation[bitRef][variationIndex] = 0; 
  
@@ -392,7 +289,7 @@ public class MagicsFinder {
         for (int bitRef=0; bitRef<=63; bitRef++)
         {
             mask = isRook ? rookOccupancyMasks[bitRef] : bishOccupancyMasks[bitRef];
-            bitCount[bitRef] = Long.bitCount(mask); //Bitboards.countSetBits(mask);
+            bitCount[bitRef] = Long.bitCount(mask);
             variationCount = (int)(1L << bitCount[bitRef]);
 //            System.out.println((isRook?"R@":"B@")+Square.named(bitRef)+": bitCount(mask)="+bitCount[bitRef]+ " variationCnt="+variationCount);
             for (int variationNo=0; variationNo<variationCount; variationNo++) //i={0, 1, 2, 3}
@@ -405,31 +302,31 @@ public class MagicsFinder {
 				int bitToSet;
                 if (isRook)
                 {
-                    bitToSet = plus8Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerPlus8(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = minus8Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerMinus8(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = plus1Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerPlus1(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = minus1Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerMinus1(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
                 }
                 else
                 {
-                    bitToSet = plus9Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerPlus9(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = minus9Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerMinus9(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = plus7Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerPlus7(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
-                    bitToSet = minus7Blocker(bitRef, occupiedVariation);
+                    bitToSet = bitBlockerMinus7(bitRef, occupiedVariation);
                     if (isOnTheBitboard(bitToSet)) 
                     	occupancyAttackSet[bitRef][variationNo] |= Bitmap.withOneBitSet(bitToSet);
                 }
@@ -443,54 +340,156 @@ public class MagicsFinder {
 		return j>=0 && j<=63;
 	}
 
-	private static int minus7Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerMinus7(int startBit, long occupied) {
 		int j;
-		for (j=bitRef-7; j%8!=7 && j%8!=0 && j>=8 && (occupancyVariation & (1<<j)) == 0; j-=7);
+		for (j=startBit-7; j%8!=7 && j%8!=0 && j>=8 && (occupied & (1<<j)) == 0; j-=7);
 		return j;
 	}
 
-	private static int plus7Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerPlus7(int startBit, long occupied) {
 		int j;
-		for (j=bitRef+7; j%8!=7 && j%8!=0 && j<=55 && (occupancyVariation & (1<<j)) == 0; j+=7);
+		for (j=startBit+7; j%8!=7 && j%8!=0 && j<=55 && (occupied & (1<<j)) == 0; j+=7);
 		return j;
 	}
 
-	private static int minus9Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerMinus9(int startBit, long occupied) {
 		int j;
-		for (j=bitRef-9; j%8!=7 && j%8!=0 && j>=8 && (occupancyVariation & (1<<j)) == 0; j-=9);
+		for (j=startBit-9; j%8!=7 && j%8!=0 && j>=8 && (occupied & (1<<j)) == 0; j-=9);
 		return j;
 	}
 
-	private static int plus9Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerPlus9(int startBit, long occupied) {
 		int j;
-		for (j=bitRef+9; j%8!=7 && j%8!=0 && j<=55 && (occupancyVariation & (1<<j)) == 0; j+=9);
+		for (j=startBit+9; j%8!=7 && j%8!=0 && j<=55 && (occupied & (1<<j)) == 0; j+=9);
 		return j;
 	}
 
-	private static int minus1Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerMinus1(int startBit, long occupied) {
 		int j;
-		for (j=bitRef-1; j%8!=7 && j%8!=0 && j>=0 && (occupancyVariation & (1<<j)) == 0; j--);
+		for (j=startBit-1; j%8!=7 && j%8!=0 && j>=0 && (occupied & (1<<j)) == 0; j--);
 		return j;
 	}
 
-	private static int plus1Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerPlus1(int startBit, long occupied) {
 		int j;
-		for (j=bitRef+1; j%8!=7 && j%8!=0 && (occupancyVariation & (1<<j)) == 0; j++);
+		for (j=startBit+1; j%8!=7 && j%8!=0 && (occupied & (1<<j)) == 0; j++);
 		return j;
 	}
 
-	private static int minus8Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerMinus8(int startBit, long occupied) {
 		int j;
-		for (j=bitRef-8; j>=8 && (occupancyVariation & (1<<j)) == 0; j-=8);
+		for (j=startBit-8; j>=8 && (occupied & (1<<j)) == 0; j-=8);
 		return j;
 	}
 
-	private static int plus8Blocker(int bitRef, long occupancyVariation) {
+	private static int bitBlockerPlus8(int startBit, long occupied) {
 		int j;
-		for (j=bitRef+8; j<=55 && (occupancyVariation & (1<<j)) == 0; j+=8);
+		for (j=startBit+8; j<=55 && (occupied & (1<<j)) == 0; j+=8);
 		return j;
 	}
     
+	public void generateMoveDatabase(boolean isRook)
+    {
+        long validMoves;
+        int magicIndex;
+        LongDisplayer d = new LongDisplayer();
+ 
+        for (int bitRef=1; bitRef<=63; bitRef++)  //goes from 0 to 63 inclusive
+        {
+            int bitCount = isRook ? Long.bitCount(rookOccupancyMasks[bitRef]) : Long.bitCount(bishOccupancyMasks[bitRef]);
+            int variationCount = (int)(1L << bitCount);
+            MagicEntry magic = isRook ? rookMagics[bitRef] : bishopMagics[bitRef];
+            for (int variationIndex=0; 
+            	 variationIndex<variationCount; 
+            	 variationIndex++)
+            {
+                validMoves = 0L;
+                long occupied = occupancyVariation[bitRef][variationIndex];
+				if (isRook)
+                {
+                	magic = rookMagics[bitRef];
+                    magicIndex = (int)((occupied * magic.number) >>> magic.shift);
+                    validMoves |= fillBitsToBlockerPlus8(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerMinus8Moves(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerPlus1Moves(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerMinus1Moves(bitRef, occupied);
+                    magicMovesRook[bitRef][magicIndex] = validMoves;
+                    
+                    d.setLong(occupied);
+                    String varAndMoves = d.formatBoard();
+                    d.setLong(validMoves);
+                    varAndMoves += d.formatBoard();
+                    System.out.println(String.format("B@%s, %d:\n%s",Square.named(bitRef), magicIndex, varAndMoves));
+                }
+                else
+                {
+                	magic = bishopMagics[bitRef];
+                    magicIndex = (int)((occupied * magic.number) >>> magic.shift);
+                    validMoves |= fillBitsToBlockerPlus9(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerMinus9(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerPlus7(bitRef, occupied);
+                    validMoves |= fillBitsToBlockerMinus7(bitRef, occupied);
+                    magicMovesBishop[bitRef][magicIndex] = validMoves;
+
+                    d.setLong(occupied);
+                    String varAndMoves = d.formatBoard();
+                    d.setLong(validMoves);
+                    varAndMoves += d.formatBoard();
+                    System.out.println(String.format("B@%s, %d:\n%s",Square.named(bitRef), magicIndex, varAndMoves));
+                }
+            }
+        }
+    }
+
+	private long fillBitsToBlockerMinus7(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit-7; j%8!=0 && j>=0; j-=7) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerPlus7(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit+7; j%8!=7 && j<=63; j+=7) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerMinus9(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit-9; j%8!=7 && j>=0; j-=9)  { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerPlus9(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit+9; j%8!=0 && j<=63; j+=9) { validMoves |= (1L << j); if(Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerMinus1Moves(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit-1; j%8!=7 && j>=0; j--) { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerPlus1Moves(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit+1; j%8!=0; j++)         { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerMinus8Moves(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit-8; j>=0; j-=8)          { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	private long fillBitsToBlockerPlus8(int startBit, long occupied) {
+		long validMoves = 0L;
+		for (int j=startBit+8; j<=63; j+=8)         { validMoves |= (1L << j); if (Bitmap.isBitSet(j, occupied)) break; }
+		return validMoves;
+	}
+
+	
     /**
      * Return an array of the bit indexes set in mask
      * @param mask the given bits we want to use

@@ -26,6 +26,18 @@ import com.jeremybrooks.chess.util.Util;
 public class Attacks {
     private static final Logger log = Logger.getLogger(Attacks.class);
     static final Attacks INSTANCE = new Attacks(); //default scope for testing
+
+    public static class Magic {
+    	public final long number;
+    	public final int shift;
+		
+    	public Magic(long number, int shift) {
+			super();
+			this.number = number;
+			this.shift = shift;
+		}
+    }
+    
     private static final int FILE1 = 0;
     private static final int FILE8 = 7;
     private static final int RANK8 = 7;
@@ -127,7 +139,25 @@ public class Attacks {
         attacks |= INSTANCE.file[rookSquare][stat2];
         return attacks;
     }
-    
+ 
+    public static long attacksTo(int square, long targets, int sideUnderAttack, GameState state)
+    {
+    	long attackers = Attacks.attackers(state, sideUnderAttack, square);
+    	long intersection = attackers & targets;
+//    	System.out.println("  attackers: "+Util.displaySquaresStr(attackers));
+//    	System.out.println("  targets  : "+Util.displaySquaresStr(targets));
+//    	System.out.println("  intersect: "+Util.displaySquaresStr(intersection)); 
+		return intersection;
+    }
+//
+//    public static long xrayRookAttacks(long occupied, long blockers, int rookSquare)
+//    {
+//    	long occupied90Degrees = 0L; //TODO: compute me
+//        long attacks = INSTANCE.rank[rookSquare][status (occupied, rookSquare)]
+//                	 | INSTANCE.file[rookSquare][status90 (occupied90Degrees, rookSquare)];
+//
+//    }
+
     /** 
      * Returns a bitbrd of the pieces (excluding the king) attacking 
      * "square".  "side" represents the color/side whose pieces we want to
