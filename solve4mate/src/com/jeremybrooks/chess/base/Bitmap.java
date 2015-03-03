@@ -389,7 +389,7 @@ public class Bitmap {
     public static long withOneBitSet(int bitToSet)
     {
         if(bitToSet < 0 || bitToSet > 63)
-            throw new IllegalArgumentException("bitToSet must be 0 to 63");
+            throw new IllegalArgumentException("bitToSet ("+bitToSet+") must be 0 to 63");
         return 1L << bitToSet;
     }
     
