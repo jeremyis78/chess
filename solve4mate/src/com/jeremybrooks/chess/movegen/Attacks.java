@@ -4,7 +4,10 @@
  */
 package com.jeremybrooks.chess.movegen;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
+import static com.jeremybrooks.chess.base.Bitmap.A1;
+import static com.jeremybrooks.chess.base.Bitmap.H8;
+import static com.jeremybrooks.chess.base.Bitmap.fileNumber;
+import static com.jeremybrooks.chess.base.Bitmap.rankNumber;
 
 import org.apache.log4j.Logger;
 
@@ -14,9 +17,12 @@ import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.SlidingPiece;
 import com.jeremybrooks.chess.base.Square;
+import com.jeremybrooks.chess.util.BishopMagics;
 import com.jeremybrooks.chess.util.DiagonalIterator;
 import com.jeremybrooks.chess.util.LeftDiagonalIterator;
 import com.jeremybrooks.chess.util.RightDiagonalIterator;
+import com.jeremybrooks.chess.util.RookMagics;
+import com.jeremybrooks.chess.util.SlidingMagics;
 import com.jeremybrooks.chess.util.Util;
 
 /**
@@ -26,21 +32,18 @@ import com.jeremybrooks.chess.util.Util;
 public class Attacks {
     private static final Logger log = Logger.getLogger(Attacks.class);
     static final Attacks INSTANCE = new Attacks(); //default scope for testing
-
-    public static class Magic {
-    	public final long number;
-    	public final int shift;
-		
-    	public Magic(long number, int shift) {
-			super();
-			this.number = number;
-			this.shift = shift;
-		}
-    }
     
+    static SlidingMagics rookMagics = new RookMagics();
+    static SlidingMagics bishopMagics = new BishopMagics();
+
     private static final int FILE1 = 0;
     private static final int FILE8 = 7;
     private static final int RANK8 = 7;
+    
+    static {
+    	rookMagics.generate();
+    	bishopMagics.generate();
+    }
 
     short base[][] = new short[8][64]; //datatype needs to be 8bits, using short instead to avoid some problem
 
@@ -102,43 +105,49 @@ public class Attacks {
             SlidingPiece slider = (SlidingPiece) piece;
             if (slider.slidesOnDiagonals())
             {
-                long allPieces45Left = position.getOccupied(-45);
-                long allPieces45Right = position.getOccupied(45);
-                pseudoAttacks |= bishopAttacks(onSquare, allPieces45Left, allPieces45Right);
+                pseudoAttacks |= bishopAttacks(onSquare, position.getOccupied());
             }
             if (slider.slidesLaterally())
             {
-                long allPiecesByRank = position.getOccupied(0);
-                long allPiecesByFile = position.getOccupied(90);
-                pseudoAttacks |= rookAttacks(onSquare, allPiecesByRank, allPiecesByFile);
+                pseudoAttacks |= rookAttacks(onSquare, position.getOccupied());
             }
         }
         return pseudoAttacks;
     }
-    
-    private static long bishopAttacks(int bishopSquare, long allPieces45Left, long allPieces45Right)
-    {
-        long attacks;
-        int stat1, stat2;
 
-        stat1 = status45L (allPieces45Left, bishopSquare);
-        stat2 = status45R (allPieces45Right, bishopSquare);
-        attacks = INSTANCE.L45[bishopSquare][stat1];
-        attacks |= INSTANCE.R45[bishopSquare][stat2];
-        return attacks;
+    private static long bishopAttacks(int bishopSquare, long occupied)
+    {
+    	return bishopMagics.getMoves(bishopSquare, occupied);
     }
 
-    private static long rookAttacks(int rookSquare, long allPiecesByRank, long allPiecesByFile)
-    {
-        long attacks;
-        int stat1, stat2;
+//    private static long bishopAttacks(int bishopSquare, long allPieces45Left, long allPieces45Right)
+//    {
+//        long attacks;
+//        int stat1, stat2;
+//
+//        stat1 = status45L (allPieces45Left, bishopSquare);
+//        stat2 = status45R (allPieces45Right, bishopSquare);
+//        attacks = INSTANCE.L45[bishopSquare][stat1];
+//        attacks |= INSTANCE.R45[bishopSquare][stat2];
+//        return attacks;
+//    }
 
-        stat1 = status (allPiecesByRank, rookSquare);
-        stat2 = status90 (allPiecesByFile, rookSquare);
-        attacks = INSTANCE.rank[rookSquare][stat1];
-        attacks |= INSTANCE.file[rookSquare][stat2];
-        return attacks;
+    private static long rookAttacks(int rookSquare, long occupied)
+    {
+    	return rookMagics.getMoves(rookSquare, occupied);
     }
+
+//    private static long rookAttacks(int rookSquare, long allPiecesByRank, long allPiecesByFile)
+//    {
+//        long attacks;
+//        int stat1, stat2;
+//
+//        stat1 = status (allPiecesByRank, rookSquare);
+//        stat2 = status90 (allPiecesByFile, rookSquare);
+//        attacks = INSTANCE.rank[rookSquare][stat1];
+//        attacks |= INSTANCE.file[rookSquare][stat2];
+//        return attacks;
+//    }
  
     public static long attacksTo(int square, long targets, int sideUnderAttack, GameState state)
     {
@@ -409,6 +418,10 @@ public class Attacks {
       generateWhitePawnAttacks();
       generateBlackPawnAttacks();
       generateKingKnightAttacks();
+      SlidingMagics rookMagics = new RookMagics();
+      rookMagics.generate();
+      SlidingMagics bishopMagics = new BishopMagics();
+      bishopMagics.generate();
     }
 
     private void generateMasks(){

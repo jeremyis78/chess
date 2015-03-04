@@ -12,7 +12,7 @@ public class BishopMagicsTest {
 
 	private static final int BISHOP_ATTACK_SETS_PER_SQUARE = 512;
 	
-	private static final BishopMagics instance = new BishopMagics();
+	private static final SlidingMagics instance = new BishopMagics();
 	private static Magic[] bishopMagics;
 	private static long[][] bishopMoves;
 
@@ -60,7 +60,7 @@ public class BishopMagicsTest {
 
 	@Test
 	public void testGenerateBishopOccupancyMasks() {
-		long[] masks = BishopMagics.occupancyMasks;
+		long[] masks = instance.getOccupancyMasks();
         assertTrue(0x40201008040200L==masks[ 0] && 6==Long.bitCount(masks[ 0])); //B@a1
         assertTrue(  0x402010080400L==masks[ 1] && 5==Long.bitCount(masks[ 1])); //B@b1
         assertTrue(    0x4020100a00L==masks[ 2] && 5==Long.bitCount(masks[ 2])); //B@c1
@@ -162,16 +162,17 @@ public class BishopMagicsTest {
 	
 	public static void main(String[] args)
 	{
-		BishopMagicsTest.initialize();
 		System.out.println("bishop (occupied and validMoves):");
-		long[] masks = BishopMagics.occupancyMasks;
+		BishopMagicsTest.initialize();
+		long[] masks = instance.getOccupancyMasks();
+		long[][] occupancyVariation = instance.getOccupancyVariation();
 		for(int square=0; square<=63; square++)
 		{
 			long mask = masks[square];
 			int variationCount = 1 << Long.bitCount(mask);
 			for(int variationIndex=0; variationIndex<variationCount; variationIndex++)
 			{
-				long occupied = BishopMagics.occupancyVariation[square][variationIndex];
+				long occupied = occupancyVariation[square][variationIndex];
 				long validMoves = BishopMagicsTest.bishopAttacks(square, occupied);
 				String occupiedAndMovesSideBySide =
 						LongDisplayer.paste(Square.named(square) + " occupied-"+variationIndex, occupied, "\tMoves", validMoves);

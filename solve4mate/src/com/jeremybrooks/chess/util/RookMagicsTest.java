@@ -47,7 +47,7 @@ public class RookMagicsTest {
 
 	@Test
 	public void testGenerateRookOccupancyMasks() {
-		long[] masks = RookMagics.occupancyMasks;
+		long[] masks = instance.getOccupancyMasks();
 		assertTrue(   0x101010101017eL==masks[ 0] && 12==Long.bitCount(masks[ 0])); //R@a1
 		assertTrue(   0x202020202027cL==masks[ 1] && 11==Long.bitCount(masks[ 1])); //R@b1
 		assertTrue(   0x404040404047aL==masks[ 2] && 11==Long.bitCount(masks[ 2])); //R@c1
@@ -140,17 +140,17 @@ public class RookMagicsTest {
 
 	public static void main(String[] args)
 	{
-		RookMagicsTest.initialize();
-		
 		System.out.println("rook (occupied and validMoves):");
-		RookMagics rm = new RookMagics();
-		for(int square=24; square<=24; square++)
+		RookMagicsTest.initialize();
+		long[] masks = instance.getOccupancyMasks();
+		long[][] occupancyVariation = instance.getOccupancyVariation();
+		for(int square=0; square<=63; square++)
 		{
-			long mask = RookMagics.occupancyMasks[square];
-			int variationCount = 50; //1 << Long.bitCount(mask);
+			long mask = masks[square];
+			int variationCount = 1 << Long.bitCount(mask);
 			for(int variationIndex=0; variationIndex<variationCount; variationIndex++)
 			{
-				long occupied = RookMagics.occupancyVariation[square][variationIndex];
+				long occupied = occupancyVariation[square][variationIndex];
 				long validMoves = RookMagicsTest.rookAttacks(square, occupied);
 				String occupiedAndMovesSideBySide =
 						LongDisplayer.paste(Square.named(square) + " occupied-"+variationIndex, occupied, "\tMoves", validMoves);
