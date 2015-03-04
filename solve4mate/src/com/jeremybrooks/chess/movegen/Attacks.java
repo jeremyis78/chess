@@ -20,6 +20,7 @@ import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.BishopMagics;
 import com.jeremybrooks.chess.util.DiagonalIterator;
 import com.jeremybrooks.chess.util.LeftDiagonalIterator;
+import com.jeremybrooks.chess.util.Magic;
 import com.jeremybrooks.chess.util.RightDiagonalIterator;
 import com.jeremybrooks.chess.util.RookMagics;
 import com.jeremybrooks.chess.util.SlidingMagics;
@@ -32,17 +33,152 @@ import com.jeremybrooks.chess.util.Util;
 public class Attacks {
     private static final Logger log = Logger.getLogger(Attacks.class);
     static final Attacks INSTANCE = new Attacks(); //default scope for testing
-    
-    static SlidingMagics rookMagics = new RookMagics();
-    static SlidingMagics bishopMagics = new BishopMagics();
+    private static Magic[] rookMagics   = new Magic[64];
+    private static Magic[] bishopMagics = new Magic[64];;
+    private static long[][] rookMovesDatabase;   //indexed by square and magic occupiedIndex
+    private static long[][] bishopMovesDatabase; //indexed by square and magic occupiedIndex
 
     private static final int FILE1 = 0;
     private static final int FILE8 = 7;
     private static final int RANK8 = 7;
     
     static {
-    	rookMagics.generate();
-    	bishopMagics.generate();
+    	//rook Magics initialization                                                    Bits/Used	NumTrialsToFindMagicNumber
+    	rookMagics[ 0] = new Magic(0x0180001020844000L, 52, 0x000101010101017eL);	// 	12/12    	66284
+    	rookMagics[ 1] = new Magic(0x08c0042000409001L, 53, 0x000202020202027cL);	// 	11/11    	3077
+    	rookMagics[ 2] = new Magic(0x0300200041004810L, 53, 0x000404040404047aL);	// 	11/11    	38965
+    	rookMagics[ 3] = new Magic(0x0a00120048042040L, 53, 0x0008080808080876L);	// 	11/11    	26717
+    	rookMagics[ 4] = new Magic(0x0200220008041020L, 53, 0x001010101010106eL);	// 	11/11    	89295
+    	rookMagics[ 5] = new Magic(0x0900010002180400L, 53, 0x002020202020205eL);	// 	11/11    	43440
+    	rookMagics[ 6] = new Magic(0x4080490000801200L, 53, 0x004040404040403eL);	// 	11/11    	40707
+    	rookMagics[ 7] = new Magic(0x010000c420810002L, 52, 0x008080808080807eL);	// 	12/12    	202904
+    	rookMagics[ 8] = new Magic(0x2801800020400091L, 53, 0x0001010101017e00L);	// 	11/11    	13207
+    	rookMagics[ 9] = new Magic(0x0400400850002000L, 54, 0x0002020202027c00L);	// 	10/10    	13000
+    	rookMagics[10] = new Magic(0x0001004013002000L, 54, 0x0004040404047a00L);	// 	10/10    	121098
+    	rookMagics[11] = new Magic(0x0000801000080084L, 54, 0x0008080808087600L);	// 	10/10    	2028
+    	rookMagics[12] = new Magic(0x8010808048000400L, 54, 0x0010101010106e00L);	// 	10/10    	24138
+    	rookMagics[13] = new Magic(0x2004012048100c00L, 54, 0x0020202020205e00L);	// 	10/10    	12066
+    	rookMagics[14] = new Magic(0x014c008810020d04L, 54, 0x0040404040403e00L);	// 	10/10    	5283
+    	rookMagics[15] = new Magic(0x10088000800d4100L, 53, 0x0080808080807e00L);	// 	11/11    	3969
+    	rookMagics[16] = new Magic(0x0004288004400082L, 53, 0x00010101017e0100L);	// 	11/11    	11980
+    	rookMagics[17] = new Magic(0x001008404000a000L, 54, 0x00020202027c0200L);	// 	10/10    	38957
+    	rookMagics[18] = new Magic(0x0620010044a10090L, 54, 0x00040404047a0400L);	// 	10/10    	51460
+    	rookMagics[19] = new Magic(0x2001818008001000L, 54, 0x0008080808760800L);	// 	10/10    	3782
+    	rookMagics[20] = new Magic(0x2208014004020040L, 54, 0x00101010106e1000L);	// 	10/10    	92493
+    	rookMagics[21] = new Magic(0x2200808004002200L, 54, 0x00202020205e2000L);	// 	10/10    	124933
+    	rookMagics[22] = new Magic(0x0000140048020910L, 54, 0x00404040403e4000L);	// 	10/10    	254
+    	rookMagics[23] = new Magic(0x48002e0008804504L, 53, 0x00808080807e8000L);	// 	11/11    	36605
+    	rookMagics[24] = new Magic(0x040a800080204000L, 53, 0x000101017e010100L);	// 	11/11    	8617
+    	rookMagics[25] = new Magic(0x3400824200230a00L, 54, 0x000202027c020200L);	// 	10/10    	17625
+    	rookMagics[26] = new Magic(0x0100410100142000L, 54, 0x000404047a040400L);	// 	10/10    	40099
+    	rookMagics[27] = new Magic(0x0408420200201008L, 54, 0x0008080876080800L);	// 	10/10    	63982
+    	rookMagics[28] = new Magic(0x8008000900050050L, 54, 0x001010106e101000L);	// 	10/10    	80623
+    	rookMagics[29] = new Magic(0x000a000200283005L, 54, 0x002020205e202000L);	// 	10/10    	23912
+    	rookMagics[30] = new Magic(0x8801006100020014L, 54, 0x004040403e404000L);	// 	10/10    	19344
+    	rookMagics[31] = new Magic(0x8000004a000c0081L, 53, 0x008080807e808000L);	// 	11/11    	11129
+    	rookMagics[32] = new Magic(0x0000400080800020L, 53, 0x0001017e01010100L);	// 	11/11    	6633
+    	rookMagics[33] = new Magic(0x8008802001804000L, 54, 0x0002027c02020200L);	// 	10/10    	2844
+    	rookMagics[34] = new Magic(0x0150200481801000L, 54, 0x0004047a04040400L);	// 	10/10    	6619
+    	rookMagics[35] = new Magic(0x0001180083801000L, 54, 0x0008087608080800L);	// 	10/10    	9581
+    	rookMagics[36] = new Magic(0x0000280101001014L, 54, 0x0010106e10101000L);	// 	10/10    	22069
+    	rookMagics[37] = new Magic(0x4044000600800480L, 54, 0x0020205e20202000L);	// 	10/10    	21750
+    	rookMagics[38] = new Magic(0x01501e1044000805L, 54, 0x0040403e40404000L);	// 	10/10    	7528
+    	rookMagics[39] = new Magic(0x01008008c8800100L, 53, 0x0080807e80808000L);	// 	11/11    	7459
+    	rookMagics[40] = new Magic(0x0000800041010020L, 53, 0x00017e0101010100L);	// 	11/11    	4736
+    	rookMagics[41] = new Magic(0x4044200150004003L, 54, 0x00027c0202020200L);	// 	10/10    	46124
+    	rookMagics[42] = new Magic(0x4100a00041010010L, 54, 0x00047a0404040400L);	// 	10/10    	16750
+    	rookMagics[43] = new Magic(0x0004a01005010008L, 54, 0x0008760808080800L);	// 	10/10    	12444
+    	rookMagics[44] = new Magic(0x0100080004008080L, 54, 0x00106e1010101000L);	// 	10/10    	15145
+    	rookMagics[45] = new Magic(0x0106008004008100L, 54, 0x00205e2020202000L);	// 	10/10    	25484
+    	rookMagics[46] = new Magic(0x0050080110040012L, 54, 0x00403e4040404000L);	// 	10/10    	18379
+    	rookMagics[47] = new Magic(0x8825008404c20003L, 53, 0x00807e8080808000L);	// 	11/11    	61637
+    	rookMagics[48] = new Magic(0x1040800040006080L, 53, 0x007e010101010100L);	// 	11/11    	5058
+    	rookMagics[49] = new Magic(0x04220b0080a04200L, 54, 0x007c020202020200L);	// 	10/10    	6834
+    	rookMagics[50] = new Magic(0x4008a00440110300L, 54, 0x007a040404040400L);	// 	10/10    	6914
+    	rookMagics[51] = new Magic(0x000040200a001200L, 54, 0x0076080808080800L);	// 	10/10    	217
+    	rookMagics[52] = new Magic(0x4002800401580080L, 54, 0x006e101010101000L);	// 	10/10    	52084
+    	rookMagics[53] = new Magic(0x4002001508900a00L, 54, 0x005e202020202000L);	// 	10/10    	1670
+    	rookMagics[54] = new Magic(0x0000800900020080L, 54, 0x003e404040404000L);	// 	10/10    	1574
+    	rookMagics[55] = new Magic(0x5000018400412a00L, 53, 0x007e808080808000L);	// 	11/11    	6349
+    	rookMagics[56] = new Magic(0x0202004027001082L, 52, 0x7e01010101010100L);	// 	12/12    	21230
+    	rookMagics[57] = new Magic(0x00042080c0010011L, 53, 0x7c02020202020200L);	// 	11/11    	33680
+    	rookMagics[58] = new Magic(0xd00200088034c022L, 53, 0x7a04040404040400L);	// 	11/11    	51509
+    	rookMagics[59] = new Magic(0x0111012824100021L, 53, 0x7608080808080800L);	// 	11/11    	2240
+    	rookMagics[60] = new Magic(0x0019000800d00225L, 53, 0x6e10101010101000L);	// 	11/11    	1609
+    	rookMagics[61] = new Magic(0x00090004000208d1L, 53, 0x5e20202020202000L);	// 	11/11    	232859
+    	rookMagics[62] = new Magic(0x0450101902028804L, 53, 0x3e40404040404000L);	// 	11/11    	18858
+    	rookMagics[63] = new Magic(0x0001104084002112L, 52, 0x7e80808080808000L);	// 	12/12    	25612
+
+    	//bishop Magics initialization                                                  Bits/Used	NumTrialsToFindMagicNumber
+    	bishopMagics[ 0] = new Magic(0x0008a00410920014L, 58, 0x0040201008040200L);	// 	6/6      	9517
+    	bishopMagics[ 1] = new Magic(0x080410208d030000L, 59, 0x0000402010080400L);	// 	5/5      	4913
+    	bishopMagics[ 2] = new Magic(0x0008022246010404L, 59, 0x0000004020100a00L);	// 	5/5      	862
+    	bishopMagics[ 3] = new Magic(0xa204052600020208L, 59, 0x0000000040221400L);	// 	5/5      	1232
+    	bishopMagics[ 4] = new Magic(0x500414202821d804L, 59, 0x0000000002442800L);	// 	5/5      	799
+    	bishopMagics[ 5] = new Magic(0x020208840420045aL, 59, 0x0000000204085000L);	// 	5/5      	2100
+    	bishopMagics[ 6] = new Magic(0x002c88011010a008L, 59, 0x0000020408102000L);	// 	5/5      	1780
+    	bishopMagics[ 7] = new Magic(0x0800240108011000L, 58, 0x0002040810204000L);	// 	6/6      	1003
+    	bishopMagics[ 8] = new Magic(0x0082082004140048L, 59, 0x0020100804020000L);	// 	5/5      	593
+    	bishopMagics[ 9] = new Magic(0x8100200144128088L, 59, 0x0040201008040000L);	// 	5/5      	385
+    	bishopMagics[10] = new Magic(0xc024440800810000L, 59, 0x00004020100a0000L);	// 	5/5      	378
+    	bishopMagics[11] = new Magic(0x0106311042000810L, 59, 0x0000004022140000L);	// 	5/5      	510
+    	bishopMagics[12] = new Magic(0x0001041c60000110L, 59, 0x0000000244280000L);	// 	5/5      	891
+    	bishopMagics[13] = new Magic(0x4402030120101514L, 59, 0x0000020408500000L);	// 	5/5      	859
+    	bishopMagics[14] = new Magic(0x0020410090052000L, 59, 0x0002040810200000L);	// 	5/5      	31
+    	bishopMagics[15] = new Magic(0x0400004044042000L, 59, 0x0004081020400000L);	// 	5/5      	769
+    	bishopMagics[16] = new Magic(0x0010822002900100L, 59, 0x0010080402000200L);	// 	5/5      	973
+    	bishopMagics[17] = new Magic(0x0208841012008c04L, 59, 0x0020100804000400L);	// 	5/5      	2169
+    	bishopMagics[18] = new Magic(0x4402180404040109L, 57, 0x004020100a000a00L);	// 	7/7      	9250
+    	bishopMagics[19] = new Magic(0x1044000804105060L, 57, 0x0000402214001400L);	// 	7/7      	4070
+    	bishopMagics[20] = new Magic(0x1024004080a00800L, 57, 0x0000024428002800L);	// 	7/7      	4732
+    	bishopMagics[21] = new Magic(0x0002000101008244L, 57, 0x0002040850005000L);	// 	7/7      	2880
+    	bishopMagics[22] = new Magic(0x08110a1088084200L, 59, 0x0004081020002000L);	// 	5/5      	613
+    	bishopMagics[23] = new Magic(0x0821000024020200L, 59, 0x0008102040004000L);	// 	5/5      	1226
+    	bishopMagics[24] = new Magic(0x8120150960140400L, 59, 0x0008040200020400L);	// 	5/5      	913
+    	bishopMagics[25] = new Magic(0x0008204062044100L, 59, 0x0010080400040800L);	// 	5/5      	584
+    	bishopMagics[26] = new Magic(0x51d2010448004400L, 57, 0x0020100a000a1000L);	// 	7/7      	6986
+    	bishopMagics[27] = new Magic(0x0008080000820062L, 55, 0x0040221400142200L);	// 	9/9      	28421
+    	bishopMagics[28] = new Magic(0x0010940000806000L, 55, 0x0002442800284400L);	// 	9/9      	22176
+    	bishopMagics[29] = new Magic(0x00080a0010608400L, 57, 0x0004085000500800L);	// 	7/7      	6196
+    	bishopMagics[30] = new Magic(0x0042008882641018L, 59, 0x0008102000201000L);	// 	5/5      	2688
+    	bishopMagics[31] = new Magic(0x000c09010041422eL, 59, 0x0010204000402000L);	// 	5/5      	707
+    	bishopMagics[32] = new Magic(0x00082a10023a2000L, 59, 0x0004020002040800L);	// 	5/5      	239
+    	bishopMagics[33] = new Magic(0x8020a61000089040L, 59, 0x0008040004081000L);	// 	5/5      	190
+    	bishopMagics[34] = new Magic(0x0544840500100042L, 57, 0x00100a000a102000L);	// 	7/7      	1060
+    	bishopMagics[35] = new Magic(0x0040080801920a00L, 55, 0x0022140014224000L);	// 	9/9      	25838
+    	bishopMagics[36] = new Magic(0x0060028401088020L, 55, 0x0044280028440200L);	// 	9/9      	26174
+    	bishopMagics[37] = new Magic(0x0206140640080800L, 57, 0x0008500050080400L);	// 	7/7      	2285
+    	bishopMagics[38] = new Magic(0x0104010050020840L, 59, 0x0010200020100800L);	// 	5/5      	2322
+    	bishopMagics[39] = new Magic(0x000c008420408401L, 59, 0x0020400040201000L);	// 	5/5      	1916
+    	bishopMagics[40] = new Magic(0x0506082054004a52L, 59, 0x0002000204081000L);	// 	5/5      	4593
+    	bishopMagics[41] = new Magic(0x0000808818042002L, 59, 0x0004000408102000L);	// 	5/5      	3877
+    	bishopMagics[42] = new Magic(0x4001040202000100L, 57, 0x000a000a10204000L);	// 	7/7      	2832
+    	bishopMagics[43] = new Magic(0x000a020102400401L, 57, 0x0014001422400000L);	// 	7/7      	1565
+    	bishopMagics[44] = new Magic(0x0020010a12001400L, 57, 0x0028002844020000L);	// 	7/7      	502
+    	bishopMagics[45] = new Magic(0x8050200808411020L, 57, 0x0050005008040200L);	// 	7/7      	4881
+    	bishopMagics[46] = new Magic(0x000424680a000852L, 59, 0x0020002010080400L);	// 	5/5      	227
+    	bishopMagics[47] = new Magic(0xa008080280200080L, 59, 0x0040004020100800L);	// 	5/5      	393
+    	bishopMagics[48] = new Magic(0x0822222220040002L, 59, 0x0000020408102000L);	// 	5/5      	594
+    	bishopMagics[49] = new Magic(0x00408a0801042000L, 59, 0x0000040810204000L);	// 	5/5      	2464
+    	bishopMagics[50] = new Magic(0x088400c208440200L, 59, 0x00000a1020400000L);	// 	5/5      	216
+    	bishopMagics[51] = new Magic(0x000010c084040200L, 59, 0x0000142240000000L);	// 	5/5      	159
+    	bishopMagics[52] = new Magic(0x0000482102048008L, 59, 0x0000284402000000L);	// 	5/5      	61
+    	bishopMagics[53] = new Magic(0x2030400408008008L, 59, 0x0000500804020000L);	// 	5/5      	395
+    	bishopMagics[54] = new Magic(0x0010200811004040L, 59, 0x0000201008040200L);	// 	5/5      	2027
+    	bishopMagics[55] = new Magic(0x11a0042444802000L, 59, 0x0000402010080400L);	// 	5/5      	910
+    	bishopMagics[56] = new Magic(0x0209010886200200L, 58, 0x0002040810204000L);	// 	6/6      	2144
+    	bishopMagics[57] = new Magic(0x008c002198280800L, 59, 0x0004081020400000L);	// 	5/5      	1543
+    	bishopMagics[58] = new Magic(0x2400800824120822L, 59, 0x000a102040000000L);	// 	5/5      	215
+    	bishopMagics[59] = new Magic(0x8091900420840400L, 59, 0x0014224000000000L);	// 	5/5      	688
+    	bishopMagics[60] = new Magic(0x0084140210020200L, 59, 0x0028440200000000L);	// 	5/5      	547
+    	bishopMagics[61] = new Magic(0x0800304030020092L, 59, 0x0050080402000000L);	// 	5/5      	454
+    	bishopMagics[62] = new Magic(0x1080040404044400L, 59, 0x0020100804020000L);	// 	5/5      	968
+    	bishopMagics[63] = new Magic(0xa1200a5000410040L, 58, 0x0040201008040200L);	// 	6/6      	362
+    	
+    	RookMagics rm = new RookMagics();
+    	rookMovesDatabase = rm.generateMoves(rookMagics);
+    	BishopMagics bm = new BishopMagics();
+    	bishopMovesDatabase = bm.generateMoves(bishopMagics);
     }
 
     short base[][] = new short[8][64]; //datatype needs to be 8bits, using short instead to avoid some problem
@@ -65,6 +201,7 @@ public class Attacks {
     long pawn[][] = new long[2][64];
     long whitepawn[] = new long[64];
     long blackpawn[] = new long[64];        
+    
 
     long plus1[] = new long[64];
     long plus7[] = new long[64];
@@ -115,9 +252,12 @@ public class Attacks {
         return pseudoAttacks;
     }
 
-    private static long bishopAttacks(int bishopSquare, long occupied)
+    private static long bishopAttacks(int fromSquare, long occupied)
     {
-    	return bishopMagics.getMoves(bishopSquare, occupied);
+    	Magic magic = bishopMagics[fromSquare];
+    	long relevantOccupancy = occupied & magic.occupiedMask;
+    	int occupiedIndex = (int)((relevantOccupancy * magic.number) >>> magic.shift);
+    	return bishopMovesDatabase[fromSquare][occupiedIndex];
     }
 
 //    private static long bishopAttacks(int bishopSquare, long allPieces45Left, long allPieces45Right)
@@ -132,9 +272,12 @@ public class Attacks {
 //        return attacks;
 //    }
 
-    private static long rookAttacks(int rookSquare, long occupied)
+    private static long rookAttacks(int fromSquare, long occupied)
     {
-    	return rookMagics.getMoves(rookSquare, occupied);
+    	Magic magic = rookMagics[fromSquare];
+    	long relevantOccupancy = occupied & magic.occupiedMask;
+    	int occupiedIndex = (int)((relevantOccupancy * magic.number) >>> magic.shift);
+    	return rookMovesDatabase[fromSquare][occupiedIndex];
     }
 
 //    private static long rookAttacks(int rookSquare, long allPiecesByRank, long allPiecesByFile)
@@ -211,13 +354,15 @@ public class Attacks {
                  attackers |= INSTANCE.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
                  attackers |= INSTANCE.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] |
-                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
+//                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] |
+//                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
+                 rankFileAtt = rookAttacks(squareUnderAttack, position.getOccupied());
                  rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= rankFileAtt & rooksQueens;
 
-                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
-                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
+//                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
+//                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
+                 diagAtt = bishopAttacks(squareUnderAttack, position.getOccupied());
                  bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= diagAtt & bishopsQueens;
                  break;
@@ -230,13 +375,15 @@ public class Attacks {
                  attackers |= INSTANCE.knight[squareUnderAttack] & position.getOpponentKnights(sideUnderAttack);
                  attackers |= INSTANCE.king[squareUnderAttack] & position.getOpponentKing(sideUnderAttack);
 
-                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] | 
-                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
+//                 rankFileAtt = INSTANCE.rank[squareUnderAttack][status (position.getOccupied(0), squareUnderAttack)] | 
+//                     INSTANCE.file[squareUnderAttack][status90 (position.getOccupied(90), squareUnderAttack)];
+                 rankFileAtt = rookAttacks(squareUnderAttack, position.getOccupied());
                  rooksQueens = position.getOpponentRooks(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= rankFileAtt & rooksQueens;
 
-                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
-                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
+//                 diagAtt = INSTANCE.L45[squareUnderAttack][status45L (position.getOccupied(-45), squareUnderAttack)] |
+//                     INSTANCE.R45[squareUnderAttack][status45R (position.getOccupied(45), squareUnderAttack)];
+                 diagAtt = bishopAttacks(squareUnderAttack, position.getOccupied());
                  bishopsQueens = position.getOpponentBishops(sideUnderAttack) | position.getOpponentQueens(sideUnderAttack);
                  attackers |= diagAtt & bishopsQueens;
                  break;
@@ -409,19 +556,15 @@ public class Attacks {
     public static final long maskMinus9(int square){  return INSTANCE.minus9[square]; }
     
     public Attacks(){
-      generateMasks();
-      generateBaseAttacks();
-      generateRankAttacks();
-      generateFileAttacks();
-      generateDiagonal45DegreesRightAttacks();
-      generateDiagonal45DegreesLeftAttacks();
-      generateWhitePawnAttacks();
-      generateBlackPawnAttacks();
-      generateKingKnightAttacks();
-      SlidingMagics rookMagics = new RookMagics();
-      rookMagics.generate();
-      SlidingMagics bishopMagics = new BishopMagics();
-      bishopMagics.generate();
+    	generateMasks();
+    	generateBaseAttacks();
+    	generateRankAttacks();
+    	generateFileAttacks();
+    	generateDiagonal45DegreesRightAttacks();
+    	generateDiagonal45DegreesLeftAttacks();
+    	generateWhitePawnAttacks();
+    	generateBlackPawnAttacks();
+    	generateKingKnightAttacks();
     }
 
     private void generateMasks(){
