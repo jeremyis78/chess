@@ -292,23 +292,25 @@ public class Attacks {
 //        return attacks;
 //    }
  
-    public static long attacksTo(int square, long targets, int sideUnderAttack, GameState state)
+    public static long xrayAttackers(int toSquare, long fromCandidates, long blockers, long occupied)
     {
-    	long attackers = Attacks.attackers(state, sideUnderAttack, square);
-    	long intersection = attackers & targets;
-//    	System.out.println("  attackers: "+Util.displaySquaresStr(attackers));
-//    	System.out.println("  targets  : "+Util.displaySquaresStr(targets));
-//    	System.out.println("  intersect: "+Util.displaySquaresStr(intersection)); 
-		return intersection;
+    	long attacksFromSquare = xrayRookAttacks(toSquare, occupied, blockers)
+    	                       | xrayBishopAttacks(toSquare, occupied, blockers);
+    	long xrayAttacks = attacksFromSquare & fromCandidates;
+		return xrayAttacks;
     }
-//
-//    public static long xrayRookAttacks(long occupied, long blockers, int rookSquare)
-//    {
-//    	long occupied90Degrees = 0L; //TODO: compute me
-//        long attacks = INSTANCE.rank[rookSquare][status (occupied, rookSquare)]
-//                	 | INSTANCE.file[rookSquare][status90 (occupied90Degrees, rookSquare)];
-//
-//    }
+    
+    public static long xrayRookAttacks(int rookSq, long occupied, long blockers) {
+    	long attacks = rookAttacks(rookSq, occupied);
+    	blockers &= attacks;
+    	return attacks ^ rookAttacks(rookSq, occupied ^ blockers);
+    }
+
+    public static long xrayBishopAttacks(int bishopSq, long occupied, long blockers) {
+    	long attacks = bishopAttacks(bishopSq, occupied);
+    	blockers &= attacks;
+    	return attacks ^ bishopAttacks(bishopSq, occupied ^ blockers);
+    }
 
     /** 
      * Returns a bitbrd of the pieces (excluding the king) attacking 

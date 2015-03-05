@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
+import com.jeremybrooks.chess.util.Util;
 
 public class EvalTester {
 
@@ -39,7 +40,7 @@ public class EvalTester {
         for(String position: positions)
         {
             GameState g = new GameState(2);
-            boolean isWhiteToMove = EvaluatorTest.setupState(g, position);
+            boolean isWhiteToMove = Util.setupState(g, position);
             int searchDepth = 0;
             int actualScore = evaluate(g, isWhiteToMove, searchDepth);
             System.out.println(actualScore + ": " + g.get());
@@ -79,7 +80,7 @@ public class EvalTester {
                 {
                     GameState g = new GameState(2);
                     //System.out.println("index: " + positionIndex);
-                    boolean isWhiteToMove = EvaluatorTest.setupState(g, position);
+                    boolean isWhiteToMove = Util.setupState(g, position);
                     int searchDepth = 0;
                     long start = System.nanoTime();
                     evaluate(g, isWhiteToMove, searchDepth);

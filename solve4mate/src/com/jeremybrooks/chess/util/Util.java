@@ -5,6 +5,7 @@
 package com.jeremybrooks.chess.util;
 
 import static com.jeremybrooks.chess.base.Square.named;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -346,4 +347,12 @@ public class Util {
     {
         return (from | (to << 6) | (mov << 12) | (cap << 15) | (pro << 18));
     }
+
+	public static boolean setupState(GameState gameState, String startState) {
+	    String position = startState;
+	    gameState.set(startState);
+	    String initialState = gameState.get();
+	    assertEquals(position.substring(0, position.length()-2), initialState.substring(0, position.length()-2));
+	    return gameState.isWhiteToMove();
+	}
 }

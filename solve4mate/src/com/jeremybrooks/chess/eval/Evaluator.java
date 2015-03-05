@@ -1,11 +1,15 @@
 package com.jeremybrooks.chess.eval;
 
 import static com.jeremybrooks.chess.base.Piece.*;
+
 import org.apache.log4j.Logger;
 
+import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.GameState;
 import com.jeremybrooks.chess.base.Piece;
 import com.jeremybrooks.chess.base.Position;
+import com.jeremybrooks.chess.base.Square;
+import com.jeremybrooks.chess.movegen.Attacks;
 import com.jeremybrooks.chess.util.FenBuilder;
 import com.jeremybrooks.chess.util.Util;
 
@@ -13,11 +17,12 @@ public class Evaluator {
     private static final Logger log = Logger.getLogger(Evaluator.class);
     public static final int PIECE_VALUE[] = 
     {
-        100, // White Pawn
-        325, // White Knight
-        325, // White Bishop
-        500, // White Rook
-        975  // White Queen
+        100, // Pawn
+        325, // Knight
+        325, // Bishop
+        500, // Rook
+        975, // Queen
+        9999 // King
     };
 
     private final static int BISHOP_PAIR_VALUE = 50;
@@ -118,7 +123,6 @@ public class Evaluator {
         assert g.inCheck() == false;
         if(g.inCheck()) 
         {
-            //System.out.println(UciDriver.toDiagram(g));
             throw new IllegalStateException("can't statically evaluate the check or mate position");
         }
         
@@ -144,7 +148,6 @@ public class Evaluator {
                     pcScore += BISHOP_PAIR_VALUE;
                     pieceScore += BISHOP_PAIR_VALUE;
                 }
-//                System.out.println(color + " - " + piece + ": " + pcScore + " (#" + numPieces+")");
             }
             if(color==Piece.WHITE) wMaterialScore += pieceScore;
             else             bMaterialScore += pieceScore;
@@ -164,13 +167,84 @@ public class Evaluator {
             fb.appendPieceBoard(g.getPosition());
             log.debug("("+finalScore+") " + currentLine + "  " +fb.toString());
         }
-
-//        if(isEval){
-//            log.debug("white score: "+ wTotalScore + " = " + wMaterialScore + " + " + wPositionalScore);
-//            log.debug("black score: "+ bTotalScore + " = " + bMaterialScore + " + " + bPositionalScore);
-//            log.debug("mate score : "+ mateScore);
-//        }
         return finalScore;
     }
+
+	public int scoreFromSEE(int move, GameState state)
+	{
+	    int fromSquare = move & 0x3F;                            //first 6 bits
+	    int toSquare = (move >> 6) & 0x3F;                       //next 6
+	    int capturingPiece = TO_PIECE[(move >> 12) & 0x7];       //next 3
+	    int capturedPieceInMove  = TO_PIECE[(move >> 15) & 0x7]; //next 3
+	    int gain[] = new int[32];
+	    int depth = 0;
+	    int sideToMove = state.isWhiteToMove()?Piece.WHITE:Piece.BLACK;
+	    long xrayCandidates = state.getPosition().getAllPiecesExceptKing(Piece.WHITE)
+	    		            | state.getPosition().getAllPiecesExceptKing(Piece.BLACK);
+	    long attackedBy = 1L << fromSquare;
+	    long occupied = state.getPosition().getOccupied();
+	    long attdef = Attacks.attackers(state, Piece.WHITE, toSquare)
+	                | Attacks.attackers(state, Piece.BLACK, toSquare);
+
+	    gain[depth] = PIECE_VALUE[capturedPieceInMove];
+	    if(log.isDebugEnabled())
+	    {
+	    	log.debug("captureSquare: "+Square.named(toSquare));
+	    	log.debug(String.format("attackFrom(ply%d): %s", depth, Square.named(fromSquare)));
+	    	log.debug(String.format("init gain[0]=%5d if %s@%s is en-prise", gain[depth], state.getPosition().get(toSquare).toChar(), Square.named(toSquare)));
+	    }
+	    do {
+	    	Piece nextAttacker = state.getPosition().get(fromSquare);
+	    	if(depth > 0)
+	    	{
+	    		assert(fromSquare != Bitmap.NOSQUARE);
+	    		capturingPiece = nextAttacker.index();	//the next capturing piece in the exchange
+	    		attackedBy = 1L << fromSquare;
+	    	}
+	    	depth++;
+	    	int capturingPieceValue = PIECE_VALUE[capturingPiece];
+	    	boolean isPromotion = isPromotion(capturingPiece, toSquare, sideToMove);
+    		if(isPromotion)	
+    			capturingPieceValue = PIECE_VALUE[Piece.QUEEN]; //use best possible promotion
+	    	sideToMove = Util.opposing(sideToMove);
+	    	gain[depth] = capturingPieceValue - gain[depth - 1];
+	    	if(log.isDebugEnabled())
+	    	{
+	    		log.debug(String.format("init gain[%d]=%5d = (%-5d-%5d) if %s@%s is en-prise%s", 
+	    			depth, gain[depth], capturingPieceValue, gain[depth - 1],
+	    			state.getPosition().get(fromSquare).toChar(), Square.named(fromSquare), (isPromotion?" (promotion=Q)":"")));
+	    	}
+	    	attdef   ^= attackedBy;
+	    	occupied ^= attackedBy;
+	    	if(Util.bool(attackedBy & xrayCandidates))
+	    		attdef |= Attacks.xrayAttackers(toSquare, xrayCandidates, attackedBy, occupied);
+	    	fromSquare = state.getPosition().getSquareOfLeastValuablePiece(attdef, sideToMove);
+	    } while (fromSquare != Bitmap.NOSQUARE ); //&& depth < gain.length - 1);// Util.bool(attackedBy));
+	    return computeGain(gain, depth);
+	}
+
+	private static int computeGain(int[] gain, int depth) {
+		if(log.isDebugEnabled()) 
+	    	for(int d=0; d<depth; d++) log.debug(String.format("gain[%d]=%5d", d, gain[d]));
+	    while (--depth != 0)
+	    {
+	    	int previousGainInverted = -gain[depth - 1];
+	    	int currentGain = gain[depth];
+			int newGain = -Math.max(previousGainInverted, currentGain);
+	    	if(log.isDebugEnabled())
+	    	{
+	    		Object[] args = new Object[]{depth-1, newGain, previousGainInverted, currentGain};
+	    		log.debug(String.format("gain[%d]=%5d = -max(%5d,%5d)", args));
+	    	}
+			gain[depth - 1] = newGain;
+	    }
+	    return gain[0];
+	}
+
+	private static boolean isPromotion(int capturingPiece, int toSq, int sideToMove) {
+		if(PAWN == capturingPiece)
+			return (sideToMove==0) ? Bitmap.rankNumber(toSq)==7 : Bitmap.rankNumber(toSq)==0; 
+		return false;
+	}
 
 }

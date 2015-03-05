@@ -552,11 +552,7 @@ public class GameStateTest extends KeyTestBase {
     }
 
     private boolean setupState(String startState) {
-        String position = startState;
-        gameState.set(startState);
-        String initialState = gameState.get();
-        assertEquals(position, initialState);
-        return gameState.isWhiteToMove();
+        return Util.setupState(gameState, startState);
     }
     
     private String makeMove(boolean isWhitesMove, int move) {
