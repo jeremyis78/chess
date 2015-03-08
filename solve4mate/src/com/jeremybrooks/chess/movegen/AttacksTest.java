@@ -1,6 +1,9 @@
 package com.jeremybrooks.chess.movegen;
 
-import static org.junit.Assert.*;
+import static com.jeremybrooks.chess.util.AbstractDisplayer.EOL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,6 +17,7 @@ import com.jeremybrooks.chess.base.Position;
 import com.jeremybrooks.chess.base.Square;
 import com.jeremybrooks.chess.util.Displayer;
 import com.jeremybrooks.chess.util.FenParser;
+import com.jeremybrooks.chess.util.OutputBuilder;
 import com.jeremybrooks.chess.util.Util;
 
 public class AttacksTest {
@@ -71,7 +75,7 @@ public class AttacksTest {
             readable.append("bit " + currentSquare);
             readable.append(" maps to " + Square.named(shift));
             readable.append(" (1L shifted "+shift+" bits)");
-            readable.append("\n");
+            readable.append(EOL);
             readable.append(Bitmap.format(mask[currentSquare]));
         }
         return readable.toString();
@@ -275,7 +279,7 @@ public class AttacksTest {
     private void assertFileEqualsString(String filename, String string)
     {
         File correctFile = new File(filename);
-        StringBuffer correct = new StringBuffer();
+        OutputBuilder correct = new OutputBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(correctFile))) {
             while (br.ready())
             {
@@ -285,7 +289,7 @@ public class AttacksTest {
                 {
                     continue; //skip comments and empty lines
                 }
-                correct.append(line + "\n");
+                correct.append(line);
             }
         } catch (IOException e) {
             e.printStackTrace();

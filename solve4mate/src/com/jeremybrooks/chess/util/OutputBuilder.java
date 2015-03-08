@@ -4,10 +4,11 @@ public class OutputBuilder
 {
     private StringBuilder sb = new StringBuilder();
     
-    public void append(String s)
+    public OutputBuilder append(String s)
     {
         sb.append(s);
         sb.append(AbstractDisplayer.EOL);
+        return this;
     }
     
     @Override

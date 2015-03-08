@@ -4,6 +4,7 @@
  */
 package com.jeremybrooks.chess.base;
 
+import static com.jeremybrooks.chess.util.AbstractDisplayer.EOL;
 import com.jeremybrooks.chess.util.Util;
 
 
@@ -158,15 +159,23 @@ public class Bitmap {
     public static final int MAXSQ = 64;
     public static final int NOSQUARE = 65;
 
-    //Represents the chess board's rank as a mask on the Bitboard
-    public static final long FIRSTRANK   = (long) 0xFF;
-    public static final long SECONDRANK  = ((long) 0xFF) << A2;
-    public static final long THIRDRANK   = ((long) 0xFF) << A3;
-    public static final long FOURTHRANK  = ((long) 0xFF) << A4;
-    public static final long FIFTHRANK   = ((long) 0xFF) << A5;
-    public static final long SIXTHRANK   = ((long) 0xFF) << A6;
-    public static final long SEVENTHRANK = ((long) 0xFF) << A7;
-    public static final long EIGHTHRANK  = ((long) 0xFF) << A8;
+    public static final long FIRSTRANK   = populateBits(new int[]{A1,B1,C1,D1,E1,F1,G1,H1});
+    public static final long SECONDRANK  = FIRSTRANK <<  8;
+    public static final long THIRDRANK   = FIRSTRANK << 16;
+    public static final long FOURTHRANK  = FIRSTRANK << 24;
+    public static final long FIFTHRANK   = FIRSTRANK << 32;
+    public static final long SIXTHRANK   = FIRSTRANK << 40;
+    public static final long SEVENTHRANK = FIRSTRANK << 48;
+    public static final long EIGHTHRANK  = FIRSTRANK << 56;
+
+    public static final long A_FILE =  populateBits(new int[]{A1,A2,A3,A4,A5,A6,A7,A8});
+    public static final long B_FILE =  A_FILE << 1;
+    public static final long C_FILE =  A_FILE << 2;
+    public static final long D_FILE =  A_FILE << 3;
+    public static final long E_FILE =  A_FILE << 4;
+    public static final long F_FILE =  A_FILE << 5;
+    public static final long G_FILE =  A_FILE << 6;
+    public static final long H_FILE =  A_FILE << 7;
 
     public enum Rank { RANK1, RANK2, RANK3, RANK4, RANK5, RANK6, RANK7, RANK8 };
     public enum File { FILE1, FILE2, FILE3, FILE4, FILE5, FILE6, FILE7, FILE8 };
@@ -178,7 +187,16 @@ public class Bitmap {
     public static final int ALL45L = 2;
     public static final int ALL45R = 3;
     public static final int MAXALL = 4;
-    
+
+	private static final long FLIP_VERTICAL_CONSTANT1 = 0x00FF00FF00FF00FFL;
+	private static final long FLIP_VERTICAL_CONSTANT2 = 0x0000FFFF0000FFFFL;
+	private static final long MIRROR_HORZTL_CONSTANT1 = 0x5555555555555555L;
+	private static final long MIRROR_HORZTL_CONSTANT2 = 0x3333333333333333L;
+	private static final long MIRROR_HORZTL_CONSTANT4 = 0x0f0f0f0f0f0f0f0fL;
+	private static final long FLIP_DIAGA1H8_CONSTANT1 = 0x5500550055005500L;
+	private static final long FLIP_DIAGA1H8_CONSTANT2 = 0x3333000033330000L;
+	private static final long FLIP_DIAGA1H8_CONSTANT4 = 0x0f0f0f0f00000000L;
+
     
     //For g.pos.board[]
     public static final char BOARD_EMPTY_SQUARE = ' ';
@@ -367,10 +385,18 @@ public class Bitmap {
 	{	
 		long populated = 0L;
 		for(int bit=firstBit; bit<lastBitExcluded; bit+=increment) 
-			populated |= withOneBitSet(bit);
+			populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
 		return populated;
 	}
-    
+
+    public static long populateBits(int[] bitIndexes)
+	{	
+		long populated = 0L;
+		for(int bit: bitIndexes) 
+			populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
+		return populated;
+	}
+
     public static boolean isBitSet(int bit, long bitboard)
     {
     	return Util.bool(bitboard & withOneBitSet(bit));
@@ -443,53 +469,84 @@ public class Bitmap {
         return (sq % 8);
     }
 
+    public static long flipVertical(long b)
+    {
+    	long k1 = FLIP_VERTICAL_CONSTANT1;
+    	long k2 = FLIP_VERTICAL_CONSTANT2;
+    	b = ((b >>>  8) & k1) | ((b & k1) <<  8);
+    	b = ((b >>> 16) & k2) | ((b & k2) << 16);
+    	b = ( b >>> 32)       | ( b       << 32);
+    	return b;
+    }
+    
+    public static long mirrorHorizontal(long b) 
+    {
+    	long k1 = MIRROR_HORZTL_CONSTANT1;
+    	long k2 = MIRROR_HORZTL_CONSTANT2;
+    	long k4 = MIRROR_HORZTL_CONSTANT4;
+    	b = ((b >>> 1) & k1) | ((b & k1) << 1);
+    	b = ((b >>> 2) & k2) | ((b & k2) << 2);
+    	b = ((b >>> 4) & k4) | ((b & k4) << 4);
+    	return b;
+    }
+    
+    public static long flipDiagA1H8(long b)
+    {
+    	long t;
+    	long k1 = FLIP_DIAGA1H8_CONSTANT1;
+    	long k2 = FLIP_DIAGA1H8_CONSTANT2;
+    	long k4 = FLIP_DIAGA1H8_CONSTANT4;
+    	t  = k4 & (b ^ (b  << 28));
+    	b ^=       t ^ (t >>> 28) ;
+    	t  = k2 & (b ^ (b  << 14));
+    	b ^=       t ^ (t >>> 14) ;
+    	t  = k1 & (b ^ (b  <<  7));
+    	b ^=       t ^ (t >>>  7) ;
+    	return b;
+    }
+
     public static String format(long moves){
         return format(moves, 0L);
     }
 
-    public static String format(long moves, long piece){
-        //This prints X for set bits (- for unset bits) and a + for
-        //a bit set in pieces.  It orients the board so that a1 is
-        //in the lower left hand corner and h8 is in the upper right hand
-        //corner--the real world chess board view.
-        
-        long mask = 1; //, m = 1;
-        
-        int  num_of_sq_to_display = 64; //must be multiple of 8 and <= 64
-        
-        //Above value should be 64 to display the entire chessboard
-        //To display only the first rank (a1-h1) it should be 8.
-        //To display 2nd and 1st rank (a2-h2 and a1-h1) it should be 16, & so on.
-        
-        StringBuffer sb = new StringBuffer();
-        int i, j;
-        for(i = num_of_sq_to_display - 8; i >=0; i-=8){
-            // I cannot manually write "mask = 0x00..01 << i;"
-            // because the compiler treats mask as 32 bits instead of 64 bits
-            // Therefore only "mask = setmask[i];" will work.
-            //    
-            //        mask = setmask[i];  
-            mask = 1L << i;
-            
-            int k = i + 8;  //set upper bound on next for-loop
-            
-            //        printf("%d ", (i / 8) + 1);
-            //cout << ((i/8) + 1) << ' ';
-            sb.append( ((i/8)+1) + " ");
-            for(j = i; j < k; ++j, mask <<= 1){
-                //If there's a bit/move/piece at that square
-                //Print "*" otherwise a "-"
-                
-                if (Util.bool(mask & piece))        //Print the '+' first so
-                    sb.append("+ ");      //we don't overwrite a move
-                else if (Util.bool(mask & moves))
+    /**
+     * For the given bitboard, prints X for set bits (- for unset bits) and a + for
+     * a bit set in highlighted; rank and file indicators are also printed.  It 
+     * orients the board so that a1 is in the lower left hand corner and 
+     * h8 is in the upper right hand corner--the standard view of a chess board.
+     * 
+     * @param b the bitboard to format
+     * @param highlighted the bitboard with a single bit set that will be highlighted
+     * @return
+     */
+    public static String format(long b, long highlighted){
+        boolean overlaps = Util.bool(b & highlighted);
+        if(overlaps)
+        	throw new IllegalArgumentException("b and highlighted cannot have any overlapping bits");
+        long mask;
+        int  numSquaresToDisplay = 64;
+        StringBuilder sb = new StringBuilder();
+        for(int firstSquareOfRank = numSquaresToDisplay - 8; 
+        		firstSquareOfRank>=0; 
+        		firstSquareOfRank-=8)
+        {
+            mask = 1L << firstSquareOfRank;
+            int lastSquareOnRank = firstSquareOfRank + 7;
+            sb.append(rankNumber(firstSquareOfRank)+1 + " ");
+            for(int currentSquare = firstSquareOfRank;
+            		currentSquare <= lastSquareOnRank;
+            		++currentSquare, mask <<= 1)
+            {
+                if (Util.bool(mask & highlighted))  //Print the '+' first so
+                    sb.append("+ ");                //we don't overwrite a move
+                else if (Util.bool(mask & b))
                     sb.append("X ");  
                 else
                     sb.append("- ");
             }
-            sb.append("\n");
+            sb.append(EOL);
         }
-        return sb.append("  a b c d e f g h\n").toString();
+        return sb.append("  a b c d e f g h"+EOL).toString();
     }
 
 }

@@ -38,28 +38,24 @@ public class UtilTest extends TestCase {
     }
 
     public void testDisplaySquares() {
-        long wking = getBitboard(Bitmap.E1);
+        long wking = Bitmap.populateBits(new int[]{Bitmap.E1});
         assertEquals("e1 ", Util.displaySquaresStr(wking));
 
-        long wrooks = getBitboard(Bitmap.A1,Bitmap.A8);
-        assertEquals("a1 a8 ", Util.displaySquaresStr(wrooks));
+        long wrooks = Bitmap.populateBits(new int[]{Bitmap.A1, Bitmap.H1});
+        assertEquals("a1 h1 ", Util.displaySquaresStr(wrooks));
         
-        long wpawns = getBitboard(Bitmap.A2,Bitmap.B2,Bitmap.C2,Bitmap.D2,
-            Bitmap.E2,Bitmap.F2,Bitmap.G2,Bitmap.H2);
+        long wpawns = Bitmap.SECONDRANK;
         assertEquals("a2 b2 c2 d2 e2 f2 g2 h2 ", Util.displaySquaresStr(wpawns));
 
-        long bpawns = getBitboard(Bitmap.A7,Bitmap.B7,Bitmap.C7,Bitmap.D7,
-            Bitmap.E7,Bitmap.F7,Bitmap.G7,Bitmap.H7);
+        long bpawns = Bitmap.SEVENTHRANK;
         assertEquals("a7 b7 c7 d7 e7 f7 g7 h7 ", Util.displaySquaresStr(bpawns));
     }
 
     public void testBitCount(){
-        for (int i=0; i<BIT_COUNT_ITERATIONS; i++){
             assertEquals( 1, Util.bitCount(1L));
             assertEquals( 1, Util.bitCount(0x8000000000000000L));
             assertEquals( 8, Util.bitCount(0x00FF000000000000L));
             assertEquals(64, Util.bitCount(0xFFFFFFFFFFFFFFFFL));
-        }
     }
 
     public void testDisplayMoveStrWithNoMove() {
@@ -452,18 +448,20 @@ public class UtilTest extends TestCase {
          int piece = 0x10;
          int occupied = 0x02;
          int attacks =  0xEE;
-         String output ="piece   : - - - - X - - -\n" + 
-                         "occupied: - X - - - - - -\n" +
-                         "attacks : - X X X - X X X\n";
-         assertEquals(output, Util.formatBaseAttacks(piece, occupied, attacks));
+         OutputBuilder expected = new OutputBuilder();
+         expected.append("piece   : - - - - X - - -"); 
+         expected.append("occupied: - X - - - - - -");
+         expected.append("attacks : - X X X - X X X");
+         assertEquals(expected.toString(), Util.formatBaseAttacks(piece, occupied, attacks));
     
          int piece2 = 0x02;
          int occupied2 = 0x0B;
          int attacks2 = 0x0D;
-         String output2 ="piece   : - X - - - - - -\n" + 
-                          "occupied: X X - X - - - -\n" +
-                          "attacks : X - X X - - - -\n";
-         assertEquals(output2, Util.formatBaseAttacks(piece2, occupied2, attacks2));
+         expected = new OutputBuilder();
+         expected.append("piece   : - X - - - - - -");
+         expected.append("occupied: X X - X - - - -");
+         expected.append("attacks : X - X X - - - -");
+         assertEquals(expected.toString(), Util.formatBaseAttacks(piece2, occupied2, attacks2));
 
          try{
              Util.formatBaseAttacks(0x03, occupied, attacks);
@@ -482,13 +480,6 @@ public class UtilTest extends TestCase {
     }
         
     /* helper methods */
-    private long getBitboard(int... indexes){
-        long board = 0L;
-        for(int i: indexes){
-            board |= 1L << i;
-        }
-        return board;
-    }
     
     private int getMove(int from, int to, int movingPiece, int capturedPiece, int promotionPiece)
     {

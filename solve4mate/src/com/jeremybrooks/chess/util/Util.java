@@ -5,6 +5,7 @@
 package com.jeremybrooks.chess.util;
 
 import static com.jeremybrooks.chess.base.Square.named;
+import static com.jeremybrooks.chess.util.AbstractDisplayer.EOL;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -320,9 +321,9 @@ public class Util {
         if (bitCount(pieceBitmap) > 1){
             throw new IllegalArgumentException("pieceBitmap: " + Integer.toBinaryString(pieceBitmap) + " can have only a single bit set");
         }
-        return     formatByteBitmap("piece   : ", (byte)pieceBitmap) + "\n" +
-                formatByteBitmap("occupied: ", (byte)occupiedBitmap) + "\n" +
-                formatByteBitmap("attacks : ", (byte)attackBitmap) + "\n";
+        return  formatByteBitmap("piece   : ", (byte)pieceBitmap) + EOL +
+                formatByteBitmap("occupied: ", (byte)occupiedBitmap) + EOL +
+                formatByteBitmap("attacks : ", (byte)attackBitmap) + EOL;
     }
 
     public static int encodeMove(int fromSquare, int toSquare, Piece piece,

@@ -1,13 +1,23 @@
 package com.jeremybrooks.chess.base;
 
 import static com.jeremybrooks.chess.base.Bitmap.*;
+import static org.junit.Assert.assertEquals;
 import junit.framework.TestCase;
 
 import org.junit.Test;
 
+import com.jeremybrooks.chess.util.OutputBuilder;
+
 public class BitmapTest extends TestCase {
 
-    long Long1 = 1L;
+    private static final long LETTER_R_BITBOARD = Bitmap.populateBits(1, 57, 8) |
+			1L << Bitmap.G1 | 1L << Bitmap.F2 |
+			1L << Bitmap.E3 | 1L << Bitmap.D4 |
+			1L << Bitmap.C4 | 1L << Bitmap.E5 |
+			1L << Bitmap.F6 | 1L << Bitmap.F7 |
+			7L << 58;
+    
+	long Long1 = 1L;
     long Long2 = (long)1;
     long LongShift8 = Long1 << 8;
 
@@ -241,55 +251,132 @@ public class BitmapTest extends TestCase {
     }
 
     @Test
-    public void testBitmapFormat() {
-        long board = 1L << Bitmap.A1;
-        board |= 1L << Bitmap.B2;
-        board |= 1L << Bitmap.C3;
-        board |= 1L << Bitmap.D4;
-        board |= 1L << Bitmap.E5;
-        board |= 1L << Bitmap.F6;
-        board |= 1L << Bitmap.G7;
-        board |= 1L << Bitmap.H8;
-
-        String output =
-            "8 - - - - - - - X \n" +
-            "7 - - - - - - X - \n" +
-            "6 - - - - - X - - \n" +
-            "5 - - - - X - - - \n" +
-            "4 - - - X - - - - \n" +
-            "3 - - X - - - - - \n" +
-            "2 - X - - - - - - \n" +
-            "1 X - - - - - - - \n" +
-            "  a b c d e f g h\n";
-        
-        assertEquals(output, Bitmap.format(board));
+    public void testGivenFormatForLetterR() {
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - - X X X - - - ");
+        expected.append("7 - X - - - X - - ");
+        expected.append("6 - X - - - X - - ");
+        expected.append("5 - X - - X - - - ");
+        expected.append("4 - X X X - - - - ");
+        expected.append("3 - X - - X - - - ");
+        expected.append("2 - X - - - X - - ");
+        expected.append("1 - X - - - - X - ");
+        expected.append("  a b c d e f g h");
+        assertEquals(expected.toString(), Bitmap.format(LETTER_R_BITBOARD));
     }
 
     @Test
-    public void testBitmapFormatWithCalloutSquareSet() {
-        long board = 1L << Bitmap.A1;
-        board     |= 1L << Bitmap.B2;
-        board     |= 1L << Bitmap.C3;
-        board     |= 1L << Bitmap.D4;
-        board     |= 1L << Bitmap.E5;
-        board     |= 1L << Bitmap.F6;
-        board     |= 1L << Bitmap.G7;
-        board     |= 1L << Bitmap.H8;
-        
-        long pieceBitboard = 1L << Bitmap.D1;
-
-        String output =
-            "8 - - - - - - - X \n" +
-            "7 - - - - - - X - \n" +
-            "6 - - - - - X - - \n" +
-            "5 - - - - X - - - \n" +
-            "4 - - - X - - - - \n" +
-            "3 - - X - - - - - \n" +
-            "2 - X - - - - - - \n" +
-            "1 X - - + - - - - \n" +
-            "  a b c d e f g h\n";
-        
-        assertEquals(output, Bitmap.format(board, pieceBitboard));
+    public void testGivenFormatForLetterRWithHighlightedSquare() {
+    	long highlightedSquare = 1L << Bitmap.G4;
+    	OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - - X X X - - - ");
+        expected.append("7 - X - - - X - - ");
+        expected.append("6 - X - - - X - - ");
+        expected.append("5 - X - - X - - - ");
+        expected.append("4 - X X X - - + - ");
+        expected.append("3 - X - - X - - - ");
+        expected.append("2 - X - - - X - - ");
+        expected.append("1 - X - - - - X - ");
+        expected.append("  a b c d e f g h");
+        assertEquals(expected.toString(), Bitmap.format(LETTER_R_BITBOARD, highlightedSquare));
     }
+
+    @Test
+    public void testGivenFlipVerticalOfLetterR()
+    {
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - X - - - - X - ");
+        expected.append("7 - X - - - X - - ");
+        expected.append("6 - X - - X - - - ");
+        expected.append("5 - X X X - - - - ");
+        expected.append("4 - X - - X - - - ");
+        expected.append("3 - X - - - X - - ");
+        expected.append("2 - X - - - X - - ");
+        expected.append("1 - - X X X - - - ");
+        expected.append("  a b c d e f g h");
+        long flipped = Bitmap.flipVertical(LETTER_R_BITBOARD);
+        assertEquals(expected.toString(), Bitmap.format(flipped));
+    }
+    
+    @Test
+    public void testGivenMirrorHorizontalOfLetterR()
+    {
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - - - X X X - - ");
+        expected.append("7 - - X - - - X - ");
+        expected.append("6 - - X - - - X - ");
+        expected.append("5 - - - X - - X - ");
+        expected.append("4 - - - - X X X - ");
+        expected.append("3 - - - X - - X - ");
+        expected.append("2 - - X - - - X - ");
+        expected.append("1 - X - - - - X - ");
+        expected.append("  a b c d e f g h");
+        long mirrored = Bitmap.mirrorHorizontal(LETTER_R_BITBOARD);
+        assertEquals(expected.toString(), Bitmap.format(mirrored));
+    }
+
+    @Test
+    public void testGivenFlipThenMirrorOfLetterR()
+    {
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - X - - - - X - ");
+        expected.append("7 - - X - - - X - ");
+        expected.append("6 - - - X - - X - ");
+        expected.append("5 - - - - X X X - ");
+        expected.append("4 - - - X - - X - ");
+        expected.append("3 - - X - - - X - ");
+        expected.append("2 - - X - - - X - ");
+        expected.append("1 - - - X X X - - ");
+        expected.append("  a b c d e f g h");
+        long flipped = Bitmap.flipVertical(LETTER_R_BITBOARD);
+		long flippedAndMirrored = Bitmap.mirrorHorizontal(flipped);
+        assertEquals(expected.toString(), Bitmap.format(flippedAndMirrored));
+    }
+
+    @Test
+    public void testGivenFlipDiagA1H8OfLetterR()
+    {
+        OutputBuilder expected = new OutputBuilder();
+        expected.append("8 - - - - - - - - ");
+        expected.append("7 X - - - - - - - ");
+        expected.append("6 - X - - - X X - ");
+        expected.append("5 - - X - X - - X ");
+        expected.append("4 - - - X - - - X ");
+        expected.append("3 - - - X - - - X ");
+        expected.append("2 X X X X X X X - ");
+        expected.append("1 - - - - - - - - ");
+        expected.append("  a b c d e f g h");
+        long flipDiagA1H8 = Bitmap.flipDiagA1H8(LETTER_R_BITBOARD);
+        assertEquals(expected.toString(), Bitmap.format(flipDiagA1H8));
+    }
+    
+    @Test
+    public void testRankMasks()
+    {
+    	long rank1 = 0xFFL;
+		assertEquals(rank1 <<  0, Bitmap.FIRSTRANK);
+    	assertEquals(rank1 <<  8, Bitmap.SECONDRANK);
+    	assertEquals(rank1 << 16, Bitmap.THIRDRANK);
+    	assertEquals(rank1 << 24, Bitmap.FOURTHRANK);
+    	assertEquals(rank1 << 32, Bitmap.FIFTHRANK);
+    	assertEquals(rank1 << 40, Bitmap.SIXTHRANK);
+    	assertEquals(rank1 << 48, Bitmap.SEVENTHRANK);
+    	assertEquals(rank1 << 56, Bitmap.EIGHTHRANK);
+    }
+
+    @Test
+    public void testFileMasks()
+    {
+    	final long file_A = 0x0101010101010101L;
+    	assertEquals(file_A << 0, Bitmap.A_FILE);
+    	assertEquals(file_A << 1, Bitmap.B_FILE);
+    	assertEquals(file_A << 2, Bitmap.C_FILE);
+    	assertEquals(file_A << 3, Bitmap.D_FILE);
+    	assertEquals(file_A << 4, Bitmap.E_FILE);
+    	assertEquals(file_A << 5, Bitmap.F_FILE);
+    	assertEquals(file_A << 6, Bitmap.G_FILE);
+    	assertEquals(file_A << 7, Bitmap.H_FILE);
+    }
+
 
 }
