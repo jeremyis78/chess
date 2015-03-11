@@ -13,6 +13,11 @@ public class Empty extends Piece {
     public boolean exists() {
         return false;
     }
+    
+	@Override
+	public int centipawnValueOnSquare(int square) {
+		return 0;
+	}
 
     @Override
     public long advances(int fromSquare, Position position) {

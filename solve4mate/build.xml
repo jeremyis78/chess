@@ -117,7 +117,7 @@
 		<mkdir dir="${reports}" />
 	</target>
 
-	<target name="test-all" depends="test, test-movegen-short"
+	<target name="test-all" depends="test, test-movegen-short, test-evaluator-speed"
 		description="Run unit tests and do quick movegen verification"/> 
 	
 	<target name="test" depends="init,compile,prepare-test">
@@ -192,6 +192,18 @@
 		<loadfile srcFile="${toString:results.err}" property="stderr"/>
 		<echo message="stderr from the engine:${line.separator}${stderr}"/>
 	</target>
+	
+	<target name="test-evaluator-speed" depends="init,compile">
+		<java classname="com.jeremybrooks.chess.eval.EvalTester"
+		           fork="true"
+		           failonerror="true"
+		           maxmemory="128m">
+			<classpath refid="compile.classpath" />
+			<classpath refid="test.classpath" />
+			<arg value="--speed" />
+       </java>
+	</target>
+
 	
 	<target name="coverage-check">
 		<cobertura-check branchrate="34" totallinerate="100" />

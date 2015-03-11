@@ -16,7 +16,7 @@ public abstract class EvalTerm {
      * @param position The position to score
      * @return a signed integer representing the evaluation of Position
      */
-    public abstract int evaluate(GameState gameState);
+    public abstract int evaluate(GameState state);
     
     public String getDescription() {
         return description;

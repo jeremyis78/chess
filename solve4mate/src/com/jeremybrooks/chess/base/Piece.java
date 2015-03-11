@@ -53,6 +53,33 @@ public abstract class Piece {
     	return (side == WHITE ? "white " : "black ") + NAME[pieceIndex];
     }
 
+    public static int asIndex(char pieceCharacter)
+    {
+    	switch(pieceCharacter)
+    	{
+    	case 'P':
+    	case 'p':
+    		return PAWN;
+    	case 'N':
+    	case 'n':
+    		return KNIGHT;
+    	case 'B':
+    	case 'b':
+    		return BISHOP;
+    	case 'R':
+    	case 'r':
+    		return ROOK;
+    	case 'Q':
+    	case 'q':
+    		return QUEEN;
+    	case 'K':
+    	case 'k':
+    		return KING;
+    	default:
+    		return NONE;
+    	}
+    }
+
 //    public static int encode(int pieceIndex)      { return ENCODED[pieceIndex]; }
 //    public static int unencode(int encoded)       { return TO_PIECE[encoded]; }
 
@@ -159,6 +186,14 @@ public abstract class Piece {
             return BOARD_EMPTY_SQUARE;
         return (color == Color.W ? encoded() : -1 * encoded());
     }
+    
+    /**
+     * Return the value in centi-pawns for this piece placed on 
+     * the given square.
+     * @param square the square where the piece is located
+     * @return the centi-pawn bonus value for this piece on this square
+     */
+    public abstract int centipawnValueOnSquare(int square);
 
     /**
      * Should return false ONLY when this piece represents

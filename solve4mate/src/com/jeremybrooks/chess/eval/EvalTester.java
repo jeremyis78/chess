@@ -1,7 +1,5 @@
 package com.jeremybrooks.chess.eval;
 
-import static com.jeremybrooks.chess.base.Bitmap.*;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -95,6 +93,39 @@ public class EvalTester {
                     numTimesExecuted + " times in " + 
                     elapsedNanos/nanosPerSecond + " seconds = " +
                     (elapsedNanos / numTimesExecuted) + " nanos/run");
+        }
+    }
+
+    public static void printLinesThatThrowException() {
+        List<String> lines = new ArrayList<>(14000);
+        try (BufferedReader br = new BufferedReader(new FileReader("test-positions.txt")))
+        {
+            while(br.ready())
+            {
+                String line = br.readLine();
+                lines.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        for(String line: lines)
+        {
+            GameState g = new GameState(2);
+            if(line.startsWith("#")){
+            	System.out.println(line); 
+            	continue;
+            }
+            String fen = line.split("\t")[0];
+			boolean isWhiteToMove = Util.setupState(g, fen);
+            int searchDepth = 0;
+            boolean doesItThrow = false;
+            try {
+            	evaluate(g, isWhiteToMove, searchDepth);
+            } catch (Exception e) {
+            	doesItThrow = true;
+            }
+            System.out.println((doesItThrow?"#IllegalStateExceptionForEvaluator ":"") + line);
         }
     }
 

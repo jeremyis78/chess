@@ -1,7 +1,22 @@
 package com.jeremybrooks.chess.base;
 
+
 public class Queen extends SlidingPiece {
-    
+
+	public static int SQUARE_CENTIPAWN_VALUE[] = new int[] { 
+		// From white's point of view:
+		//               a1   b1   c1   d1   e1   f1   g1   h1
+	    /* 1st rank */  -20, -10, -10,  -5,  -5, -10, -10, -20,
+	    /*   2nd    */  -10,   0,   5,   0,   0,   0,   0, -10,  
+	    /*   3rd    */  -10,   5,   5,   5,   5,   5,   0, -10, 
+	    /*   4th    */   0,    0,   5,   5,   5,   5,   0,  -5,
+	    /*   5th    */  -5,    0,   5,   5,   5,   5,   0,  -5,
+	    /*   6th    */  -10,   0,   5,   5,   5,   5,   0, -10,
+	    /*   7th    */  -10,   0,   0,   0,   0,   0,   0, -10,
+		/* 8th rank */  -20, -10, -10,  -5,  -5, -10, -10, -20
+		//               a8   b8   c8   d8   e8   f8   g8   h8   
+	};
+
     public Queen(Color color) { 
         super(color, Piece.QUEEN, 'Q');
     }
@@ -10,4 +25,10 @@ public class Queen extends SlidingPiece {
     public boolean exists() {
         return true;
     }
+
+	@Override
+	public int centipawnValueOnSquare(int square) {
+		int onSquare = (color == Color.W) ? square : square ^ 56;
+		return SQUARE_CENTIPAWN_VALUE[onSquare];
+	}
 }

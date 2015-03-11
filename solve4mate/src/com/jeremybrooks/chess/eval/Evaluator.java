@@ -24,85 +24,52 @@ public class Evaluator {
         975, // Queen
         9999 // King
     };
+    
+    public static final int INCLUDE_PIECE_LOCATION_BONUSES = 1;
 
-    private final static int BISHOP_PAIR_VALUE = 50;
+    private static final int BISHOP_PAIR_VALUE = 50;
+    /*
+     * 
+    	Useful Masks  (maybe????)
+	-------------------------------------
+	Basic geographies on the board:
+	-territory[w]    = (ranks 1-4)
+	-territory[b]    = (ranks 5-8)
+	-left            = (files 1-4)
+	-right           = (files 5-8)
+	-dark squares    = (a1,c1,e1,...,h8)  0xAA55AA55AA55AA55L;
+	-light squares   = (b1,d1,f1,...,g7)  DARK_SQUARES << 1;
+	-mainDiagonals   = (a1,b2,c3,...,h8; h1,g2,f3,...,a8) 
+        
+	These form concentric circles starting from the center:
+	-center          = (d4,e4,d5,e5)                         (2x2)
+	-adjacentCenter  = (c3-f3,c4,f4,c5,f5,c6-f6)             (4x4 minus middle 4 squares)
+	-adjacentEdges   = (b2-g2,b3 up to b6,g3 up to g6,b7-g7) (6x6 minus middle 16 squares)
+	-edges           = (ranks 1,8; files 1,8)                (8x8 minus middle 32 squares)
 
-    //These boards represent the Positional Value (in centipawns)
-    //on the board for the named piece (a1=0, b1=1,...,h8=63).
-    //These are from white's perspective
-    private static int knightPV[][] = new int[][]{
-        //White
-        {   5,  5, 12, 12, 12, 12,  5,  5, // first rank (a1-h1)
-            10, 15, 20, 20, 20, 20, 15, 10, // second rank  
-            10, 20, 30, 20, 20, 30, 20, 10, // 
-            10, 20, 30, 20, 20, 30, 20, 10, //    .
-            10, 40, 45, 20, 20, 45, 40, 10, //    .
-            10, 20, 30, 20, 20, 30, 20, 10, //    .
-            10, 15, 20, 20, 20, 20, 15, 10, //
-            5, 10, 12, 12, 12, 12, 10,  5  // eighth rank
-        },
-        //Black
-        {   
-            5, 10, 12, 12, 12, 12, 10,  5, // first rank
-            10, 15, 20, 20, 20, 20, 15, 10, //
-            10, 20, 30, 20, 20, 30, 20, 10, //    .
-            10, 40, 45, 20, 20, 45, 40, 10, //    .
-            10, 20, 30, 20, 20, 30, 20, 10, //    .
-            10, 20, 30, 20, 20, 30, 20, 10, // 
-            10, 15, 20, 20, 20, 20, 15, 10, // seventh rank  
-            5,  5, 12, 12, 12, 12,  5,  5  // eighth rank
-        }
-    };
+	    Computed masks
+	-----------------------------------
+	-not edges        = NOT edges                  (6x6) 
+	-corners          = edges AND mainDiagonals
+	-bankRank[w]      = territory[w] AND edges
+	-bankRank[b]      = territory[b] AND edges
 
-    private static int bishopPV[][] = new int[][]{
-        //White
-        {    10, 10,  8, 15, 15,  8, 10, 10, // first rank (a1-h1)
-            10, 50, 10, 10, 10, 10, 50, 10, // second rank
-            10, 20, 20, 25, 25, 20, 20, 10, //
-            10, 20, 45, 20, 20, 45, 20, 10, //    .
-            15, 45, 40, 30, 30, 40, 45, 15, //    .
-            15, 20, 20, 20, 20, 20, 20, 15, //    .
-            15, 20, 20, 20, 20, 20, 20, 15, //
-            10, 15, 20, 20, 20, 20, 15, 10  // eighth rank
-        },
-        //Black
-        {
-            10, 15, 20, 20, 20, 20, 15, 10, // first rank
-            15, 20, 20, 20, 20, 20, 20, 15, //
-            15, 20, 20, 20, 20, 20, 20, 15, //    .
-            15, 45, 40, 30, 30, 40, 45, 15, //    .
-            10, 20, 45, 20, 20, 45, 20, 10, //    .
-            10, 20, 20, 25, 25, 20, 20, 10, //        
-            10, 50, 10, 10, 10, 10, 50, 10, // seventh rank
-            10, 10,  8, 15, 15,  8, 10, 10  // eighth rank
-        }
-    };
+     */
+    
+    private int evaluationTerms;
+    
+    
 
-    private static int rookPV[][] = new int[][]{
-        //White
-        {    20,  5,  5, 45, 45, 45,  5, 20, // first rank (a1-h1)
-            5,  5,  5, 18, 20, 10,  5,  5, // second rank
-            10, 10, 10, 13, 15, 10, 10, 10, //
-            10, 10, 10, 10, 12, 10, 10, 10, //    .
-            10, 10, 10, 10, 10, 10, 10, 10, //    .
-            10, 10, 10, 10, 10, 10, 10, 10, //    .
-            10, 10, 10, 10, 10, 10, 10, 10, //
-            10, 10, 10, 10, 10, 10, 10, 10 // eighth rank
-        },
-        //Black
-        {    10, 10, 10, 10, 10, 10, 10, 10, // first rank
-            10, 10, 10, 10, 10, 10, 10, 10, //
-            10, 10, 10, 10, 10, 10, 10, 10, //    .
-            10, 10, 10, 10, 10, 10, 10, 10, //    .
-            10, 10, 10, 10, 12, 10, 10, 10, //    .
-            10, 10, 10, 13, 15, 10, 10, 10, //
-            5,  5,  5, 18, 20, 10,  5,  5, // seventh rank
-            20,  5,  5, 45, 45, 45,  5, 20  // eighth rank        
-        }
-    };
+    public Evaluator() {
+		super();
+	}
 
+	public Evaluator(int evaluationTerms) {
+		super();
+		this.evaluationTerms = evaluationTerms;
+	}
 
-    /**
+	/**
      * 
      * Returns an evaluation score for the side to move 'side'
      * Scores advantageous for white are positive.
@@ -119,11 +86,10 @@ public class Evaluator {
     
     public int evaluate(GameState g, int side, int depth, int[] currentMove, boolean isSearchDebug, boolean isEval){
         int wMaterialScore = 0, bMaterialScore = 0;  //score for white and black
-        int mateScore = 0;
         assert g.inCheck() == false;
         if(g.inCheck()) 
         {
-            throw new IllegalStateException("can't statically evaluate the check or mate position");
+            throw new IllegalStateException("can't statically evaluate the check or mate position: " + g.get());
         }
         
         Position position = g.getPosition();
@@ -150,12 +116,18 @@ public class Evaluator {
                 }
             }
             if(color==Piece.WHITE) wMaterialScore += pieceScore;
-            else             bMaterialScore += pieceScore;
+            else                   bMaterialScore += pieceScore;
         }
 
         int materialScore = wMaterialScore - bMaterialScore;
         int materialAdjustment = new MaterialAdjustmentTerm().evaluate(g);
-        int finalScore = materialScore + materialAdjustment + mateScore;
+        int finalScore = materialScore + materialAdjustment;
+        if(Util.bool(evaluationTerms & INCLUDE_PIECE_LOCATION_BONUSES))
+        {
+        	int pieceLocationScore = new PieceLocationsTerm().evaluate(g);
+        	finalScore += pieceLocationScore;
+        }
+        
         if(isSearchDebug)
         {
             String currentLine = "";
