@@ -13,8 +13,7 @@ public class SquareTest {
     private Square square;
     
     @Before
-    public void setUp()
-    {
+    public void setUp(){
         square = new Square();
     }
     
@@ -105,8 +104,7 @@ public class SquareTest {
     }
     
     @Test
-    public void testNotOnThirdRank()
-    {
+    public void testNotOnThirdRank(){
         assertTrue(Square.notOnThirdRank(Bitmap.G1));
         assertTrue(Square.notOnThirdRank(Bitmap.H2));
         for(int square = Bitmap.A3; square <= Bitmap.H3; square++)
@@ -121,8 +119,7 @@ public class SquareTest {
     }
 
     @Test
-    public void testNotOnSixthRank()
-    {
+    public void testNotOnSixthRank(){
         assertTrue(Square.notOnSixthRank(Bitmap.A8));
         assertTrue(Square.notOnSixthRank(Bitmap.A7));
         for(int square = Bitmap.A6; square <= Bitmap.H6; square++)
@@ -137,8 +134,7 @@ public class SquareTest {
     }
     
     @Test
-    public void testSquareLeftOf()
-    {
+    public void testSquareLeftOf(){
         assertEquals("left of A1 would be an index 'off the bitboard'",
                 -1, Square.squareLeftOf(Bitmap.A1));
         assertEquals(Bitmap.A1, Square.squareLeftOf(Bitmap.B1));
@@ -153,8 +149,7 @@ public class SquareTest {
     }
 
     @Test
-    public void testSquareRightOf()
-    {
+    public void testSquareRightOf(){
         assertEquals("right of H8 would be an index 'off the bitboard'",
                 64, Square.squareRightOf(Bitmap.H8));
         assertEquals(Bitmap.H8, Square.squareRightOf(Bitmap.G8));
@@ -164,28 +159,27 @@ public class SquareTest {
     }
     
     @Test
-    public void testIsEighthRank()
-    {
-    	int white = Piece.WHITE;
-    	for(int square = Bitmap.A1; square < Bitmap.A2; square++)
-    	{
-    		assertFalse(Square.isEighthRank(square, white));
-    		assertTrue (Square.isEighthRank(square, ~white));
-    	}
-    	for(int square = Bitmap.A2; square < Bitmap.A8; square++)
-    	{
-    		assertFalse(Square.isEighthRank(square, white));
-    		assertFalse(Square.isEighthRank(square, ~white));
-    	}
-    	for(int square = Bitmap.A8; square <= Bitmap.H8; square++)
-    	{
-    		assertTrue (Square.isEighthRank(square, white));
-    		assertFalse(Square.isEighthRank(square, ~white));
-    	}
-    	assertFalse(Square.isEighthRank(Bitmap.MAXSQ, white));
-    	assertFalse(Square.isEighthRank(Bitmap.MAXSQ, ~white));
-    	assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, white));
-    	assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, ~white));
+    public void testIsEighthRank(){
+        int white = Piece.WHITE;
+        for(int square = Bitmap.A1; square < Bitmap.A2; square++)
+        {
+            assertFalse(Square.isEighthRank(square, white));
+            assertTrue (Square.isEighthRank(square, ~white));
+        }
+        for(int square = Bitmap.A2; square < Bitmap.A8; square++)
+        {
+            assertFalse(Square.isEighthRank(square, white));
+            assertFalse(Square.isEighthRank(square, ~white));
+        }
+        for(int square = Bitmap.A8; square <= Bitmap.H8; square++)
+        {
+            assertTrue (Square.isEighthRank(square, white));
+            assertFalse(Square.isEighthRank(square, ~white));
+        }
+        assertFalse(Square.isEighthRank(Bitmap.MAXSQ, white));
+        assertFalse(Square.isEighthRank(Bitmap.MAXSQ, ~white));
+        assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, white));
+        assertFalse(Square.isEighthRank(Bitmap.NOSQUARE, ~white));
     }
 
     private void assertSquareIsUnoccupied() {

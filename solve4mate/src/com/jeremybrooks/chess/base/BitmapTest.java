@@ -11,20 +11,20 @@ import com.jeremybrooks.chess.util.OutputBuilder;
 public class BitmapTest extends TestCase {
 
     private static final long LETTER_R_BITBOARD = Bitmap.populateBits(1, 57, 8) |
-			1L << Bitmap.G1 | 1L << Bitmap.F2 |
-			1L << Bitmap.E3 | 1L << Bitmap.D4 |
-			1L << Bitmap.C4 | 1L << Bitmap.E5 |
-			1L << Bitmap.F6 | 1L << Bitmap.F7 |
-			7L << 58;
+            1L << Bitmap.G1 | 1L << Bitmap.F2 |
+            1L << Bitmap.E3 | 1L << Bitmap.D4 |
+            1L << Bitmap.C4 | 1L << Bitmap.E5 |
+            1L << Bitmap.F6 | 1L << Bitmap.F7 |
+            7L << 58;
     
-	long Long1 = 1L;
+    long Long1 = 1L;
     long Long2 = (long)1;
     long LongShift8 = Long1 << 8;
 
     /* DO NOT CHANGE THESE */
     private static final int[] SQ2BIT = {
-        0,  1,  2,  3,  4,  5,  6,  7,    // 1st rank
-        8,  9, 10, 11, 12, 13, 14, 15,    // 2nd-rank
+        0,  1,  2,  3,  4,  5,  6,  7,     // 1st rank
+        8,  9, 10, 11, 12, 13, 14, 15,     // 2nd-rank
         16, 17, 18, 19, 20, 21, 22, 23,    // 3rd-rank
         24, 25, 26, 27, 28, 29, 30, 31,    // 4th-rank
         32, 33, 34, 35, 36, 37, 38, 39,    // 5th-rank
@@ -40,7 +40,7 @@ public class BitmapTest extends TestCase {
         4, 12, 20, 28, 36, 44, 52, 60,    // e-file
         5, 13, 21, 29, 37, 45, 53, 61,    // f-file
         6, 14, 22, 30, 38, 46, 54, 62,    // g-file
-        7, 15, 23, 31, 39, 47, 55, 63    // h-file
+        7, 15, 23, 31, 39, 47, 55, 63     // h-file
     };
     private static final int[] SQ2BIT45L = {
          0,  1,  3,  6, 10, 15, 21, 28,
@@ -229,25 +229,6 @@ public class BitmapTest extends TestCase {
         
         Bitmap a3h8 = rankBitmap(A3).bitwiseOr(rankBitmap(H8));
         assertEquals(emptyBitmap().toString(), a3h8.bitwiseXor(a3h8).toString());
-
-
-/*        Bitmap b             = Bitmap.set(12);
-        Bitmap c             = Bitmap.set(45);
-        boolean bORe4          = b.or(Bitmap.E4);
-        boolean bANDe4        = b.and(E4);
-        boolean bXORe4         = b.xor(E4);
-        int bCount             = b.count();
-        int bFirstBit          = b.first();
-        Bitmap bOREQUALc     = b.orAssign(c);
-        Bitmap bANDEQUALc    = b.andAssign(c);
-        Bitmap bXOREQUALc    = b.xorAssign(c);
-        
-        Bitmap bShiftedEight = b.leftShift(8);
-        Bitmap bShiftedEightRight = b.rightShift(8);
-        Bitmap bRotated90DegreesRight = b.rotate90DegRight();
-        Bitmap bRotated45DegreesRight = b.rotate45DegRight();
-        Bitmap bRotated45DegreesLeft = b.roate45DegLeft();
-        */
     }
 
     @Test
@@ -267,8 +248,8 @@ public class BitmapTest extends TestCase {
 
     @Test
     public void testGivenFormatForLetterRWithHighlightedSquare() {
-    	long highlightedSquare = 1L << Bitmap.G4;
-    	OutputBuilder expected = new OutputBuilder();
+        long highlightedSquare = 1L << Bitmap.G4;
+        OutputBuilder expected = new OutputBuilder();
         expected.append("8 - - X X X - - - ");
         expected.append("7 - X - - - X - - ");
         expected.append("6 - X - - - X - - ");
@@ -329,7 +310,7 @@ public class BitmapTest extends TestCase {
         expected.append("1 - - - X X X - - ");
         expected.append("  a b c d e f g h");
         long flipped = Bitmap.flipVertical(LETTER_R_BITBOARD);
-		long flippedAndMirrored = Bitmap.mirrorHorizontal(flipped);
+        long flippedAndMirrored = Bitmap.mirrorHorizontal(flipped);
         assertEquals(expected.toString(), Bitmap.format(flippedAndMirrored));
     }
 
@@ -353,29 +334,29 @@ public class BitmapTest extends TestCase {
     @Test
     public void testRankMasks()
     {
-    	long rank1 = 0xFFL;
-		assertEquals(rank1 <<  0, Bitmap.FIRSTRANK);
-    	assertEquals(rank1 <<  8, Bitmap.SECONDRANK);
-    	assertEquals(rank1 << 16, Bitmap.THIRDRANK);
-    	assertEquals(rank1 << 24, Bitmap.FOURTHRANK);
-    	assertEquals(rank1 << 32, Bitmap.FIFTHRANK);
-    	assertEquals(rank1 << 40, Bitmap.SIXTHRANK);
-    	assertEquals(rank1 << 48, Bitmap.SEVENTHRANK);
-    	assertEquals(rank1 << 56, Bitmap.EIGHTHRANK);
+        long rank1 = 0xFFL;
+        assertEquals(rank1 <<  0, Bitmap.FIRSTRANK);
+        assertEquals(rank1 <<  8, Bitmap.SECONDRANK);
+        assertEquals(rank1 << 16, Bitmap.THIRDRANK);
+        assertEquals(rank1 << 24, Bitmap.FOURTHRANK);
+        assertEquals(rank1 << 32, Bitmap.FIFTHRANK);
+        assertEquals(rank1 << 40, Bitmap.SIXTHRANK);
+        assertEquals(rank1 << 48, Bitmap.SEVENTHRANK);
+        assertEquals(rank1 << 56, Bitmap.EIGHTHRANK);
     }
 
     @Test
     public void testFileMasks()
     {
-    	final long file_A = 0x0101010101010101L;
-    	assertEquals(file_A << 0, Bitmap.A_FILE);
-    	assertEquals(file_A << 1, Bitmap.B_FILE);
-    	assertEquals(file_A << 2, Bitmap.C_FILE);
-    	assertEquals(file_A << 3, Bitmap.D_FILE);
-    	assertEquals(file_A << 4, Bitmap.E_FILE);
-    	assertEquals(file_A << 5, Bitmap.F_FILE);
-    	assertEquals(file_A << 6, Bitmap.G_FILE);
-    	assertEquals(file_A << 7, Bitmap.H_FILE);
+        final long file_A = 0x0101010101010101L;
+        assertEquals(file_A << 0, Bitmap.A_FILE);
+        assertEquals(file_A << 1, Bitmap.B_FILE);
+        assertEquals(file_A << 2, Bitmap.C_FILE);
+        assertEquals(file_A << 3, Bitmap.D_FILE);
+        assertEquals(file_A << 4, Bitmap.E_FILE);
+        assertEquals(file_A << 5, Bitmap.F_FILE);
+        assertEquals(file_A << 6, Bitmap.G_FILE);
+        assertEquals(file_A << 7, Bitmap.H_FILE);
     }
 
 

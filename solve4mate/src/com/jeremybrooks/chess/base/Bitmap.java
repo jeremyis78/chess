@@ -188,14 +188,14 @@ public class Bitmap {
     public static final int ALL45R = 3;
     public static final int MAXALL = 4;
 
-	private static final long FLIP_VERTICAL_CONSTANT1 = 0x00FF00FF00FF00FFL;
-	private static final long FLIP_VERTICAL_CONSTANT2 = 0x0000FFFF0000FFFFL;
-	private static final long MIRROR_HORZTL_CONSTANT1 = 0x5555555555555555L;
-	private static final long MIRROR_HORZTL_CONSTANT2 = 0x3333333333333333L;
-	private static final long MIRROR_HORZTL_CONSTANT4 = 0x0f0f0f0f0f0f0f0fL;
-	private static final long FLIP_DIAGA1H8_CONSTANT1 = 0x5500550055005500L;
-	private static final long FLIP_DIAGA1H8_CONSTANT2 = 0x3333000033330000L;
-	private static final long FLIP_DIAGA1H8_CONSTANT4 = 0x0f0f0f0f00000000L;
+    private static final long FLIP_VERTICAL_CONSTANT1 = 0x00FF00FF00FF00FFL;
+    private static final long FLIP_VERTICAL_CONSTANT2 = 0x0000FFFF0000FFFFL;
+    private static final long MIRROR_HORZTL_CONSTANT1 = 0x5555555555555555L;
+    private static final long MIRROR_HORZTL_CONSTANT2 = 0x3333333333333333L;
+    private static final long MIRROR_HORZTL_CONSTANT4 = 0x0f0f0f0f0f0f0f0fL;
+    private static final long FLIP_DIAGA1H8_CONSTANT1 = 0x5500550055005500L;
+    private static final long FLIP_DIAGA1H8_CONSTANT2 = 0x3333000033330000L;
+    private static final long FLIP_DIAGA1H8_CONSTANT4 = 0x0f0f0f0f00000000L;
 
     
     //For g.pos.board[]
@@ -223,10 +223,10 @@ public class Bitmap {
         56, 57, 58, 59, 60, 61, 62, 63     // 8th-rank
     };
     public static final int SQ2BIT90R[] = { 
-    	// The name is actually incorrect; it's a combination of a rotation and a flip:
-    	// 1) rotated 90 degrees LEFT such that 0=a8, 1=a7, ..., 7=a1
-    	// 2) then vertically flipped such that 0=a1, 1=a2, ..., 7=a8 (so we have ascending order)
-    	// Therefore a better name might be SQ2FILEBIT / SQUARE_TO_FILE_BIT
+        // The name is actually incorrect; it's a combination of a rotation and a flip:
+        // 1) rotated 90 degrees LEFT such that 0=a8, 1=a7, ..., 7=a1
+        // 2) then vertically flipped such that 0=a1, 1=a2, ..., 7=a8 (so we have ascending order)
+        // Therefore a better name might be SQ2FILEBIT / SQUARE_TO_FILE_BIT
         0,  8, 16, 24, 32, 40, 48, 56,    // a-file 
         1,  9, 17, 25, 33, 41, 49, 57,    // b-file
         2, 10, 18, 26, 34, 42, 50, 58,    // c-file
@@ -382,32 +382,32 @@ public class Bitmap {
     }
 
     public static long populateBits(int firstBit, int lastBitExcluded, int increment)
-	{	
-		long populated = 0L;
-		for(int bit=firstBit; bit<lastBitExcluded; bit+=increment) 
-			populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
-		return populated;
-	}
+    { 
+        long populated = 0L;
+        for(int bit=firstBit; bit<lastBitExcluded; bit+=increment) 
+            populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
+        return populated;
+    }
 
     public static long populateBits(int[] bitIndexes)
-	{	
-		long populated = 0L;
-		for(int bit: bitIndexes) 
-			populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
-		return populated;
-	}
+    {
+        long populated = 0L;
+        for(int bit: bitIndexes) 
+            populated |= withOneBitSet(bit & 0x3F); //only first 6 bits are valid
+        return populated;
+    }
 
     public static boolean isBitSet(int bit, long bitboard)
     {
-    	return Util.bool(bitboard & withOneBitSet(bit));
+        return Util.bool(bitboard & withOneBitSet(bit));
     }
 
     public static long withNewBitSet(long bitboard, int newBit)
     {
-    	return bitboard |= withOneBitSet(newBit);
+        return bitboard |= withOneBitSet(newBit);
     }
     
-	public static boolean hasMore(long board)
+    public static boolean hasMore(long board)
     {
         return board != 0;
     }
@@ -471,38 +471,38 @@ public class Bitmap {
 
     public static long flipVertical(long b)
     {
-    	long k1 = FLIP_VERTICAL_CONSTANT1;
-    	long k2 = FLIP_VERTICAL_CONSTANT2;
-    	b = ((b >>>  8) & k1) | ((b & k1) <<  8);
-    	b = ((b >>> 16) & k2) | ((b & k2) << 16);
-    	b = ( b >>> 32)       | ( b       << 32);
-    	return b;
+        long k1 = FLIP_VERTICAL_CONSTANT1;
+        long k2 = FLIP_VERTICAL_CONSTANT2;
+        b = ((b >>>  8) & k1) | ((b & k1) <<  8);
+        b = ((b >>> 16) & k2) | ((b & k2) << 16);
+        b = ( b >>> 32)       | ( b       << 32);
+        return b;
     }
     
     public static long mirrorHorizontal(long b) 
     {
-    	long k1 = MIRROR_HORZTL_CONSTANT1;
-    	long k2 = MIRROR_HORZTL_CONSTANT2;
-    	long k4 = MIRROR_HORZTL_CONSTANT4;
-    	b = ((b >>> 1) & k1) | ((b & k1) << 1);
-    	b = ((b >>> 2) & k2) | ((b & k2) << 2);
-    	b = ((b >>> 4) & k4) | ((b & k4) << 4);
-    	return b;
+        long k1 = MIRROR_HORZTL_CONSTANT1;
+        long k2 = MIRROR_HORZTL_CONSTANT2;
+        long k4 = MIRROR_HORZTL_CONSTANT4;
+        b = ((b >>> 1) & k1) | ((b & k1) << 1);
+        b = ((b >>> 2) & k2) | ((b & k2) << 2);
+        b = ((b >>> 4) & k4) | ((b & k4) << 4);
+        return b;
     }
     
     public static long flipDiagA1H8(long b)
     {
-    	long t;
-    	long k1 = FLIP_DIAGA1H8_CONSTANT1;
-    	long k2 = FLIP_DIAGA1H8_CONSTANT2;
-    	long k4 = FLIP_DIAGA1H8_CONSTANT4;
-    	t  = k4 & (b ^ (b  << 28));
-    	b ^=       t ^ (t >>> 28) ;
-    	t  = k2 & (b ^ (b  << 14));
-    	b ^=       t ^ (t >>> 14) ;
-    	t  = k1 & (b ^ (b  <<  7));
-    	b ^=       t ^ (t >>>  7) ;
-    	return b;
+        long t;
+        long k1 = FLIP_DIAGA1H8_CONSTANT1;
+        long k2 = FLIP_DIAGA1H8_CONSTANT2;
+        long k4 = FLIP_DIAGA1H8_CONSTANT4;
+        t  = k4 & (b ^ (b  << 28));
+        b ^=       t ^ (t >>> 28) ;
+        t  = k2 & (b ^ (b  << 14));
+        b ^=       t ^ (t >>> 14) ;
+        t  = k1 & (b ^ (b  <<  7));
+        b ^=       t ^ (t >>>  7) ;
+        return b;
     }
 
     public static String format(long moves){
@@ -522,20 +522,20 @@ public class Bitmap {
     public static String format(long b, long highlighted){
         boolean overlaps = Util.bool(b & highlighted);
         if(overlaps)
-        	throw new IllegalArgumentException("b and highlighted cannot have any overlapping bits");
+            throw new IllegalArgumentException("b and highlighted cannot have any overlapping bits");
         long mask;
         int  numSquaresToDisplay = 64;
         StringBuilder sb = new StringBuilder();
         for(int firstSquareOfRank = numSquaresToDisplay - 8; 
-        		firstSquareOfRank>=0; 
-        		firstSquareOfRank-=8)
+                firstSquareOfRank>=0; 
+                firstSquareOfRank-=8)
         {
             mask = 1L << firstSquareOfRank;
             int lastSquareOnRank = firstSquareOfRank + 7;
             sb.append(rankNumber(firstSquareOfRank)+1 + " ");
             for(int currentSquare = firstSquareOfRank;
-            		currentSquare <= lastSquareOnRank;
-            		++currentSquare, mask <<= 1)
+                    currentSquare <= lastSquareOnRank;
+                    ++currentSquare, mask <<= 1)
             {
                 if (Util.bool(mask & highlighted))  //Print the '+' first so
                     sb.append("+ ");                //we don't overwrite a move

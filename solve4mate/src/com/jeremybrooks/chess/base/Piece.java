@@ -14,22 +14,6 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
  * @author jeremy
  *
  */
-/*
- * Of the 37 classes as of this commit, these are the only classes remaining
- * with a complexity of 4 or greater.
- * 
- * class                  Line coverage  Branch coverage   Complexity
- * ---------------------- -------------  ---------------   ----------
-    EscapeGenerator            85% 79/92      66% 42/63        33
-    NonCaptureGenerator       100% 81/81      93% 41/44        27
-    CaptureGenerator       100% 54/54      96% 28/29        19
-    Search++                 0% 0/83        0% 0/38         6.5
-    SolveForMate++             0% 0/46        0% 0/22         5.5
-    MoveGenerator            85% 206/242    72% 112/154      4.483
-    Evaluator                79%    54/68      70% 21/30        4.4
-     ++ = currently has NO unit tests
- *
- */
 public abstract class Piece {
     public static enum Color{W, B}
     public static final int WHITE = 0;
@@ -38,50 +22,47 @@ public abstract class Piece {
     public static final char[][] CHAR = new char[2][];
     public static final String[] NAME =new String[]{"pawn","knight","bishop","rook","queen","king","none"};
     static {
-    	CHAR[WHITE] = new char[]{' ','P','N','K',' ','B','R','Q'};
-    	CHAR[BLACK] = new char[]{' ','p','n','k',' ','b','r','q'};
+        CHAR[WHITE] = new char[]{' ','P','N','K',' ','B','R','Q'};
+        CHAR[BLACK] = new char[]{' ','p','n','k',' ','b','r','q'};
     }
     public static char lowercase(int encodedPiece){ return CHAR[BLACK][encodedPiece]; }
     public static char uppercase(int encodedPiece){ return CHAR[WHITE][encodedPiece]; }
     public static char asCharacter(int side, int pieceIndex)
     {
-    	return CHAR[side][ENCODED[pieceIndex]];
+        return CHAR[side][ENCODED[pieceIndex]];
     }
 
     public static String asString(int side, int pieceIndex)
     {
-    	return (side == WHITE ? "white " : "black ") + NAME[pieceIndex];
+        return (side == WHITE ? "white " : "black ") + NAME[pieceIndex];
     }
 
     public static int asIndex(char pieceCharacter)
     {
-    	switch(pieceCharacter)
-    	{
-    	case 'P':
-    	case 'p':
-    		return PAWN;
-    	case 'N':
-    	case 'n':
-    		return KNIGHT;
-    	case 'B':
-    	case 'b':
-    		return BISHOP;
-    	case 'R':
-    	case 'r':
-    		return ROOK;
-    	case 'Q':
-    	case 'q':
-    		return QUEEN;
-    	case 'K':
-    	case 'k':
-    		return KING;
-    	default:
-    		return NONE;
-    	}
+        switch(pieceCharacter)
+        {
+        case 'P':
+        case 'p':
+            return PAWN;
+        case 'N':
+        case 'n':
+            return KNIGHT;
+        case 'B':
+        case 'b':
+            return BISHOP;
+        case 'R':
+        case 'r':
+            return ROOK;
+        case 'Q':
+        case 'q':
+            return QUEEN;
+        case 'K':
+        case 'k':
+            return KING;
+        default:
+            return NONE;
+        }
     }
-
-//    public static int encode(int pieceIndex)      { return ENCODED[pieceIndex]; }
-//    public static int unencode(int encoded)       { return TO_PIECE[encoded]; }
 
     //Piece indexes
     public static final int PAWN   = 0;
@@ -93,36 +74,34 @@ public abstract class Piece {
     public static final int NONE   = 6;
 
     /**
-	 * Returns the encoded value of the piece as it is encoded into 
-	 * the "move" integer (as well as the Position.board array). 
-	 * Indexed by Piece.PAWN, Piece.KNIGHT, etc.
-	 * @see Position.getBoard(int) 
-	 */
-	public static final int ENCODED[] = {
-	    1,  // ENCODED[PAWN  ] = 0x001
-	    2,  // ENCODED[KNIGHT] = 0x010
-	    5,  // ENCODED[BISHOP] = 0x101
-	    6,  // ENCODED[ROOK  ] = 0x110
-	    7,  // ENCODED[QUEEN ] = 0x111
-	    3,  // ENCODED[KING  ] = 0x011 
-	    0   // ENCODED[NONE  ] = 0x000
-	};
-
-	//takes an int index (a board character) and maps it to a corresponding piece
-	
-	/**
-	 * Reverses the operation of ENCODED[] 
-	 */
-	public static final int TO_PIECE[] = {
-	    NONE,       // 0 (no piece)
-	    PAWN,       // 1
-	    KNIGHT,     // 2
-	    KING,       // 3
-	    NONE,       // 4 (no piece)
-	    BISHOP,     // 5
-	    ROOK,       // 6
-	    QUEEN
-	};
+     * Returns the encoded value of the piece as it is encoded into 
+     * the "move" integer (as well as the Position.board array). 
+     * Indexed by Piece.PAWN, Piece.KNIGHT, etc.
+     * @see Position.getBoard(int) 
+     */
+    public static final int ENCODED[] = {
+        1,  // ENCODED[PAWN  ] = 0x001
+        2,  // ENCODED[KNIGHT] = 0x010
+        5,  // ENCODED[BISHOP] = 0x101
+        6,  // ENCODED[ROOK  ] = 0x110
+        7,  // ENCODED[QUEEN ] = 0x111
+        3,  // ENCODED[KING  ] = 0x011 
+        0   // ENCODED[NONE  ] = 0x000
+    };
+    
+    /**
+     * Reverses the operation of ENCODED[] 
+     */
+    public static final int TO_PIECE[] = {
+        NONE,       // 0 (no piece)
+        PAWN,       // 1
+        KNIGHT,     // 2
+        KING,       // 3
+        NONE,       // 4 (no piece)
+        BISHOP,     // 5
+        ROOK,       // 6
+        QUEEN
+    };
 
 
     protected Color color;

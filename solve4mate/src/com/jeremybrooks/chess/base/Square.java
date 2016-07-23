@@ -180,7 +180,7 @@ public class Square {
         return (rankNumber(currentSquare) != 2); //zero-based rank
     }
 
-	public static boolean isEighthRank(int currentSquare, int side) {
-		return side == Piece.WHITE ? 7 == rankNumber(currentSquare) : 0 == rankNumber(currentSquare); //zero-based rank 
-	}
+    public static boolean isEighthRank(int currentSquare, int side) {
+        return side == Piece.WHITE ? 7 == rankNumber(currentSquare) : 0 == rankNumber(currentSquare); //zero-based rank 
+    }
 }

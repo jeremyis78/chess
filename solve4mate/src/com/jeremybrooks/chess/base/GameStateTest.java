@@ -280,23 +280,23 @@ public class GameStateTest extends KeyTestBase {
         assertWhiteToMove();
     }
 
-	private void assertWhiteToMove() {
-		assertEquals(true, gameState.isWhiteToMove());
-	}
+    private void assertWhiteToMove() {
+        assertEquals(true, gameState.isWhiteToMove());
+    }
 
-	private void assertBlackToMove() {
-		assertEquals(false, gameState.isWhiteToMove());
-	}
+    private void assertBlackToMove() {
+        assertEquals(false, gameState.isWhiteToMove());
+    }
 
-	private String movesMadeInFAN() {
-		StringBuilder line = new StringBuilder();
-		for(int move: gameState.currentLine())
-		{
-			line.append(Util.displayMoveStr(move, false, false)).append(" ");
-		}
-		if(line.length()>0) line.deleteCharAt(line.length()-1);
-		return line.toString();
-	}
+    private String movesMadeInFAN() {
+        StringBuilder line = new StringBuilder();
+        for(int move: gameState.currentLine())
+        {
+            line.append(Util.displayMoveStr(move, false, false)).append(" ");
+        }
+        if(line.length()>0) line.deleteCharAt(line.length()-1);
+        return line.toString();
+    }
     
     @Test
     public void testMakeAndUndoWhitePawnCapturesEnPassant() {
@@ -467,7 +467,7 @@ public class GameStateTest extends KeyTestBase {
     
     @Test
     public void givenWhiteRookMoveThatDoesntAffectCastlingStatus() {
-    	//inspired by: position fen r3k2r/p1ppqpb1/1n2pnp1/1b1PN3/1p2P3/2N2Q1p/PPPBBPPP/R3KR2 w Qkq - 2 2 moves f1h1
+        //inspired by: position fen r3k2r/p1ppqpb1/1n2pnp1/1b1PN3/1p2P3/2N2Q1p/PPPBBPPP/R3KR2 w Qkq - 2 2 moves f1h1
         String beforeMove = "r3k2r/8/8/8/8/8/8/R3KR2 w Qkq - 2 2";
         int move = encodeMove(F1, H1, ENCODED[ROOK]);
         String afterMove = "r3k2r/8/8/8/8/8/8/R3K2R b Qkq - 3 2";
@@ -478,7 +478,7 @@ public class GameStateTest extends KeyTestBase {
 
     @Test
     public void givenBlackRookMoveThatDoesntAffectCastlingStatus() {
-    	//inspired by: position fen r3k2r/p1ppqpb1/1n2pnp1/1b1PN3/1p2P3/2N2Q1p/PPPBBPPP/R3KR2 w Qkq - 2 2 moves f1h1
+        //inspired by: position fen r3k2r/p1ppqpb1/1n2pnp1/1b1PN3/1p2P3/2N2Q1p/PPPBBPPP/R3KR2 w Qkq - 2 2 moves f1h1
         String beforeMove = "3rk2r/8/8/8/8/8/8/R3K2R b KQk - 2 2";
         int move = encodeMove(D8, A8, ENCODED[ROOK]);
         String afterMove = "r3k2r/8/8/8/8/8/8/R3K2R w KQk - 3 3";
@@ -490,30 +490,30 @@ public class GameStateTest extends KeyTestBase {
     @Test
     public void givenHashingForSameStateButBlackToMove()
     {
-    	String whiteToMove = GameState.FEN_START;
-    	setupState(whiteToMove);
-    	long wKey = gameState.fullZobristKey();
+        String whiteToMove = GameState.FEN_START;
+        setupState(whiteToMove);
+        long wKey = gameState.fullZobristKey();
 
-    	String blackToMove = whiteToMove.replace(" w ", " b ");
-    	setupState(blackToMove);
-    	long bKey = gameState.fullZobristKey();
-    	Assert.assertNotEquals(wKey, bKey);
+        String blackToMove = whiteToMove.replace(" w ", " b ");
+        setupState(blackToMove);
+        long bKey = gameState.fullZobristKey();
+        Assert.assertNotEquals(wKey, bKey);
     }
     
     @Test
     public void givenHashingForCastlingOptions()
     {
-    	//While these positions are invalid, they provide differences
-    	//in the castling options and for testing the purpose of whether 
-    	//or not they are included in the hash, it's still a valid test
-    	String initialFen = GameState.FEN_START;
-    	for(String castlingOptions: PositionInfoTest.CASTLING_OPTIONS)
+        //While these positions are invalid, they provide differences
+        //in the castling options and for testing the purpose of whether 
+        //or not they are included in the hash, it's still a valid test
+        String initialFen = GameState.FEN_START;
+        for(String castlingOptions: PositionInfoTest.CASTLING_OPTIONS)
         {
-        	String nextFen = initialFen.replace(" KQkq ", " "+castlingOptions+" ");
-        	System.out.println(nextFen);
-    		setupState(nextFen);
-    		long key = gameState.fullZobristKey();
-    		addKeyOrFailIfNotUnique(key);
+            String nextFen = initialFen.replace(" KQkq ", " "+castlingOptions+" ");
+            System.out.println(nextFen);
+            setupState(nextFen);
+            long key = gameState.fullZobristKey();
+            addKeyOrFailIfNotUnique(key);
         }
     }
 
@@ -521,33 +521,33 @@ public class GameStateTest extends KeyTestBase {
     @Test
     public void givenHashingForEnPassantTargetSquare()
     {
-    	//Requires valid positions because GameState wipes out the enpassant square if it
-    	//conflicts with the board position
-    	String[] fens = new String[]{
-    			"rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq a3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq b3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq f3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq g3 0 1",
-    			"rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq h3 0 1",
-    			"rnbqkbnr/1ppppppp/8/p7/P7/8/1PPPPPPP/RNBQKBNR w KQkq a6 0 2",
-    			"rnbqkbnr/p1pppppp/8/1p6/P7/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 2",
-    			"rnbqkbnr/pp1ppppp/8/2p5/P7/8/1PPPPPPP/RNBQKBNR w KQkq c6 0 2",
-    			"rnbqkbnr/ppp1pppp/8/3p4/P7/8/1PPPPPPP/RNBQKBNR w KQkq d6 0 2",
-    			"rnbqkbnr/pppp1ppp/8/4p3/P7/8/1PPPPPPP/RNBQKBNR w KQkq e6 0 2",
-    			"rnbqkbnr/ppppp1pp/8/5p2/P7/8/1PPPPPPP/RNBQKBNR w KQkq f6 0 2",
-    			"rnbqkbnr/pppppp1p/8/6p1/P7/8/1PPPPPPP/RNBQKBNR w KQkq g6 0 2",
-    			"rnbqkbnr/ppppppp1/8/7p/P7/8/1PPPPPPP/RNBQKBNR w KQkq h6 0 2",
-    			"rnbqkb1r/pppppppp/7n/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 1 2"
-    	};
-    	for(String fen: fens)
+        //Requires valid positions because GameState wipes out the enpassant square if it
+        //conflicts with the board position
+        String[] fens = new String[]{
+                "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq a3 0 1",
+                "rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq b3 0 1",
+                "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1",
+                "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1",
+                "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+                "rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq f3 0 1",
+                "rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq g3 0 1",
+                "rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq h3 0 1",
+                "rnbqkbnr/1ppppppp/8/p7/P7/8/1PPPPPPP/RNBQKBNR w KQkq a6 0 2",
+                "rnbqkbnr/p1pppppp/8/1p6/P7/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 2",
+                "rnbqkbnr/pp1ppppp/8/2p5/P7/8/1PPPPPPP/RNBQKBNR w KQkq c6 0 2",
+                "rnbqkbnr/ppp1pppp/8/3p4/P7/8/1PPPPPPP/RNBQKBNR w KQkq d6 0 2",
+                "rnbqkbnr/pppp1ppp/8/4p3/P7/8/1PPPPPPP/RNBQKBNR w KQkq e6 0 2",
+                "rnbqkbnr/ppppp1pp/8/5p2/P7/8/1PPPPPPP/RNBQKBNR w KQkq f6 0 2",
+                "rnbqkbnr/pppppp1p/8/6p1/P7/8/1PPPPPPP/RNBQKBNR w KQkq g6 0 2",
+                "rnbqkbnr/ppppppp1/8/7p/P7/8/1PPPPPPP/RNBQKBNR w KQkq h6 0 2",
+                "rnbqkb1r/pppppppp/7n/8/P7/8/1PPPPPPP/RNBQKBNR w KQkq - 1 2"
+        };
+        for(String fen: fens)
         {
-        	System.out.println(fen);
-    		setupState(fen);
-    		long key = gameState.fullZobristKey();
-    		addKeyOrFailIfNotUnique(key);
+            System.out.println(fen);
+            setupState(fen);
+            long key = gameState.fullZobristKey();
+            addKeyOrFailIfNotUnique(key);
         }
     }
 
