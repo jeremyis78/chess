@@ -267,11 +267,11 @@ public class GameState {
 //            throw new IllegalStateException("isWhiteToMove conflicts with isWhiteToMove()");
 //        }
         //whiteToMove = isWhitesMove;                        //cache whose move it is
-        int from = move & 0x3F;                         //first 6 bits
-        int to = (move >> 6) & 0x3F;                    //next 6
-        int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
-        int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
-        int promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
+        int from      = Util.decodeFromSquare(move);
+        int to        = Util.decodeToSquare(move);
+        int moving    = Util.decodePiece(move);
+        int captured  = Util.decodeCapturedPiece(move);
+        int promotion = Util.decodePromotionPiece(move);
         try {
             if (moving == KING){
                 updateCastlingOptionsWhenKingMoves();
@@ -369,10 +369,10 @@ public class GameState {
         }
         int move = moveStack.peek();
         whiteToMove = !whiteToMove;
-        int from = move & 0x3F;                         //first 6 bits
-        int to = (move >> 6) & 0x3F;                    //next 6
-        int moving = TO_PIECE[(move >> 12) & 0x7];      //next 3
-        int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
+        int from     = Util.decodeFromSquare(move);
+        int to       = Util.decodeToSquare(move);
+        int moving   = Util.decodePiece(move);
+        int captured = Util.decodeCapturedPiece(move);
         
         posInfo[numberOfMovesMade].setReversiblePlies(0); //Is this needed???
         

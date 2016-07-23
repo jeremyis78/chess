@@ -144,10 +144,10 @@ public class Evaluator {
 
 	public int scoreFromSEE(int move, GameState state)
 	{
-	    int fromSquare = move & 0x3F;                            //first 6 bits
-	    int toSquare = (move >> 6) & 0x3F;                       //next 6
-	    int capturingPiece = TO_PIECE[(move >> 12) & 0x7];       //next 3
-	    int capturedPieceInMove  = TO_PIECE[(move >> 15) & 0x7]; //next 3
+	    int fromSquare = Util.decodeFromSquare(move);
+	    int toSquare = Util.decodeToSquare(move);
+	    int capturingPiece = Util.decodePiece(move);
+	    int capturedPieceInMove  = Util.decodeCapturedPiece(move);
 	    int gain[] = new int[32];
 	    int depth = 0;
 	    int sideToMove = state.isWhiteToMove()?Piece.WHITE:Piece.BLACK;

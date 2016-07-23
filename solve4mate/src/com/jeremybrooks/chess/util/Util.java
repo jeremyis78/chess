@@ -4,6 +4,7 @@
  */
 package com.jeremybrooks.chess.util;
 
+import static com.jeremybrooks.chess.base.Piece.TO_PIECE;
 import static com.jeremybrooks.chess.base.Square.named;
 import static com.jeremybrooks.chess.util.AbstractDisplayer.EOL;
 import static org.junit.Assert.assertEquals;
@@ -61,7 +62,27 @@ public class Util {
     {
         return Long.bitCount(pieces);
     }
+
+    public static int decodeFromSquare(int move){
+        return move & 0x3F;
+    }
     
+    public static int decodeToSquare(int move){
+        return (move >> 6) & 0x3F;
+    }
+
+    public static int decodePiece(int move){
+        return TO_PIECE[(move >> 12) & 0x7];
+    }
+    
+    public static int decodeCapturedPiece(int move){
+        return TO_PIECE[(move >> 15) & 0x7];
+    }
+
+    public static int decodePromotionPiece(int move){
+        return TO_PIECE[(move >> 18) & 0x7];
+    }
+
     /**
      * Return string of moves in Full Algebraic Notation (f2-f4, Qd1xd8, etc)
      * @param moves the list of moves to format
