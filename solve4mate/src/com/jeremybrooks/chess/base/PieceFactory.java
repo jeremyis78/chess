@@ -67,7 +67,7 @@ public class PieceFactory {
         if(upperPieceChar == 'K') piece = color==Color.W ? WHITE_KING   : BLACK_KING;
         if(!piece.exists())
             throw new IllegalArgumentException("piece is invalid '"+pieceChar+"'; "
-            		+ "allowed piece characters are: KkQqRrBbNnPp");
+                    + "allowed piece characters are: KkQqRrBbNnPp");
         return piece;
     }
 
@@ -80,7 +80,7 @@ public class PieceFactory {
         else if(upperPieceChar == 'N') piece = WHITE_KNIGHT;
         else 
             throw new IllegalArgumentException("promotion piece is invalid '"+pieceChar+"'; "
-            		+ "allowed piece characters are: QqRrBbNn");
+                    + "allowed piece characters are: QqRrBbNn");
         return piece;
     }
 

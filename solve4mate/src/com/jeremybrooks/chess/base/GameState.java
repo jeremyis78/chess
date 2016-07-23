@@ -273,42 +273,42 @@ public class GameState {
         int captured = TO_PIECE[(move >> 15) & 0x7];    //next 3
         int promotion = TO_PIECE[(move >> 18) & 0x7];   //next 3
         try {
-        if (moving == KING){
-            updateCastlingOptionsWhenKingMoves();
-            int rookFrom = correspondingRookIfKingCastled(from, to);
-            if(rookFrom != NOSQUARE)
-            {
-                if(isOnGFile(to)){
-                    moveRook(rookFrom, squareLeftOf(to));
-                } else if (isOnCFile(to)) {
-                    moveRook(rookFrom, squareRightOf(to));
+            if (moving == KING){
+                updateCastlingOptionsWhenKingMoves();
+                int rookFrom = correspondingRookIfKingCastled(from, to);
+                if(rookFrom != NOSQUARE)
+                {
+                    if(isOnGFile(to)){
+                        moveRook(rookFrom, squareLeftOf(to));
+                    } else if (isOnCFile(to)) {
+                        moveRook(rookFrom, squareRightOf(to));
+                    }
                 }
             }
-        }
-        else if (moving == ROOK)
-        {
-            updateCastlingOptionsWhenRookMoves(from);             
-        } else {
-            if( isEnPassantCapture(moving, to, captured))
+            else if (moving == ROOK)
             {
-                erasePiece(squareBehind(to, whiteToMove?0:1));
-                captured = NONE;
-            } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
-                updateEnPassantSquareForNextMove(squareAhead(from, whiteToMove?0:1));
+                updateCastlingOptionsWhenRookMoves(from);             
+            } else {
+                if( isEnPassantCapture(moving, to, captured))
+                {
+                    erasePiece(squareBehind(to, whiteToMove?0:1));
+                    captured = NONE;
+                } else if (isPawnAdvancingTwoSquares(moving, from, to)) {
+                    updateEnPassantSquareForNextMove(squareAhead(from, whiteToMove?0:1));
+                }
+                duplicateCastlingFlags();
             }
-            duplicateCastlingFlags();
-        }
 
-        //Move the piece
-        if(captured != NONE){
-            erasePiece(to);
-        }
-        pos.erasePiece(from);
-        if(promotion != NONE) {
-            placePiece(promotion, to);
-        } else {
-            placePiece(moving, to);
-        }
+            //Move the piece
+            if(captured != NONE){
+                erasePiece(to);
+            }
+            pos.erasePiece(from);
+            if(promotion != NONE) {
+                placePiece(promotion, to);
+            } else {
+                placePiece(moving, to);
+            }
         } catch (IllegalStateException e) {
             String msg = "making " + Util.displayMoveStr(move, false, false) +
                     " on " + get() + " created illegal Position modification: " +
@@ -379,35 +379,35 @@ public class GameState {
         //Undo the depth
         numberOfMovesMade--;
         try {
-        //Undo the moving piece
-        erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
-        placePiece(moving, from);
+            //Undo the moving piece
+            erasePiece(to);  //NOTE: also erases any promotion piece that was placed there
+            placePiece(moving, from);
 
-        //Undo a castling move (that is, undo the rook move)
-        if (moving == KING){
-            int rookFrom = correspondingRookIfKingCastled(from, to);
-            if(rookFrom != NOSQUARE)
-            {
-                if(isOnGFile(to)){
-                    moveRook(squareLeftOf(to), rookFrom);
-                } else if (isOnCFile(to)) {
-                    moveRook(squareRightOf(to), rookFrom);
+            //Undo a castling move (that is, undo the rook move)
+            if (moving == KING){
+                int rookFrom = correspondingRookIfKingCastled(from, to);
+                if(rookFrom != NOSQUARE)
+                {
+                    if(isOnGFile(to)){
+                        moveRook(squareLeftOf(to), rookFrom);
+                    } else if (isOnCFile(to)) {
+                        moveRook(squareRightOf(to), rookFrom);
+                    }
                 }
+            } 
+            //NOTE: Castling flags are stored on the castle stack (array) so simply
+            //decrementing the numberOfMovesMade undoes any castling flag changes.
+
+            if(isPawnAdvancingTwoSquares(moving, from, to)){
+                updateEnPassantSquareForNextMove(NOSQUARE);
             }
-        } 
-        //NOTE: Castling flags are stored on the castle stack (array) so simply
-        //decrementing the numberOfMovesMade undoes any castling flag changes.
-        
-        if(isPawnAdvancingTwoSquares(moving, from, to)){
-            updateEnPassantSquareForNextMove(NOSQUARE);
-        }
-        //Place captured piece back on the board
-        if(isEnPassantCapture(moving, to, captured))
-        {
-            placeOpposingPiece(PAWN, squareBehind(to, whiteToMove?0:1));
-        } else if (captured != NONE) { //Normal capture
-            placeOpposingPiece(captured, to);
-        }
+            //Place captured piece back on the board
+            if(isEnPassantCapture(moving, to, captured))
+            {
+                placeOpposingPiece(PAWN, squareBehind(to, whiteToMove?0:1));
+            } else if (captured != NONE) { //Normal capture
+                placeOpposingPiece(captured, to);
+            }
         } catch (IllegalStateException e) {
             String msg = "after " + numberOfMovesMade + " moves made and undoing " + Util.displayMoveStr(move, false, false) +
                     " on " + get() + " created illegal Position modification: " +
@@ -425,7 +425,7 @@ public class GameState {
     {
         long hash = 0L;
         if(!whiteToMove)
-        	hash ^= ZobristKey.forBlackToMove();
+            hash ^= ZobristKey.forBlackToMove();
         for(int square = A1; square <= H8; square++)
         {
             Piece piece = pos.get(square);
@@ -435,18 +435,18 @@ public class GameState {
             }
         }
         int castlingOptions = posInfo[numberOfMovesMade].getCastleOptions();
-		hash ^= ZobristKey.forCastlingOptions(castlingOptions);
-		if(hasEnPassantOption())
-		{
-			int targetFile = Bitmap.fileNumber(getEnPassantSquare());
-			hash ^= ZobristKey.forEnPassantTargetFile(targetFile);
-		}
+        hash ^= ZobristKey.forCastlingOptions(castlingOptions);
+        if(hasEnPassantOption())
+        {
+            int targetFile = Bitmap.fileNumber(getEnPassantSquare());
+            hash ^= ZobristKey.forEnPassantTargetFile(targetFile);
+        }
         return hash;
     }
     
     public MoveStack getMoveStack()
     {
-    	return moveStack;
+        return moveStack;
     }
     
     private String indent() {

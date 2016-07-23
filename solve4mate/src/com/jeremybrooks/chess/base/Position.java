@@ -112,8 +112,8 @@ public class Position
     }
 
     public long getPieces(int side, int pieceIndex){
-    	if(pieceIndex < 0 || pieceIndex > pieces[0].length)
-    		throw new IllegalArgumentException("pieceIndex must be between 0 (pawn) and 5 (king)");
+        if(pieceIndex < 0 || pieceIndex > pieces[0].length)
+            throw new IllegalArgumentException("pieceIndex must be between 0 (pawn) and 5 (king)");
         if (isNotTheKing(pieceIndex)) {
             return pieces[side][pieceIndex];
         } else if(isKingPlaced(side)) {
@@ -123,7 +123,7 @@ public class Position
     }
 
     public long getAllPiecesExceptKing(int side){
-    	return allPieces[side];
+        return allPieces[side];
     }
 
     public long getAllPiecesAndKing(int side){
@@ -138,7 +138,7 @@ public class Position
 
     public long getOccupied()
     {
-    	return getOccupied(0);
+        return getOccupied(0);
     }
     
     public long getOccupied(int rotationInDegrees)
@@ -167,17 +167,17 @@ public class Position
      * @return the square number containing the least valuable piece or NOSQUARE if there's none found
      */
     public int getSquareOfLeastValuablePiece(long targetPieces, int sideToMove) {
-    	for(int pieceIndex = Piece.PAWN; pieceIndex <= Piece.KING; pieceIndex++)
-    	{
-    		long pieceBitboard = targetPieces & getPieces(sideToMove, pieceIndex);
-    		if(Util.bool(pieceBitboard))
-    		{
-    			long leastValuable = pieceBitboard & -pieceBitboard;
-    			return Bitmap.lowestBitNumber(leastValuable);
-    		}
-    	}
-    	return NOSQUARE;
-	}
+        for(int pieceIndex = Piece.PAWN; pieceIndex <= Piece.KING; pieceIndex++)
+        {
+            long pieceBitboard = targetPieces & getPieces(sideToMove, pieceIndex);
+            if(Util.bool(pieceBitboard))
+            {
+                long leastValuable = pieceBitboard & -pieceBitboard;
+                return Bitmap.lowestBitNumber(leastValuable);
+            }
+        }
+        return NOSQUARE;
+    }
 
     private boolean isNotTheKing(int p) {
         return p <= Piece.QUEEN;
@@ -280,7 +280,7 @@ public class Position
         int color = (boardPiece > 0) ? WHITE : BLACK;
         int piece = Piece.TO_PIECE[Math.abs(boardPiece)];
         if(log.isTraceEnabled()) 
-        	log.trace(String.format("erasing %s on %s", Piece.asString(color, piece), named(square)));
+            log.trace(String.format("erasing %s on %s", Piece.asString(color, piece), named(square)));
         long mask = 1L << square;
         all[Bitmap.ALL] ^= mask;
         all[ALL90] ^= 1L << SQ2BIT90R[square];
@@ -296,119 +296,120 @@ public class Position
         }
     }
 
-	// Validate the invariants of the position.
-	// Specifically, that the bitboards, king square locations, board array
+    // Validate the invariants of the position.
+    // Specifically, that the bitboards, king square locations, board array
     // and occupied bitboards all stay in agreement. 
     public static void validate(Position p) {
-    	//
-    	// 1. Verify the piece bitboards as well as king squares do not overlap
-    	//
-    	long bitboardPiecesOR = 0;
-    	long bitboardAllPiecesOR[] = new long[2];
-    	int bitboardPieceCount[][] = new int[2][6];
-    	for(int side=0; side < 2; side++)
-    	{
-    		for(int piece=PAWNS; piece<=QUEENS; piece++)
-    		{
-    			long pcs = p.getPieces(side, piece);
-    			bitboardPiecesOR          |= pcs;
-    			bitboardAllPiecesOR[side] |= pcs;
-    			bitboardPieceCount[side][piece] = Long.bitCount(pcs);
-    		}
-    	}
-    	long whitePiecesOverlap = p.getPawns(WHITE) & p.getKnights(WHITE) & p.getBishops(WHITE)
-    			 & p.getRooks(WHITE) & p.getQueens(WHITE);
-    	long blackPiecesOverlap = p.getPawns(BLACK) & p.getKnights(BLACK) & p.getBishops(BLACK)
-    			 & p.getRooks(BLACK) & p.getQueens(BLACK);
-    	long whitePiecesPlusKingOverlap = whitePiecesOverlap & p.getKing(WHITE);
-    	long blackPiecesPlusKingOverlap = blackPiecesOverlap & p.getKing(BLACK);
-    	long whiteBlackWithKingsOverlap = whitePiecesPlusKingOverlap & blackPiecesPlusKingOverlap;
-    	assertValid(0 == whitePiecesOverlap);  //pieces overlap
-    	assertValid(0 == blackPiecesOverlap);  //pieces overlap
-    	assertValid(0 == (whitePiecesOverlap & blackPiecesOverlap)); //white/black pieces overlap
-    	assertValid(0 == whitePiecesPlusKingOverlap); //pieces and kings overlap
-    	assertValid(0 == blackPiecesPlusKingOverlap); //pieces and kings overlap
-    	assertValid(0 == whiteBlackWithKingsOverlap);
-    	
-		//
-    	// 2. Verify that the summary bitboard of each side's pieces is accurate
-		//
-    	assertValid(p.getAllPiecesExceptKing(WHITE) == bitboardAllPiecesOR[WHITE]);
-    	assertValid(p.getAllPiecesExceptKing(BLACK) == bitboardAllPiecesOR[BLACK]);
+        //
+        // 1. Verify the piece bitboards as well as king squares do not overlap
+        //
+        long bitboardPiecesOR = 0;
+        long bitboardAllPiecesOR[] = new long[2];
+        int bitboardPieceCount[][] = new int[2][6];
+        for(int side=0; side < 2; side++)
+        {
+            for(int piece=PAWNS; piece<=QUEENS; piece++)
+            {
+                long pcs = p.getPieces(side, piece);
+                bitboardPiecesOR          |= pcs;
+                bitboardAllPiecesOR[side] |= pcs;
+                bitboardPieceCount[side][piece] = Long.bitCount(pcs);
+            }
+        }
+        long whitePiecesOverlap = p.getPawns(WHITE) & p.getKnights(WHITE) & p.getBishops(WHITE)
+                 & p.getRooks(WHITE) & p.getQueens(WHITE);
+        long blackPiecesOverlap = p.getPawns(BLACK) & p.getKnights(BLACK) & p.getBishops(BLACK)
+                 & p.getRooks(BLACK) & p.getQueens(BLACK);
+        long whitePiecesPlusKingOverlap = whitePiecesOverlap & p.getKing(WHITE);
+        long blackPiecesPlusKingOverlap = blackPiecesOverlap & p.getKing(BLACK);
+        long whiteBlackWithKingsOverlap = whitePiecesPlusKingOverlap & blackPiecesPlusKingOverlap;
+        assertValid(0 == whitePiecesOverlap);  //pieces overlap
+        assertValid(0 == blackPiecesOverlap);  //pieces overlap
+        assertValid(0 == (whitePiecesOverlap & blackPiecesOverlap)); //white/black pieces overlap
+        assertValid(0 == whitePiecesPlusKingOverlap); //pieces and kings overlap
+        assertValid(0 == blackPiecesPlusKingOverlap); //pieces and kings overlap
+        assertValid(0 == whiteBlackWithKingsOverlap);
+        
+        //
+        // 2. Verify that the summary bitboard of each side's pieces is accurate
+        //
+        assertValid(p.getAllPiecesExceptKing(WHITE) == bitboardAllPiecesOR[WHITE]);
+        assertValid(p.getAllPiecesExceptKing(BLACK) == bitboardAllPiecesOR[BLACK]);
 
-    	//
-    	// 3. Verify the occupied bitboards (and rotations) are in sync with the piece bitboards
-    	// representing all pieces for each side.
-    	// 
-    	// For the rotated bitboards we simply validate the bit counts against the non-rotated board.
-    	// This will catch simple things like a piece being added (or removed) to the non-rotated
-    	// occupied bitboard but not to the rotated boards.  Errors where the rotated bitboard has 
-    	// the same number of bits--but bits in the wrong spot (wrong value)--will NOT be caught here.
-    	//
-    	long kingsOR = p.getKing(WHITE) | p.getKing(BLACK);
-    	long allPiecesWithKings = p.getAllPiecesExceptKing(WHITE) | p.getAllPiecesExceptKing(BLACK) | kingsOR;
-    	bitboardPiecesOR |= kingsOR;
-    	assertValid(p.getOccupied(0)  == bitboardPiecesOR);
-    	assertValid(allPiecesWithKings == bitboardPiecesOR);
-    	int occupiedBitCount     = Long.bitCount(p.getOccupied(0));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(90)));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(-45)));
-    	assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(45)));
-    	
-    	//
-    	// 4. Verify the array of board squares/pieces (of what piece is on each square) 
-    	// matches the bitboards.
-    	//
-    	// Again for simplicity we only validate the piece
-    	// counts match, not their positions, so this will catch a missing piece on the board
-    	// and not in the bitboards or vice versa, but it will not catch a set of the same number
-    	// of pieces but on different squares in the array versus on the bitboard.
-    	//
-    	int boardArrayKing[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
-    	int boardArrayPieceCount[][] = new int[2][6];
-    	for(int squareNo=0; squareNo<64; squareNo++)
-    	{
-    		Piece piece = p.get(squareNo);
-    		boolean existsInOccupiedBitboard = Util.bool(1L<<squareNo & p.getOccupied(0));
-    		if(piece.exists())
-    		{
-    			//Piece piece = sq.get();
-    			int side = Character.isUpperCase(piece.toChar())?WHITE:BLACK;
-    			if('K' == Character.toUpperCase(piece.toChar()))
-    			{
-    				boardArrayKing[side] = squareNo;
-    			} else {
-    				int index = piece.index();
-    				boardArrayPieceCount[side][index]++;
-    			}
-//    			System.out.println("all : "+Util.formatSquares(all[ALL]));
-//    			System.out.println("mask: "+Util.formatSquares(1L<<squareNo));
-//    			System.out.println("and : "+Util.formatSquares((1L<<squareNo)&all[ALL]));
-//    			System.out.println("cond: "+existsOnBitboard);
-    			assertValid(existsInOccupiedBitboard); //bitboard piece must exist
-    		} else {
-				assertValid(!existsInOccupiedBitboard); //bitboard piece must NOT exist
-    		}
-    	}
-    	for (int side = WHITE; side <= BLACK; side++){
-	    	if(p.isKingPlaced(side))
-	    		assertValid(p.getKingSquare(side)         == boardArrayKing[side]);
-	    	assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
-	    	assertValid(bitboardPieceCount[side][KNIGHTS] == boardArrayPieceCount[side][KNIGHTS]);
-	    	assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
-	    	assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
-	    	assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
-    	}
-	}
+        //
+        // 3. Verify the occupied bitboards (and rotations) are in sync with the piece bitboards
+        // representing all pieces for each side.
+        // 
+        // For the rotated bitboards we simply validate the bit counts against the non-rotated board.
+        // This will catch simple things like a piece being added (or removed) to the non-rotated
+        // occupied bitboard but not to the rotated boards.  Errors where the rotated bitboard has 
+        // the same number of bits--but bits in the wrong spot (wrong value)--will NOT be caught here.
+        //
+        long kingsOR = p.getKing(WHITE) | p.getKing(BLACK);
+        long allPiecesWithKings = p.getAllPiecesExceptKing(WHITE) | p.getAllPiecesExceptKing(BLACK) | kingsOR;
+        bitboardPiecesOR |= kingsOR;
+        assertValid(p.getOccupied(0)  == bitboardPiecesOR);
+        assertValid(allPiecesWithKings == bitboardPiecesOR);
+        int occupiedBitCount     = Long.bitCount(p.getOccupied(0));
+        assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(90)));
+        assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(-45)));
+        assertValid(occupiedBitCount == Long.bitCount(p.getOccupied(45)));
+        
+        //
+        // 4. Verify the array of board squares/pieces (of what piece is on each square) 
+        // matches the bitboards.
+        //
+        // Again for simplicity we only validate the piece
+        // counts match, not their positions, so this will catch a missing piece on the board
+        // and not in the bitboards or vice versa, but it will not catch a set of the same number
+        // of pieces but on different squares in the array versus on the bitboard.
+        //
+        int boardArrayKing[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
+        int boardArrayPieceCount[][] = new int[2][6];
+        for(int squareNo=0; squareNo<64; squareNo++)
+        {
+            Piece piece = p.get(squareNo);
+            boolean existsInOccupiedBitboard = Util.bool(1L<<squareNo & p.getOccupied(0));
+            if(piece.exists())
+            {
+                //Piece piece = sq.get();
+                int side = Character.isUpperCase(piece.toChar())?WHITE:BLACK;
+                if('K' == Character.toUpperCase(piece.toChar()))
+                {
+                    boardArrayKing[side] = squareNo;
+                } else {
+                    int index = piece.index();
+                    boardArrayPieceCount[side][index]++;
+                }
+//                System.out.println("all : "+Util.formatSquares(all[ALL]));
+//                System.out.println("mask: "+Util.formatSquares(1L<<squareNo));
+//                System.out.println("and : "+Util.formatSquares((1L<<squareNo)&all[ALL]));
+//                System.out.println("cond: "+existsOnBitboard);
+                assertValid(existsInOccupiedBitboard); //bitboard piece must exist
+            } else {
+                assertValid(!existsInOccupiedBitboard); //bitboard piece must NOT exist
+            }
+        }
+        for (int side = WHITE; side <= BLACK; side++){
+            if(p.isKingPlaced(side)){
+                assertValid(p.getKingSquare(side)         == boardArrayKing[side]);
+            }
+            assertValid(bitboardPieceCount[side][PAWNS  ] == boardArrayPieceCount[side][PAWNS]);
+            assertValid(bitboardPieceCount[side][KNIGHTS] == boardArrayPieceCount[side][KNIGHTS]);
+            assertValid(bitboardPieceCount[side][BISHOPS] == boardArrayPieceCount[side][BISHOPS]);
+            assertValid(bitboardPieceCount[side][ROOKS  ] == boardArrayPieceCount[side][ROOKS]);
+            assertValid(bitboardPieceCount[side][QUEENS ] == boardArrayPieceCount[side][QUEENS]);
+        }
+    }
 
-	private static void assertValid(boolean condition)
-	{
-		if(!condition) throw new IllegalStateException("my assertion failed; see Position.validate() line number below");
-		//TODO: in the end (production) we want the keyword assertion: assert(condition);
-		//so it can be optimized away when -ea is not enabled.
-	}
+    private static void assertValid(boolean condition)
+    {
+        if(!condition) throw new IllegalStateException("my assertion failed; see Position.validate() line number below");
+        //TODO: in the end (production) we want the keyword assertion: assert(condition);
+        //so it can be optimized away when -ea is not enabled.
+    }
 
-	public String toString()
+    public String toString()
     {
         StringBuilder sb = new StringBuilder();
         sb.append("wking: "+Square.named(kingSq[WHITE])).append("\n");
