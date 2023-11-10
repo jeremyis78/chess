@@ -75,8 +75,8 @@
 			            value="com.jeremybrooks.chess.UciDriver"/>
 		    </manifest>
 		</jar>
-		<copy file="${src}/start.bat" todir="${build}"/>
-		<copy file="${src}/start.sh" todir="${build}"/>
+		<copy file="/start.bat" todir="${build}"/>
+		<copy file="/start.sh" todir="${build}"/>
 		<chmod file="${build}/start.sh" perm="755" />
 
 	</target>
@@ -198,7 +198,7 @@
 	</target>
 	
 	<target name="test-evaluator-speed" depends="init,compile">
-		<java classname="com.jeremybrooks.chess.eval.EvalTester"
+		<java classname="test.java.com.jeremybrooks.eval.EvalTester"
 		           fork="true"
 		           failonerror="true"
 		           maxmemory="128m">
