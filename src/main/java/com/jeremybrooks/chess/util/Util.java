@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public class Util {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(Util.class);
     /**
      * Give current time in milliseconds (as an int, not a long).
      * 

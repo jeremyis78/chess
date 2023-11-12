@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Random;
 
 public abstract class SlidingMagics {
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger(SlidingMagics.class);
 	protected static final Random random = new Random();
 	protected long occupancyMasks[] = new long[64];
 	protected long occupancyVariation[][];

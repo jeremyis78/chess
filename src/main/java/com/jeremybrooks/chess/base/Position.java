@@ -22,7 +22,7 @@ import static com.jeremybrooks.chess.base.Square.named;
 
 public class Position
 {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(Position.class);
     
     private static final int PAWNS = 0;
     private static final int KNIGHTS = 1;

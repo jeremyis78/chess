@@ -10,7 +10,7 @@ import static com.jeremybrooks.chess.search.ScoredMove.Precision;
 
 public class CacheEnabledSearch extends IterativeDeepeningSearch {
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(CacheEnabledSearch.class);
     private static final int INITIAL_CACHE_SIZE = 65536;
 
     /*

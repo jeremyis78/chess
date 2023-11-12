@@ -17,7 +17,7 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
  */
 public class Attacks {
     //public static final long[][] R45 = ;
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(Attacks.class);
     public static final Attacks INSTANCE = new Attacks(); //default scope for testing
     private static Magic[] rookMagics   = new Magic[64];
     private static Magic[] bishopMagics = new Magic[64];;

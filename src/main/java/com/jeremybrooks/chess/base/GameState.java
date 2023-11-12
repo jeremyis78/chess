@@ -76,7 +76,7 @@ import com.jeremybrooks.chess.util.ZobristKey;
  *
  */
 public class GameState {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(GameState.class);
 
     public static final int W_SHORT_CASTLE = 1;
     public static final int W_LONG_CASTLE  = 2;

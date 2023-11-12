@@ -13,7 +13,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class Solver {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(Solver.class);
     private static final int MILLIS_PER_SEC = 1000;
     private static final long NANOS_PER_MILLI = 1000000;
     private DefaultGenerator moveGenerator;

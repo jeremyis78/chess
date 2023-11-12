@@ -88,6 +88,7 @@ public class RootMove implements Comparable<RootMove> {
         //Descending order (biggest scores first) 
         //To work, the max() call/player needs to be called/play first. It doesn't
         //matter what color plays first as long as the Search.max() call is called first).
+        //TODO: return a > b ? +1 : a < b ? -1 : 0;
         RootMove other = (RootMove) o;
         return -1 * new Integer(this.score).compareTo(other.score);
     }

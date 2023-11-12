@@ -26,7 +26,7 @@ import java.util.List;
  *
  */
 public class SolveForMate {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(SolveForMate.class);
     private static final PrintStream out = System.out;
     private static final PrintStream err = System.err;
     private static final String EOL = System.getProperty("line.separator");

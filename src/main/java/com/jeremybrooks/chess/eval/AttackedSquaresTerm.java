@@ -12,7 +12,7 @@ import static com.jeremybrooks.chess.base.Bitmap.A1;
 import static com.jeremybrooks.chess.base.Bitmap.H8;
 
 public class AttackedSquaresTerm extends EvalTerm {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(AttackedSquaresTerm.class);
     private static final String DESC = "number of squares attacked by white minus those attacked by black";
 
     public AttackedSquaresTerm() {

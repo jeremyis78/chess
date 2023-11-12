@@ -88,7 +88,7 @@ import static com.jeremybrooks.chess.util.FenBuilder.*;
  *  </pre>  
  */
 public class FenParser {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(FenParser.class);
     public static final String OPCODE_FMVN = "fmvn";
     public static final String OPCODE_HMVC = "hmvc";
     private static final int PIECE_BOARD_FIELD         = 0;

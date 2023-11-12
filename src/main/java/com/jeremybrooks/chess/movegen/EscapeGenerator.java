@@ -13,7 +13,7 @@ import static com.jeremybrooks.chess.base.Bitmap.*;
 import static com.jeremybrooks.chess.base.Piece.*;
 
 public class EscapeGenerator extends AbstractGenerator {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(EscapeGenerator.class);
 
     @Override
     public void generate(List<Integer> moves, int side) {

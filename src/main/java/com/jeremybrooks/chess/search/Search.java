@@ -27,7 +27,7 @@ public class Search {
 //        private int currentMove;
 //        private int depth;
 //    }
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(Search.class);
     private static transient final boolean isTrace = false; //log.isTraceEnabled();
     private static transient final boolean showPvUpdates = false; //logs principle variation changes
     static final int MAX_DEPTH_LIMIT  = 120;

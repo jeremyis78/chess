@@ -18,7 +18,7 @@ import static com.jeremybrooks.chess.util.AbstractDisplayer.EOL;
 import static org.junit.Assert.*;
 
 public class AttacksTest {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(AttacksTest.class);
     private static final String BASE_DIR = "src/test/resources/";
     private static final int PLUS1_MOVES_COLUMN = 2;
     private static final int MINUS1_MOVES_COLUMN = 3;

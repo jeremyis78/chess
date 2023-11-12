@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class IterativeDeepeningSearch extends Search {
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getLogger(IterativeDeepeningSearch.class);
     
     public IterativeDeepeningSearch(int maxDepth)
     {
