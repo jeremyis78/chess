@@ -34,6 +34,10 @@ we hit our max depth, ie at the leaf nodes.
 
 The packaging process generates engine.jar.  So at a high level it implements (well...on its way to implementing) the UCI protocol for chess engines. 
 The UCI protocol is a stdin/stdout stateless protocol: http://download.shredderchess.com/div/uci.zip
+2025-12-22: That shredderchess.com link appears dead, try this (which references that same link): 
+
+https://gist.github.com/DOBRO/2592c6dad754ba67e6dcaec8c90165bf
+
 
 com.jeremy_brooks.chess.UCIDriver is the main class in the jar.
 And UCIDriver calls Solver.search(GameState g, int depth) to initiate a search to the given depth. (The Solver name and the root directory solve4mate are
