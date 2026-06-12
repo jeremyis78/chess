@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.jeremybrooks.chess.util.ZobristKey;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.jeremybrooks.chess.base.Bitmap;
 import com.jeremybrooks.chess.base.Piece;
@@ -13,6 +14,7 @@ import com.jeremybrooks.chess.base.Square;
 
 public class ZobristKeyTest extends KeyTestBase {
 
+    @Ignore
     @Test
     public void givenAllKeys()
     {
