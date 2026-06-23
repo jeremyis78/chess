@@ -31,11 +31,11 @@ public class Position
     private static final int QUEENS = 4;
     private static final int KING_NOT_PLACED = -1;
 
-    private long pieces[][] = new long[2][5];
-    private long allPieces[] = new long[2]; //all pieces except king for a side
-    private long all[] = new long[MAXALL];
-    private Square board[] = new Square[64];
-    private int kingSq[] = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
+    private long[][] pieces = new long[2][5];
+    private long[] allPieces = new long[2]; //all pieces except king for a side
+    private long[] all = new long[MAXALL];
+    private Square[] board = new Square[64];
+    private int[] kingSq = new int[]{KING_NOT_PLACED, KING_NOT_PLACED};
 
     public Position(){
         clear();
@@ -305,8 +305,8 @@ public class Position
         // 1. Verify the piece bitboards as well as king squares do not overlap
         //
         long bitboardPiecesOR = 0;
-        long bitboardAllPiecesOR[] = new long[2];
-        int bitboardPieceCount[][] = new int[2][6];
+        long[] bitboardAllPiecesOR = new long[2];
+        int[][] bitboardPieceCount = new int[2][6];
         for(int side=0; side < 2; side++)
         {
             for(int piece=PAWNS; piece<=QUEENS; piece++)

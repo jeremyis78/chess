@@ -5,7 +5,7 @@ import com.jeremybrooks.chess.movegen.Attacks;
 
 public class Knight extends Piece {
 
-    public static int SQUARE_CENTIPAWN_VALUE[] = new int[] { 
+    public static int[] SQUARE_CENTIPAWN_VALUE = new int[] {
             // From white's point of view:
             //              a1   b1   c1   d1   e1   f1   g1   h1
             /* 1st rank */ -50, -40, -30, -30, -30, -30, -40, -50,

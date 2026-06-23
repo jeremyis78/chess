@@ -212,7 +212,7 @@ public class Bitmap {
     //*                1L << SQ2BIT90R[28]                        *
     //********************************************************************
 
-    public static final int SQ2BIT[] = {
+    public static final int[] SQ2BIT = {
         0,  1,  2,  3,  4,  5,  6,  7,    // 1st rank
         8,  9, 10, 11, 12, 13, 14, 15,    // 2nd-rank
         16, 17, 18, 19, 20, 21, 22, 23,    // 3rd-rank
@@ -222,7 +222,7 @@ public class Bitmap {
         48, 49, 50, 51, 52, 53, 54, 55,    // 7th-rank
         56, 57, 58, 59, 60, 61, 62, 63     // 8th-rank
     };
-    public static final int SQ2BIT90R[] = { 
+    public static final int[] SQ2BIT90R = {
         // The name is actually incorrect; it's a combination of a rotation and a flip:
         // 1) rotated 90 degrees LEFT such that 0=a8, 1=a7, ..., 7=a1
         // 2) then vertically flipped such that 0=a1, 1=a2, ..., 7=a8 (so we have ascending order)
@@ -237,7 +237,7 @@ public class Bitmap {
         7, 15, 23, 31, 39, 47, 55, 63     // h-file
     };
     
-    public static final int SQ2BIT45L[] = {
+    public static final int[] SQ2BIT45L = {
         0,  1,  3,  6, 10, 15, 21, 28,
         2,  4,  7, 11, 16, 22, 29, 36,
         5,  8, 12, 17, 23, 30, 37, 43,
@@ -248,7 +248,7 @@ public class Bitmap {
         35, 42, 48, 53, 57, 60, 62, 63
     };
     
-    public static final int SQ2BIT45R[] = { 
+    public static final int[] SQ2BIT45R = {
         28, 21, 15, 10,  6,  3,  1,  0,
         36, 29, 22, 16, 11,  7,  4,  2,
         43, 37, 30, 23, 17, 12,  8,  5,

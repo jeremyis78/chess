@@ -5,7 +5,7 @@ import static com.jeremybrooks.chess.base.Piece.Color.*;
 
 public class Rook extends SlidingPiece {
 
-    public static int SQUARE_CENTIPAWN_VALUE[] = new int[] { 
+    public static int[] SQUARE_CENTIPAWN_VALUE = new int[] {
             // From white's point of view:
             //              a1   b1   c1   d1   e1   f1   g1   h1
             /* 1st rank */   0,   0,   0,   5,   5,   0,   0,   0,

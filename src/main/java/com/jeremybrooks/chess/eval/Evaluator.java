@@ -12,7 +12,7 @@ import static com.jeremybrooks.chess.base.Piece.*;
 
 public class Evaluator {
 	private static final Logger log = LogManager.getLogger(Evaluator.class);
-    public static final int PIECE_VALUE[] = 
+    public static final int[] PIECE_VALUE =
     {
         100, // Pawn
         325, // Knight

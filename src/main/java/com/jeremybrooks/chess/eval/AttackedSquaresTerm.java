@@ -27,7 +27,7 @@ public class AttackedSquaresTerm extends EvalTerm {
         //for each type of term (instead of the current design)
         //might be the most efficient.
         Position position = gameState.getPosition();
-        long attackedBy[] = new long[2];
+        long[] attackedBy = new long[2];
         for(int square = A1; square <= H8; square++)
         {
             Piece piece = position.get(square);
